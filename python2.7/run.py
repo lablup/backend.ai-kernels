@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 from __future__ import print_function
-import builtins as builtin_mod
+import __builtin__ as builtin_mod
 import code
 from cStringIO import StringIO
 from namedlist import namedtuple
@@ -91,8 +91,9 @@ class CodeRunner(object):
             exceptions.append(ExceptionInfo.create(e, before_exec, None))
         else:
             before_exec = False
+            exec_result = None
             try:
-                exec_result = exec(code_obj, self.user_ns)
+                exec code_obj in self.user_ns
             except Exception as e:
                 exceptions.append(ExceptionInfo.create(e, before_exec, None))
 
