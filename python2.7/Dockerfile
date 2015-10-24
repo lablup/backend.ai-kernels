@@ -14,7 +14,7 @@ ENV HOME /home/work
 WORKDIR /home/work
 
 # Install Python 3.4
-RUN apt-get update && apt-get build-dep -y python3
+RUN apt-get update && apt-get build-dep -y python
 RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev
 ADD install-python.sh /home/sorna/install-python.sh
 ADD install-python-packages.sh /home/sorna/install-python-packages.sh
