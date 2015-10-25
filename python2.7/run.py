@@ -129,7 +129,7 @@ if __name__ == '__main__':
     try:
         while True:
             data = sock.recv_multipart()
-            result, exceptions, output = runner.execute(data[0].decode('ascii'),
+            exceptions, output = runner.execute(data[0].decode('ascii'),
                                                         data[1].decode('utf8'))
             response = {
                 'stdout': output[0],
