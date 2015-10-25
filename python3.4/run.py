@@ -74,7 +74,6 @@ class CodeRunner(object):
         sys.stdout, orig_stdout = self.stdout_writer, sys.stdout
         sys.stderr, orig_stderr = self.stderr_writer, sys.stderr
 
-        exec_result = None
         exceptions = []
         before_exec = True
 
@@ -91,13 +90,13 @@ class CodeRunner(object):
         else:
             before_exec = False
             try:
-                exec_result = exec(code_obj, self.user_ns)
+                exec(code_obj, self.user_ns)
             except Exception as e:
                 exceptions.append(ExceptionInfo.create(e, before_exec, None))
 
         sys.excepthook = sys.__excepthook__
 
-        output = (self.stdout_writer.buffer.getvalue(), self.stderr_writer.buffer.getvalue())
+        output = (self.stdout_writer.getvalue(), self.stderr_writer.getvalue())
         self.stdout_writer.seek(0, io.SEEK_SET)
         self.stdout_writer.truncate(0)
         self.stderr_writer.seek(0, io.SEEK_SET)
@@ -105,7 +104,7 @@ class CodeRunner(object):
 
         sys.stdout = orig_stdout
         sys.stderr = orig_stderr
-        return exec_result, exceptions, output
+        return exceptions, output
 
 
 if __name__ == '__main__':
@@ -122,6 +121,7 @@ if __name__ == '__main__':
     ctx = zmq.Context()
     sock = ctx.socket(zmq.REP)
     sock.bind('tcp://*:2001')
+    print('serving at port 2001...')
 
     # Apply the security sandbox.
     # TODO: implement and call initialize_ptrace_sandbox()
@@ -129,18 +129,16 @@ if __name__ == '__main__':
     try:
         while True:
             data = sock.recv_multipart()
-            result, exceptions, output = runner.execute(data[0], data[1])
-            if not (isinstance(exec_result, str) or exec_result is None):
-                exec_result = str(exec_result)
+            exceptions, output = runner.execute(data[0].decode('ascii'),
+                                                        data[1].decode('utf8'))
             response = {
-                'eval_result': exec_result,
                 'stdout': output[0],
                 'stderr': output[1],
                 'exceptions': exceptions,
             }
             sock.send_json(response)
-    except SystemExit:
+    except (KeyboardInterrupt, SystemExit):
         pass
     finally:
         sock.close()
-        ctx.close()
+        print('exit.')

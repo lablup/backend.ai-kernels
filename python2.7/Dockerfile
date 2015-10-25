@@ -40,4 +40,5 @@ VOLUME ["/home/work"]
 EXPOSE 2001
 
 USER work
+ENV PYTHONUNBUFFERED 1
 CMD /home/sorna/run.sh
