@@ -26,6 +26,9 @@ ENV PYENV_ROOT /home/sorna/.pyenv
 ENV PATH /home/sorna/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN git clone https://github.com/yyuu/pyenv /home/sorna/.pyenv
 RUN /home/sorna/install-python.sh
+USER root
+RUN apt-get install -y pkg-config libpng-dev libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
+USER work
 RUN /home/sorna/install-python-packages.sh
 
 # Secure installation scripts
