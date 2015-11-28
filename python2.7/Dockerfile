@@ -31,6 +31,13 @@ RUN apt-get install -y pkg-config libpng-dev libfreetype6-dev libblas-dev liblap
 USER work
 RUN /home/sorna/install-python-packages.sh
 
+# Additional packages
+USER root
+ADD install-python-packages2.sh /home/sorna/install-python-packages2.sh
+RUN chmod +x /home/sorna/install-python-packages2.sh
+USER work
+RUN /home/sorna/install-python-packages2.sh
+
 # Secure installation scripts
 USER root
 ADD run.py /home/sorna/run.py
