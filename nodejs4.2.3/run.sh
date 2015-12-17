@@ -1,2 +1,2 @@
 #! /bin/bash
-nodejs /home/sorna/run.js
+node /home/sorna/run.js

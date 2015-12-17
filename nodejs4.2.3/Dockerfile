@@ -16,9 +16,16 @@ WORKDIR /home/work
 # Install node.js 4.2.3
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
-RUN apt-get install -y nodejs npm
+RUN apt-get install -y nodejs
+RUN apt-get install -y npm
+RUN ln -s `which nodejs` /usr/bin/node
 
 # Install packages
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository -y ppa:chris-lea/zeromq
+RUN add-apt-repository -y ppa:chris-lea/libpgm
+RUN apt-get update
+RUN apt-get install -y libzmq3-dev
 ADD package.json /home/sorna/package.json
 RUN cd /home/sorna; npm install; cd $HOME
 
