@@ -1,0 +1,11 @@
+{
+	"name": "lablup-nodejs-execution-container",
+	"version": "0.0.1",
+	"private": true,
+	"description": "Lablup node.js container",
+	"main": "/home/sorna/run.js",
+	"author": "Jonghyun Park <adrysn@lablup.com>",
+	"dependencies": {
+		"express": "4.x"
+	}
+}
