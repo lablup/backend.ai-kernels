@@ -94,7 +94,7 @@ class ImageTestBase(object):
 
     def test_basic_success(self):
         for idx, (code, expected) in enumerate(self.basic_success()):
-            with self.subTest(idx):
+            with self.subTest(subcase=idx + 1):
                 resp = self.execute(idx, code)
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
@@ -104,12 +104,13 @@ class ImageTestBase(object):
 
     def test_basic_failure(self):
         for idx, (code, expected) in enumerate(self.basic_failure()):
-            with self.subTest(idx):
+            with self.subTest(subcase=idx + 1):
                 resp = self.execute(idx, code)
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
                 self.assertIn('exceptions', resp)
                 self.assertIs(type(resp['exceptions']), list)
+                self.assertGreater(len(resp['exceptions']), 0)
                 err_name, err_arg = expected
                 self.assertRegex(resp['exceptions'][0][0], '^' + re.escape(err_name))
                 if err_arg:
@@ -149,6 +150,10 @@ class PHP55ImageTest(ImageTestBase, unittest.TestCase):
     def basic_success(self):
         yield 'echo "hello world";', 'hello world'
         yield '$a = 1; $b = 2; $c = $a + $b; echo "$c";', '3'
+        yield 'echo isset($my_nonexistent_variable) ? "1" : "0";', '0' 
+        # checks if our internal REPL code is NOT exposed.
+        yield 'echo isset($context) ? "1" : "0";', '0' 
+        yield 'global $context; echo isset($context) ? "1" : "0";', '0'
 
     def basic_failure(self):
         yield 'throw new Exception("asdf");', ('Exception', 'asdf')

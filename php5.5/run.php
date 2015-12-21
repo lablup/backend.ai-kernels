@@ -1,60 +1,76 @@
 <?php
 
-$exceptions = array();
-
-$errhandler = function ($errlvl, $errstr, $errfile, $errline, $errcontext)
-              use (&$exceptions)
-{
-    array_push($exceptions, array(
-        "$errstr (Line: $errline)",
-        array(),
-        false,
-        NULL
-    ));
-    return true;  # do NOT continue PHP's own error processing
-};
-
-$exchandler = function ($ex) use (&$exceptions)
-{
-    $exc_name = get_class($ex);
-    array_push($exceptions, array(
-        "$exc_name",
-        array($ex->getMessage()),
-        false,
-        $ex->getTraceAsString()
-    ));
-};
-
-chdir('/home/work');
-
-$context = new ZMQContext();
-$server = new ZMQSocket($context, ZMQ::SOCKET_REP);
-$server->bind('tcp://*:2001');
-echo 'serving at port 2001...';
-
-while (true) {
-    $data = $server->recvMulti();
-
-    $exceptions = array();  # reinit the array
-    set_error_handler($errhandler);
-    ob_start();
-
-    try {
-	# $data[0] (cell_id) is unused currently.
-	eval($data[1]);
-    } catch (Exception $ex) {
-	$exchandler($ex);
-    } finally {
-	$output = ob_get_flush();
-	restore_error_handler();
-	$stderr = NULL;
-	$reply = array(
-	    'stdout' => $output,
-	    'stderr' => $stderr,
-	    'exceptions' => $exceptions
-	);
-	$server->send(json_encode($reply));
+# This class hides REPL's variable scope from user codes.
+class CodeExecutor {
+    public function execute($code) {
+        $f = function () use ($code) { eval($code); };
+        $f = $f->bindTo(null);
+        $f();
     }
 }
+
+function _main() {
+
+    $exceptions = array();
+
+    $errhandler = function ($errlvl, $errstr, $errfile, $errline, $errcontext)
+                  use (&$exceptions)
+    {
+        array_push($exceptions, array(
+            "$errstr (Line: $errline)",
+            array(),
+            false,
+            NULL
+        ));
+        return true;  # do NOT continue PHP's own error processing
+    };
+
+    $exchandler = function ($ex) use (&$exceptions)
+    {
+        $exc_name = get_class($ex);
+        array_push($exceptions, array(
+            "$exc_name",
+            array($ex->getMessage()),
+            false,
+            $ex->getTraceAsString()
+        ));
+    };
+
+    chdir('/home/work');
+
+    $context = new ZMQContext();
+    $server = new ZMQSocket($context, ZMQ::SOCKET_REP);
+    $server->bind('tcp://*:2001');
+    echo 'serving at port 2001...';
+
+    while (true) {
+        $data = $server->recvMulti();
+
+        $exceptions = array();  # reinit the array
+        set_error_handler($errhandler);
+        ob_start();
+
+        try {
+            # $data[0] (cell_id) is unused currently.
+            $c = new CodeExecutor();
+            $c->execute($data[1]);
+        } catch (Exception $ex) {
+            $exchandler($ex);
+        } finally {
+            $output = ob_get_flush();
+            restore_error_handler();
+            $stderr = NULL;
+            $reply = array(
+                'stdout' => $output,
+                'stderr' => $stderr,
+                'exceptions' => $exceptions
+            );
+            $server->send(json_encode($reply));
+        }
+    }
+
+}
+
+_main();
 
 # vim: ts=8 sts=4 sw=4 et
