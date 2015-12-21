@@ -116,9 +116,9 @@ class PHP55ImageTest(ImageTestBase, unittest.TestCase):
         yield '$a = 1; $b = 2; $c = $a + $b; echo "$c";', '3'
 
 
-class Node34ImageTest(ImageTestBase, unittest.TestCase):
+class Nodejs42ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-node34'
+    image_name = 'kernel-nodejs42'
 
     def basic_success(self):
         yield 'console.log("hello world");', 'hello world'
