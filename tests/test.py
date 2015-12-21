@@ -2,6 +2,7 @@
 from abc import abstractmethod
 import docker
 import os
+import re
 import shutil
 from sorna.proto import generate_uuid
 import time
@@ -16,6 +17,16 @@ class ImageTestBase(object):
 
     @abstractmethod
     def basic_success(self):
+        '''
+        Should return a pair of input code and expected output substring in stdout.
+        '''
+        yield None, None
+
+    @abstractmethod
+    def basic_failure(self):
+        '''
+        Should return a pair of input code and expected output substring in stderr.
+        '''
         yield None, None
 
     @classmethod
@@ -88,6 +99,18 @@ class ImageTestBase(object):
                 self.assertIn('exceptions', resp)
                 self.assertIn(expected, resp['stdout'])
 
+    def test_basic_failure(self):
+        for idx, (code, expected) in enumerate(self.basic_failure()):
+            with self.subTest(idx):
+                resp = self.execute(idx, code)
+                self.assertIn('stdout', resp)
+                self.assertIn('stderr', resp)
+                self.assertIn('exceptions', resp)
+                err_name, err_arg = expected
+                self.assertRegex(resp['exceptions'][0][0], '^' + re.escape(err_name))
+                if err_arg:
+                    self.assertIn(err_arg, resp['exceptions'][0][1])
+
 
 class Python27ImageTest(ImageTestBase, unittest.TestCase):
 
@@ -96,6 +119,10 @@ class Python27ImageTest(ImageTestBase, unittest.TestCase):
     def basic_success(self):
         yield 'print "hello world"', 'hello world'
         yield 'a = 1\nb = 2\nc = a + b\nprint c', '3'
+
+    def basic_failure(self):
+        yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
+        yield 'x = 0 / 0', ('ZeroDivisionError', None)
 
 
 class Python34ImageTest(ImageTestBase, unittest.TestCase):
@@ -106,6 +133,10 @@ class Python34ImageTest(ImageTestBase, unittest.TestCase):
         yield 'print("hello world")', 'hello world'
         yield 'a = 1\nb = 2\nc = a + b\nprint(c)', '3'
 
+    def basic_failure(self):
+        yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
+        yield 'x = 0 / 0', ('ZeroDivisionError', None)
+
 
 class PHP55ImageTest(ImageTestBase, unittest.TestCase):
 
@@ -115,6 +146,10 @@ class PHP55ImageTest(ImageTestBase, unittest.TestCase):
         yield 'echo "hello world";', 'hello world'
         yield '$a = 1; $b = 2; $c = $a + $b; echo "$c";', '3'
 
+    def basic_failure(self):
+        yield 'throw new Exception("asdf");', ('Exception', 'asdf')
+        yield '$x = 0 / 0;', ('Division by zero', None)
+
 
 class Nodejs42ImageTest(ImageTestBase, unittest.TestCase):
 
@@ -123,6 +158,9 @@ class Nodejs42ImageTest(ImageTestBase, unittest.TestCase):
     def basic_success(self):
         yield 'console.log("hello world");', 'hello world'
         yield 'var a = 1; var b = 2; var c = a + b; console.log(c);', '3'
+
+    def basic_failure(self):
+        yield '/* TODO */', ('', None)
 
 
 if __name__ == '__main__':

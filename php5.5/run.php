@@ -6,10 +6,10 @@ $errhandler = function ($errlvl, $errstr, $errfile, $errline, $errcontext)
               use (&$exceptions)
 {
     array_push($exceptions, array(
-        'exc' => "$errstr (Line: $errline)",
-        'args' => array(),
-        'raised_before_exec' => false,
-        'traceback' => NULL
+        "$errstr (Line: $errline)",
+        array(),
+        false,
+        NULL
     ));
     return true;  # do NOT continue PHP's own error processing
 };
@@ -18,10 +18,10 @@ $exchandler = function ($ex) use (&$exceptions)
 {
     $exc_name = get_class($ex);
     array_push($exceptions, array(
-        'exc' => "$exc_name",
-        'args' => array($ex->getMessage()),
-        'raised_before_exec' => false,
-        'traceback' => $ex->getTraceAsString()
+        "$exc_name",
+        array($ex->getMessage()),
+        false,
+        $ex->getTraceAsString()
     ));
 };
 
