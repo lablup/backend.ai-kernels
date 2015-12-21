@@ -55,7 +55,7 @@ class ImageTestBase(object):
         kernel_host_port = container_info['NetworkSettings']['Ports'] \
                                          ['2001/tcp'][0]['HostPort']
         self.kernel_addr = 'tcp://{}:{}'.format(self.docker_host, kernel_host_port)
-        time.sleep(0.2)  # prevent corruption of containers when killed immediately
+        time.sleep(0.1)  # prevent corruption of containers when killed immediately
 
     def tearDown(self):
         try:
@@ -63,7 +63,8 @@ class ImageTestBase(object):
         except docker.errors.NotFound:
             # may have been terminated during tests
             pass
-        self.docker.remove_container(self.container_id)
+        else:
+            self.docker.remove_container(self.container_id)
         shutil.rmtree(self.work_dir)
 
     def execute(self, cell_id, code):
@@ -75,6 +76,7 @@ class ImageTestBase(object):
         cli.send_multipart(msg)
         resp = cli.recv_json()
         cli.close()
+        ctx.destroy()
         return resp
 
     def test_basic_success(self):
