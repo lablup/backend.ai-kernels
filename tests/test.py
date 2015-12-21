@@ -99,6 +99,7 @@ class ImageTestBase(object):
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
                 self.assertIn('exceptions', resp)
+                self.assertIsInstance(resp['stdout'], str)
                 self.assertIn(expected, resp['stdout'])
 
     def test_basic_failure(self):
@@ -108,6 +109,7 @@ class ImageTestBase(object):
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
                 self.assertIn('exceptions', resp)
+                self.assertIs(type(resp['exceptions']), list)
                 err_name, err_arg = expected
                 self.assertRegex(resp['exceptions'][0][0], '^' + re.escape(err_name))
                 if err_arg:
