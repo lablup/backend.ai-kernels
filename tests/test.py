@@ -18,14 +18,16 @@ class ImageTestBase(object):
     @abstractmethod
     def basic_success(self):
         '''
-        Should return a pair of input code and expected output substring in stdout.
+        Should return a pair of the input code and the expected output
+        substring in stdout.
         '''
         yield None, None
 
     @abstractmethod
     def basic_failure(self):
         '''
-        Should return a pair of input code and expected output substring in stderr.
+        Should return a pair of the input code and the expected output pair of
+        exception name and argument.
         '''
         yield None, None
 
