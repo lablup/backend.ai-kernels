@@ -30,6 +30,11 @@ var main = function() {
             process.stderr.write = old_stderr_write;
         }
     }
+    
+    function exception_handler(e, exceptions) {
+        var exception_info = [e.stack.split('\n')[0], [], false, null];
+        exceptions.push(exception_info);
+    }
 
     function execute(code) {
         eval(code);
@@ -42,20 +47,26 @@ var main = function() {
         var stderr = '';
         var exceptions = [];  // exceptions not supported yet
         var unhook_stdout = hook_stdout(function(string, encoding, fd) {
-           stdout += string;
+            stdout += string;
         });
         var unhook_stderr = hook_stderr(function(string, encoding, fd) {
-           stderr += string;
+            stderr += string;
         });
-        execute(code.toString());
-        var result = {
-            'stdout': stdout,
-            'stderr': stderr,
-            'exceptions': exceptions
-        };
-        socket.send(JSON.stringify(result));
-        unhook_stdout();
-        unhook_stderr();
+        
+        try {
+           execute(code.toString());
+        } catch(e) {
+            exception_handler(e, exceptions);
+        } finally {
+            var result = {
+                'stdout': stdout,
+                'stderr': stderr,
+                'exceptions': exceptions
+            }
+            socket.send(JSON.stringify(result));
+            unhook_stdout();
+            unhook_stderr();
+        }
     });
 
     socket.on('SIGINT', function() {
