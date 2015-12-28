@@ -14,11 +14,11 @@ func main() {
     //
     // Example: ./jail abc123 /bin/ls wow
     args := os.Args[2:]
-    cwd, _ := os.Getwd()
     if len(args) < 1 {
         fmt.Println("Not enough arguments.")
         return
     }
+    cwd, _ := os.Getwd()
     pid, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{
         cwd,
         []string{},
@@ -29,10 +29,7 @@ func main() {
         fmt.Println("ForkExec:", err)
         return
     }
-    proc, _ := os.FindProcess(pid)
-    proc.Wait()
     syscall.PtraceSetOptions(pid, syscall.PTRACE_O_TRACESYSGOOD)
-    count := 0
     for {
         syscall.PtraceSyscall(pid, 0)
         var state syscall.WaitStatus
@@ -45,7 +42,6 @@ func main() {
             syscall.PtraceGetRegs(pid, &regs)
             fmt.Printf("syscall %d\n", regs.Orig_rax)
         }
-        count ++
     }
 }
 
