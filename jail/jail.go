@@ -43,9 +43,10 @@ func main() {
 		l.Fatal("GeneratePolicy: ", err)
 	}
 	cwd, _ := os.Getwd()
+	envs := append([]string{}, policyInst.GetExtraEnvs()...)
 	pid, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{
 		cwd,
-		[]string{},
+		envs,
 		[]uintptr{0, 1, 2},
 		&syscall.SysProcAttr{Ptrace: true},
 	})
