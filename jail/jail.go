@@ -17,6 +17,11 @@ func main() {
     for _, name := range policy.AllowedSyscalls {
         allowedSyscallsSet[name] = 1
     }
+    arch, _ := seccomp.GetNativeArch()
+    var (
+        id_Open, _ = seccomp.GetSyscallFromNameByArch("open", arch)
+        id_Execve, _ = seccomp.GetSyscallFromNameByArch("execve", arch)
+    )
     // Command-line usage:
     // ./jail <jail_id> <child_args ...>
     //
@@ -45,37 +50,39 @@ func main() {
     if err != nil {
         l.Fatal("ForkExec: ", err)
     }
-    syscall.PtraceSetOptions(pid, syscall.PTRACE_O_TRACESYSGOOD)
+    syscall.PtraceSetOptions(pid, 1 << 7 /*PTRACE_O_TRACESECCOMP*/)
+    var execveDone bool = false
     for {
-        syscall.PtraceSyscall(pid, 0)
+        syscall.PtraceCont(pid, 0)
         var state syscall.WaitStatus
         syscall.Wait4(pid, &state, 0, nil)
         if state.Exited() {
             l.Print("child-exit-status: ", state.ExitStatus(), state.TrapCause())
             break
-        } else if state.Stopped() && (state.StopSignal() & 0x80 != 0) {
+        } else if state.Stopped() && (state.StopSignal() & 7 /*PTRACE_EVENT_SECCOMP*/ != 0) {
             var regs syscall.PtraceRegs
             syscall.PtraceGetRegs(pid, &regs)
             syscallId := uint(regs.Orig_rax)
-            syscallState := syscall.Errno(-int64(regs.Rax))
-            if syscallState == syscall.ENOSYS {
-                // When entering syscall
-                syscallType := policy.GetSyscallType(syscallId)
-                var allow bool
-                switch syscallType {
-                case policy.IO_OPEN:
-                    // TODO: extract path from syscall args
-                    allow = policyInst.AllowPath("...")
-                default:
-                    allow = true
-                }
-                if allow {
-                    //seccomp.ScmpSyscall(syscallId).GetName()
-                    syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
-                    if _, ok := allowedSyscallsSet[syscallName]; !ok {
-                        l.Printf("unexpected syscall %s\n", syscallName)
-                    }
-                }
+            allow := false
+            switch seccomp.ScmpSyscall(syscallId) {
+            case id_Open:
+                // TODO: extract path from syscall args
+                allow = policyInst.AllowPath("...")
+            case id_Execve:
+                // Allow only once!
+                allow = !execveDone
+                execveDone = true
+            default:
+                allow = true
+            }
+            syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
+            if allow {
+                l.Printf("traced syscall %s\n", syscallName)
+            } else {
+                // Skip the system call with permission error
+                regs.Orig_rax = 0xFFFFFFFFFFFFFFFF // -1
+                regs.Rax = 0xFFFFFFFFFFFFFFFF - uint64(syscall.EPERM) + 1
+                syscall.PtraceSetRegs(pid, &regs)
             }
         } else {
             //l.Print("child-update: ", state.ExitStatus(), state.TrapCause())

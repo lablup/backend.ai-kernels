@@ -1,28 +1,42 @@
 package policy
 
+var TracedSyscalls []string
 var AllowedSyscalls []string
 
 func init() {
+    // Following syscalls are intercepted by our ptrace-based tracer.
+    // The tracer will implement its own policies, optinally by inspecting
+    // the arguments in the registers.
+    TracedSyscalls = []string {
+	"open",
+	"stat",
+	"lstat",
+	"statfs",
+	"access",
+	"readlink",
+	"creat",
+	"rename",
+	"unlink",
+        // required to launch user program
+        "execve",
+    }
+
+    // Following syscalls are blindly allowed.
+    // IMPORTANT: ptrace MUST NOT be included!
     AllowedSyscalls = []string {
-        "open",
         "read",
         "write",
         "close",
         "openat",
-        "stat",
-        "lstat",
         "fstat",
-        "statfs",
-        "access",
+        "fstatfs",
         "mmap",
         "mprotect",
         "munmap",
         "brk",
         "lseek",
         "getdents",
-        "readlink",
         "dup",
-        "creat",
         "rt_sigaction",
         "rt_sigprocmask",
         "sigaltstack",
@@ -53,8 +67,6 @@ func init() {
         "epoll_create1",
         "epoll_wait",
         "epoll_ctl",
-        "rename",
-        "unlink",
         "exit_group",
         // potentially replaced with VDSO
         "getpid",
@@ -63,8 +75,6 @@ func init() {
         "clock_gettime",
         "clock_getres",
         "clock_nanosleep",
-        // required to launch user program
-        "execve",
     }
 }
 

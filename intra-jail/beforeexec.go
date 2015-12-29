@@ -11,6 +11,10 @@ import (
 func main() {
     arch, _ := seccomp.GetNativeArch()
     filter, _ := seccomp.NewFilter(seccomp.ActKill)
+    for _, syscallName := range policy.TracedSyscalls {
+        syscallId, _ := seccomp.GetSyscallFromNameByArch(syscallName, arch)
+        filter.AddRuleExact(syscallId, seccomp.ActTrace)
+    }
     for _, syscallName := range policy.AllowedSyscalls {
         syscallId, _ := seccomp.GetSyscallFromNameByArch(syscallName, arch)
         filter.AddRuleExact(syscallId, seccomp.ActAllow)

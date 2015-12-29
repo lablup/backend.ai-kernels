@@ -10,14 +10,6 @@ type SandboxPolicy interface {
     AllowPath(path string) bool
 }
 
-type SyscallType int
-const (
-    IO_OPEN SyscallType = iota
-    IO_READ
-    IO_WRITE
-    IO_ETC
-)
-
 func GeneratePolicy(exec_path string) (SandboxPolicy, error) {
     _, exec_name := path.Split(exec_path)
     switch exec_name {
@@ -27,7 +19,3 @@ func GeneratePolicy(exec_path string) (SandboxPolicy, error) {
     }
 }
 
-func GetSyscallType(syscallId uint) SyscallType {
-    // TODO: implement
-    return IO_OPEN
-}
