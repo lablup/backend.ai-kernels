@@ -9,26 +9,29 @@ import (
     "path"
     "sorna-repl/jail/policy"
     "github.com/kardianos/osext"
+    seccomp "github.com/seccomp/libseccomp-golang"
 )
 
 func main() {
+    var allowedSyscallsSet = make(map[string]int)
+    for _, name := range policy.AllowedSyscalls {
+        allowedSyscallsSet[name] = 1
+    }
     // Command-line usage:
     // ./jail <jail_id> <child_args ...>
     //
     // Example: ./jail abc123 /bin/ls wow
     l := log.New(os.Stderr, "", 0)
-    l.Print("my pid: ", os.Getpid())
     if len(os.Args) < 2 {
         l.Print("You need to specify jail ID, absolute path to executable and its arguments.")
         l.Fatal("Error: Not enough command-line arguments.")
     }
-    jail_id := os.Args[1]
-    l.Print("Jail ID: ", jail_id)
+    //jail_id := os.Args[1]
+    //l.Print("Jail ID: ", jail_id)
     myExecPath, _ := osext.Executable()
     myPath, _ := path.Split(myExecPath)
     args := append([]string{path.Join(myPath, "intra-jail")}, os.Args[2:]...)
     policyInst, err := policy.GeneratePolicy(args[1])
-    l.Printf("%#v\n", policyInst)
     if err != nil {
         l.Fatal("GeneratePolicy: ", err)
     }
@@ -42,7 +45,6 @@ func main() {
     if err != nil {
         l.Fatal("ForkExec: ", err)
     }
-    l.Print("child-pid: ", pid)
     syscall.PtraceSetOptions(pid, syscall.PTRACE_O_TRACESYSGOOD)
     for {
         syscall.PtraceSyscall(pid, 0)
@@ -55,20 +57,28 @@ func main() {
             var regs syscall.PtraceRegs
             syscall.PtraceGetRegs(pid, &regs)
             syscallId := uint(regs.Orig_rax)
-            syscallType := policy.GetSyscallType(syscallId)
-            var allow bool
-            switch syscallType {
-            case policy.IO_OPEN, policy.IO_READ, policy.IO_WRITE:
-                // TODO: extract path from syscall args
-                allow = policyInst.AllowPath("...")
-            default:
-                allow = policyInst.AllowSyscall(syscallId)
-            }
-            if allow {
-                l.Printf("Syscall %d is allowed.\n", syscallId)
+            syscallState := syscall.Errno(-int64(regs.Rax))
+            if syscallState == syscall.ENOSYS {
+                // When entering syscall
+                syscallType := policy.GetSyscallType(syscallId)
+                var allow bool
+                switch syscallType {
+                case policy.IO_OPEN:
+                    // TODO: extract path from syscall args
+                    allow = policyInst.AllowPath("...")
+                default:
+                    allow = true
+                }
+                if allow {
+                    //seccomp.ScmpSyscall(syscallId).GetName()
+                    syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
+                    if _, ok := allowedSyscallsSet[syscallName]; !ok {
+                        l.Printf("unexpected syscall %s\n", syscallName)
+                    }
+                }
             }
         } else {
-            l.Print("child-update: ", state.ExitStatus(), state.TrapCause())
+            //l.Print("child-update: ", state.ExitStatus(), state.TrapCause())
         }
     }
 }
