@@ -3,9 +3,10 @@ package main
 /* This ptrace-based jail assumes linux/amd64 platforms. */
 
 import (
-    "fmt"
     "os"
+    "log"
     "syscall"
+    "sorna-repl/jail/policy"
 )
 
 func main() {
@@ -13,10 +14,17 @@ func main() {
     // ./jail <jail_id> <child_args ...>
     //
     // Example: ./jail abc123 /bin/ls wow
+    l := log.New(os.Stderr, "", 0)
+    if len(os.Args) < 2 {
+        l.Print("You need to specify jail ID, absolute path to executable and its arguments.")
+        l.Fatal("Error: Not enough command-line arguments.")
+    }
+    jail_id := os.Args[1]
+    l.Print("Jail ID: ", jail_id)
     args := os.Args[2:]
-    if len(args) < 1 {
-        fmt.Println("Not enough arguments.")
-        return
+    policyInst, err := policy.GeneratePolicy(args[0])
+    if err != nil {
+        l.Fatal("GeneratePolicy: ", err)
     }
     cwd, _ := os.Getwd()
     pid, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{
@@ -26,8 +34,7 @@ func main() {
         &syscall.SysProcAttr{ Ptrace: true },
     })
     if err != nil {
-        fmt.Println("ForkExec:", err)
-        return
+        l.Fatal("ForkExec: ", err)
     }
     syscall.PtraceSetOptions(pid, syscall.PTRACE_O_TRACESYSGOOD)
     for {
@@ -40,7 +47,19 @@ func main() {
         if state.Stopped() && (state.StopSignal() & 0x80 != 0) {
             var regs syscall.PtraceRegs
             syscall.PtraceGetRegs(pid, &regs)
-            fmt.Printf("syscall %d\n", regs.Orig_rax)
+            syscallId := uint(regs.Orig_rax)
+            syscallType := policy.GetSyscallType(syscallId)
+            var allow bool
+            switch syscallType {
+            case policy.IO_OPEN, policy.IO_READ, policy.IO_WRITE:
+                // TODO: extract path from syscall args
+                allow = policyInst.AllowPath("...")
+            default:
+                allow = policyInst.AllowSyscall(syscallId)
+            }
+            if allow {
+                l.Printf("Syscall %d is allowed.\n", syscallId)
+            }
         }
     }
 }
