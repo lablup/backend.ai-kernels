@@ -6,7 +6,9 @@ import (
     "os"
     "log"
     "syscall"
+    "path"
     "sorna-repl/jail/policy"
+    "github.com/kardianos/osext"
 )
 
 func main() {
@@ -15,14 +17,18 @@ func main() {
     //
     // Example: ./jail abc123 /bin/ls wow
     l := log.New(os.Stderr, "", 0)
+    l.Print("my pid: ", os.Getpid())
     if len(os.Args) < 2 {
         l.Print("You need to specify jail ID, absolute path to executable and its arguments.")
         l.Fatal("Error: Not enough command-line arguments.")
     }
     jail_id := os.Args[1]
     l.Print("Jail ID: ", jail_id)
-    args := os.Args[2:]
-    policyInst, err := policy.GeneratePolicy(args[0])
+    myExecPath, _ := osext.Executable()
+    myPath, _ := path.Split(myExecPath)
+    args := append([]string{path.Join(myPath, "intra-jail")}, os.Args[2:]...)
+    policyInst, err := policy.GeneratePolicy(args[1])
+    l.Printf("%#v\n", policyInst)
     if err != nil {
         l.Fatal("GeneratePolicy: ", err)
     }
@@ -36,15 +42,16 @@ func main() {
     if err != nil {
         l.Fatal("ForkExec: ", err)
     }
+    l.Print("child-pid: ", pid)
     syscall.PtraceSetOptions(pid, syscall.PTRACE_O_TRACESYSGOOD)
     for {
         syscall.PtraceSyscall(pid, 0)
         var state syscall.WaitStatus
         syscall.Wait4(pid, &state, 0, nil)
         if state.Exited() {
+            l.Print("child-exit-status: ", state.ExitStatus(), state.TrapCause())
             break
-        }
-        if state.Stopped() && (state.StopSignal() & 0x80 != 0) {
+        } else if state.Stopped() && (state.StopSignal() & 0x80 != 0) {
             var regs syscall.PtraceRegs
             syscall.PtraceGetRegs(pid, &regs)
             syscallId := uint(regs.Orig_rax)
@@ -60,6 +67,8 @@ func main() {
             if allow {
                 l.Printf("Syscall %d is allowed.\n", syscallId)
             }
+        } else {
+            l.Print("child-update: ", state.ExitStatus(), state.TrapCause())
         }
     }
 }
