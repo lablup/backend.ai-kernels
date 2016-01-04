@@ -9,14 +9,23 @@ func (p *PythonPolicy) CheckPath(path string, perm Permission) bool {
 }
 
 func (p *PythonPolicy) GetExecAllowance() uint {
-	// In Python, we use a bootstrapping shell script
-	// to initialize pyenv, requiring two execve() calls.
-	return 2
+	return 0
+}
+
+func (p *PythonPolicy) GetForkAllowance() uint {
+	return 0
+}
+
+func (p *PythonPolicy) GetForkExecExceptionPaths() []string {
+	return []string{}
 }
 
 func (p *PythonPolicy) GetExtraEnvs() []string {
-	// Currently empty.
 	return []string{}
+}
+
+func (p *PythonPolicy) GetPreservedEnvKeys() []string {
+	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH"}
 }
 
 // vim: ts=4 sts=4 sw=4 noet

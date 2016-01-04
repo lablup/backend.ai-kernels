@@ -18,10 +18,16 @@ type SandboxPolicy interface {
 
 	// Should return the number of maximum execv() syscalls.
 	GetExecAllowance() uint
+	GetForkAllowance() uint
+
+	GetForkExecExceptionPaths() []string
 
 	// Should return additional environment key-value pairs.
 	// They will be merged to environment variables of the user process.
 	GetExtraEnvs() []string
+
+	// Should return which environment variables are kept intact.
+	GetPreservedEnvKeys() []string
 }
 
 func GeneratePolicy(exec_path string) (SandboxPolicy, error) {

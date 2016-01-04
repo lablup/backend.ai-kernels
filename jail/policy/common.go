@@ -17,13 +17,17 @@ func init() {
 		"creat",
 		"rename",
 		"unlink",
-		// required to launch user program
+		// traced by ptrace exec/fork/clone
+		"fork",
+		"vfork",
+		"clone",
 		"execve",
 	}
 
 	// Following syscalls are blindly allowed.
 	// IMPORTANT: ptrace MUST NOT be included!
 	AllowedSyscalls = []string{
+		// blindly allowed
 		"read",
 		"write",
 		"close",
@@ -37,6 +41,9 @@ func init() {
 		"lseek",
 		"getdents",
 		"dup",
+		"dup2",
+		"chdir",
+		"fchdir",
 		"rt_sigaction",
 		"rt_sigprocmask",
 		"sigaltstack",
@@ -59,6 +66,7 @@ func init() {
 		"socket",
 		"socketpair",
 		"connect",
+		"pipe",
 		"ioctl",
 		"fcntl",
 		"select",
@@ -68,9 +76,13 @@ func init() {
 		"epoll_wait",
 		"epoll_ctl",
 		"exit_group",
+		"wait4",
+		"uname",
 		// potentially replaced with VDSO
 		"getpid",
+		"getppid",
 		"getpgid",
+		"getpgrp",
 		"getsid",
 		"clock_gettime",
 		"clock_getres",

@@ -42,13 +42,16 @@ RUN /home/sorna/install-python-packages2.sh
 USER root
 ADD run.py /home/sorna/run.py
 ADD run.sh /home/sorna/run.sh
+# NOTE: you must symlink or copy the $GOPATH/bin to <repo_root>/bin
+ADD ../bin/jail /home/sorna/jail
+ADD ../bin/intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh
 RUN chmod 600 /home/sorna/*.sh
-RUN chmod 755 /home/sorna/run.sh
+RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
 
 VOLUME ["/home/work"]
 EXPOSE 2001
 
 USER work
 ENV PYTHONUNBUFFERED 1
-CMD /home/sorna/run.sh
+CMD /home/sorna/jail python3 `pyenv which python`
