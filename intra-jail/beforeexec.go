@@ -11,6 +11,7 @@ import (
 func main() {
 	syscall.RawSyscall(syscall.SYS_PRCTL, syscall.PR_SET_PTRACER, uintptr(os.Getppid()), 0)
 	arch, _ := seccomp.GetNativeArch()
+	//filter, _ := seccomp.NewFilter(seccomp.ActTrace)
 	filter, _ := seccomp.NewFilter(seccomp.ActErrno.SetReturnCode(int16(syscall.EPERM)))
 	for _, syscallName := range policy.TracedSyscalls {
 		syscallId, _ := seccomp.GetSyscallFromNameByArch(syscallName, arch)

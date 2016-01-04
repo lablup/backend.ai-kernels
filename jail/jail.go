@@ -120,7 +120,7 @@ func traceProcess(pid int) {
 						} else if _, ok := forkExecExceptions[execPath]; ok {
 							allow = true
 						} else {
-							allow = (execCount < policyInst.GetForkAllowance())
+							allow = (execCount < policyInst.GetExecAllowance())
 							execCount++
 						}
 						if debug {
@@ -141,6 +141,11 @@ func traceProcess(pid int) {
 						regs.Orig_rax = 0xFFFFFFFFFFFFFFFF // -1
 						regs.Rax = 0xFFFFFFFFFFFFFFFF - uint64(syscall.EPERM) + 1
 						syscall.PtraceSetRegs(traceePid, &regs)
+					} else {
+						if debug {
+							syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
+							l.Printf("allowed syscall %s\n", syscallName)
+						}
 					}
 				case syscall.PTRACE_EVENT_CLONE,
 					syscall.PTRACE_EVENT_FORK,

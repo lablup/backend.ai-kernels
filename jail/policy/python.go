@@ -13,7 +13,8 @@ func (p *PythonPolicy) GetExecAllowance() uint {
 }
 
 func (p *PythonPolicy) GetForkAllowance() uint {
-	return 0
+	// pyzmq performs clone() twice on intialization.
+	return 2
 }
 
 func (p *PythonPolicy) GetForkExecExceptionPaths() []string {
