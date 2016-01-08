@@ -123,9 +123,6 @@ if __name__ == '__main__':
     sock.bind('tcp://*:2001')
     print('serving at port 2001...')
 
-    # Apply the security sandbox.
-    # TODO: implement and call initialize_ptrace_sandbox()
-
     try:
         while True:
             data = sock.recv_multipart()

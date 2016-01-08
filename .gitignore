@@ -58,3 +58,7 @@ target/
 
 # etc
 .env
+
+# Generate binaries for images
+**/jail
+**/intra-jail

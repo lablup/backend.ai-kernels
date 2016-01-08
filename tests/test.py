@@ -54,6 +54,7 @@ class ImageTestBase(object):
                                               host_config=self.docker.create_host_config(
                                                  mem_limit='128m',
                                                  memswap_limit=0,
+                                                 security_opt=['apparmor:docker-ptrace'],
                                                  port_bindings={2001: ('0.0.0.0', )},
                                                  binds={
                                                      self.work_dir: {

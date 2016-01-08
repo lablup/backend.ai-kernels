@@ -1,27 +1,49 @@
 package policy
 
+import seccomp "github.com/seccomp/libseccomp-golang"
+import "syscall"
+
 var TracedSyscalls []string
 var AllowedSyscalls []string
+var ConditionallyAllowedSyscalls map[string]seccomp.ScmpCondition
 
 func init() {
 	// Following syscalls are intercepted by our ptrace-based tracer.
 	// The tracer will implement its own policies, optinally by inspecting
 	// the arguments in the registers.
 	TracedSyscalls = []string{
-		"open",
+		// 1st param is filename/path
 		"stat",
 		"lstat",
 		"statfs",
-		"access",
 		"readlink",
-		"creat",
-		"rename",
 		"unlink",
+		"rmdir",
+		"truncate",
+		"access", // 2nd param is mode
+		"creat",  // 2nd param is mode
+		"mkdir",  // 2nd param is mode
+		"open",   // 3rd param is mode
+		// 2nd param is filename/path
+		"readlinkat",
+		"unlinkat",
+		"faccessat", // 3rd param is mode
+		"mkdirat",   // 3rd param is mode
+		"openat",    // 4th param is mode
+		// 1st & 2nd params are filename/paths
+		"rename",
+		// 2nd & 4th params are filename/paths
+		"renameat",
 		// traced by ptrace exec/fork/clone
 		"fork",
 		"vfork",
 		"clone",
 		"execve",
+	}
+
+	// Following syscalls are conditionally allowed.
+	ConditionallyAllowedSyscalls = map[string]seccomp.ScmpCondition{
+		"kill": {1, seccomp.CompareEqual, uint64(syscall.SIGSTOP), 0},
 	}
 
 	// Following syscalls are blindly allowed.
@@ -31,12 +53,15 @@ func init() {
 		"read",
 		"write",
 		"close",
-		"openat",
 		"fstat",
 		"fstatfs",
 		"mmap",
 		"mprotect",
 		"munmap",
+		"mlock",
+		"munlock",
+		"mlockall",
+		"munlockall",
 		"brk",
 		"lseek",
 		"getdents",
@@ -44,10 +69,15 @@ func init() {
 		"dup2",
 		"chdir",
 		"fchdir",
+		"flock",
+		"fsync",
+		"fdatasync",
+		"ftruncate",
 		"tkill",
 		"tgkill",
 		"rt_sigaction",
 		"rt_sigprocmask",
+		"rt_sigreturn",
 		"sigaltstack",
 		"arch_prctl",
 		"prctl",
@@ -77,7 +107,9 @@ func init() {
 		"socket",
 		"socketpair",
 		"connect",
+		"accept",
 		"pipe",
+		"pipe2",
 		"ioctl",
 		"fcntl",
 		"select",
@@ -86,6 +118,7 @@ func init() {
 		"epoll_create1",
 		"epoll_wait",
 		"epoll_ctl",
+		"exit",
 		"exit_group",
 		"wait4",
 		"uname",
@@ -95,6 +128,7 @@ func init() {
 		"getpgid",
 		"getpgrp",
 		"getsid",
+		"gettimeofday",
 		"clock_gettime",
 		"clock_getres",
 		"clock_nanosleep",
