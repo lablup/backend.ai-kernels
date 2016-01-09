@@ -9,6 +9,11 @@ from os import path
 import sys
 import types
 import zmq
+try:
+    import simplejson
+    has_simplejson = True
+except ImportError:
+    has_simplejson = False
 
 ExceptionInfo = namedtuple('ExceptionInfo', [
     'exc',
@@ -133,7 +138,10 @@ if __name__ == '__main__':
                 'stderr': output[1],
                 'exceptions': exceptions,
             }
-            sock.send_json(response)
+            json_opts = {}
+            if has_simplejson:
+                json_opts['namedtuple_as_object'] = False
+            sock.send_json(response, **json_opts)
     except (KeyboardInterrupt, SystemExit):
         pass
     finally:
