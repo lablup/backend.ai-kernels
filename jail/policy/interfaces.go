@@ -14,13 +14,19 @@ const (
 type SandboxPolicy interface {
 	// Should return a boolean representing if access to the path
 	// with the given permission is allowed or not.
-	CheckPath(path string, perm Permission) bool
+	CheckPathAccessible(path string, perm Permission) bool
 
 	// Should return the number of maximum execv() syscalls.
+	// If it returns -1, no limit is imposed.
 	GetExecAllowance() uint
+
+	// Should return the number of maximum fork()/clone() syscalls.
+	// If it returns -1, no limit is imposed.
 	GetForkAllowance() uint
 
-	GetForkExecExceptionPaths() []string
+	// Should return a boolean representing if executing the executable file in
+	// the given path.  Here executing means calling execve().
+	CheckPathExecutable(path string) bool
 
 	// Should return additional environment key-value pairs.
 	// They will be merged to environment variables of the user process.

@@ -3,7 +3,7 @@ package policy
 type PythonPolicy struct {
 }
 
-func (p *PythonPolicy) CheckPath(path string, perm Permission) bool {
+func (p *PythonPolicy) CheckPathAccessible(path string, perm Permission) bool {
 	// TODO: implement
 	return true
 }
@@ -17,8 +17,9 @@ func (p *PythonPolicy) GetForkAllowance() uint {
 	return 2
 }
 
-func (p *PythonPolicy) GetForkExecExceptionPaths() []string {
-	return []string{}
+func (p *PythonPolicy) CheckPathExecutable(path string) bool {
+	// TODO: implement
+	return true
 }
 
 func (p *PythonPolicy) GetExtraEnvs() []string {

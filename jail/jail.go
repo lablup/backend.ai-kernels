@@ -49,7 +49,6 @@ var (
 	id_Execve, _  = seccomp.GetSyscallFromNameByArch("execve", arch)
 )
 var policyInst policy.SandboxPolicy = nil
-var forkExecExceptions map[string]struct{} = nil
 var execCount uint = 0
 var forkCount uint = 0
 
@@ -168,8 +167,6 @@ loop:
 								allow = true
 							} else if execPath == intraJailPath {
 								allow = true
-							} else if _, ok := forkExecExceptions[execPath]; ok {
-								allow = true
 							} else {
 								allow = (forkCount < policyInst.GetForkAllowance())
 								forkCount++
@@ -183,7 +180,7 @@ loop:
 								allow = true
 							} else if execPath == intraJailPath {
 								allow = true
-							} else if _, ok := forkExecExceptions[execPath]; ok {
+							} else if policyInst.CheckPathExecutable(execPath) {
 								allow = true
 							} else {
 								allow = (execCount < policyInst.GetExecAllowance())
@@ -194,7 +191,7 @@ loop:
 							}
 						case id_Open:
 							// TODO: extract path from syscall args
-							allow = policyInst.CheckPath("...", policy.PERM_RD)
+							allow = policyInst.CheckPathAccessible("...", policy.PERM_RD)
 						default:
 							allow = true
 						}
@@ -319,10 +316,6 @@ func main() {
 	// because waitpid() only monitors the caller's direct children, not
 	// siblings' children.
 	args := append([]string{intraJailPath}, os.Args[2:]...)
-	forkExecExceptions = make(map[string]struct{})
-	for _, path := range policyInst.GetForkExecExceptionPaths() {
-		forkExecExceptions[path] = struct{}{}
-	}
 	cwd, _ := os.Getwd()
 	envs := filterEnvs(os.Environ(), policyInst.GetPreservedEnvKeys())
 	envs = append(envs, policyInst.GetExtraEnvs()...)
