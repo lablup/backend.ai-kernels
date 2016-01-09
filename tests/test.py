@@ -10,6 +10,8 @@ import unittest
 import urllib.parse
 import zmq
 
+_apparmor_profile_path = '/etc/apparmor.d/docker-ptrace'
+
 
 class ImageTestBase(object):
 
@@ -47,6 +49,7 @@ class ImageTestBase(object):
         container_name = 'kernel.test.{}'.format(generate_uuid())
         self.work_dir = os.path.join(os.getcwd(), '_workdir_{}'.format(container_name))
         os.makedirs(self.work_dir)
+        security_opt = ['apparmor:docker-ptrace'] if os.path.exists(_apparmor_profile_path) else []
         result = self.docker.create_container(self.image_name,
                                               name=container_name,
                                               ports=[(2001, 'tcp')],
@@ -54,7 +57,7 @@ class ImageTestBase(object):
                                               host_config=self.docker.create_host_config(
                                                  mem_limit='128m',
                                                  memswap_limit=0,
-                                                 security_opt=['apparmor:docker-ptrace'],
+                                                 security_opt=security_opt,
                                                  port_bindings={2001: ('0.0.0.0', )},
                                                  binds={
                                                      self.work_dir: {
@@ -88,6 +91,9 @@ class ImageTestBase(object):
         cli.connect(self.kernel_addr)
         msg = ('{}'.format(cell_id).encode('ascii'), code.encode('utf8'))
         cli.send_multipart(msg)
+        evs = cli.poll(timeout=2)
+        if not evs:
+            raise TimeoutError('Container does not respond.')
         resp = cli.recv_json()
         cli.close()
         ctx.destroy()
@@ -151,9 +157,9 @@ class PHP55ImageTest(ImageTestBase, unittest.TestCase):
     def basic_success(self):
         yield 'echo "hello world";', 'hello world'
         yield '$a = 1; $b = 2; $c = $a + $b; echo "$c";', '3'
-        yield 'echo isset($my_nonexistent_variable) ? "1" : "0";', '0' 
+        yield 'echo isset($my_nonexistent_variable) ? "1" : "0";', '0'
         # checks if our internal REPL code is NOT exposed.
-        yield 'echo isset($context) ? "1" : "0";', '0' 
+        yield 'echo isset($context) ? "1" : "0";', '0'
         yield 'global $context; echo isset($context) ? "1" : "0";', '0'
 
     def basic_failure(self):
