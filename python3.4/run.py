@@ -118,7 +118,7 @@ if __name__ == '__main__':
     runner = CodeRunner()
 
     # Initialize minimal ZMQ server socket.
-    ctx = zmq.Context()
+    ctx = zmq.Context(io_threads=1)
     sock = ctx.socket(zmq.REP)
     sock.bind('tcp://*:2001')
     print('serving at port 2001...')

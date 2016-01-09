@@ -91,9 +91,8 @@ class ImageTestBase(object):
         cli.connect(self.kernel_addr)
         msg = ('{}'.format(cell_id).encode('ascii'), code.encode('utf8'))
         cli.send_multipart(msg)
-        evs = cli.poll(timeout=2)
-        if not evs:
-            raise TimeoutError('Container does not respond.')
+        #if cli.poll(timeout=5) == 0:
+        #    raise TimeoutError('Container does not respond.')
         resp = cli.recv_json()
         cli.close()
         ctx.destroy()
@@ -148,6 +147,7 @@ class Python34ImageTest(ImageTestBase, unittest.TestCase):
     def basic_failure(self):
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
+        yield 'import os; os.fork()', ('PermissionError', None)
 
 
 class PHP55ImageTest(ImageTestBase, unittest.TestCase):
