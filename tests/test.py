@@ -134,6 +134,7 @@ class Python27ImageTest(ImageTestBase, unittest.TestCase):
     def basic_failure(self):
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
+        yield 'import os; os.fork()', ('OSError', 'Operation not permitted')
 
 
 class Python34ImageTest(ImageTestBase, unittest.TestCase):

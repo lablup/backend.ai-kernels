@@ -42,7 +42,7 @@ RUN /home/sorna/install-python-packages2.sh
 USER root
 ADD run.py /home/sorna/run.py
 ADD run.sh /home/sorna/run.sh
-# NOTE: you must symlink or copy $GOPATH/bin to <dockerfile_dir>/bin
+# NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
 RUN apt-get install -y libseccomp2
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
