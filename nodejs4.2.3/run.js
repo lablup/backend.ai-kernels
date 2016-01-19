@@ -1,4 +1,4 @@
-var main = function() {
+function main() {
     var process = require('process');
     var zmq = require('zmq');
     var socket = zmq.socket('rep');
@@ -69,9 +69,12 @@ var main = function() {
         }
     });
 
-    socket.on('SIGINT', function() {
+    function shutdown() {
         socket.close();
-    });
+        console.log('exit.');
+    }
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
 
     socket.bind(port, function(err) {
         if (err) {
