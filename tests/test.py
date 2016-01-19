@@ -177,7 +177,7 @@ class Nodejs42ImageTest(ImageTestBase, unittest.TestCase):
         yield 'var a = 1; var b = 2; var c = a + b; console.log(c);', '3'
 
     def basic_failure(self):
-        yield '/* TODO */', ('', None)
+        yield 'console.log(some_undef_var);', ('ReferenceError', None)
 
 
 if __name__ == '__main__':
