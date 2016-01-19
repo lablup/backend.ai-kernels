@@ -61,6 +61,8 @@ func init() {
 		"close",
 		"fstat",
 		"fstatfs",
+		"pread64",
+		"pwrite64",
 		"mmap",
 		"mprotect",
 		"munmap",

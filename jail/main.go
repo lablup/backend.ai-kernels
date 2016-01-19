@@ -10,7 +10,6 @@ Example:
 package main
 
 import (
-	"fmt"
 	seccomp "github.com/seccomp/libseccomp-golang"
 	"log"
 	"os"
@@ -19,7 +18,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sorna-repl/jail/policy"
-	"strings"
+	"sorna-repl/jail/utils"
 	"syscall"
 	"unsafe"
 )
@@ -38,7 +37,7 @@ import "C"
 const debug = false
 
 var (
-	myExecPath, _ = getExecutable(os.Getpid())
+	myExecPath, _ = utils.GetExecutable(os.Getpid())
 	myPath        = filepath.Dir(myExecPath)
 	intraJailPath = path.Join(myPath, "intra-jail")
 	arch, _       = seccomp.GetNativeArch()
@@ -51,23 +50,6 @@ var (
 var policyInst policy.SandboxPolicy = nil
 var execCount uint = 0
 var forkCount uint = 0
-
-func filterEnvs(envs []string, preservedKeys []string) []string {
-	filteredEnvs := []string{}
-	for _, entry := range os.Environ() {
-		var kept bool = false
-		for _, key := range preservedKeys {
-			if strings.HasPrefix(entry, key+"=") {
-				kept = true
-				break
-			}
-		}
-		if kept {
-			filteredEnvs = append(filteredEnvs, entry)
-		}
-	}
-	return filteredEnvs
-}
 
 func setPtraceOpts(l *log.Logger, pid int) {
 	var ptraceOpts int = 0
@@ -162,7 +144,7 @@ loop:
 					case 7 /*PTRACE_EVENT_SECCOMP*/ :
 						switch seccomp.ScmpSyscall(syscallId) {
 						case id_Fork, id_Vfork, id_Clone:
-							execPath, _ := getExecutable(result.pid)
+							execPath, _ := utils.GetExecutable(result.pid)
 							if execPath == myExecPath {
 								allow = true
 							} else if execPath == intraJailPath {
@@ -175,7 +157,7 @@ loop:
 								l.Printf("fork owner: %s\n", execPath)
 							}
 						case id_Execve:
-							execPath, _ := getExecutable(result.pid)
+							execPath, _ := utils.GetExecutable(result.pid)
 							if execPath == myExecPath {
 								allow = true
 							} else if execPath == intraJailPath {
@@ -265,38 +247,6 @@ loop:
 	} /* endloop */
 }
 
-func getExecutable(pid int) (string, error) {
-	const deletedTag = " (deleted)"
-	execPath, err := os.Readlink(fmt.Sprintf("/proc/%d/exe", pid))
-	if err != nil {
-		return execPath, err
-	}
-	execPath = strings.TrimSuffix(execPath, deletedTag)
-	execPath = strings.TrimPrefix(execPath, deletedTag)
-	switch execPath {
-	case "/bin/sh", "/bin/bash", "/bin/dash":
-		rawData := make([]byte, 1024)
-		file, err := os.Open(fmt.Sprintf("/proc/%d/cmdline", pid))
-		if err != nil {
-			return execPath, err
-		}
-		file.Read(rawData)
-		file.Close()
-		data := string(rawData[:])
-		cmd := strings.Split(data, "\x00")
-		if !path.IsAbs(cmd[1]) && cmd[1] != "/usr/bin/env" {
-			cwd, err := os.Readlink(fmt.Sprintf("/proc/%d/cwd", pid))
-			if err != nil {
-				return execPath, err
-			}
-			execPath = path.Join(cwd, cmd[1])
-		} else {
-			execPath = cmd[1]
-		}
-	}
-	return execPath, nil
-}
-
 func main() {
 	l := log.New(os.Stderr, "", 0)
 	if len(os.Args) < 2 {
@@ -317,7 +267,7 @@ func main() {
 	// siblings' children.
 	args := append([]string{intraJailPath}, os.Args[2:]...)
 	cwd, _ := os.Getwd()
-	envs := filterEnvs(os.Environ(), policyInst.GetPreservedEnvKeys())
+	envs := utils.FilterEnvs(os.Environ(), policyInst.GetPreservedEnvKeys())
 	envs = append(envs, policyInst.GetExtraEnvs()...)
 	pid, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{
 		cwd,

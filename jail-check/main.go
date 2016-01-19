@@ -1,27 +1,34 @@
 package main
 
 import (
-	"fmt"
 	seccomp "github.com/seccomp/libseccomp-golang"
 	"log"
 	"os"
 	"os/signal"
+	"path"
+	"path/filepath"
 	"runtime"
 	"sorna-repl/jail/policy"
+	"sorna-repl/jail/utils"
 	"syscall"
 )
 
 var (
-	myExecPath, _ = getExecutable(os.Getpid())
+	myExecPath, _ = utils.GetExecutable(os.Getpid())
 	myPath        = filepath.Dir(myExecPath)
 	intraJailPath = path.Join(myPath, "intra-jail-check")
 	arch, _       = seccomp.GetNativeArch()
+	id_Open, _    = seccomp.GetSyscallFromNameByArch("open", arch)
+	id_Clone, _   = seccomp.GetSyscallFromNameByArch("clone", arch)
+	id_Fork, _    = seccomp.GetSyscallFromNameByArch("fork", arch)
+	id_Vfork, _   = seccomp.GetSyscallFromNameByArch("vfork", arch)
+	id_Execve, _  = seccomp.GetSyscallFromNameByArch("execve", arch)
 )
 var execCount uint = 0
 var forkCount uint = 0
 
 func setPtraceOpts(l *log.Logger, pid int) {
-	var ptraceOpts int = syscall.PTRACE_O_SYSGOOD
+	var ptraceOpts int = (1 << 7 /* SECCOMP */)
 	if err := syscall.PtraceSetOptions(pid, ptraceOpts); err != nil {
 		l.Fatal("PtraceSetOptions: ", err)
 	}
@@ -35,11 +42,20 @@ type WaitResult struct {
 
 func traceProcess(l *log.Logger, pid int) {
 	traceLogFile, err := os.Create("/tmp/trace.log")
-	if err {
+	if err != nil {
 		l.Fatal("Could not create /tmp/trace.log file.: ", err)
 	}
 	traceLog := log.New(traceLogFile, "", 0)
 	defer traceLogFile.Close()
+
+	allowedSyscalls := make(map[string]struct{})
+	for _, name := range policy.AllowedSyscalls {
+		allowedSyscalls[name] = struct{}{}
+	}
+	for _, name := range policy.TracedSyscalls {
+		allowedSyscalls[name] = struct{}{}
+	}
+
 	first_stop := true
 	mySignals := make(chan os.Signal, 1)
 	childrenWaits := make(chan WaitResult, 2)
@@ -76,18 +92,11 @@ loop:
 				}
 			}
 			if result.status.Exited() {
-				if debug {
-					l.Printf("EXIT (pid %d) status %d\n", result.pid, result.status.ExitStatus())
-				}
 				if pid == result.pid {
 					// Our very child has exited. Terminate.
 					break loop
 				}
 			} else if result.status.Stopped() {
-				if debug {
-					l.Printf("STOP stopsignal: 0x%x, trapcause: %d\n",
-						uint(result.status.StopSignal()), result.status.TrapCause())
-				}
 				switch result.status.StopSignal() {
 				case syscall.SIGSTOP:
 					if first_stop {
@@ -95,7 +104,6 @@ loop:
 						first_stop = false
 					}
 				case syscall.SIGTRAP:
-					allow := true
 					var regs syscall.PtraceRegs
 					for {
 						err := syscall.PtraceGetRegs(result.pid, &regs)
@@ -112,24 +120,21 @@ loop:
 					case 7 /*PTRACE_EVENT_SECCOMP*/ :
 						switch seccomp.ScmpSyscall(syscallId) {
 						case id_Fork, id_Vfork, id_Clone:
-							execPath, _ := getExecutable(result.pid)
+							execPath, _ := utils.GetExecutable(result.pid)
 							forkCount++
 							traceLog.Printf("fork/vfork/clone() (count: %d) on %s\n", forkCount, execPath)
-							if debug {
-								l.Printf("fork owner: %s\n", execPath)
-							}
 						case id_Execve:
-							execPath, _ := getExecutable(result.pid)
+							execPath, _ := utils.GetExecutable(result.pid)
 							execCount++
 							traceLog.Printf("execve() (count: %d) on %s\n", execCount, execPath)
-							if debug {
-								l.Printf("execve owner: %s\n", execPath)
-							}
 						case id_Open:
 							// TODO: extract path from syscall args
 						default:
 							syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
-							traceLog.Printf("non-registered syscall: %s\n", syscallName)
+							_, ok := allowedSyscalls[syscallName]
+							if !ok {
+								traceLog.Printf("non-registered syscall: %s\n", syscallName)
+							}
 						}
 					case 0:
 						// ignore
@@ -138,9 +143,6 @@ loop:
 					}
 				default:
 					// Transparently deliver other signals.
-					if debug {
-						l.Printf("Injecting unhandled signal: %v\n", result.status.StopSignal())
-					}
 					signalToChild = result.status.StopSignal()
 				}
 				for {
@@ -167,9 +169,11 @@ func main() {
 	/* Initialize fork/exec of the child. */
 	runtime.GOMAXPROCS(1)
 	runtime.LockOSThread()
+	args := append([]string{intraJailPath}, os.Args[2:]...)
+	cwd, _ := os.Getwd()
 	pid, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{
 		cwd,
-		envs,
+		os.Environ(),
 		[]uintptr{0, 1, 2},
 		&syscall.SysProcAttr{Setsid: true, Ptrace: true},
 	})
