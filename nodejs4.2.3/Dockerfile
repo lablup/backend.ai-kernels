@@ -11,20 +11,24 @@ RUN chmod 755 /home/sorna
 RUN chown -R work:work /home/sorna
 
 ENV HOME /home/work
-WORKDIR /home/work
 
-# Install node.js 4.2.3
+# Install latest node.js 4.x
 ENV DEBIAN_FRONTEND noninteractive
+RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update
+RUN apt-get install -y curl build-essential
+RUN apt-get install -y libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev libgdbm-dev libc6-dev libbz2-dev
+RUN apt-get install -y wget
+WORKDIR /home/sorna
+RUN wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz && tar xzvf Python-2.7.11.tgz
+WORKDIR /home/sorna/Python-2.7.11
+RUN ./configure && make altinstall
+RUN ln -s /usr/local/bin/python2.7 /usr/bin/python
+RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
 RUN apt-get install -y nodejs
-RUN apt-get install -y npm
-RUN ln -s `which nodejs` /usr/bin/node
 
 # Install packages
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository -y ppa:chris-lea/zeromq
-RUN add-apt-repository -y ppa:chris-lea/libpgm
-RUN apt-get update
+WORKDIR /home/sorna
 RUN apt-get install -y libzmq3-dev
 ADD package.json /home/sorna/package.json
 RUN cd /home/sorna; npm install; cd $HOME
@@ -37,6 +41,7 @@ RUN chown root:root /home/sorna/*.sh
 RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh
 
+WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2001
 

@@ -175,6 +175,7 @@ class Nodejs42ImageTest(ImageTestBase, unittest.TestCase):
     def basic_success(self):
         yield 'console.log("hello world");', 'hello world'
         yield 'var a = 1; var b = 2; var c = a + b; console.log(c);', '3'
+        yield 'console.log(process.version)', 'v4.2'
 
     def basic_failure(self):
         yield 'console.log(some_undef_var);', ('ReferenceError', None)
