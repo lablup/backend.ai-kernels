@@ -17,9 +17,7 @@ func main() {
 	syscall.Kill(os.Getpid(), syscall.SIGSTOP)
 
 	arch, _ := seccomp.GetNativeArch()
-	//filter, _ := seccomp.NewFilter(seccomp.ActAllow)
-	//filter, _ := seccomp.NewFilter(seccomp.ActTrace)
-	filter, _ := seccomp.NewFilter(seccomp.ActErrno.SetReturnCode(int16(syscall.EPERM)))
+	filter, _ := seccomp.NewFilter(seccomp.ActTrace)
 	for _, syscallName := range policy.TracedSyscalls {
 		syscallId, _ := seccomp.GetSyscallFromNameByArch(syscallName, arch)
 		filter.AddRuleExact(syscallId, seccomp.ActTrace)
