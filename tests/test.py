@@ -123,9 +123,9 @@ class ImageTestBase(object):
                     self.assertIn(err_arg, resp['exceptions'][0][1])
 
 
-class Python27ImageTest(ImageTestBase, unittest.TestCase):
+class Python2ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python27'
+    image_name = 'kernel-python2'
 
     def basic_success(self):
         yield 'print "hello world"', 'hello world'
@@ -137,9 +137,9 @@ class Python27ImageTest(ImageTestBase, unittest.TestCase):
         yield 'import os; os.fork()', ('OSError', 'Operation not permitted')
 
 
-class Python34ImageTest(ImageTestBase, unittest.TestCase):
+class Python3ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python34'
+    image_name = 'kernel-python3'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
@@ -151,9 +151,9 @@ class Python34ImageTest(ImageTestBase, unittest.TestCase):
         yield 'import os; os.fork()', ('PermissionError', None)
 
 
-class PHP55ImageTest(ImageTestBase, unittest.TestCase):
+class PHP5ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-php55'
+    image_name = 'kernel-php5'
 
     def basic_success(self):
         yield 'echo "hello world";', 'hello world'
@@ -168,14 +168,14 @@ class PHP55ImageTest(ImageTestBase, unittest.TestCase):
         yield '$x = 0 / 0;', ('Division by zero', None)
 
 
-class Nodejs42ImageTest(ImageTestBase, unittest.TestCase):
+class Nodejs4ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-nodejs42'
+    image_name = 'kernel-nodejs4'
 
     def basic_success(self):
         yield 'console.log("hello world");', 'hello world'
         yield 'var a = 1; var b = 2; var c = a + b; console.log(c);', '3'
-        yield 'console.log(process.version)', 'v4.2'
+        yield 'console.log(process.version)', 'v4.'
 
     def basic_failure(self):
         yield 'console.log(some_undef_var);', ('ReferenceError', None)
