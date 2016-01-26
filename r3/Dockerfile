@@ -37,6 +37,7 @@ RUN chown root:root /home/sorna/*.sh
 RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh
 
+ENV HOME /home/work
 WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2001
