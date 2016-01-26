@@ -151,6 +151,41 @@ class Python3ImageTest(ImageTestBase, unittest.TestCase):
         yield 'import os; os.fork()', ('PermissionError', None)
 
 
+_py3_tf_example = '''
+import tensorflow as tf
+import numpy as np
+x_data = np.random.rand(100).astype(np.float32)
+y_data = x_data * 0.1 + 0.3
+W = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
+b = tf.Variable(tf.zeros([1]))
+y = W * x_data + b
+loss = tf.reduce_mean(tf.square(y - y_data))
+optimizer = tf.train.GradientDescentOptimizer(0.5)
+train = optimizer.minimize(loss)
+init = tf.initialize_all_variables()
+sess = tf.Session()
+sess.run(init)
+for step in range(201):
+    sess.run(train)
+    if step % 20 == 0:
+        print(step, sess.run(W), sess.run(b))
+print('done')
+'''
+
+class Python3DeepLearningImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'kernel-python3-deeplearning'
+
+    def basic_success(self):
+        yield 'print("hello world")', 'hello world'
+        yield 'a = 1\nb = 2\nc = a + b\nprint(c)', '3'
+        yield _py3_tf_example, 'done'
+
+    def basic_failure(self):
+        yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
+        yield 'x = 0 / 0', ('ZeroDivisionError', None)
+
+
 class PHP5ImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'kernel-php5'
