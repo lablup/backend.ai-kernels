@@ -186,6 +186,20 @@ class Python3DeepLearningImageTest(ImageTestBase, unittest.TestCase):
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
 
 
+class R3ImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'kernel-r3'
+
+    def basic_success(self):
+        yield 'cat("hello world\n")', 'hello world'
+        yield 'a = 1;b = 2;c = a + b;cat(c, "\n")', '3'
+        yield 'library("ggplot2"); cat("success\n")', 'success'
+
+    def basic_failure(self):
+        yield 'stop("my error")', ('simpleError', 'my error')
+        yield 'some_undefined_func()', ('simpleError', 'could not find function')
+
+
 class PHP5ImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'kernel-php5'
