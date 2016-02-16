@@ -8,11 +8,11 @@ func (p *PythonPolicy) CheckPathAccessible(path string, perm Permission) bool {
 	return true
 }
 
-func (p *PythonPolicy) GetExecAllowance() uint {
+func (p *PythonPolicy) GetExecAllowance() int {
 	return 0
 }
 
-func (p *PythonPolicy) GetForkAllowance() uint {
+func (p *PythonPolicy) GetForkAllowance() int {
 	// pyzmq performs clone() twice on intialization.
 	return 2
 }

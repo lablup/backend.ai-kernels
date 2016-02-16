@@ -1,7 +1,6 @@
 package policy
 
 import (
-	"fmt"
 	"path"
 )
 
@@ -18,11 +17,11 @@ type SandboxPolicy interface {
 
 	// Should return the number of maximum execv() syscalls.
 	// If it returns -1, no limit is imposed.
-	GetExecAllowance() uint
+	GetExecAllowance() int
 
 	// Should return the number of maximum fork()/clone() syscalls.
 	// If it returns -1, no limit is imposed.
-	GetForkAllowance() uint
+	GetForkAllowance() int
 
 	// Should return a boolean representing if executing the executable file in
 	// the given path.  Here executing means calling execve().
@@ -43,7 +42,7 @@ func GeneratePolicy(exec_path string) (SandboxPolicy, error) {
 		return new(PythonPolicy), nil
 	// TODO: add policies for other languages
 	default:
-		return nil, fmt.Errorf("Unsupported sandbox policy for %s.", exec_name)
+		return new(DefaultPolicy), nil
 	}
 }
 

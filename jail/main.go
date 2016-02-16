@@ -48,8 +48,8 @@ var (
 	id_Execve, _  = seccomp.GetSyscallFromNameByArch("execve", arch)
 )
 var policyInst policy.SandboxPolicy = nil
-var execCount uint = 0
-var forkCount uint = 0
+var execCount int = 0
+var forkCount int = 0
 
 func setPtraceOpts(l *log.Logger, pid int) {
 	var ptraceOpts int = 0
@@ -150,7 +150,8 @@ loop:
 							} else if execPath == intraJailPath {
 								allow = true
 							} else {
-								allow = (forkCount < policyInst.GetForkAllowance())
+								maxForks := policyInst.GetForkAllowance()
+								allow = (maxForks == -1 || forkCount < maxForks)
 								forkCount++
 							}
 							if debug {
@@ -165,7 +166,8 @@ loop:
 							} else if policyInst.CheckPathExecutable(execPath) {
 								allow = true
 							} else {
-								allow = (execCount < policyInst.GetExecAllowance())
+								maxExec := policyInst.GetExecAllowance()
+								allow = (maxExec == -1 || execCount < maxExec)
 								execCount++
 							}
 							if debug {

@@ -60,5 +60,14 @@ target/
 .env
 
 # Generate binaries for images
-**/jail
-**/intra-jail
+*/jail
+*/intra-jail
+*/jail-check
+*/intra-jail-check
+old/*/jail
+old/*/intra-jail
+old/*/jail-check
+old/*/intra-jail-check
+
+node_modules/
+*.gz
