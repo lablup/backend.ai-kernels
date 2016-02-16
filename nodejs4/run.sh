@@ -1,2 +1,2 @@
 #! /bin/bash
-exec node /home/sorna/run.js
+exec /home/sorna/jail default `which node` /home/sorna/run.js

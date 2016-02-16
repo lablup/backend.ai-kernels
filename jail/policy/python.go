@@ -17,6 +17,10 @@ func (p *PythonPolicy) GetForkAllowance() int {
 	return 2
 }
 
+func (p *PythonPolicy) GetMaxChildProcs() uint {
+	return 32
+}
+
 func (p *PythonPolicy) CheckPathExecutable(path string) bool {
 	// TODO: implement
 	return true

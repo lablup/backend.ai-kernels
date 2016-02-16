@@ -28,9 +28,13 @@ RUN echo 'extension=zmq.so' > /etc/php5/cli/conf.d/30-zmq.ini
 USER root
 ADD run.php /home/sorna/run.php
 ADD run.sh /home/sorna/run.sh
-RUN chown root:root /home/sorna/*.sh
+# NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
+RUN apt-get install -y libseccomp2
+ADD jail /home/sorna/jail
+ADD intra-jail /home/sorna/intra-jail
+RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
 RUN chmod 600 /home/sorna/*.sh
-RUN chmod 755 /home/sorna/run.sh
+RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
 
 VOLUME ["/home/work"]
 EXPOSE 2001

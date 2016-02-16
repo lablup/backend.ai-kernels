@@ -1,2 +1,2 @@
 #! /bin/bash
-exec `which Rscript` /home/sorna/run.R
+exec /home/sorna/jail default `which Rscript` /home/sorna/run.R

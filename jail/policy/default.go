@@ -15,6 +15,10 @@ func (p *DefaultPolicy) GetForkAllowance() int {
 	return -1
 }
 
+func (p *DefaultPolicy) GetMaxChildProcs() uint {
+	return 32
+}
+
 func (p *DefaultPolicy) CheckPathExecutable(path string) bool {
 	return true
 }
@@ -24,7 +28,7 @@ func (p *DefaultPolicy) GetExtraEnvs() []string {
 }
 
 func (p *DefaultPolicy) GetPreservedEnvKeys() []string {
-	return []string{"HOME", "PATH"}
+	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH"}
 }
 
 // vim: ts=4 sts=4 sw=4 noet

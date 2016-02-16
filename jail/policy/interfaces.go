@@ -23,6 +23,9 @@ type SandboxPolicy interface {
 	// If it returns -1, no limit is imposed.
 	GetForkAllowance() int
 
+	// Should return the maximum number of child processes and threads.
+	GetMaxChildProcs() uint
+
 	// Should return a boolean representing if executing the executable file in
 	// the given path.  Here executing means calling execve().
 	CheckPathExecutable(path string) bool
