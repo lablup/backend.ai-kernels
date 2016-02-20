@@ -47,7 +47,7 @@ var (
 var policyInst policy.SandboxPolicy = nil
 var execCount int = 0
 var forkCount int = 0
-var childCount uint = 0
+var childCount uint = 1
 
 func setPtraceOpts(l *log.Logger, pid int) {
 	var ptraceOpts int = 0
@@ -162,7 +162,7 @@ loop:
 								allow = (maxForks == -1 || forkCount < maxForks)
 								forkCount++
 							}
-							allow = allow && (childCount <= policyInst.GetMaxChildProcs())
+							allow = allow && (childCount < policyInst.GetMaxChildProcs())
 							if debug {
 								l.Printf("fork owner: %s\n", execPath)
 							}
