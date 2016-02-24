@@ -5,3 +5,10 @@ pip3 install networkx
 pip3 install six
 pip3 install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.6.0-cp34-none-linux_x86_64.whl
 pyenv rehash
+cat > /tmp/sample_data_importer.py <<- EOF
+from tensorflow.examples.tutorials.mnist import input_data
+mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+print("Imported MNIST data.")
+EOF
+python3 /tmp/sample_data_importer.py
+rm /tmp/sample_data_importer.py
