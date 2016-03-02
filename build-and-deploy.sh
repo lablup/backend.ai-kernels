@@ -22,9 +22,7 @@ def is_fresh(docker_cli, target):
                                                  and item['RepoTags'][0].startswith(kernel_name + ':'),
                                     docker_cli.images()))
         if len(target_images) == 0:
-            raise RuntimeError('There is no docker images for {}.'
-                               'If this is first time to build, '
-                               'run the build process manually.'.format(target))
+            return True
         dump_mtime = datetime.fromtimestamp(path.getmtime(dump_name))
         return all(map(lambda item: datetime.fromtimestamp(int(item['Created'])) > dump_mtime,
                    target_images))
