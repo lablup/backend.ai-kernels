@@ -10,29 +10,38 @@ RUN mkdir /home/sorna
 RUN chmod 755 /home/sorna
 RUN chown -R work:work /home/sorna
 
+ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /home/work
 WORKDIR /home/work
 
-# Install Python 3.4
+# Install Python
+USER root
+RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get build-dep -y python3
 RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev
 ADD install-python.sh /home/sorna/install-python.sh
-ADD install-python-packages.sh /home/sorna/install-python-packages.sh
 RUN chmod +x /home/sorna/*.sh
-
 USER work
-# Install common Python packages
 ENV PYENV_ROOT /home/sorna/.pyenv
 ENV PATH /home/sorna/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN git clone https://github.com/yyuu/pyenv /home/sorna/.pyenv
 RUN /home/sorna/install-python.sh
+
+# Install common Python packages
 USER root
-RUN apt-get install -y pkg-config libpng-dev libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
+RUN apt-get install -y pkg-config
+RUN apt-get install -y libjpeg-dev libpng-dev
+RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
+ADD install-python-packages.sh /home/sorna/install-python-packages.sh
+RUN chmod +x /home/sorna/*.sh
 USER work
 RUN /home/sorna/install-python-packages.sh
 
 # Additional packages
 USER root
+ENV MPLCONFIGDIR /home/sorna/.matplotlib
+RUN mkdir /home/sorna/.matplotlib
+RUN chown -R work:work /home/sorna/.matplotlib
 ADD install-python-packages2.sh /home/sorna/install-python-packages2.sh
 RUN chmod +x /home/sorna/install-python-packages2.sh
 USER work

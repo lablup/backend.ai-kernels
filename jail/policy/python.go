@@ -13,8 +13,8 @@ func (p *PythonPolicy) GetExecAllowance() int {
 }
 
 func (p *PythonPolicy) GetForkAllowance() int {
-	// pyzmq performs clone() twice on intialization.
-	return 2
+	// Note: pyzmq performs clone() twice on intialization.
+	return -1
 }
 
 func (p *PythonPolicy) GetMaxChildProcs() uint {
@@ -31,7 +31,7 @@ func (p *PythonPolicy) GetExtraEnvs() []string {
 }
 
 func (p *PythonPolicy) GetPreservedEnvKeys() []string {
-	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH"}
+	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH", "MPLCONFIGDIR"}
 }
 
 // vim: ts=4 sts=4 sw=4 noet
