@@ -62,7 +62,7 @@ VOLUME ["/home/work"]
 EXPOSE 2001
 
 LABEL com.lablup.sorna.timeout="30"
-LABEL com.lablup.sorna.maxmem="512"
+LABEL com.lablup.sorna.maxmem="512m"
 
 USER work
 ENV PYTHONUNBUFFERED 1
