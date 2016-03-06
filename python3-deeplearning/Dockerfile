@@ -1,6 +1,9 @@
 FROM ubuntu:14.04
 MAINTAINER Joongi Kim "joongi@lablup.com"
 
+LABEL com.lablup.sorna.timeout="30"
+LABEL com.lablup.sorna.maxmem="512"
+
 # Add an isolated user
 # /home/work: actual working directory for user codes
 # /home/sorna: place for Python and REPL script

@@ -62,6 +62,9 @@ RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
 VOLUME ["/home/work"]
 EXPOSE 2001
 
+LABEL com.lablup.sorna.timeout="10"
+LABEL com.lablup.sorna.maxmem="128"
+
 USER work
 ENV PYTHONUNBUFFERED 1
 CMD /home/sorna/run.sh
