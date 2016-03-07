@@ -41,7 +41,7 @@ type SandboxPolicy interface {
 func GeneratePolicy(exec_path string) (SandboxPolicy, error) {
 	_, exec_name := path.Split(exec_path)
 	switch exec_name {
-	case "python2", "python3":
+	case "python", "python2", "python3":
 		return new(PythonPolicy), nil
 	// TODO: add policies for other languages
 	default:
