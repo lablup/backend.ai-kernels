@@ -1,72 +1,87 @@
 function main() {
-    var process = require('process');
-    var zmq = require('zmq');
+    const deasync = require('deasync');
+    const domain = require('domain');
+    const streams = require('memory-streams');
+    const vm = require('vm');
+    const zmq = require('zmq');
+    const Console = require('console').Console;
+    const Module = require('module');
+
     var socket = zmq.socket('rep');
     var port = 'tcp://*:2001';
 
-    // refs: https://gist.github.com/pguillory/729616
-    function hook_stdout(callback) {
-        var old_stdout_write = process.stdout.write;
-        process.stdout.write = (function(write) {
-            return function(string, encoding, fd) {
-                write.apply(process.stdout, arguments);
-                callback(string, encoding, fd);
-            };
-        })(process.stdout.write);
-        return function() {
-            process.stdout.write = old_stdout_write;
+    var requireDepth = 0;
+
+    function makeRequireFunction() {
+        const Module = this.constructor;
+        const self = this;
+
+        function require(path) {
+            try {
+                requireDepth += 1;
+                return self.require(path);
+            } finally {
+                requireDepth -= 1;
+            }
         }
+        require.resolve = function(request) {
+            return Module._resolveFilename(request, self);
+        };
+        require.main = process.mainModule;
+
+        // Enable support to add extra extension types.
+        require.extensions = Module._extensions;
+        require.cache = Module._cache;
+        return require;
     }
 
-    function hook_stderr(callback) {
-        var old_stderr_write = process.stderr.write;
-        process.stderr.write = (function(write) {
-            return function(string, encoding, fd) {
-                write.apply(process.stderr, arguments);
-                callback(string, encoding, fd);
-            };
-        })(process.stderr.write);
-        return function() {
-            process.stderr.write = old_stderr_write;
-        }
-    }
-    
     function exception_handler(e, exceptions) {
         var exception_info = [e.stack.split('\n')[0], [], false, null];
         exceptions.push(exception_info);
     }
 
-    function execute(code) {
-        eval(code);
-    }
-
     process.chdir('/home/work');
 
+    var mod = new Module('<repl>');
+    var ctx = vm.createContext();
+    ctx.module = module;
+    ctx.require = makeRequireFunction.call(mod);
+    for (var i in global) ctx[i] = global[i];
+    ctx.global = ctx;
+    ctx.global.global = ctx;
+    var userDomain = domain.create();
+
     socket.on('message', function(code_id, code) {
-        var stdout = '';
-        var stderr = '';
-        var exceptions = [];  // exceptions not supported yet
-        var unhook_stdout = hook_stdout(function(string, encoding, fd) {
-            stdout += string;
+
+        var stdout = new streams.WritableStream();
+        var stderr = new streams.WritableStream();
+        var exceptions = [];
+        ctx.console = new Console(stdout, stderr);
+        var result = {
+            'stdout': '',
+            'stderr': '',
+            'exceptions': exceptions
+        };
+
+        userDomain.on('error', function(err) {
+            exception_handler(err, exceptions);
         });
-        var unhook_stderr = hook_stderr(function(string, encoding, fd) {
-            stderr += string;
-        });
-        
         try {
-           execute(code.toString());
-        } catch(e) {
-            exception_handler(e, exceptions);
+            var script = new vm.Script(`'use strict'; void 0; ${code}`);
+            socket.unref();
+            userDomain.run(function() {
+                script.runInContext(ctx);
+                deasync.loopUntilNoEvents();
+            });
+        } catch (err) {
+            exception_handler(err, exceptions);
         } finally {
-            var result = {
-                'stdout': stdout,
-                'stderr': stderr,
-                'exceptions': exceptions
-            }
+            socket.ref();
+            result['stdout'] = stdout.toString();
+            result['stderr'] = stderr.toString();
             socket.send(JSON.stringify(result));
-            unhook_stdout();
-            unhook_stderr();
         }
+
     });
 
     function shutdown() {
@@ -88,3 +103,5 @@ function main() {
 if (require.main === module) {
     main();
 }
+
+// vim: ts=8 sts=4 sw=4 et

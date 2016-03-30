@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 from abc import abstractmethod
+from distutils.version import StrictVersion
 import docker
 import os
 import re
@@ -49,7 +50,13 @@ class ImageTestBase(object):
         container_name = 'kernel.test.{}'.format(generate_uuid())
         self.work_dir = os.path.join(os.getcwd(), '_workdir_{}'.format(container_name))
         os.makedirs(self.work_dir)
-        security_opt = ['apparmor:docker-ptrace'] if os.path.exists(_apparmor_profile_path) else []
+        docker_version = StrictVersion(self.docker.version()['Version'])
+        if docker_version >= StrictVersion('1.10'):
+            # We already have our own jail!
+            security_opt = ['seccomp:unconfined']
+        else:
+            security_opt = ['apparmor:docker-ptrace'] \
+                           if os.path.exists(_apparmor_profile_path) else []
         result = self.docker.create_container(self.image_name,
                                               name=container_name,
                                               ports=[(2001, 'tcp')],
@@ -226,7 +233,8 @@ class Nodejs4ImageTest(ImageTestBase, unittest.TestCase):
     def basic_success(self):
         yield 'console.log("hello world");', 'hello world'
         yield 'var a = 1; var b = 2; var c = a + b; console.log(c);', '3'
-        yield 'console.log(process.version)', 'v4.'
+        yield 'console.log(process.version);', 'v4.'
+        yield 'setTimeout(() => { console.log("async"); }, 100);', 'async'
 
     def basic_failure(self):
         yield 'console.log(some_undef_var);', ('ReferenceError', None)

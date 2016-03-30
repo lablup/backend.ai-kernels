@@ -6,7 +6,8 @@
 	"main": "/home/sorna/run.js",
 	"author": "Jonghyun Park <adrysn@lablup.com>",
 	"dependencies": {
-		"process": "*",
-		"zmq": "2.14.0"
+		"memory-streams": "*",
+		"zmq": "lablup/zeromq.node",
+		"deasync": "lablup/deasync"
 	}
 }

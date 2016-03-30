@@ -29,7 +29,7 @@ RUN apt-get install -y nodejs
 
 # Install packages
 WORKDIR /home/sorna
-RUN apt-get install -y libzmq3-dev
+RUN apt-get install -y libzmq3-dev git-core
 ADD package.json /home/sorna/package.json
 RUN cd /home/sorna; npm install; cd $HOME
 
