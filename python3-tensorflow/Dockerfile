@@ -46,6 +46,25 @@ RUN chmod +x /home/sorna/install-python-packages2.sh
 USER work
 RUN /home/sorna/install-python-packages2.sh
 
+# Install caffe
+USER root
+RUN apt-get update
+RUN apt-get install -y libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler
+RUN apt-get install -y --no-install-recommends libboost-all-dev
+RUN apt-get install -y libgflags-dev libgoogle-glog-dev liblmdb-dev
+USER root
+ADD install-caffe-deps.sh /home/sorna/install-caffe-deps.sh
+RUN chmod +x /home/sorna/install-caffe-deps.sh
+USER work
+RUN /home/sorna/install-caffe-deps.sh
+USER root
+RUN apt-get install -y libatlas-dev libatlas-base-dev libblas-dev
+RUN ldconfig
+ADD install-caffe.sh /home/sorna/install-caffe.sh
+RUN chmod +x /home/sorna/install-caffe.sh
+USER work
+RUN /home/sorna/install-caffe.sh
+
 # Secure installation scripts
 USER root
 ADD run.py /home/sorna/run.py
