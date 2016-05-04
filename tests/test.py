@@ -179,9 +179,9 @@ for step in range(201):
 print('done')
 '''
 
-class Python3DeepLearningImageTest(ImageTestBase, unittest.TestCase):
+class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python3-deeplearning'
+    image_name = 'kernel-python3-tensorflow'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
