@@ -15,7 +15,6 @@ ENV HOME /home/work
 WORKDIR /home/work
 
 # Install Python
-USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get build-dep -y python3
 RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev
@@ -47,6 +46,40 @@ RUN chmod +x /home/sorna/install-python-packages2.sh
 USER work
 RUN /home/sorna/install-python-packages2.sh
 
+# Install caffe
+USER root
+RUN apt-get update
+RUN apt-get install -y libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-dev libhdf5-serial-dev protobuf-compiler
+RUN apt-get install -y --no-install-recommends libboost-all-dev
+RUN apt-get install -y libgflags-dev libgoogle-glog-dev liblmdb-dev
+
+USER root
+ADD install-caffe-deps.sh /home/sorna/install-caffe-deps.sh
+RUN chmod +x /home/sorna/install-caffe-deps.sh
+USER work
+RUN /home/sorna/install-caffe-deps.sh
+
+USER root
+RUN apt-get install -y libatlas-dev libatlas-base-dev libblas-dev
+RUN ldconfig
+ADD install-caffe.sh /home/sorna/install-caffe.sh
+RUN chmod +x /home/sorna/install-caffe.sh
+USER work
+RUN /home/sorna/install-caffe.sh
+
+USER root
+RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py35.so /usr/lib/x86_64-linux-gnu/libboost_python-py3.so
+RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py35.a /usr/lib/x86_64-linux-gnu/libboost_python-py3.a
+RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.so /usr/lib/x86_64-linux-gnu/libboost_python3.so
+RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.a /usr/lib/x86_64-linux-gnu/libboost_python3.a
+RUN ldconfig
+ADD install-caffe-pyext.sh /home/sorna/install-caffe-pyext.sh
+RUN chmod +x /home/sorna/install-caffe-pyext.sh
+USER work
+RUN /home/sorna/install-caffe-pyext.sh
+ENV PYTHONPATH=/home/sorna/caffe-install/python:.
+
+
 # Secure installation scripts
 USER root
 ADD run.py /home/sorna/run.py
@@ -62,8 +95,8 @@ RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
 VOLUME ["/home/work"]
 EXPOSE 2001
 
-LABEL com.lablup.sorna.timeout="10"
-LABEL com.lablup.sorna.maxmem="128m"
+LABEL com.lablup.sorna.timeout="30"
+LABEL com.lablup.sorna.maxmem="512m"
 
 USER work
 ENV PYTHONUNBUFFERED 1

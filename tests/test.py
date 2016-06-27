@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 from abc import abstractmethod
-from distutils.version import StrictVersion
+from distutils.version import LooseVersion
 import docker
 import os
 import re
@@ -50,8 +50,8 @@ class ImageTestBase(object):
         container_name = 'kernel.test.{}'.format(generate_uuid())
         self.work_dir = os.path.join(os.getcwd(), '_workdir_{}'.format(container_name))
         os.makedirs(self.work_dir)
-        docker_version = StrictVersion(self.docker.version()['Version'])
-        if docker_version >= StrictVersion('1.10'):
+        docker_version = LooseVersion(self.docker.version()['Version'])
+        if docker_version >= LooseVersion('1.10'):
             # We already have our own jail!
             security_opt = ['seccomp:unconfined']
         else:
@@ -191,6 +191,28 @@ class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
     def basic_failure(self):
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
+
+
+_py3_caffe_example = '''
+import numpy as np
+import caffe
+caffe.set_mode_cpu()
+print('done')
+'''
+
+class Python3CaffeImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'kernel-python3-caffe'
+
+    def basic_success(self):
+        yield 'print("hello world")', 'hello world'
+        yield 'a = 1\nb = 2\nc = a + b\nprint(c)', '3'
+        yield _py3_caffe_example, 'done'
+
+    def basic_failure(self):
+        yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
+        yield 'x = 0 / 0', ('ZeroDivisionError', None)
+
 
 
 class R3ImageTest(ImageTestBase, unittest.TestCase):

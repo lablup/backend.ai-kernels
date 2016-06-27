@@ -5,6 +5,7 @@ pip install pyzmq namedlist
 pip install numpy
 pip install matplotlib
 pip install scipy
+pip install cvxpy
 pip install seaborn
 pip install scikit-learn scikit-image
 pip install pandas
