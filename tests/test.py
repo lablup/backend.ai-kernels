@@ -248,6 +248,23 @@ class PHP5ImageTest(ImageTestBase, unittest.TestCase):
         yield '$x = 0 / 0;', ('Division by zero', None)
 
 
+class PHP7ImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'kernel-php7'
+
+    def basic_success(self):
+        yield 'echo "hello world";', 'hello world'
+        yield '$a = 1; $b = 2; $c = $a + $b; echo "$c";', '3'
+        yield 'echo isset($my_nonexistent_variable) ? "1" : "0";', '0'
+        # checks if our internal REPL code is NOT exposed.
+        yield 'echo isset($context) ? "1" : "0";', '0'
+        yield 'global $context; echo isset($context) ? "1" : "0";', '0'
+
+    def basic_failure(self):
+        yield 'throw new Exception("asdf");', ('Exception', 'asdf')
+        yield '$x = 0 / 0;', ('Division by zero', None)
+
+
 class Nodejs4ImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'kernel-nodejs4'

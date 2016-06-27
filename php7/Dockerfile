@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 MAINTAINER Joongi Kim "joongi@lablup.com"
 
 # Add an isolated user
@@ -21,10 +21,10 @@ RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y language-pack-en-base python-software-properties software-properties-common
 ENV LC_ALL=en_US.UTF-8
-RUN add-apt-repository ppa:ondrej/php-7.0 && apt-get update
-RUN apt-get install -y git-core wget php7.0-cli php7.0-gd php7.0-sqlite3 php7.0-dev php-pear
+RUN apt-get install -y php7.0-cli php7.0-gd php7.0-sqlite3 php7.0-dev php-pear
 RUN apt-get install -y pkg-config libzmq3-dev
 RUN echo '' | pecl install zmq-beta
+RUN echo 'extension=zmq.so' > /etc/php/7.0/cli/conf.d/20-zmq.ini
 
 # Secure installation scripts
 USER root
