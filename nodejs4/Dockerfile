@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 MAINTAINER Jonghyun Park "jpark@lablup.com"
 
 # Add an isolated user

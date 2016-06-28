@@ -71,7 +71,7 @@ function main() {
             socket.unref();
             userDomain.run(function() {
                 script.runInContext(ctx);
-                deasync.loopUntilNoEvents();
+                deasync.loopUntilNoMoreEvents();
             });
         } catch (err) {
             exception_handler(err, exceptions);

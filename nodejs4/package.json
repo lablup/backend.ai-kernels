@@ -7,7 +7,7 @@
 	"author": "Jonghyun Park <adrysn@lablup.com>",
 	"dependencies": {
 		"memory-streams": "*",
-		"zmq": "lablup/zeromq.node",
+		"zmq": "*",
 		"deasync": "lablup/deasync"
 	}
 }
