@@ -226,7 +226,7 @@ class R3ImageTest(ImageTestBase, unittest.TestCase):
 
     def basic_failure(self):
         yield 'stop("my error")', ('simpleError', 'my error')
-        yield 'some_undefined_func()', ('simpleError', 'could not find function')
+        yield 'some_undefined_func()', ('simpleError', 'could not find function "some_undefined_func"')
         # checks if environment is properly isolated.
         yield 'print(ctx)', ('simpleError', "object 'ctx' not found")
 

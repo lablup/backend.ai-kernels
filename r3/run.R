@@ -39,7 +39,7 @@ catchAll <- function(expr) {
     errorHandler <- function(e) {
         myError <<- list(
             class(e)[[1]],
-            e$message,
+            list(e$message),
             F,
             "" # traceback() func has side-effect on stdout. just ignore it. :(
         )
