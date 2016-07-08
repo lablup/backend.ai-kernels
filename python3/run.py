@@ -15,6 +15,8 @@ try:
 except ImportError:
     has_simplejson = False
 
+import sorna.drawing
+
 ExceptionInfo = namedtuple('ExceptionInfo', [
     'exc',
     ('args', tuple()),
@@ -94,10 +96,16 @@ class CodeRunner(object):
             exceptions.append(ExceptionInfo.create(e, before_exec, None))
         else:
             before_exec = False
+            self.user_module.__builtins__._sorna_has_drawing = False
             try:
                 exec(code_obj, self.user_ns)
             except Exception as e:
                 exceptions.append(ExceptionInfo.create(e, before_exec, None))
+
+        if self.user_module.__builtins__._sorna_has_drawing:
+            #print("DRAWING DETECTED")
+            # TODO: add drawing data to response
+            pass
 
         sys.excepthook = sys.__excepthook__
 

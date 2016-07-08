@@ -47,6 +47,14 @@ RUN chmod +x /home/sorna/install-python-packages2.sh
 USER work
 RUN /home/sorna/install-python-packages2.sh
 
+# Sorna Drawing
+USER root
+ADD *.whl /tmp
+ADD install-sorna-drawing.sh /home/sorna/
+RUN chmod +x /home/sorna/install-sorna-drawing.sh
+USER work
+RUN /home/sorna/install-sorna-drawing.sh
+
 # Secure installation scripts
 USER root
 ADD run.py /home/sorna/run.py
