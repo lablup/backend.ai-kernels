@@ -52,6 +52,7 @@ USER root
 ADD *.whl /tmp
 ADD install-sorna-drawing.sh /home/sorna/
 RUN chmod +x /home/sorna/install-sorna-drawing.sh
+ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
 RUN /home/sorna/install-sorna-drawing.sh
 
