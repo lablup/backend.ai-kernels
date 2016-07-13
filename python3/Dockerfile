@@ -47,14 +47,14 @@ RUN chmod +x /home/sorna/install-python-packages2.sh
 USER work
 RUN /home/sorna/install-python-packages2.sh
 
-# Sorna Drawing
+# Sorna Media support
 USER root
 ADD *.whl /tmp
-ADD install-sorna-drawing.sh /home/sorna/
-RUN chmod +x /home/sorna/install-sorna-drawing.sh
+ADD install-sorna-media.sh /home/sorna/
+RUN chmod +x /home/sorna/install-sorna-media.sh
 ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
-RUN /home/sorna/install-sorna-drawing.sh
+RUN /home/sorna/install-sorna-media.sh
 
 # Secure installation scripts
 USER root
