@@ -133,6 +133,7 @@ func init() {
 		"exit_group",
 		"wait4",
 		"uname",
+		"getrandom",
 		// potentially replaced with VDSO
 		"getpid",
 		"getppid",
