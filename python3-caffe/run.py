@@ -3,7 +3,7 @@
 import builtins as builtin_mod
 import code
 import io
-from namedlist import namedtuple
+from namedlist import namedtuple, namedlist
 import os
 from os import path
 import sys
@@ -15,12 +15,21 @@ try:
 except ImportError:
     has_simplejson = False
 
+import sorna.drawing
+
 ExceptionInfo = namedtuple('ExceptionInfo', [
     'exc',
     ('args', tuple()),
     ('raised_before_exec', False),
     ('traceback', None),
 ])
+
+Result = namedlist('Result', [
+    ('stdout', ''),
+    ('stderr', ''),
+    ('media', None),
+])
+
 
 @staticmethod
 def _create_excinfo(e, raised_before_exec, tb):
@@ -80,6 +89,7 @@ class CodeRunner(object):
         sys.stderr, orig_stderr = self.stderr_writer, sys.stderr
 
         exceptions = []
+        result = Result()
         before_exec = True
 
         def my_excepthook(type_, value, tb):
@@ -93,6 +103,7 @@ class CodeRunner(object):
         except (OverflowError, SyntaxError, ValueError, TypeError, MemoryError) as e:
             exceptions.append(ExceptionInfo.create(e, before_exec, None))
         else:
+            self.user_module.__builtins__._sorna_media = []
             before_exec = False
             try:
                 exec(code_obj, self.user_ns)
@@ -101,7 +112,10 @@ class CodeRunner(object):
 
         sys.excepthook = sys.__excepthook__
 
-        output = (self.stdout_writer.getvalue(), self.stderr_writer.getvalue())
+        result.stdout = self.stdout_writer.getvalue()
+        result.stderr = self.stderr_writer.getvalue()
+        # TODO: sanitize media?
+        result.media = self.user_module.__builtins__._sorna_media
         self.stdout_writer.seek(0, io.SEEK_SET)
         self.stdout_writer.truncate(0)
         self.stderr_writer.seek(0, io.SEEK_SET)
@@ -109,7 +123,7 @@ class CodeRunner(object):
 
         sys.stdout = orig_stdout
         sys.stderr = orig_stderr
-        return exceptions, output
+        return exceptions, result
 
 
 if __name__ == '__main__':
@@ -131,11 +145,12 @@ if __name__ == '__main__':
     try:
         while True:
             data = sock.recv_multipart()
-            exceptions, output = runner.execute(data[0].decode('ascii'),
-                                                        data[1].decode('utf8'))
+            exceptions, result = runner.execute(data[0].decode('ascii'),
+                                                data[1].decode('utf8'))
             response = {
-                'stdout': output[0],
-                'stderr': output[1],
+                'stdout': result.stdout,
+                'stderr': result.stderr,
+                'media': result.media,
                 'exceptions': exceptions,
             }
             json_opts = {}
