@@ -19,6 +19,7 @@ RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get build-dep -y python3
 RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev
 ADD install-python.sh /home/sorna/install-python.sh
+ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
 USER work
 ENV PYENV_ROOT /home/sorna/.pyenv
@@ -31,20 +32,26 @@ USER root
 RUN apt-get install -y pkg-config
 RUN apt-get install -y libjpeg-dev libpng-dev
 RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
-ADD install-python-packages.sh /home/sorna/install-python-packages.sh
-RUN chmod +x /home/sorna/*.sh
 USER work
-RUN /home/sorna/install-python-packages.sh
+RUN /home/sorna/pyenv-run.sh pip install python-dateutil
+RUN /home/sorna/pyenv-run.sh pip install numpy matplotlib
+RUN /home/sorna/pyenv-run.sh pip install scipy
+RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
+RUN /home/sorna/pyenv-run.sh pip install cvxpy
+RUN /home/sorna/pyenv-run.sh pip install pandas
+RUN /home/sorna/pyenv-run.sh pip install seaborn
+RUN /home/sorna/pyenv-run.sh pip install networkx
+RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
 
-# Additional packages
+# Matplotlib configuration
 USER root
 ENV MPLCONFIGDIR /home/sorna/.matplotlib
 RUN mkdir /home/sorna/.matplotlib
 RUN chown -R work:work /home/sorna/.matplotlib
-ADD install-python-packages2.sh /home/sorna/install-python-packages2.sh
-RUN chmod +x /home/sorna/install-python-packages2.sh
 USER work
-RUN /home/sorna/install-python-packages2.sh
+RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py
+RUN /home/sorna/pyenv-run.sh python /tmp/matplotlib-fontcache.py
+RUN rm /tmp/matplotlib-fontcache.py
 
 # Install caffe
 USER root
@@ -62,23 +69,25 @@ RUN /home/sorna/install-caffe-deps.sh
 USER root
 RUN apt-get install -y libatlas-dev libatlas-base-dev libblas-dev
 RUN ldconfig
-ADD install-caffe.sh /home/sorna/install-caffe.sh
-RUN chmod +x /home/sorna/install-caffe.sh
 USER work
-RUN /home/sorna/install-caffe.sh
-
+RUN cd /home/sorna/caffe-install; make all -j4
 USER root
 RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py35.so /usr/lib/x86_64-linux-gnu/libboost_python-py3.so
 RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py35.a /usr/lib/x86_64-linux-gnu/libboost_python-py3.a
 RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.so /usr/lib/x86_64-linux-gnu/libboost_python3.so
 RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.a /usr/lib/x86_64-linux-gnu/libboost_python3.a
 RUN ldconfig
-ADD install-caffe-pyext.sh /home/sorna/install-caffe-pyext.sh
-RUN chmod +x /home/sorna/install-caffe-pyext.sh
 USER work
-RUN /home/sorna/install-caffe-pyext.sh
+RUN /home/sorna/pyenv-run.sh pip install --upgrade protobuf==3.0.0b3
+RUN cd /home/sorna/caffe-install; make pycaffe
 ENV PYTHONPATH=/home/sorna/caffe-install/python:.
 
+# Install Sorna Media support
+USER root
+ADD *.whl /tmp
+ADD matplotlibrc /home/sorna/.matplotlib/
+USER work
+RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any.whl
 
 # Secure installation scripts
 USER root
