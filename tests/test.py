@@ -106,7 +106,17 @@ class ImageTestBase(object):
         return resp
 
     def test_basic_success(self):
-        for idx, (code, expected) in enumerate(self.basic_success()):
+        for idx, case in enumerate(self.basic_success()):
+            if len(case) == 2:
+                code = case[0]
+                expected_stdout = case[1]
+                expected_stderr = None
+            elif len(case) == 3:
+                code = case[0]
+                expected_stdout = case[1]
+                expected_stderr = case[2]
+            if code is None:
+                continue
             with self.subTest(subcase=idx + 1):
                 resp = self.execute(idx, code)
                 #print(resp)
@@ -114,10 +124,18 @@ class ImageTestBase(object):
                 self.assertIn('stderr', resp)
                 self.assertIn('exceptions', resp)
                 self.assertIsInstance(resp['stdout'], str)
-                self.assertIn(expected, resp['stdout'])
+                self.assertIn(expected_stdout, resp['stdout'])
+                if expected_stderr:
+                    self.assertIn(expected_stderr, resp['stderr'])
+                else:
+                    if not (resp['stderr'] is None or resp['stderr'] == ''):
+                        self.fail('stderr is expected to be empty but is not: {!r}'
+                                  .format(resp['stderr']))
 
     def test_basic_failure(self):
         for idx, (code, expected) in enumerate(self.basic_failure()):
+            if code is None:
+                continue
             with self.subTest(subcase=idx + 1):
                 resp = self.execute(idx, code)
                 #print(resp)
@@ -286,15 +304,16 @@ class GitImageTest(ImageTestBase, unittest.TestCase):
     image_name = 'kernel-git'
 
     def basic_success(self):
+        yield 'invalid-shell-command', '', 'not found'
         yield 'git init .', ''
-        yield 'touch a.txt && echo "test" > a.txt', ''
+        yield 'echo "test" > a.txt', ''
         yield 'cat a.txt', 'test'
         yield 'git add a.txt', ''
         yield 'git commit -m "first commit"', ''
         yield 'git log', 'first commit'
 
     def basic_failure(self):
-        yield 'invalid-shell-command', ('FileNotFoundError', None)
+        yield None, None
 
 
 if __name__ == '__main__':
