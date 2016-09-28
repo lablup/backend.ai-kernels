@@ -70,7 +70,7 @@ ADD intra-jail /home/sorna/intra-jail
 ADD run.sh /home/sorna/run.sh
 ADD run.py /home/sorna/run.py
 RUN chown root:root /home/sorna/*
-RUN chmod 600 /home/sorna/*
+RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
 
 VOLUME ["/home/work"]

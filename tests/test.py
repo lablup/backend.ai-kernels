@@ -109,6 +109,7 @@ class ImageTestBase(object):
         for idx, (code, expected) in enumerate(self.basic_success()):
             with self.subTest(subcase=idx + 1):
                 resp = self.execute(idx, code)
+                #print(resp)
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
                 self.assertIn('exceptions', resp)
@@ -119,6 +120,7 @@ class ImageTestBase(object):
         for idx, (code, expected) in enumerate(self.basic_failure()):
             with self.subTest(subcase=idx + 1):
                 resp = self.execute(idx, code)
+                #print(resp)
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
                 self.assertIn('exceptions', resp)
@@ -277,6 +279,22 @@ class Nodejs4ImageTest(ImageTestBase, unittest.TestCase):
 
     def basic_failure(self):
         yield 'console.log(some_undef_var);', ('ReferenceError', None)
+
+
+class GitImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'kernel-git'
+
+    def basic_success(self):
+        yield 'git init .', ''
+        yield 'touch a.txt && echo "test" > a.txt', ''
+        yield 'cat a.txt', 'test'
+        yield 'git add a.txt', ''
+        yield 'git commit -m "first commit"', ''
+        yield 'git log', 'first commit'
+
+    def basic_failure(self):
+        yield 'invalid-shell-command', ('FileNotFoundError', None)
 
 
 if __name__ == '__main__':
