@@ -226,7 +226,7 @@ loop:
 								l.Printf("blocked syscall %s\n", syscallName)
 								color.Unset()
 							}
-							// Skip the system call with modeission error
+							// Skip the system call with permission error
 							regs.Orig_rax = 0xFFFFFFFFFFFFFFFF // -1
 							regs.Rax = 0xFFFFFFFFFFFFFFFF - uint64(syscall.EPERM) + 1
 							syscall.PtraceSetRegs(result.pid, &regs)
