@@ -3,8 +3,10 @@ package utils
 import (
 	"fmt"
 	"os"
+	"bytes"
 	"strings"
 	"path"
+	"syscall"
 )
 
 func FilterEnvs(envs []string, preservedKeys []string) []string {
@@ -54,6 +56,27 @@ func GetExecutable(pid int) (string, error) {
 		}
 	}
 	return execPath, nil
+}
+
+func ReadString(pid int, addr uintptr) string {
+	out := make([]byte, syscall.PathMax)
+	syscall.PtracePeekData(pid, addr, out)
+	// Try to find the index of first null character
+	length := bytes.IndexByte(out, 0)
+	if length == -1 {
+		length = syscall.PathMax
+	}
+	return string(out[:length])
+}
+
+func GetAbsPathAs(path_ string, pid int) string {
+	if path.IsAbs(path_) {
+		return path_
+	} else {
+		pwdPath := fmt.Sprintf("/proc/%d/cwd", pid)
+		pwd, _ := os.Readlink(pwdPath)
+		return path.Join(pwd, path_)
+	}
 }
 
 

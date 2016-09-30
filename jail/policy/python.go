@@ -1,11 +1,21 @@
 package policy
 
+import (
+	"strings"
+)
+
 type PythonPolicy struct {
 }
 
-func (p *PythonPolicy) CheckPathAccessible(path string, perm Permission) bool {
-	// TODO: implement
-	return true
+func (p *PythonPolicy) CheckPathOp(path string, op PathOps, mode int) bool {
+	var allow bool
+	switch op {
+	case OP_CHMOD:
+		allow = strings.HasPrefix(path, "/home/work/")
+	default:
+		allow = true
+	}
+	return allow
 }
 
 func (p *PythonPolicy) GetExecAllowance() int {

@@ -34,15 +34,18 @@ import "C"
 const debug = false
 
 var (
-	myExecPath, _ = utils.GetExecutable(os.Getpid())
-	myPath        = filepath.Dir(myExecPath)
-	intraJailPath = path.Join(myPath, "intra-jail")
-	arch, _       = seccomp.GetNativeArch()
-	id_Open, _    = seccomp.GetSyscallFromNameByArch("open", arch)
-	id_Clone, _   = seccomp.GetSyscallFromNameByArch("clone", arch)
-	id_Fork, _    = seccomp.GetSyscallFromNameByArch("fork", arch)
-	id_Vfork, _   = seccomp.GetSyscallFromNameByArch("vfork", arch)
-	id_Execve, _  = seccomp.GetSyscallFromNameByArch("execve", arch)
+	myExecPath, _  = utils.GetExecutable(os.Getpid())
+	myPath         = filepath.Dir(myExecPath)
+	intraJailPath  = path.Join(myPath, "intra-jail")
+	arch, _        = seccomp.GetNativeArch()
+	id_Open, _     = seccomp.GetSyscallFromNameByArch("open", arch)
+	id_Access, _   = seccomp.GetSyscallFromNameByArch("access", arch)
+	id_Clone, _    = seccomp.GetSyscallFromNameByArch("clone", arch)
+	id_Fork, _     = seccomp.GetSyscallFromNameByArch("fork", arch)
+	id_Vfork, _    = seccomp.GetSyscallFromNameByArch("vfork", arch)
+	id_Execve, _   = seccomp.GetSyscallFromNameByArch("execve", arch)
+	id_Chmod, _    = seccomp.GetSyscallFromNameByArch("chmod", arch)
+	id_Fchmodat, _ = seccomp.GetSyscallFromNameByArch("fchmodat", arch)
 )
 var policyInst policy.SandboxPolicy = nil
 var execCount int = 0
@@ -148,6 +151,14 @@ loop:
 						break
 					}
 					syscallId := uint(regs.Orig_rax)
+					// Linux syscall convention for x86_64 arch:
+					//  - rax: syscall number
+					//  - rdi: 1st param
+					//  - rsi: 2nd param
+					//  - rdx: 3rd param
+					//  - r10: 4th param
+					//  - r8: 5th param
+					//  - r9: 6th param
 					switch result.status.TrapCause() {
 					case 7 /*PTRACE_EVENT_SECCOMP*/ :
 						switch seccomp.ScmpSyscall(syscallId) {
@@ -183,8 +194,28 @@ loop:
 								l.Printf("execve owner: %s\n", execPath)
 							}
 						case id_Open:
-							// TODO: extract path from syscall args
-							allow = policyInst.CheckPathAccessible("...", policy.PERM_RD)
+							pathPtr := uintptr(regs.Rdi)
+							path := utils.ReadString(result.pid, pathPtr)
+							// rsi is flags
+							mode := int(regs.Rdx)
+							allow = policyInst.CheckPathOp(path, policy.OP_OPEN, mode)
+						case id_Access:
+							pathPtr := uintptr(regs.Rdi)
+							path := utils.ReadString(result.pid, pathPtr)
+							mode := int(regs.Rsi)
+							allow = policyInst.CheckPathOp(path, policy.OP_ACCESS, mode)
+						case id_Fchmodat:
+							pathPtr := uintptr(regs.Rsi)
+							path := utils.ReadString(result.pid, pathPtr)
+							path = utils.GetAbsPathAs(path, result.pid)
+							mode := int(regs.Rdx)
+							allow = policyInst.CheckPathOp(path, policy.OP_CHMOD, mode)
+						case id_Chmod:
+							pathPtr := uintptr(regs.Rdi)
+							path := utils.ReadString(result.pid, pathPtr)
+							path = utils.GetAbsPathAs(path, result.pid)
+							mode := int(regs.Rsi)
+							allow = policyInst.CheckPathOp(path, policy.OP_CHMOD, mode)
 						default:
 							allow = true
 						}
@@ -195,7 +226,7 @@ loop:
 								l.Printf("blocked syscall %s\n", syscallName)
 								color.Unset()
 							}
-							// Skip the system call with permission error
+							// Skip the system call with modeission error
 							regs.Orig_rax = 0xFFFFFFFFFFFFFFFF // -1
 							regs.Rax = 0xFFFFFFFFFFFFFFFF - uint64(syscall.EPERM) + 1
 							syscall.PtraceSetRegs(result.pid, &regs)

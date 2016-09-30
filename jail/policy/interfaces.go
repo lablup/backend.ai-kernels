@@ -4,16 +4,19 @@ import (
 	"path"
 )
 
-type Permission int
+type PathOps int
 const (
-	PERM_RD Permission = iota
-	PERM_RW
+	OP_OPEN PathOps = iota
+	OP_ACCESS
+	OP_EXEC
+	OP_STAT
+	OP_CHMOD
 )
 
 type SandboxPolicy interface {
 	// Should return a boolean representing if access to the path
 	// with the given permission is allowed or not.
-	CheckPathAccessible(path string, perm Permission) bool
+	CheckPathOp(path string, op PathOps, mode int) bool
 
 	// Should return the number of maximum execv() syscalls.
 	// If it returns -1, no limit is imposed.

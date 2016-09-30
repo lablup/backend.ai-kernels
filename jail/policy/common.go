@@ -23,10 +23,12 @@ func init() {
 		"access", // 2nd param is mode
 		"creat",  // 2nd param is mode
 		"mkdir",  // 2nd param is mode
+		"chmod",  // 2nd param is mode
 		"open",   // 3rd param is mode
 		// 2nd param is filename/path
 		"readlinkat",
 		"unlinkat",
+		"fchmodat",  // 3rd param is mode
 		"faccessat", // 3rd param is mode
 		"mkdirat",   // 3rd param is mode
 		"openat",    // 4th param is mode
