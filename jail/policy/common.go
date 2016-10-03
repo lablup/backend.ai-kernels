@@ -6,8 +6,14 @@ import "syscall"
 var TracedSyscalls []string
 var AllowedSyscalls []string
 var ConditionallyAllowedSyscalls map[string]seccomp.ScmpCondition
+var WhitelistPaths map[PathOps][]string
 
 func init() {
+
+	WhitelistPaths = map[PathOps][]string{
+		OP_CHMOD: []string{"/home/work/", "/tmp/"},
+	}
+
 	// Following syscalls are intercepted by our ptrace-based tracer.
 	// The tracer will implement its own policies, optinally by inspecting
 	// the arguments in the registers.
