@@ -17,11 +17,15 @@ ENV HOME /home/work
 USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y wget software-properties-common build-essential
+RUN apt-get install -y software-properties-common build-essential
+RUN apt-get install -y liboctave-dev
 RUN add-apt-repository -y ppa:octave/stable
 RUN apt-get install -y octave
 ENV HOME /home/sorna
 WORKDIR /home/sorna
+
+# Install Git
+RUN apt-get install -y git-core git-flow wget
 
 # Install ZeroMQ
 RUN wget "https://github.com/zeromq/zeromq4-1/releases/download/v4.1.5/zeromq-4.1.5.tar.gz"
@@ -32,7 +36,15 @@ RUN make
 RUN make install
 RUN ldconfig
 WORKDIR /home/sorna
-RUN rm -rf zeromq
+RUN rm -rf zeromq*
+
+# Install zeromq-octave
+RUN git clone https://github.com/esromneb/zeromq-octave.git
+WORKDIR /home/sorna/zeromq-octave
+RUN make
+RUN cp zmq.mex /home/work/
+WORKDIR /home/sorna
+RUN rm -rf zeromq-octave
 
 # Secure installation scripts
 USER root
