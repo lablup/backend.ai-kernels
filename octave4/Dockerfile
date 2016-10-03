@@ -24,28 +24,6 @@ RUN apt-get install -y octave
 ENV HOME /home/sorna
 WORKDIR /home/sorna
 
-# Install Git
-RUN apt-get install -y git-core git-flow wget
-
-# Install ZeroMQ
-RUN wget "https://github.com/zeromq/zeromq4-1/releases/download/v4.1.5/zeromq-4.1.5.tar.gz"
-RUN tar xf zeromq-4.1.5.tar.gz
-WORKDIR /home/sorna/zeromq-4.1.5
-RUN ./configure
-RUN make
-RUN make install
-RUN ldconfig
-WORKDIR /home/sorna
-RUN rm -rf zeromq*
-
-# Install zeromq-octave
-RUN git clone https://github.com/esromneb/zeromq-octave.git
-WORKDIR /home/sorna/zeromq-octave
-RUN make
-RUN cp zmq.mex /home/work/
-WORKDIR /home/sorna
-RUN rm -rf zeromq-octave
-
 # Secure installation scripts
 USER root
 ADD run.m /home/sorna/run.m
