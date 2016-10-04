@@ -65,7 +65,7 @@ class ImageTestBase(object):
                                                  mem_limit='128m',
                                                  memswap_limit=0,
                                                  security_opt=security_opt,
-                                                 port_bindings={2001: ('0.0.0.0', )},
+                                                 port_bindings={2001: ('127.0.0.1', 2001)},
                                                  binds={
                                                      self.work_dir: {
                                                         'bind': '/home/work',
@@ -75,17 +75,14 @@ class ImageTestBase(object):
                                               tty=False)
         self.container_id = result['Id']
         self.docker.start(self.container_id)
-        container_info = self.docker.inspect_container(self.container_id)
-        kernel_host_port = container_info['NetworkSettings']['Ports'] \
-                                         ['2001/tcp'][0]['HostPort']
-        self.kernel_addr = 'tcp://{}:{}'.format(self.docker_host, kernel_host_port)
+        self.kernel_addr = 'tcp://{}:{}'.format(self.docker_host, 2001)
         time.sleep(0.1)  # prevent corruption of containers when killed immediately
 
     def tearDown(self):
         try:
             self.docker.kill(self.container_id)
         except docker.errors.NotFound:
-            # may have been terminated during tests
+            # The container might have been terminated during tests due to errors.
             pass
         else:
             self.docker.remove_container(self.container_id)
@@ -96,16 +93,17 @@ class ImageTestBase(object):
         ctx.setsockopt(zmq.LINGER, 50)
         cli = ctx.socket(zmq.REQ)
         cli.connect(self.kernel_addr)
-        msg = ('{}'.format(cell_id).encode('ascii'), code.encode('utf8'))
-        cli.send_multipart(msg)
-        #if cli.poll(timeout=5) == 0:
-        #    raise TimeoutError('Container does not respond.')
-        resp = cli.recv_json()
-        cli.close()
+        with cli:
+            msg = ('{}'.format(cell_id).encode('ascii'), code.encode('utf8'))
+            cli.send_multipart(msg)
+            if cli.poll(timeout=3000) == 0:  # timeout in millisec
+                raise TimeoutError('Container does not respond.')
+            resp = cli.recv_json()
         ctx.destroy()
         return resp
 
     def test_basic_success(self):
+        inner_exception = None
         for idx, case in enumerate(self.basic_success()):
             if len(case) == 2:
                 code = case[0]
@@ -118,8 +116,13 @@ class ImageTestBase(object):
             if code is None:
                 continue
             with self.subTest(subcase=idx + 1):
-                resp = self.execute(idx, code)
-                #print(resp)
+                try:
+                    resp = self.execute(idx, code)
+                except TimeoutError as e:
+                    # (Re-)raised exception here is captured by subTest ctxmgr.
+                    # We just store the exception object and break out of the sub-case loop.
+                    inner_exception = AssertionError('Timeout detected at sub-case {}'.format(idx + 1))
+                    break
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
                 self.assertIn('exceptions', resp)
@@ -131,14 +134,20 @@ class ImageTestBase(object):
                     if not (resp['stderr'] is None or resp['stderr'] == ''):
                         self.fail('stderr is expected to be empty but is not: {!r}'
                                   .format(resp['stderr']))
+        if inner_exception:
+            self.fail(inner_exception)
 
     def test_basic_failure(self):
+        inner_exception = None
         for idx, (code, expected) in enumerate(self.basic_failure()):
             if code is None:
                 continue
             with self.subTest(subcase=idx + 1):
-                resp = self.execute(idx, code)
-                #print(resp)
+                try:
+                    resp = self.execute(idx, code)
+                except TimeoutError as e:
+                    inner_exception = AssertionError('Timeout detected at sub-case {}'.format(idx + 1))
+                    break
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
                 self.assertIn('exceptions', resp)
@@ -148,6 +157,8 @@ class ImageTestBase(object):
                 self.assertRegex(resp['exceptions'][0][0], '^' + re.escape(err_name))
                 if err_arg:
                     self.assertIn(err_arg, resp['exceptions'][0][1])
+        if inner_exception:
+            self.fail(inner_exception)
 
 
 class Python2ImageTest(ImageTestBase, unittest.TestCase):
@@ -161,7 +172,6 @@ class Python2ImageTest(ImageTestBase, unittest.TestCase):
     def basic_failure(self):
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
-        yield 'import os; os.fork()', ('OSError', 'Operation not permitted')
 
 
 class Python3ImageTest(ImageTestBase, unittest.TestCase):
@@ -175,7 +185,6 @@ class Python3ImageTest(ImageTestBase, unittest.TestCase):
     def basic_failure(self):
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
-        yield 'import os; os.fork()', ('PermissionError', None)
 
 
 _py3_tf_example = '''
@@ -309,11 +318,29 @@ class GitImageTest(ImageTestBase, unittest.TestCase):
         yield 'echo "test" > a.txt', ''
         yield 'cat a.txt', 'test'
         yield 'git add a.txt', ''
-        yield 'git commit -m "first commit"', ''
+        yield 'git commit -m "first commit"', '', 'Please tell me who you are'
+        yield 'git config user.name Tester', '', ''
+        yield 'git config user.email test@lablup.com', '', ''
+        yield 'git commit -m "first commit"', '', ''
         yield 'git log', 'first commit'
 
     def basic_failure(self):
         yield None, None
+
+
+class JailTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'kernel-python3'
+
+    def basic_success(self):
+        yield 'import os; os.chmod("/home/work", 700)', '', ''
+
+        # Since Python 3.5.1, we need to allow getrandom() syscall.
+        yield 'import random; print(random.randint(0, 0))', '0', ''
+
+    def basic_failure(self):
+        yield 'import os; os.chmod("/home/sorna", 700)', ('PermissionError', None)
+        yield 'import os; os.chmod("/home/work/../sorna", 700)', ('PermissionError', None)
 
 
 if __name__ == '__main__':
