@@ -17,10 +17,14 @@ ENV HOME /home/work
 USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y software-properties-common #build-essential
+RUN apt-get install -y software-properties-common wget build-essential
 RUN add-apt-repository -y ppa:staticfloat/juliareleases
 RUN add-apt-repository -y ppa:staticfloat/julia-deps
 RUN apt-get install -y julia
+
+# Install Julia packages
+ADD package.jl /home/sorna/package.jl
+RUN julia /home/sorna/package.jl
 ENV HOME /home/sorna
 WORKDIR /home/sorna
 
