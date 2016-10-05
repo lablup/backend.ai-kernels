@@ -339,8 +339,13 @@ class JailTest(ImageTestBase, unittest.TestCase):
         yield 'import random; print(random.randint(0, 0))', '0', ''
 
     def basic_failure(self):
-        yield 'import os; os.chmod("/home/sorna", 700)', ('PermissionError', None)
-        yield 'import os; os.chmod("/home/work/../sorna", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/sorna", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("../sorna", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/work/../sorna", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/work/./../sorna", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/sorna/.", 700)', ('PermissionError', None)
+        yield 'import os\nos.mkdir("/home/work/test")\n' + \
+              'os.chmod("/home/work/test/../../sorna/", 700)', ('PermissionError', None)
 
 
 if __name__ == '__main__':

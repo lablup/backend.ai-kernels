@@ -71,10 +71,11 @@ func ReadString(pid int, addr uintptr) string {
 
 func GetAbsPathAs(path_ string, pid int) string {
 	if path.IsAbs(path_) {
-		return path_
+		return path.Clean(path_)
 	} else {
 		pwdPath := fmt.Sprintf("/proc/%d/cwd", pid)
 		pwd, _ := os.Readlink(pwdPath)
+		path_ = path.Clean(path_)
 		return path.Join(pwd, path_)
 	}
 }
