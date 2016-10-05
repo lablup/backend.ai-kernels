@@ -1,6 +1,9 @@
 using ZMQ
 
 function main()
+    # Set home directory
+    # cd("/home/work")
+
     # Intercept STDOUT and STDERR
     const (OLDOUT, OLDERR) = STDOUT, STDERR
     (outRead, outWrite) = redirect_stdout()
@@ -12,20 +15,19 @@ function main()
     port = "tcp://*:2001"
     ZMQ.bind(socket, port)
 
-    # cd("/home/work")
+    # Todo: keep reading request from ZMQ
 
-    # Read stdout and stderr and revert to normal STDOUT and STDERR
-    # Todo: this script hangs on read*() function if outRead or errorRead is empty.
-    write(STDOUT, 0x61)
-    write(STDERR, 0x61)
-    close(outWrite)
-    output = readavailable(outRead)
-    close(outRead)
-    close(errorWrite)
-    errors = readavailable(errorRead)
-    close(errorRead)
+    # Todo: execute code and retrieve result / handle exceptions
+
+    # Read stdout and stderr during code execution
     redirect_stdout(OLDOUT)
+    close(outWrite); out = readall(outRead); close(outRead)
     redirect_stderr(OLDERR)
+    close(errorWrite); err = readall(errorRead); close(errorRead)
+
+    # Todo: reply with ZMQ
+
+    # Todo: handle termination signals
 end
 
 main()
