@@ -24,7 +24,8 @@ RUN apt-get install -y git-core git-flow wget
 USER root
 ENV SORNA_PYTHON_VERSION 3.5.2
 RUN apt-get build-dep -y python3
-RUN apt-get install -y libreadline-dev libsqlite3-dev libssl-dev libbz2-dev
+RUN apt-get install -y pkg-config
+RUN apt-get install -y libreadline-dev libsqlite3-dev libssl-dev libbz2-dev tk-dev
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
@@ -36,13 +37,17 @@ RUN /home/sorna/install-python.sh
 
 # Install common Python packages
 USER root
-RUN apt-get install -y pkg-config
-RUN apt-get install -y libjpeg-dev libpng-dev libzmq3-dev tk-dev
+RUN apt-get install -y libjpeg-dev libpng-dev libzmq3-dev
 USER work
 # matplotlib may install older version of dateutil; we first install it.
 RUN /home/sorna/pyenv-run.sh pip install python-dateutil
 RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
 RUN /home/sorna/pyenv-run.sh pip install matplotlib
+
+# Install pygit2
+USER root
+RUN apt-get install -y libgit2-dev libffi-dev
+RUN /home/sorna/pyenv-run.sh pip install pygit2
 
 # Matplotlib configuration
 USER root

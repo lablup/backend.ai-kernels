@@ -1,13 +1,15 @@
 #! /usr/bin/env python3
 
-import builtins as builtin_mod
-import code
+import argparse
 import io
 from namedlist import namedtuple, namedlist
 import os
+import shlex
 import subprocess
 import sys
 import types
+
+import pygit2
 import zmq
 try:
     import simplejson
@@ -28,6 +30,7 @@ Result = namedlist('Result', [
     ('stdout', ''),
     ('stderr', ''),
     ('media', None),
+    ('options', None),
 ])
 
 
@@ -49,14 +52,34 @@ class CodeRunner(object):
     def __init__(self):
         self.stdout_buffer = io.StringIO()
         self.stderr_buffer = io.StringIO()
+        self._sorna_media = []
 
-        # Initialize user module and namespaces.
-        user_module = types.ModuleType('__main__',
-                                       doc='Automatically created module for the interactive shell.')
-        user_module.__dict__.setdefault('__builtin__', builtin_mod)
-        user_module.__dict__.setdefault('__builtins__', builtin_mod)
-        self.user_module = user_module
-        self.user_ns = user_module.__dict__
+        self.cmdparser = argparse.ArgumentParser()
+        subparsers = self.cmdparser.add_subparsers()
+
+        parser_chdir = subparsers.add_parser('chdir')
+        parser_chdir.add_argument('path', type=str)
+        parser_chdir.set_defaults(func=self.do_chdir)
+
+        parser_show = subparsers.add_parser('show')
+        parser_show.add_argument('target', choices=('graph',), default='graph')
+        parser_show.add_argument('path', type=str)
+        parser_show.set_defaults(func=self.do_show)
+
+    def do_chdir(self, args):
+        os.chdir(args.path)
+
+    def do_show(self, args):
+        if args.target == 'graph':
+            repo_path = pygit2.discover_repository(args.path)
+            repo = pygit2.Repository(repo_path)
+            for b in repo.listall_branches():
+                print('Branch: {}'.format(b))
+                branch = repo.lookup_branch(b)
+                for log in branch.log():
+                    print('  {}'.format(log.oid_new))
+        else:
+            raise ValueError('Unsupported show target', args.target)
 
     def execute(self, cell_id, src):
         sys.stdout, orig_stdout = self.stdout_buffer, sys.stdout
@@ -65,30 +88,36 @@ class CodeRunner(object):
         exceptions = []
         result = Result()
 
+        # This image does not upload any file to S3.
+        # (e.g., blobs in .git directory)
+        result.options = {'upload_output_files': False}
+
         def my_excepthook(type_, value, tb):
             exceptions.append(ExceptionInfo.create(value, False, tb))
         sys.excepthook = my_excepthook
 
-        self.user_module.__builtins__._sorna_media = []
-        try:
-            if src.startswith('%'):
-                # TODO: do special commands.
-                raise NotImplementedError()
-            else:
-                # execute shell commands.
-                completed = subprocess.run(src, shell=True, check=False,
-                                           stdout=subprocess.PIPE,
-                                           stderr=subprocess.PIPE)
-                self.stdout_buffer.write(completed.stdout.decode())
-                self.stderr_buffer.write(completed.stderr.decode())
-        except Exception as e:
-            exceptions.append(ExceptionInfo.create(e, False, None))
+        self._sorna_media = []
+        for line in src.splitlines():
+            try:
+                if line.startswith('%'):
+                    cmdargs = self.cmdparser.parse_args(shlex.split(line[1:], comments=True))
+                    cmdargs.func(cmdargs)
+                else:
+                    # execute shell commands.
+                    completed = subprocess.run(line, shell=True, check=False,
+                                               stdout=subprocess.PIPE,
+                                               stderr=subprocess.PIPE)
+                    self.stdout_buffer.write(completed.stdout.decode())
+                    self.stderr_buffer.write(completed.stderr.decode())
+            except Exception as e:
+                exceptions.append(ExceptionInfo.create(e, False, None))
 
         sys.excepthook = sys.__excepthook__
 
         result.stdout = self.stdout_buffer.getvalue()
         result.stderr = self.stderr_buffer.getvalue()
-        result.media = self.user_module.__builtins__._sorna_media
+        result.media = self._sorna_media
+
         self.stdout_buffer.seek(0, io.SEEK_SET)
         self.stdout_buffer.truncate(0)
         self.stderr_buffer.seek(0, io.SEEK_SET)
@@ -124,6 +153,7 @@ if __name__ == '__main__':
                 'stdout': result.stdout,
                 'stderr': result.stderr,
                 'media': result.media,
+                'options': result.options,
                 'exceptions': exceptions,
             }
             json_opts = {}
