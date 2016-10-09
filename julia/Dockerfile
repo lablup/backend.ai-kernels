@@ -20,15 +20,11 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y software-properties-common wget build-essential
 RUN add-apt-repository -y ppa:staticfloat/juliareleases
 RUN add-apt-repository -y ppa:staticfloat/julia-deps
+RUN apt-get update
 RUN apt-get install -y julia
 
-# Install Julia packages
-ADD package.jl /home/sorna/package.jl
-RUN julia /home/sorna/package.jl
-ENV HOME /home/sorna
-WORKDIR /home/sorna
-
 # Install ZeroMQ
+WORKDIR /home/sorna
 RUN wget "https://github.com/zeromq/zeromq4-1/releases/download/v4.1.5/zeromq-4.1.5.tar.gz"
 RUN tar xf zeromq-4.1.5.tar.gz
 WORKDIR /home/sorna/zeromq-4.1.5
@@ -38,6 +34,14 @@ RUN make install
 RUN ldconfig
 WORKDIR /home/sorna
 RUN rm -rf zeromq*
+
+# Install Julia packages
+RUN mkdir -p /usr/local/share/julia/site/
+ENV JULIA_PKGDIR "/usr/local/share/julia/site"
+RUN chown work:work /usr/local/share/julia/site/
+USER work
+ADD package.jl /home/sorna/package.jl
+RUN julia /home/sorna/package.jl
 
 # Secure installation scripts
 USER root
