@@ -29,22 +29,22 @@ function execute_code(code_id, code)
 
     # Julia's Base.parse() does not parse multi-line string by design
     exprs = parseall(code)
+
+    str = err = ""
+    exceptions = []
     try
         eval(exprs)
-
-        # Read stdout and stderr during code execution
+    catch e
+        exception_info = [split(string(e), "\n")[1], [], false, nothing]
+        push!(exceptions, exception_info)
+    finally
+        # Store stdout and stderr during evaluation, and restore them with original ones
         redirect_stdout(OLDOUT)
         close(outWrite); out = readstring(outRead); close(outRead)
         redirect_stderr(OLDERR)
         close(errorWrite); err = readstring(errorRead); close(errorRead)
 
-        return out, err
-    catch e
-        redirect_stdout(OLDOUT)
-        close(outWrite); close(outRead)
-        redirect_stderr(OLDERR)
-        close(errorWrite); close(errorRead)
-        throw(e)
+        return out, err, exceptions
     end
 end
 
@@ -71,26 +71,16 @@ try
         io = seek(convert(IOStream, msg), 0)
         code = takebuf_string(io)
 
-        exceptions = []
-        try
-            out, err = execute_code(code_id, code)
-            result = Dict(
-                "stdout" => out,
-                "stderr" => err,
-                "exceptions" => []
-            )
-            ZMQ.send(socket, Message(JSON.json(result)))
-        catch e
-            exception_info = [split(string(e), "\n")[1], [], false, nothing]
-            push!(exceptions, exception_info)
+        # Evaluate code
+        out, err, exceptions = execute_code(code_id, code)
 
-            result = Dict(
-                "stdout" => [],
-                "stderr" => [],
-                "exceptions" => exceptions
-            )
-            ZMQ.send(socket, Message(JSON.json(result)))
-        end
+        # Return results
+        result = Dict(
+            "stdout" => out,
+            "stderr" => err,
+            "exceptions" => exceptions
+        )
+        ZMQ.send(socket, Message(JSON.json(result)))
     end
 finally
     ZMQ.close(socket)
