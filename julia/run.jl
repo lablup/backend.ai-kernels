@@ -4,19 +4,19 @@ import JSON
 
 function parseall(code)
     pos = start(code)
-    exs = []
+    exprs = []
 
     while !done(code, pos)
-       ex, pos = parse(code, pos)
-       push!(exs, ex)
+       expr, pos = parse(code, pos)
+       push!(exprs, expr)
     end
 
-    if length(exs) == 0
+    if length(exprs) == 0
        throw(ParseError("end of input"))
-    elseif length(exs) == 1
-       return exs[1]
+    elseif length(exprs) == 1
+       return exprs[1]
     else
-       return Expr(:block, exs...)
+       return Expr(:block, exprs...)
     end
 end
 
@@ -29,15 +29,23 @@ function execute_code(code_id, code)
 
     # Julia's Base.parse() does not parse multi-line string by design
     exprs = parseall(code)
-    eval(exprs)
+    try
+        eval(exprs)
 
-    # Read stdout and stderr during code execution
-    redirect_stdout(OLDOUT)
-    close(outWrite); out = readstring(outRead); close(outRead)
-    redirect_stderr(OLDERR)
-    close(errorWrite); err = readstring(errorRead); close(errorRead)
+        # Read stdout and stderr during code execution
+        redirect_stdout(OLDOUT)
+        close(outWrite); out = readstring(outRead); close(outRead)
+        redirect_stderr(OLDERR)
+        close(errorWrite); err = readstring(errorRead); close(errorRead)
 
-    return out, err
+        return out, err
+    catch e
+        redirect_stdout(OLDOUT)
+        close(outWrite); close(outRead)
+        redirect_stderr(OLDERR)
+        close(errorWrite); close(errorRead)
+        throw(e)
+    end
 end
 
 
@@ -63,18 +71,25 @@ try
         io = seek(convert(IOStream, msg), 0)
         code = takebuf_string(io)
 
+        exceptions = []
         try
             out, err = execute_code(code_id, code)
-
             result = Dict(
                 "stdout" => out,
                 "stderr" => err,
                 "exceptions" => []
             )
-
             ZMQ.send(socket, Message(JSON.json(result)))
         catch e
-            # Todo: Handle exceptions
+            exception_info = [split(string(e), "\n")[1], [], false, nothing]
+            push!(exceptions, exception_info)
+
+            result = Dict(
+                "stdout" => [],
+                "stderr" => [],
+                "exceptions" => exceptions
+            )
+            ZMQ.send(socket, Message(JSON.json(result)))
         end
     end
 finally
