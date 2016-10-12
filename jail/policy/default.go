@@ -45,7 +45,7 @@ func (p *DefaultPolicy) GetExtraEnvs() []string {
 }
 
 func (p *DefaultPolicy) GetPreservedEnvKeys() []string {
-	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH"}
+	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH", "JULIA_PKGDIR"}
 }
 
 // vim: ts=4 sts=4 sw=4 noet

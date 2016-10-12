@@ -24,16 +24,7 @@ RUN apt-get update
 RUN apt-get install -y julia
 
 # Install ZeroMQ
-WORKDIR /home/sorna
-RUN wget "https://github.com/zeromq/zeromq4-1/releases/download/v4.1.5/zeromq-4.1.5.tar.gz"
-RUN tar xf zeromq-4.1.5.tar.gz
-WORKDIR /home/sorna/zeromq-4.1.5
-RUN ./configure
-RUN make
-RUN make install
-RUN ldconfig
-WORKDIR /home/sorna
-RUN rm -rf zeromq*
+RUN apt-get install -y libzmq3-dev
 
 # Install Julia packages
 RUN mkdir -p /usr/local/share/julia/site/
