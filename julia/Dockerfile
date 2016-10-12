@@ -24,10 +24,27 @@ RUN apt-get update
 RUN apt-get install -y julia
 
 # Install ZeroMQ and Python 2.7 (for PyPlot)
-RUN apt-get install -y libzmq3-dev python2.7 python2.7-dev python-pip
+# (Python 3.5 is not recognized by PyCall/PyPlot yet.)
+RUN apt-get install -y libzmq3-dev python2.7 python2.7-dev python-pip python-tk
 RUN pip install numpy matplotlib
 
+# Configure Python's matplotlib and pre-heat font-cache.
+USER root
+RUN mkdir /home/sorna/.matplotlib
+ENV MPLCONFIGDIR "/home/sorna/.matplotlib"
+RUN chown -R work:work /home/sorna/.matplotlib
+USER work
+RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py
+RUN python /tmp/matplotlib-fontcache.py
+RUN rm /tmp/matplotlib-fontcache.py
+ADD matplotlibrc /home/sorna/.matplotlib/
+
+# Install extra Julia dependencies (detected only at runtime)
+USER root
+RUN apt-get install -y libgmp-dev libmpfr-dev
+
 # Install Julia packages
+USER root
 RUN mkdir -p /usr/local/share/julia/site/
 ENV JULIA_PKGDIR "/usr/local/share/julia/site"
 RUN chown work:work /usr/local/share/julia/site/

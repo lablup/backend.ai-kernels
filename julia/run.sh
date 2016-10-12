@@ -1,2 +1,2 @@
 #! /bin/bash
-exec /home/sorna/jail default `which julia` /home/sorna/run.jl
+exec /home/sorna/jail julia `which julia` /home/sorna/run.jl

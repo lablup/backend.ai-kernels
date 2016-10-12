@@ -5,6 +5,7 @@ import (
 )
 
 type PathOps int
+
 const (
 	OP_OPEN PathOps = iota
 	OP_ACCESS
@@ -46,7 +47,8 @@ func GeneratePolicy(exec_path string) (SandboxPolicy, error) {
 	switch exec_name {
 	case "python", "python2", "python3":
 		return new(PythonPolicy), nil
-	// TODO: add policies for other languages
+	case "julia":
+		return new(JuliaPolicy), nil
 	default:
 		return new(DefaultPolicy), nil
 	}
