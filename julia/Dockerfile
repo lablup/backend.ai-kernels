@@ -23,8 +23,9 @@ RUN add-apt-repository -y ppa:staticfloat/julia-deps
 RUN apt-get update
 RUN apt-get install -y julia
 
-# Install ZeroMQ
-RUN apt-get install -y libzmq3-dev
+# Install ZeroMQ and Python 2.7 (for PyPlot)
+RUN apt-get install -y libzmq3-dev python2.7 python2.7-dev python-pip
+RUN pip install numpy matplotlib
 
 # Install Julia packages
 RUN mkdir -p /usr/local/share/julia/site/
