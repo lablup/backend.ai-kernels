@@ -36,7 +36,6 @@ func init() {
 		"chmod",  // 2nd param is mode
 		"open",   // 3rd param is mode
 		// 2nd param is filename/path
-		"name_to_handle_at",
 		"readlinkat",
 		"unlinkat",
 		"fchmodat",  // 3rd param is mode
@@ -84,7 +83,6 @@ func init() {
 		"sendto",
 		"sendmsg",
 		"sendmmsg",
-		"open_by_handle_at",
 		"close",
 		"fallocate",
 		"fstat",
