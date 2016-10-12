@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/fatih/color"
 	seccomp "github.com/seccomp/libseccomp-golang"
 	"log"
 	"os"
@@ -16,7 +17,7 @@ import (
 var (
 	myExecPath, _ = utils.GetExecutable(os.Getpid())
 	myPath        = filepath.Dir(myExecPath)
-	intraJailPath = path.Join(myPath, "intra-jail-check")
+	intraJailPath = path.Join(myPath, "intra-jail")
 	arch, _       = seccomp.GetNativeArch()
 	id_Open, _    = seccomp.GetSyscallFromNameByArch("open", arch)
 	id_Clone, _   = seccomp.GetSyscallFromNameByArch("clone", arch)
@@ -24,6 +25,7 @@ var (
 	id_Vfork, _   = seccomp.GetSyscallFromNameByArch("vfork", arch)
 	id_Execve, _  = seccomp.GetSyscallFromNameByArch("execve", arch)
 )
+var policyInst policy.SandboxPolicy = nil
 var execCount uint = 0
 var forkCount uint = 0
 
@@ -35,8 +37,8 @@ func setPtraceOpts(l *log.Logger, pid int) {
 }
 
 type WaitResult struct {
-	pid int
-	err error
+	pid    int
+	err    error
 	status syscall.WaitStatus
 }
 
@@ -92,6 +94,9 @@ loop:
 				}
 			}
 			if result.status.Exited() {
+				color.Set(color.FgYellow)
+				l.Printf("EXIT (pid %d) status %d\n", result.pid, result.status.ExitStatus())
+				color.Unset()
 				if pid == result.pid {
 					// Our very child has exited. Terminate.
 					break loop
@@ -107,7 +112,7 @@ loop:
 					var regs syscall.PtraceRegs
 					for {
 						err := syscall.PtraceGetRegs(result.pid, &regs)
-						if (err != nil) {
+						if err != nil {
 							errno := err.(syscall.Errno)
 							if errno == syscall.EBUSY || errno == syscall.EFAULT || errno == syscall.ESRCH {
 								continue
@@ -127,12 +132,13 @@ loop:
 							execPath, _ := utils.GetExecutable(result.pid)
 							execCount++
 							traceLog.Printf("execve() (count: %d) on %s\n", execCount, execPath)
-						case id_Open:
-							// TODO: extract path from syscall args
 						default:
 							syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
 							_, ok := allowedSyscalls[syscallName]
 							if !ok {
+								color.Set(color.FgRed)
+								l.Printf("non-registered syscall: %s\n", syscallName)
+								color.Unset()
 								traceLog.Printf("non-registered syscall: %s\n", syscallName)
 							}
 						}
@@ -143,12 +149,15 @@ loop:
 					}
 				default:
 					// Transparently deliver other signals.
+					color.Set(color.FgBlue)
+					l.Printf("Injecting unhandled signal: %v\n", result.status.StopSignal())
+					color.Unset()
 					signalToChild = result.status.StopSignal()
 				}
 				for {
 					// TODO: refactor using function-accepting function
 					err := syscall.PtraceCont(result.pid, int(signalToChild))
-					if (err != nil) {
+					if err != nil {
 						errno := err.(syscall.Errno)
 						if errno == syscall.EBUSY || errno == syscall.EFAULT || errno == syscall.ESRCH {
 							continue
@@ -166,14 +175,23 @@ func main() {
 	if len(os.Args) < 2 {
 		l.Fatal("Main: Not enough command-line arguments. See the docs.")
 	}
+	policyName := os.Args[1]
+	var err error
+	policyInst, err = policy.GeneratePolicy(policyName)
+	if err != nil {
+		l.Fatal("GeneratePolicy: ", err)
+	}
+
 	/* Initialize fork/exec of the child. */
 	runtime.GOMAXPROCS(1)
 	runtime.LockOSThread()
 	args := append([]string{intraJailPath}, os.Args[2:]...)
 	cwd, _ := os.Getwd()
+	envs := utils.FilterEnvs(os.Environ(), policyInst.GetPreservedEnvKeys())
+	envs = append(envs, policyInst.GetExtraEnvs()...)
 	pid, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{
 		cwd,
-		os.Environ(),
+		envs,
 		[]uintptr{0, 1, 2},
 		&syscall.SysProcAttr{Setsid: true, Ptrace: true},
 	})
