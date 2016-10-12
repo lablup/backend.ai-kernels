@@ -37,10 +37,10 @@ RUN julia /home/sorna/package.jl
 
 # Secure installation scripts
 USER root
+RUN apt-get install -y libseccomp2
 ADD run.jl /home/sorna/run.jl
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-RUN apt-get install -y libseccomp2
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
