@@ -1,23 +1,27 @@
 #! /usr/bin/env python3
 
 import argparse
+import asyncio
 import io
-from namedlist import namedtuple, namedlist
 import os
+import pty
 import shlex
+import signal
 import subprocess
 import sys
 import types
 
-import pygit2
-import zmq
+import aiozmq
+from namedlist import namedtuple, namedlist
 try:
     import simplejson
     has_simplejson = True
 except ImportError:
     has_simplejson = False
+import pygit2
+import uvloop
+import zmq
 
-import sorna.drawing
 
 ExceptionInfo = namedtuple('ExceptionInfo', [
     'exc',
@@ -34,14 +38,26 @@ Result = namedlist('Result', [
 ])
 
 
-@staticmethod
-def _create_excinfo(e, raised_before_exec, tb):
-    assert isinstance(e, Exception)
-    return ExceptionInfo(type(e).__name__, e.args, raised_before_exec, tb)
-ExceptionInfo.create = _create_excinfo
+class StdoutProtocol(asyncio.Protocol):
+
+    transport = None
+    sock_out = None
+
+    def __init__(self, sock_out):
+        self.sock_out = sock_out
+
+    def connection_made(self, transport):
+        self.transport = transport
+
+    def data_received(self, data):
+        self.sock_out.write([data])
+        print('terminal output:', data)
+
+    def connection_lost(self, exc):
+        pass
 
 
-class CodeRunner(object):
+class TerminalRunner(object):
     '''
     A thin wrapper for REPL.
 
@@ -49,10 +65,11 @@ class CodeRunner(object):
     (e.g., variables and functions).
     '''
 
-    def __init__(self):
-        self.stdout_buffer = io.StringIO()
-        self.stderr_buffer = io.StringIO()
+    def __init__(self, loop):
         self._sorna_media = []
+        self.loop = loop
+        self.pid = None
+        self.fd = None
 
         self.cmdparser = argparse.ArgumentParser()
         subparsers = self.cmdparser.add_subparsers()
@@ -81,87 +98,90 @@ class CodeRunner(object):
         else:
             raise ValueError('Unsupported show target', args.target)
 
-    def execute(self, cell_id, src):
-        sys.stdout, orig_stdout = self.stdout_buffer, sys.stdout
-        sys.stderr, orig_stderr = self.stderr_buffer, sys.stderr
+    async def handle_command(self, cell_id, src):
+        args = self.cmdparser.parse(src)
+        args.func(args)
 
-        exceptions = []
-        result = Result()
+    async def start_shell(self):
+        self.pid, self.fd = pty.fork()
+        if self.pid == 0:
+            os.execv('/bin/bash', ['/bin/bash'])
+        else:
+            self.sock_in  = await aiozmq.create_zmq_stream(zmq.SUB, bind='tcp://*:2002')
+            self.sock_in.transport.subscribe(b'')
+            self.sock_out = await aiozmq.create_zmq_stream(zmq.PUB, bind='tcp://*:2003')
+            await loop.connect_read_pipe(lambda: StdoutProtocol(self.sock_out),
+                                         os.fdopen(self.fd, 'rb'))
+            loop.create_task(self.terminal_in())
+            print('opened shell pty: stdin at port 2002, stdout at port 2003')
 
-        # This image does not upload any file to S3.
-        # (e.g., blobs in .git directory)
-        result.options = {'upload_output_files': False}
-
-        def my_excepthook(type_, value, tb):
-            exceptions.append(ExceptionInfo.create(value, False, tb))
-        sys.excepthook = my_excepthook
-
-        self._sorna_media = []
-        for line in src.splitlines():
+    async def terminal_in(self):
+        while True:
             try:
-                if line.startswith('%'):
-                    cmdargs = self.cmdparser.parse_args(shlex.split(line[1:], comments=True))
-                    cmdargs.func(cmdargs)
-                else:
-                    # execute shell commands.
-                    completed = subprocess.run(line, shell=True, check=False,
-                                               stdout=subprocess.PIPE,
-                                               stderr=subprocess.PIPE)
-                    self.stdout_buffer.write(completed.stdout.decode())
-                    self.stderr_buffer.write(completed.stderr.decode())
-            except Exception as e:
-                exceptions.append(ExceptionInfo.create(e, False, None))
+                data = await self.sock_in.read()
+            except aiozmq.ZmqStreamClosed:
+                break
+            os.write(self.fd, data[0])
+            print('terminal input:', data[0])
 
-        sys.excepthook = sys.__excepthook__
+    def kill_shell(self):
+        self.sock_in.close()
+        self.sock_out.close()
+        os.close(self.fd)
+        os.kill(self.pid, signal.SIGHUP)
+        os.kill(self.pid, signal.SIGCONT)
+        ret = os.waitpid(self.pid)
+        self.pid = None
+        self.fd = None
+        print('killed shell')
 
-        result.stdout = self.stdout_buffer.getvalue()
-        result.stderr = self.stderr_buffer.getvalue()
-        result.media = self._sorna_media
 
-        self.stdout_buffer.seek(0, io.SEEK_SET)
-        self.stdout_buffer.truncate(0)
-        self.stderr_buffer.seek(0, io.SEEK_SET)
-        self.stderr_buffer.truncate(0)
+async def repl(sock, runner):
 
-        sys.stdout = orig_stdout
-        sys.stderr = orig_stderr
-        return exceptions, result
+    json_opts = {}
+    if has_simplejson:
+        json_opts['namedtuple_as_object'] = False
+
+    await runner.start_shell()
+    try:
+        while True:
+            try:
+                data = await sock.read()
+                result = await runner.handle_command(data[0].decode('ascii'),
+                                                     data[1].decode('utf8'))
+            except (aiozmq.ZmqStreamClosed, asyncio.CancelledError):
+                break
+            response = {
+                'stdout': result.stdout,
+                'stderr': '',
+                'media': [],
+                'options': {'upload_output_files': False},
+                'exceptions': [],
+            }
+            sock.send_json(response, **json_opts)
+    finally:
+        runner.kill_shell()
+
+def terminate():
+    raise SystemExit
 
 
 if __name__ == '__main__':
-    # Use the "confined" working directory
-    os.chdir('/home/work')
-    # Replace stdin with a "null" file
-    # (trying to read stdin will raise EOFError immediately afterwards.)
-    sys.stdin = open(os.devnull, 'rb')
-
-    # Initialize context object.
-    runner = CodeRunner()
-
-    # Initialize minimal ZMQ server socket.
-    ctx = zmq.Context(io_threads=1)
-    sock = ctx.socket(zmq.REP)
-    sock.bind('tcp://*:2001')
+    #asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    loop = asyncio.get_event_loop()
+    sock_repl = loop.run_until_complete(
+        aiozmq.create_zmq_stream(zmq.REP, bind='tcp://*:2001', loop=loop))
+    loop.add_signal_handler(signal.SIGTERM, terminate)
+    loop.add_signal_handler(signal.SIGINT, terminate)
     print('serving at port 2001...')
 
+    runner = TerminalRunner(loop)
+    task = loop.create_task(repl(sock_repl, runner))
     try:
-        while True:
-            data = sock.recv_multipart()
-            exceptions, result = runner.execute(data[0].decode('ascii'),
-                                                data[1].decode('utf8'))
-            response = {
-                'stdout': result.stdout,
-                'stderr': result.stderr,
-                'media': result.media,
-                'options': result.options,
-                'exceptions': exceptions,
-            }
-            json_opts = {}
-            if has_simplejson:
-                json_opts['namedtuple_as_object'] = False
-            sock.send_json(response, **json_opts)
+        loop.run_forever()
     except (KeyboardInterrupt, SystemExit):
-        pass
+        sock_repl.close()
+        loop.stop()
     finally:
-        sock.close()
         print('exit.')
+        loop.close()

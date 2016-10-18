@@ -44,10 +44,12 @@ RUN /home/sorna/pyenv-run.sh pip install python-dateutil
 RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
 RUN /home/sorna/pyenv-run.sh pip install matplotlib
 
-# Install pygit2
+# Install specialization packages
 USER root
 RUN apt-get install -y libgit2-dev libffi-dev
+USER work
 RUN /home/sorna/pyenv-run.sh pip install pygit2
+RUN /home/sorna/pyenv-run.sh pip install aiozmq uvloop
 
 # Matplotlib configuration
 USER root
