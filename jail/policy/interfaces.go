@@ -49,6 +49,8 @@ func GeneratePolicy(exec_path string) (SandboxPolicy, error) {
 		return new(PythonPolicy), nil
 	case "julia":
 		return new(JuliaPolicy), nil
+	case "git":
+		return new(GitPolicy), nil
 	default:
 		return new(DefaultPolicy), nil
 	}

@@ -121,8 +121,11 @@ class TerminalRunner(object):
                 data = await self.sock_in.read()
             except aiozmq.ZmqStreamClosed:
                 break
-            os.write(self.fd, data[0])
-            print('terminal input:', data[0])
+            try:
+                os.write(self.fd, data[0])
+                print('terminal input:', data[0])
+            except OSError:
+                break
 
     def kill_shell(self):
         self.sock_in.close()

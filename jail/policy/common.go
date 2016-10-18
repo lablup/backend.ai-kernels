@@ -238,6 +238,7 @@ func init() {
 		"getpgid",
 		"getpgrp",
 		"getsid",
+		"setsid",
 		"gettimeofday",
 		"clock_gettime",
 		"clock_getres",
