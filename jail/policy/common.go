@@ -189,6 +189,7 @@ func init() {
 		"getegid",
 		"getregid",
 		"getresgid",
+		"getgroups",  // for shell
 		"getcwd",
 		"socket",
 		"socketpair",
@@ -236,9 +237,10 @@ func init() {
 		"getpid",
 		"getppid",
 		"getpgid",
+		"setpgid", // for shell
 		"getpgrp",
 		"getsid",
-		"setsid",
+		"setsid",  // for shell
 		"gettimeofday",
 		"clock_gettime",
 		"clock_getres",

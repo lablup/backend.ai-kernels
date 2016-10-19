@@ -12,7 +12,7 @@ import sys
 import types
 
 import aiozmq
-from namedlist import namedtuple, namedlist
+from namedlist import namedtuple, namedlist, FACTORY
 try:
     import simplejson
     has_simplejson = True
@@ -33,8 +33,8 @@ ExceptionInfo = namedtuple('ExceptionInfo', [
 Result = namedlist('Result', [
     ('stdout', ''),
     ('stderr', ''),
-    ('media', None),
-    ('options', None),
+    ('media', FACTORY(list)),
+    ('options', FACTORY(dict)),
 ])
 
 
@@ -74,17 +74,25 @@ class TerminalRunner(object):
         self.cmdparser = argparse.ArgumentParser()
         subparsers = self.cmdparser.add_subparsers()
 
+        parser_ping = subparsers.add_parser('ping')
+        parser_ping.set_defaults(func=self.do_ping)
+
         parser_chdir = subparsers.add_parser('chdir')
         parser_chdir.add_argument('path', type=str)
         parser_chdir.set_defaults(func=self.do_chdir)
 
-        parser_show = subparsers.add_parser('show')
-        parser_show.add_argument('target', choices=('graph',), default='graph')
-        parser_show.add_argument('path', type=str)
-        parser_show.set_defaults(func=self.do_show)
+        # TODO: Temporarily disabled.
+        #parser_show = subparsers.add_parser('show')
+        #parser_show.add_argument('target', choices=('graph',), default='graph')
+        #parser_show.add_argument('path', type=str)
+        #parser_show.set_defaults(func=self.do_show)
+
+    def do_ping(self, args):
+        return Result('pong!', '')
 
     def do_chdir(self, args):
         os.chdir(args.path)
+        return Result('changed working directory to {}'.format(args.path), '')
 
     def do_show(self, args):
         if args.target == 'graph':
@@ -99,8 +107,14 @@ class TerminalRunner(object):
             raise ValueError('Unsupported show target', args.target)
 
     async def handle_command(self, cell_id, src):
-        args = self.cmdparser.parse(src)
-        args.func(args)
+        if src.startswith('%'):
+            args = self.cmdparser.parse_args(shlex.split(src[1:], comments=True))
+            if asyncio.iscoroutine(args.func):
+                return (await args.func(args))
+            else:
+                return args.func(args)
+        else:
+            return Result('', 'Invalid command.')
 
     async def start_shell(self):
         self.pid, self.fd = pty.fork()
@@ -154,14 +168,16 @@ async def repl(sock, runner):
                                                      data[1].decode('utf8'))
             except (aiozmq.ZmqStreamClosed, asyncio.CancelledError):
                 break
+            result.options['upload_output_files'] = False
             response = {
                 'stdout': result.stdout,
-                'stderr': '',
-                'media': [],
-                'options': {'upload_output_files': False},
+                'stderr': result.stderr,
+                'media': result.media,
+                'options': result.options,
                 'exceptions': [],
             }
             sock.send_json(response, **json_opts)
+            await sock.drain()
     finally:
         runner.kill_shell()
 
