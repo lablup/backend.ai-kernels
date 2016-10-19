@@ -68,6 +68,10 @@ ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
 RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any.whl
 
+# Editors
+USER root
+RUN apt-get install -y nano vim
+
 # Secure installation scripts
 USER root
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
