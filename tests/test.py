@@ -5,7 +5,7 @@ import docker
 import os
 import re
 import shutil
-from sorna.proto import generate_uuid
+from sorna.utils import generate_uuid
 import time
 import unittest
 import urllib.parse
