@@ -110,7 +110,7 @@ class TerminalRunner(object):
     async def handle_command(self, cell_id, src):
         if src.startswith('%'):
             args = self.cmdparser.parse_args(shlex.split(src[1:], comments=True))
-            if asyncio.iscoroutine(args.func):
+            if asyncio.iscoroutine(args.func) or asyncio.iscoroutinefunction(args.func):
                 return (await args.func(args))
             else:
                 return args.func(args)
@@ -127,7 +127,7 @@ class TerminalRunner(object):
             self.sock_out = await aiozmq.create_zmq_stream(zmq.PUB, bind='tcp://*:2003')
             await loop.connect_read_pipe(lambda: StdoutProtocol(self.sock_out),
                                          os.fdopen(self.fd, 'rb'))
-            loop.create_task(self.terminal_in())
+            asyncio.ensure_future(self.terminal_in())
             print('opened shell pty: stdin at port 2002, stdout at port 2003')
 
     async def terminal_in(self):
@@ -138,17 +138,15 @@ class TerminalRunner(object):
                 break
             try:
                 os.write(self.fd, data[0])
-                print('terminal input:', data[0])
             except OSError:
                 break
 
     def kill_shell(self):
         self.sock_in.close()
         self.sock_out.close()
-        os.close(self.fd)
         os.kill(self.pid, signal.SIGHUP)
         os.kill(self.pid, signal.SIGCONT)
-        ret = os.waitpid(self.pid)
+        ret = os.waitpid(self.pid, 0)
         self.pid = None
         self.fd = None
         print('killed shell')
@@ -187,7 +185,7 @@ def terminate():
 
 
 if __name__ == '__main__':
-    #asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     loop = asyncio.get_event_loop()
     sock_repl = loop.run_until_complete(
         aiozmq.create_zmq_stream(zmq.REP, bind='tcp://*:2001', loop=loop))
@@ -196,11 +194,12 @@ if __name__ == '__main__':
     print('serving at port 2001...')
 
     runner = TerminalRunner(loop)
-    task = loop.create_task(repl(sock_repl, runner))
+    asyncio.ensure_future(repl(sock_repl, runner))
     try:
         loop.run_forever()
     except (KeyboardInterrupt, SystemExit):
         sock_repl.close()
+        loop.run_until_complete(asyncio.sleep(0.05))
         loop.stop()
     finally:
         print('exit.')
