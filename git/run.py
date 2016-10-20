@@ -14,9 +14,10 @@ import types
 import aiozmq
 from namedlist import namedtuple, namedlist, FACTORY
 try:
-    import simplejson
+    import simplejson as json
     has_simplejson = True
 except ImportError:
+    import json
     has_simplejson = False
 import pygit2
 import uvloop
@@ -164,8 +165,8 @@ async def repl(sock, runner):
         while True:
             try:
                 data = await sock.read()
-                result = await runner.handle_command(data[0].decode('ascii'),
-                                                     data[1].decode('utf8'))
+                result = await runner.handle_command(data[0].decode(),
+                                                     data[1].decode())
             except (aiozmq.ZmqStreamClosed, asyncio.CancelledError):
                 break
             result.options['upload_output_files'] = False
@@ -176,7 +177,7 @@ async def repl(sock, runner):
                 'options': result.options,
                 'exceptions': [],
             }
-            sock.send_json(response, **json_opts)
+            sock.write([json.dumps(response, **json_opts).encode()])
             await sock.drain()
     finally:
         runner.kill_shell()
