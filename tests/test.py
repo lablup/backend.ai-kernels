@@ -328,6 +328,21 @@ class GitImageTest(ImageTestBase, unittest.TestCase):
         yield None, None
 
 
+class JuliaImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'kernel-julia'
+
+    def basic_success(self):
+        yield 'print("hello world")', 'hello world'
+        yield 'a = 1; b = 2; c = a + b; print("sum", c)', 'sum3'
+        yield 'for i in 1:5; print(i, ", "); end', '1, 2, 3, 4, 5,'
+        yield 'type Person; name::AbstractString; end; print(Person("Julia"))', 'Person("Julia")'
+
+    def basic_failure(self):
+        yield 'print(some_undef_var)', ('UndefVarError', None)
+        yield 'throw(ParseError("asdf"))', ('ParseError("asdf")', None)
+
+
 class JailTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'kernel-python3'
