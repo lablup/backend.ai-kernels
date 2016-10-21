@@ -109,7 +109,6 @@ class TerminalRunner(object):
         newsz = struct.pack('HHHH', args.rows, args.cols, origx, origy)
         newsz = fcntl.ioctl(self.fd, termios.TIOCSWINSZ, newsz)
         newr, newc, _, _ = struct.unpack('HHHH', newsz)
-        print('terminal output:', data)
         return Result('OK; terminal resized to {} rows and {} cols'.format(newr, newc), '')
 
     def do_show(self, args):
