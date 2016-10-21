@@ -16,12 +16,12 @@ import types
 
 import aiozmq
 from namedlist import namedtuple, namedlist, FACTORY
+json_opts = {}
 try:
     import simplejson as json
-    has_simplejson = True
+    json_opts['namedtuple_as_object'] = False
 except ImportError:
     import json
-    has_simplejson = False
 import pygit2
 import uvloop
 import zmq
@@ -47,8 +47,9 @@ class StdoutProtocol(asyncio.Protocol):
     transport = None
     sock_out = None
 
-    def __init__(self, sock_out):
+    def __init__(self, sock_out, runner):
         self.sock_out = sock_out
+        self.runner = runner
 
     def connection_made(self, transport):
         self.transport = transport
@@ -57,7 +58,10 @@ class StdoutProtocol(asyncio.Protocol):
         self.sock_out.write([data])
 
     def connection_lost(self, exc):
-        pass
+        if not self.runner.ev_term.is_set():
+            print("shell exited, restarting it.")
+            self.sock_out.write([b'Restarting the shell...\r\n'])
+            asyncio.ensure_future(self.runner.start_shell(), loop=self.runner.loop)
 
 
 class TerminalRunner(object):
@@ -68,11 +72,14 @@ class TerminalRunner(object):
     (e.g., variables and functions).
     '''
 
-    def __init__(self, loop):
+    def __init__(self, loop, ev_term):
         self._sorna_media = []
         self.loop = loop
+        self.ev_term = ev_term
         self.pid = None
         self.fd = None
+        self.sock_in = None
+        self.sock_out = None
 
         self.cmdparser = argparse.ArgumentParser()
         subparsers = self.cmdparser.add_subparsers()
@@ -138,10 +145,12 @@ class TerminalRunner(object):
         if self.pid == 0:
             os.execv('/bin/bash', ['/bin/bash'])
         else:
-            self.sock_in  = await aiozmq.create_zmq_stream(zmq.SUB, bind='tcp://*:2002')
-            self.sock_in.transport.subscribe(b'')
-            self.sock_out = await aiozmq.create_zmq_stream(zmq.PUB, bind='tcp://*:2003')
-            await loop.connect_read_pipe(lambda: StdoutProtocol(self.sock_out),
+            if self.sock_in is None:
+                self.sock_in  = await aiozmq.create_zmq_stream(zmq.SUB, bind='tcp://*:2002')
+                self.sock_in.transport.subscribe(b'')
+            if self.sock_out is None:
+                self.sock_out = await aiozmq.create_zmq_stream(zmq.PUB, bind='tcp://*:2003')
+            await loop.connect_read_pipe(lambda: StdoutProtocol(self.sock_out, self),
                                          os.fdopen(self.fd, 'rb'))
             asyncio.ensure_future(self.terminal_in())
             print('opened shell pty: stdin at port 2002, stdout at port 2003')
@@ -169,11 +178,6 @@ class TerminalRunner(object):
 
 
 async def repl(sock, runner):
-
-    json_opts = {}
-    if has_simplejson:
-        json_opts['namedtuple_as_object'] = False
-
     await runner.start_shell()
     try:
         while True:
@@ -196,8 +200,9 @@ async def repl(sock, runner):
     finally:
         runner.kill_shell()
 
-def terminate():
-    raise SystemExit
+def signal_handler(loop, ev_term):
+    if not ev_term.is_set():
+        loop.stop()
 
 
 if __name__ == '__main__':
@@ -205,15 +210,17 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     sock_repl = loop.run_until_complete(
         aiozmq.create_zmq_stream(zmq.REP, bind='tcp://*:2001', loop=loop))
-    loop.add_signal_handler(signal.SIGTERM, terminate)
-    loop.add_signal_handler(signal.SIGINT, terminate)
-    print('serving at port 2001...')
 
-    runner = TerminalRunner(loop)
+    ev_term = asyncio.Event()
+    loop.add_signal_handler(signal.SIGTERM, signal_handler, loop, ev_term)
+    loop.add_signal_handler(signal.SIGINT, signal_handler, loop, ev_term)
+
+    runner = TerminalRunner(loop, ev_term)
     asyncio.ensure_future(repl(sock_repl, runner))
     try:
+        print('serving at port 2001...')
         loop.run_forever()
-    except (KeyboardInterrupt, SystemExit):
+        ev_term.set()
         sock_repl.close()
         loop.run_until_complete(asyncio.sleep(0.05))
         loop.stop()
