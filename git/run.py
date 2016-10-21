@@ -2,13 +2,16 @@
 
 import argparse
 import asyncio
+import fcntl
 import io
 import os
 import pty
 import shlex
 import signal
+import struct
 import subprocess
 import sys
+import termios
 import types
 
 import aiozmq
@@ -52,7 +55,6 @@ class StdoutProtocol(asyncio.Protocol):
 
     def data_received(self, data):
         self.sock_out.write([data])
-        print('terminal output:', data)
 
     def connection_lost(self, exc):
         pass
@@ -78,6 +80,11 @@ class TerminalRunner(object):
         parser_ping = subparsers.add_parser('ping')
         parser_ping.set_defaults(func=self.do_ping)
 
+        parser_resize = subparsers.add_parser('resize')
+        parser_resize.add_argument('rows', type=int)
+        parser_resize.add_argument('cols', type=int)
+        parser_resize.set_defaults(func=self.do_resize_term)
+
         parser_chdir = subparsers.add_parser('chdir')
         parser_chdir.add_argument('path', type=str)
         parser_chdir.set_defaults(func=self.do_chdir)
@@ -94,6 +101,16 @@ class TerminalRunner(object):
     def do_chdir(self, args):
         os.chdir(args.path)
         return Result('changed working directory to {}'.format(args.path), '')
+
+    def do_resize_term(self, args):
+        origsz = struct.pack('HHHH', 0, 0, 0, 0)
+        origsz = fcntl.ioctl(self.fd, termios.TIOCGWINSZ, origsz)
+        _, _, origx, origy = struct.unpack('HHHH', origsz)
+        newsz = struct.pack('HHHH', args.rows, args.cols, origx, origy)
+        newsz = fcntl.ioctl(self.fd, termios.TIOCSWINSZ, newsz)
+        newr, newc, _, _ = struct.unpack('HHHH', newsz)
+        print('terminal output:', data)
+        return Result('OK; terminal resized to {} rows and {} cols'.format(newr, newc), '')
 
     def do_show(self, args):
         if args.target == 'graph':
