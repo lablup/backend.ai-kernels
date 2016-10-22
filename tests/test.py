@@ -154,7 +154,10 @@ class ImageTestBase(object):
                 self.assertIs(type(resp['exceptions']), list)
                 self.assertGreater(len(resp['exceptions']), 0)
                 err_name, err_arg = expected
-                self.assertRegex(resp['exceptions'][0][0], '^' + re.escape(err_name))
+                if 'kernel-lua' in self.image_name:
+                    self.assertIn(err_name, resp['exceptions'][0][0])
+                else:
+                    self.assertRegex(resp['exceptions'][0][0], '^' + re.escape(err_name))
                 if err_arg:
                     self.assertIn(err_arg, resp['exceptions'][0][1])
         if inner_exception:
@@ -341,6 +344,20 @@ class JuliaImageTest(ImageTestBase, unittest.TestCase):
     def basic_failure(self):
         yield 'print(some_undef_var)', ('UndefVarError', None)
         yield 'throw(ParseError("asdf"))', ('ParseError("asdf")', None)
+
+
+class Lua5ImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'kernel-lua5'
+
+    def basic_success(self):
+        yield 'print("hello world")', 'hello world'
+        yield 'io.write("hello world")', 'hello world'
+        yield 'a = 1; b = 2; c = a + b; print(c)', '3'
+
+    def basic_failure(self):
+        yield 'print(some_undef_var)', ('nil', None)
+        yield 'error("test-error")', ('test-error', None)
 
 
 class JailTest(ImageTestBase, unittest.TestCase):
