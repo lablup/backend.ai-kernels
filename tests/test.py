@@ -351,7 +351,7 @@ class Lua5ImageTest(ImageTestBase, unittest.TestCase):
     image_name = 'kernel-lua5'
 
     def basic_success(self):
-        yield 'print("hello world")', 'hello world'
+        yield 'print("hello world")', 'hello world\n'
         yield 'io.write("hello world")', 'hello world'
         yield 'a = 1; b = 2; c = a + b; print(c)', '3'
 
