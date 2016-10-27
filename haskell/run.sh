@@ -1,2 +1,2 @@
 #! /bin/bash
-exec /home/sorna/jail default `which ghci` /home/sorna/run.hs
+exec /home/sorna/jail default `which runhaskell` /home/sorna/run.hs

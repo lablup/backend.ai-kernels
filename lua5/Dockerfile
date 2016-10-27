@@ -22,7 +22,6 @@ RUN apt-get install -y libzmq3-dev
 # Install Lua
 USER root
 RUN apt-get install -y lua5.2 liblua5.2-dev
-RUN lua
 
 # Install Lua packages
 WORKDIR /home/sorna
