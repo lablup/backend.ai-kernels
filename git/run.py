@@ -62,6 +62,7 @@ class StdoutProtocol(asyncio.Protocol):
             print("shell exited, restarting it.")
             self.sock_out.write([b'Restarting the shell...\r\n'])
             asyncio.ensure_future(self.runner.start_shell(), loop=self.runner.loop)
+        os.waitpid(self.runner.pid, 0)
 
 
 class TerminalRunner(object):
