@@ -27,6 +27,8 @@ func init() {
 		"stat",
 		"lstat",
 		"statfs",
+		"getxattr",
+		"lgetxattr",
 		"readlink",
 		"unlink",
 		"rmdir",
