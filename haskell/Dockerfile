@@ -19,10 +19,10 @@ RUN apt-get update && apt-get upgrade -y
 #RUN apt-get install -y wget zip
 RUN apt-get install -y libzmq3-dev
 
-# Install Haskell Platform and zeromq4-haskell
+# Install Haskell Platform and required packages
 RUN apt-get install -y haskell-platform pkg-config
 RUN cabal update
-RUN cabal install zeromq4-haskell
+RUN cabal install zeromq4-haskell aeson utf8-string
 
 # Secure installation scripts
 USER root
