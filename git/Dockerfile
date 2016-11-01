@@ -68,9 +68,11 @@ ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
 RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any.whl
 
-# Editors
+# Editors and other packages
 USER root
 RUN apt-get install -y nano vim
+RUN apt-get install -y nodejs nodejs-legacy npm
+RUN npm install -g hexo-cli
 
 # Secure installation scripts
 USER root
