@@ -44,6 +44,7 @@ var (
 	id_Fork, _     = seccomp.GetSyscallFromNameByArch("fork", arch)
 	id_Vfork, _    = seccomp.GetSyscallFromNameByArch("vfork", arch)
 	id_Execve, _   = seccomp.GetSyscallFromNameByArch("execve", arch)
+	id_Kill, _     = seccomp.GetSyscallFromNameByArch("kill", arch)
 	id_Chmod, _    = seccomp.GetSyscallFromNameByArch("chmod", arch)
 	id_Fchmodat, _ = seccomp.GetSyscallFromNameByArch("fchmodat", arch)
 )
@@ -177,6 +178,9 @@ loop:
 							if debug {
 								l.Printf("fork owner: %s\n", execPath)
 							}
+						case id_Kill:
+							targetPid := int(regs.Rdi)
+							allow = (targetPid != pid && targetPid != os.Getpid())
 						case id_Execve:
 							execPath, _ := utils.GetExecutable(result.pid)
 							if execPath == myExecPath {

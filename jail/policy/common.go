@@ -1,7 +1,8 @@
 package policy
 
 import seccomp "github.com/seccomp/libseccomp-golang"
-import "syscall"
+
+//import "syscall"
 
 var TracedSyscalls []string
 var AllowedSyscalls []string
@@ -59,7 +60,7 @@ func init() {
 
 	// Following syscalls are conditionally allowed.
 	ConditionallyAllowedSyscalls = map[string]seccomp.ScmpCondition{
-		"kill": {1, seccomp.CompareEqual, uint64(syscall.SIGSTOP), 0},
+	//"kill": {1, seccomp.CompareEqual, uint64(syscall.SIGSTOP), 0},
 	}
 
 	// Following syscalls are blindly allowed.
@@ -189,7 +190,7 @@ func init() {
 		"getegid",
 		"getregid",
 		"getresgid",
-		"getgroups",  // for shell
+		"getgroups", // for shell
 		"getcwd",
 		"socket",
 		"socketpair",
@@ -240,7 +241,7 @@ func init() {
 		"setpgid", // for shell
 		"getpgrp",
 		"getsid",
-		"setsid",  // for shell
+		"setsid", // for shell
 		"gettimeofday",
 		"clock_gettime",
 		"clock_getres",
