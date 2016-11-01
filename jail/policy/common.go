@@ -56,6 +56,7 @@ func init() {
 		"vfork",
 		"clone",
 		"execve",
+		"kill",
 	}
 
 	// Following syscalls are conditionally allowed.
