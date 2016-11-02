@@ -22,7 +22,7 @@ RUN apt-get install -y libzmq3-dev
 # Install Haskell Platform and required packages
 RUN apt-get install -y haskell-platform pkg-config
 RUN cabal update
-RUN cabal install --global zeromq4-haskell aeson utf8-string
+RUN cabal install --global zeromq4-haskell aeson utf8-string hint
 
 # Secure installation scripts
 USER root

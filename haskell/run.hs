@@ -8,6 +8,7 @@ import qualified Data.ByteString.Lazy as BL
 import Data.Aeson
 import System.ZMQ4.Monadic
 import qualified Data.ByteString.UTF8 as U
+import Language.Haskell.Interpreter
 
 
 -- Define execution result data type.
