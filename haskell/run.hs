@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 
+import Control.Monad
 import GHC.Generics
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
@@ -31,10 +32,10 @@ data ExceptionInfo = ExceptionInfo {
 main :: IO ()
 main = do
     let
-    putStrLn "serving at port 2001..."
     runZMQ $ do
         skt <- socket Rep
         bind skt port
+        printInZMQ "serving at port 2001..."
         loop skt
     putStrLn "exit."
 
@@ -49,6 +50,10 @@ main = do
 
         send skt [] result
         loop skt
+
+-- Print string inside ZMQ monad
+printInZMQ :: String -> ZMQ z ()
+printInZMQ = liftIO . putStrLn
 
 -- Convert Lazy ByteString to Strict ByteString
 lazyToStrict :: BL.ByteString -> B.ByteString
