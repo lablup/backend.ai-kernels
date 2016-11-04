@@ -57,21 +57,38 @@ class ImageTestBase(object):
         else:
             security_opt = ['apparmor:docker-ptrace'] \
                            if os.path.exists(_apparmor_profile_path) else []
+
+        ret = self.docker.inspect_image(self.image_name)
+        binds={self.work_dir: {'bind': '/home/work', 'mode': 'rw'}}
+        if 'yes' == ret['ContainerConfig']['Labels'].get('com.lablup.sorna.nvidia.enabled', 'no'):
+            # FIXME: get the arguments from http://localhost:3476/docker/cli
+            # --volume-driver=nvidia-docker --volume=nvidia_driver_367.48:/usr/local/nvidia:ro
+            # --device=/dev/nvidiactl --device=/dev/nvidia-uvm --device=/dev/nvidia-uvm-tools
+            # --device=/dev/nvidia0 --device=/dev/nvidia1
+            volume_driver = 'nvidia-docker'
+            volumes = ['/usr/local/nvidia']
+            binds.update({'nvidia_driver_367.48': {'bind': '/usr/local/nvidia', 'mode': 'ro'}})
+            devices = ['/dev/nvidiactl:/dev/nvidiactl:rwm',
+                       '/dev/nvidia-uvm:/dev/nvidia-uvm:rwm',
+                       '/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools:rwm',
+                       '/dev/nvidia0:/dev/nvidia0:rwm',
+                       '/dev/nvidia1:/dev/nvidia1:rwm']
+        else:
+            volume_driver = None
+            volumes = []
+            devices = None
         result = self.docker.create_container(self.image_name,
                                               name=container_name,
                                               ports=[(2001, 'tcp')],
-                                              volumes=['/home/work'],
+                                              volumes=['/home/work'] + volumes,
                                               host_config=self.docker.create_host_config(
                                                  mem_limit='128m',
                                                  memswap_limit=0,
                                                  security_opt=security_opt,
+                                                 devices=devices,
                                                  port_bindings={2001: ('127.0.0.1', 2001)},
-                                                 binds={
-                                                     self.work_dir: {
-                                                        'bind': '/home/work',
-                                                        'mode': 'rw'
-                                                    },
-                                                 }),
+                                                 binds=binds,
+                                              ),
                                               tty=False)
         self.container_id = result['Id']
         self.docker.start(self.container_id)
@@ -96,7 +113,7 @@ class ImageTestBase(object):
         with cli:
             msg = ('{}'.format(cell_id).encode('ascii'), code.encode('utf8'))
             cli.send_multipart(msg)
-            if cli.poll(timeout=3000) == 0:  # timeout in millisec
+            if cli.poll(timeout=5000) == 0:  # timeout in millisec
                 raise TimeoutError('Container does not respond.')
             resp = cli.recv_json()
         ctx.destroy()
@@ -118,6 +135,7 @@ class ImageTestBase(object):
             with self.subTest(subcase=idx + 1):
                 try:
                     resp = self.execute(idx, code)
+                    print('{!r}'.format(resp))
                 except TimeoutError as e:
                     # (Re-)raised exception here is captured by subTest ctxmgr.
                     # We just store the exception object and break out of the sub-case loop.
@@ -145,6 +163,7 @@ class ImageTestBase(object):
             with self.subTest(subcase=idx + 1):
                 try:
                     resp = self.execute(idx, code)
+                    print('{!r}'.format(resp))
                 except TimeoutError as e:
                     inner_exception = AssertionError('Timeout detected at sub-case {}'.format(idx + 1))
                     break
@@ -191,29 +210,48 @@ class Python3ImageTest(ImageTestBase, unittest.TestCase):
 
 
 _py3_tf_example = '''
+#import ctypes, ctypes.util
+#_libcuda_path = ctypes.util.find_library('cudart')
+#print(_libcuda_path)
+#_libcuda = ctypes.CDLL(_libcuda_path)
+#count = ctypes.c_int(0)
+#ret = _libcuda.cudaGetDeviceCount(ctypes.byref(count))
+#print('Number of GPUs detected: {0} / ret = {1}'.format(count.value, ret))
+
 import tensorflow as tf
-import numpy as np
-x_data = np.random.rand(100).astype(np.float32)
-y_data = x_data * 0.1 + 0.3
-W = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
-b = tf.Variable(tf.zeros([1]))
-y = W * x_data + b
-loss = tf.reduce_mean(tf.square(y - y_data))
-optimizer = tf.train.GradientDescentOptimizer(0.5)
-train = optimizer.minimize(loss)
-init = tf.initialize_all_variables()
+a = tf.constant(10)
+b = tf.constant(20)
+c = a + b
+d = tf.constant('hello')
 sess = tf.Session()
-sess.run(init)
-for step in range(201):
-    sess.run(train)
-    if step % 20 == 0:
-        print(step, sess.run(W), sess.run(b))
+print(sess.run(c))
+print(sess.run(d))
+
+#import numpy as np
+#x_data = np.random.rand(100).astype(np.float32)
+#y_data = x_data * 0.1 + 0.3
+#with tf.device('/cpu:0'):
+#    W = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
+#    b = tf.Variable(tf.zeros([1]))
+#    y = W * x_data + b
+#    loss = tf.reduce_mean(tf.square(y - y_data))
+#    optimizer = tf.train.GradientDescentOptimizer(0.5)
+#    train = optimizer.minimize(loss)
+#    init = tf.initialize_all_variables()
+#    sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+#    sess.run(init)
+#    #for step in range(201):
+#    #    sess.run(train)
+#    #    if step % 20 == 0:
+#    #        print(step, sess.run(W), sess.run(b))
+sess.close()
 print('done')
 '''
 
 class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python3-tensorflow'
+    image_name = 'kernel-python3-tensorflow-gpu'
+    #image_name = 'kernel-python3-tensorflow'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
