@@ -15,9 +15,11 @@ ENV HOME /home/work
 WORKDIR /home/work
 
 # Install Python
+USER root
+ENV SORNA_PYTHON_VERSION 3.5.2
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get build-dep -y python3
-RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev
+RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
@@ -43,7 +45,9 @@ RUN /home/sorna/pyenv-run.sh pip install pandas
 RUN /home/sorna/pyenv-run.sh pip install seaborn
 RUN /home/sorna/pyenv-run.sh pip install networkx
 RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
-RUN /home/sorna/pyenv-run.sh pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.9.0-cp35-cp35m-linux_x86_64.whl
+RUN /home/sorna/pyenv-run.sh pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.11.0rc2-cp35-cp35m-linux_x86_64.whl
+RUN /home/sorna/pyenv-run.sh pip install pillow
+RUN /home/sorna/pyenv-run.sh pip install sklearn
 
 # Additional packages
 USER root
@@ -64,10 +68,10 @@ RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any
 
 # Secure installation scripts
 USER root
+RUN apt-get install -y libseccomp2
 ADD run.py /home/sorna/run.py
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-RUN apt-get install -y libseccomp2
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
