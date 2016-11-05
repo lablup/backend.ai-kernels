@@ -66,7 +66,7 @@ class ImageTestBase(object):
             # --device=/dev/nvidiactl --device=/dev/nvidia-uvm --device=/dev/nvidia-uvm-tools
             # --device=/dev/nvidia0 --device=/dev/nvidia1
             volume_driver = 'nvidia-docker'
-            volumes = ['/usr/local/nvidia']
+            volumes = []
             binds.update({'nvidia_driver_367.48': {'bind': '/usr/local/nvidia', 'mode': 'ro'}})
             devices = ['/dev/nvidiactl:/dev/nvidiactl:rwm',
                        '/dev/nvidia-uvm:/dev/nvidia-uvm:rwm',
@@ -82,8 +82,8 @@ class ImageTestBase(object):
                                               ports=[(2001, 'tcp')],
                                               volumes=['/home/work'] + volumes,
                                               host_config=self.docker.create_host_config(
-                                                 mem_limit='128m',
-                                                 memswap_limit=0,
+                                                 mem_limit='2g',
+                                                 memswap_limit=-1,
                                                  security_opt=security_opt,
                                                  devices=devices,
                                                  port_bindings={2001: ('127.0.0.1', 2001)},
@@ -113,7 +113,7 @@ class ImageTestBase(object):
         with cli:
             msg = ('{}'.format(cell_id).encode('ascii'), code.encode('utf8'))
             cli.send_multipart(msg)
-            if cli.poll(timeout=5000) == 0:  # timeout in millisec
+            if cli.poll(timeout=180000) == 0:  # timeout in millisec
                 raise TimeoutError('Container does not respond.')
             resp = cli.recv_json()
         ctx.destroy()
@@ -163,7 +163,6 @@ class ImageTestBase(object):
             with self.subTest(subcase=idx + 1):
                 try:
                     resp = self.execute(idx, code)
-                    print('{!r}'.format(resp))
                 except TimeoutError as e:
                     inner_exception = AssertionError('Timeout detected at sub-case {}'.format(idx + 1))
                     break
@@ -209,15 +208,7 @@ class Python3ImageTest(ImageTestBase, unittest.TestCase):
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
 
 
-_py3_tf_example = '''
-#import ctypes, ctypes.util
-#_libcuda_path = ctypes.util.find_library('cudart')
-#print(_libcuda_path)
-#_libcuda = ctypes.CDLL(_libcuda_path)
-#count = ctypes.c_int(0)
-#ret = _libcuda.cudaGetDeviceCount(ctypes.byref(count))
-#print('Number of GPUs detected: {0} / ret = {1}'.format(count.value, ret))
-
+_simple_tf_example = '''
 import tensorflow as tf
 a = tf.constant(10)
 b = tf.constant(20)
@@ -226,37 +217,90 @@ d = tf.constant('hello')
 sess = tf.Session()
 print(sess.run(c))
 print(sess.run(d))
+sess.close()
+'''
 
-#import numpy as np
-#x_data = np.random.rand(100).astype(np.float32)
-#y_data = x_data * 0.1 + 0.3
-#with tf.device('/cpu:0'):
-#    W = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
-#    b = tf.Variable(tf.zeros([1]))
-#    y = W * x_data + b
-#    loss = tf.reduce_mean(tf.square(y - y_data))
-#    optimizer = tf.train.GradientDescentOptimizer(0.5)
-#    train = optimizer.minimize(loss)
-#    init = tf.initialize_all_variables()
-#    sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-#    sess.run(init)
-#    #for step in range(201):
-#    #    sess.run(train)
-#    #    if step % 20 == 0:
-#    #        print(step, sess.run(W), sess.run(b))
+_complex_tf_example = '''
+import tensorflow as tf
+import numpy as np
+x_data = np.random.rand(100).astype(np.float32)
+y_data = x_data * 0.1 + 0.3
+with tf.device('/cpu:0'):
+    W = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
+    b = tf.Variable(tf.zeros([1]))
+    y = W * x_data + b
+    loss = tf.reduce_mean(tf.square(y - y_data))
+    optimizer = tf.train.GradientDescentOptimizer(0.5)
+    train = optimizer.minimize(loss)
+    init = tf.initialize_all_variables()
+    sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+    sess.run(init)
+    for step in range(201):
+        sess.run(train)
+        if step % 20 == 0:
+            print(step, sess.run(W), sess.run(b))
+    sess.close()
+print('done')
+'''
+
+_gpu_detect_example = '''
+import ctypes, ctypes.util
+_libcuda_path = ctypes.util.find_library('cudart')
+print(_libcuda_path)
+_libcuda = ctypes.CDLL(_libcuda_path)
+count = ctypes.c_int(0)
+ret = _libcuda.cudaGetDeviceCount(ctypes.byref(count))
+print('Number of GPUs detected: {0} / ret = {1}'.format(count.value, ret))
+'''
+
+_complex_tf_gpu_example = '''
+import tensorflow as tf
+import numpy as np
+x_data = np.random.rand(100).astype(np.float32)
+y_data = x_data * 0.1 + 0.3
+#with tf.device('/gpu:0'):
+W = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
+b = tf.Variable(tf.zeros([1]))
+y = W * x_data + b
+loss = tf.reduce_mean(tf.square(y - y_data))
+optimizer = tf.train.GradientDescentOptimizer(0.5)
+train = optimizer.minimize(loss)
+init = tf.initialize_all_variables()
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+sess.run(init)
+for step in range(201):
+    sess.run(train)
+    if step % 20 == 0:
+        print(step, sess.run(W), sess.run(b))
 sess.close()
 print('done')
 '''
 
 class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python3-tensorflow-gpu'
-    #image_name = 'kernel-python3-tensorflow'
+    image_name = 'kernel-python3-tensorflow'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
         yield 'a = 1\nb = 2\nc = a + b\nprint(c)', '3'
-        yield _py3_tf_example, 'done'
+        yield _simple_tf_example, '30'
+        yield _complex_tf_example, 'done'
+
+    def basic_failure(self):
+        yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
+        yield 'x = 0 / 0', ('ZeroDivisionError', None)
+
+
+class Python3TensorFlowGPUImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'kernel-python3-tensorflow-gpu'
+
+    def basic_success(self):
+        yield 'print("hello world")', 'hello world'
+        yield 'a = 1\nb = 2\nc = a + b\nprint(c)', '3'
+        yield _gpu_detect_example, 'ret = 0'
+        yield _simple_tf_example, '30'
+        yield _complex_tf_gpu_example, 'done'
 
     def basic_failure(self):
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
