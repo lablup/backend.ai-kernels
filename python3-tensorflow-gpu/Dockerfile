@@ -79,6 +79,11 @@ RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
 RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
 
+# CUDA libs linking
+RUN echo '/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64' > /etc/ld.so.conf.d/cuda.conf
+RUN ln -s /usr/local/cuda/lib64/libcudnn.so.5 /usr/local/cuda/lib64/libcudnn.so
+RUN ldconfig
+
 VOLUME ["/home/work"]
 EXPOSE 2001
 
