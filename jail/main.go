@@ -180,7 +180,7 @@ loop:
 							}
 						case id_Kill:
 							targetPid := int(regs.Rdi)
-							allow = (targetPid != pid && targetPid != os.Getpid())
+							allow = (targetPid != pid && targetPid != os.Getpid() && targetPid != 1)
 						case id_Execve:
 							execPath, _ := utils.GetExecutable(result.pid)
 							if execPath == myExecPath {
