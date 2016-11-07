@@ -172,7 +172,7 @@ class ImageTestBase(object):
                 self.assertIs(type(resp['exceptions']), list)
                 self.assertGreater(len(resp['exceptions']), 0)
                 err_name, err_arg = expected
-                if 'kernel-lua' in self.image_name:
+                if 'lablup/kernel-lua' in self.image_name:
                     self.assertIn(err_name, resp['exceptions'][0][0])
                 else:
                     self.assertRegex(resp['exceptions'][0][0], '^' + re.escape(err_name))
@@ -184,7 +184,7 @@ class ImageTestBase(object):
 
 class Python2ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python2'
+    image_name = 'lablup/kernel-python2'
 
     def basic_success(self):
         yield 'print "hello world"', 'hello world'
@@ -197,7 +197,7 @@ class Python2ImageTest(ImageTestBase, unittest.TestCase):
 
 class Python3ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python3'
+    image_name = 'lablup/kernel-python3'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
@@ -278,7 +278,7 @@ print('done')
 
 class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python3-tensorflow'
+    image_name = 'lablup/kernel-python3-tensorflow'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
@@ -293,7 +293,7 @@ class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
 
 class Python3TensorFlowGPUImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python3-tensorflow-gpu'
+    image_name = 'lablup/kernel-python3-tensorflow-gpu'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
@@ -316,7 +316,7 @@ print('done')
 
 class Python3CaffeImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python3-caffe'
+    image_name = 'lablup/kernel-python3-caffe'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
@@ -331,7 +331,7 @@ class Python3CaffeImageTest(ImageTestBase, unittest.TestCase):
 
 class R3ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-r3'
+    image_name = 'lablup/kernel-r3'
 
     def basic_success(self):
         yield 'cat("hello world\n")', 'hello world'
@@ -347,7 +347,7 @@ class R3ImageTest(ImageTestBase, unittest.TestCase):
 
 class PHP5ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-php5'
+    image_name = 'lablup/kernel-php5'
 
     def basic_success(self):
         yield 'echo "hello world";', 'hello world'
@@ -364,7 +364,7 @@ class PHP5ImageTest(ImageTestBase, unittest.TestCase):
 
 class PHP7ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-php7'
+    image_name = 'lablup/kernel-php7'
 
     def basic_success(self):
         yield 'echo "hello world";', 'hello world'
@@ -381,7 +381,7 @@ class PHP7ImageTest(ImageTestBase, unittest.TestCase):
 
 class Nodejs4ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-nodejs4'
+    image_name = 'lablup/kernel-nodejs4'
 
     def basic_success(self):
         yield 'console.log("hello world");', 'hello world'
@@ -395,7 +395,7 @@ class Nodejs4ImageTest(ImageTestBase, unittest.TestCase):
 
 class GitImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-git'
+    image_name = 'lablup/kernel-git'
 
     def basic_success(self):
         yield 'invalid-shell-command', '', 'not found'
@@ -415,7 +415,7 @@ class GitImageTest(ImageTestBase, unittest.TestCase):
 
 class JuliaImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-julia'
+    image_name = 'lablup/kernel-julia'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
@@ -430,7 +430,7 @@ class JuliaImageTest(ImageTestBase, unittest.TestCase):
 
 class Lua5ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-lua5'
+    image_name = 'lablup/kernel-lua5'
 
     def basic_success(self):
         yield 'print("hello world")', 'hello world\n'
@@ -444,7 +444,7 @@ class Lua5ImageTest(ImageTestBase, unittest.TestCase):
 
 class JailTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'kernel-python3'
+    image_name = 'lablup/kernel-python3'
 
     def basic_success(self):
         yield 'import os; os.chmod("/home/work", 700)', '', ''
