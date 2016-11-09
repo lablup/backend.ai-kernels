@@ -46,7 +46,6 @@ RUN /home/sorna/pyenv-run.sh pip install pandas
 RUN /home/sorna/pyenv-run.sh pip install seaborn
 RUN /home/sorna/pyenv-run.sh pip install networkx
 RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
-RUN /home/sorna/pyenv-run.sh pip install https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow-0.11.0rc2-cp35-cp35m-linux_x86_64.whl
 RUN /home/sorna/pyenv-run.sh pip install pillow
 RUN /home/sorna/pyenv-run.sh pip install sklearn
 
@@ -62,10 +61,19 @@ RUN rm /tmp/matplotlib-fontcache.py
 
 # Install Sorna Media support
 USER root
-ADD *.whl /tmp
+ADD sorna_media-*.whl /tmp
 ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
-RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any.whl
+RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-*.whl
+
+# Install TensorFlow
+USER root
+# Original dependencies:
+#   - openjdk-8-jdk libcurl4-openssl-dev swig
+#   - python3-numpy python3-dev python3-pip python3-setuptools (not required for us)
+ADD tensorflow-*.whl /tmp
+USER work
+RUN /home/sorna/pyenv-run.sh pip install /tmp/tensorflow-*.whl
 
 # Secure installation scripts
 USER root
@@ -87,8 +95,8 @@ RUN ldconfig
 VOLUME ["/home/work"]
 EXPOSE 2001
 
-LABEL com.lablup.sorna.timeout="30"
-LABEL com.lablup.sorna.maxmem="512m"
+LABEL com.lablup.sorna.timeout="180"
+LABEL com.lablup.sorna.maxmem="1g"
 LABEL com.lablup.sorna.nvidia.enabled="yes"
 
 USER work

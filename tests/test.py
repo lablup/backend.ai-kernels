@@ -1,15 +1,18 @@
 #! /usr/bin/env python3
 from abc import abstractmethod
 from distutils.version import LooseVersion
-import docker
 import os
 import re
 import shutil
-from sorna.utils import generate_uuid
 import time
 import unittest
 import urllib.parse
+
+import docker
+import requests
 import zmq
+
+from sorna.utils import generate_uuid
 
 _apparmor_profile_path = '/etc/apparmor.d/docker-ptrace'
 
@@ -60,29 +63,18 @@ class ImageTestBase(object):
 
         ret = self.docker.inspect_image(self.image_name)
         binds={self.work_dir: {'bind': '/home/work', 'mode': 'rw'}}
+        volumes = []
+        devices = []
         if 'yes' == ret['ContainerConfig']['Labels'].get('com.lablup.sorna.nvidia.enabled', 'no'):
-            # FIXME: get the arguments from http://localhost:3476/docker/cli
-            # --volume-driver=nvidia-docker --volume=nvidia_driver_367.48:/usr/local/nvidia:ro
-            # --device=/dev/nvidiactl --device=/dev/nvidia-uvm --device=/dev/nvidia-uvm-tools
-            # --device=/dev/nvidia0 --device=/dev/nvidia1
-            volume_driver = 'nvidia-docker'
-            volumes = []
-            binds.update({'nvidia_driver_367.48': {'bind': '/usr/local/nvidia', 'mode': 'ro'}})
-            devices = ['/dev/nvidiactl:/dev/nvidiactl:rwm',
-                       '/dev/nvidia-uvm:/dev/nvidia-uvm:rwm',
-                       '/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools:rwm',
-                       '/dev/nvidia0:/dev/nvidia0:rwm',
-                       '/dev/nvidia1:/dev/nvidia1:rwm']
-        else:
-            volume_driver = None
-            volumes = []
-            devices = None
+            extra_binds, extra_devices = self.prepare_nvidia()
+            binds.update(extra_binds)
+            devices.extend(extra_devices)
         result = self.docker.create_container(self.image_name,
                                               name=container_name,
                                               ports=[(2001, 'tcp')],
                                               volumes=['/home/work'] + volumes,
                                               host_config=self.docker.create_host_config(
-                                                 mem_limit='2g',
+                                                 mem_limit='1g',
                                                  memswap_limit=-1,
                                                  security_opt=security_opt,
                                                  devices=devices,
@@ -104,6 +96,30 @@ class ImageTestBase(object):
         else:
             self.docker.remove_container(self.container_id)
         shutil.rmtree(self.work_dir)
+
+    def prepare_nvidia(self):
+        r = requests.get('http://localhost:3476/docker/cli/json')
+        nvidia_params = r.json()
+        existing_volumes = set(vol['Name'] for vol in self.docker.volumes()['Volumes'])
+        required_volumes = set(vol.split(':')[0] for vol in nvidia_params['Volumes'])
+        missing_volumes = required_volumes - existing_volumes
+        binds = {}
+        for vol_name in missing_volumes:
+            for vol_param in nvidia_params['Volumes']:
+                if vol_param.startswith(vol_name + ':'):
+                    _, _, permission = vol_param.split(':')
+                    driver = nvidia_params['VolumeDriver']
+                    self.docker.create_volume(name=vol_name, driver=driver)
+        for vol_name in required_volumes:
+            for vol_param in nvidia_params['Volumes']:
+                if vol_param.startswith(vol_name + ':'):
+                    _, mount_pt, permission = vol_param.split(':')
+                    binds[vol_name] = {
+                        'bind': mount_pt,
+                        'mode': permission,
+                    }
+        devices = ['{0}:{0}:rwm'.format(dev) for dev in nvidia_params['Devices']]
+        return binds, devices
 
     def execute(self, cell_id, code):
         ctx = zmq.Context()
@@ -301,6 +317,9 @@ class Python3TensorFlowGPUImageTest(ImageTestBase, unittest.TestCase):
         yield _gpu_detect_example, 'ret = 0'
         yield _simple_tf_example, '30'
         yield _complex_tf_gpu_example, 'done'
+        # If you encounter long delay on this test, try repeating the last sub-case.
+        # If further runs takes short time, you need to rebuild tensorflow to match
+        # your GPU's CUDA compute capabilities to avoid JIT-ing ptx codes on the first run.
 
     def basic_failure(self):
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
