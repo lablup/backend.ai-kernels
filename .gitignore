@@ -73,4 +73,4 @@ node_modules/
 *.gz
 
 .*.swp
-*/venv
+venv
