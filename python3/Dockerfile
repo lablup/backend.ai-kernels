@@ -45,6 +45,7 @@ RUN /home/sorna/pyenv-run.sh pip install pandas
 RUN /home/sorna/pyenv-run.sh pip install seaborn
 RUN /home/sorna/pyenv-run.sh pip install networkx
 RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
+RUN /home/sorna/pyenv-run.sh pip install bokeh
 
 # Matplotlib configuration
 USER root
