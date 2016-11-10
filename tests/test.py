@@ -69,6 +69,8 @@ class ImageTestBase(object):
             extra_binds, extra_devices = self.prepare_nvidia()
             binds.update(extra_binds)
             devices.extend(extra_devices)
+        # Limit the CPU cores exposed to the container.
+        cpu_range = '0-{}'.format(min(os.cpu_count() - 1, 3))
         result = self.docker.create_container(self.image_name,
                                               name=container_name,
                                               ports=[(2001, 'tcp')],
@@ -80,6 +82,7 @@ class ImageTestBase(object):
                                                  devices=devices,
                                                  port_bindings={2001: ('127.0.0.1', 2001)},
                                                  binds=binds,
+                                                 cpuset_cpus=cpu_range,
                                               ),
                                               tty=False)
         self.container_id = result['Id']

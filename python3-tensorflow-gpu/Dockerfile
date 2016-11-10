@@ -101,5 +101,5 @@ LABEL com.lablup.sorna.nvidia.enabled="yes"
 
 USER work
 ENV PYTHONUNBUFFERED 1
-ENV OPENBLAS_NUM_THREADS 1
+ENV OPENBLAS_NUM_THREADS 4
 CMD /home/sorna/run.sh
