@@ -1,0 +1,5 @@
+venv
+tensorflow_build
+*.so
+*.o
+*.c
