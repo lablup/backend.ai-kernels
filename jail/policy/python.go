@@ -41,7 +41,12 @@ func (p *PythonPolicy) GetExtraEnvs() []string {
 }
 
 func (p *PythonPolicy) GetPreservedEnvKeys() []string {
-	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH", "MPLCONFIGDIR"}
+	return []string{
+		"HOME", "PATH",
+		"PYENV_ROOT", "PYTHONPATH",
+		"MPLCONFIGDIR",
+		"OPENBLAS_NUM_THREADS",
+	}
 }
 
 // vim: ts=4 sts=4 sw=4 noet

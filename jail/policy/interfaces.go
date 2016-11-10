@@ -45,6 +45,8 @@ type SandboxPolicy interface {
 func GeneratePolicy(exec_path string) (SandboxPolicy, error) {
 	_, exec_name := path.Split(exec_path)
 	switch exec_name {
+	case "python-tensorflow":
+		return new(PythonTensorFlowPolicy), nil
 	case "python", "python2", "python3":
 		return new(PythonPolicy), nil
 	case "julia":

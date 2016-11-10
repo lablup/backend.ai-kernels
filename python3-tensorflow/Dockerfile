@@ -86,4 +86,5 @@ LABEL com.lablup.sorna.maxmem="512m"
 
 USER work
 ENV PYTHONUNBUFFERED 1
+ENV OPENBLAS_NUM_THREADS 4
 CMD /home/sorna/run.sh
