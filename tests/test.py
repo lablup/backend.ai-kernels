@@ -151,7 +151,6 @@ class ImageTestBase(object):
             with self.subTest(subcase=idx + 1):
                 try:
                     resp = self.execute(idx, code)
-                    print('{!r}'.format(resp))
                 except TimeoutError as e:
                     # (Re-)raised exception here is captured by subTest ctxmgr.
                     # We just store the exception object and break out of the sub-case loop.
@@ -211,6 +210,29 @@ class Python2ImageTest(ImageTestBase, unittest.TestCase):
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
 
 
+_simple_plot_example = '''
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = 20
+theta = np.linspace(0.0, 2 * np.pi, N, endpoint=False)
+radii = 10 * np.random.rand(N)
+width = np.pi / 4 * np.random.rand(N)
+
+ax = plt.subplot(111, projection='polar')
+bars = ax.bar(theta, radii, width=width, bottom=0.0)
+
+for r, bar in zip(radii, bars):
+    bar.set_facecolor(plt.cm.jet(r / 10.))
+    bar.set_alpha(0.5)
+
+plt.show()
+plt.close()
+
+print(N, width)
+'''
+
+
 class Python3ImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-python3'
@@ -218,6 +240,8 @@ class Python3ImageTest(ImageTestBase, unittest.TestCase):
     def basic_success(self):
         yield 'print("hello world")', 'hello world'
         yield 'a = 1\nb = 2\nc = a + b\nprint(c)', '3'
+        yield 'import numpy as np; import matplotlib\nprint("ok")', 'ok'
+        yield _simple_plot_example, '20'
 
     def basic_failure(self):
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
