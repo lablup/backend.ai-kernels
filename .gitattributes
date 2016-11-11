@@ -1,2 +1,6 @@
 *.whl-orig filter=lfs diff=lfs merge=lfs -text
 *.whl filter=lfs diff=lfs merge=lfs -text
+bin/intra-jail filter=lfs diff=lfs merge=lfs -text
+bin/intra-jail-check filter=lfs diff=lfs merge=lfs -text
+bin/jail filter=lfs diff=lfs merge=lfs -text
+bin/jail-check filter=lfs diff=lfs merge=lfs -text
