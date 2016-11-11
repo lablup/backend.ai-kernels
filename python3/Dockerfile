@@ -31,21 +31,16 @@ RUN /home/sorna/install-python.sh
 
 # Install common Python packages
 USER root
+RUN apt-get update
 RUN apt-get install -y pkg-config
 RUN apt-get install -y libjpeg-dev libpng-dev
 RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
 USER work
-# matplotlib may install older version of dateutil; we first install it.
-RUN /home/sorna/pyenv-run.sh pip install python-dateutil
-RUN /home/sorna/pyenv-run.sh pip install numpy matplotlib
-RUN /home/sorna/pyenv-run.sh pip install scipy
+RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six python-dateutil
+RUN /home/sorna/pyenv-run.sh pip install numpy scipy matplotlib bokeh
 RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
-RUN /home/sorna/pyenv-run.sh pip install cvxpy
-RUN /home/sorna/pyenv-run.sh pip install pandas
-RUN /home/sorna/pyenv-run.sh pip install seaborn
-RUN /home/sorna/pyenv-run.sh pip install networkx
-RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
-RUN /home/sorna/pyenv-run.sh pip install bokeh
+RUN /home/sorna/pyenv-run.sh pip install pandas networkx cvxpy seaborn
+RUN /home/sorna/pyenv-run.sh pip install pillow sklearn
 
 # Matplotlib configuration
 USER root

@@ -18,7 +18,7 @@ WORKDIR /home/work
 USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get build-dep -y python
-RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev
+RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
@@ -30,19 +30,16 @@ RUN /home/sorna/install-python.sh
 
 # Install common Python packages
 USER root
+RUN apt-get update
 RUN apt-get install -y pkg-config
 RUN apt-get install -y libjpeg-dev libpng-dev
 RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
 USER work
-RUN /home/sorna/pyenv-run.sh pip install python-dateutil
-RUN /home/sorna/pyenv-run.sh pip install numpy matplotlib
-RUN /home/sorna/pyenv-run.sh pip install scipy
+RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six "python-dateutil>=1.4,<2"
+RUN /home/sorna/pyenv-run.sh pip install numpy scipy matplotlib bokeh
 RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
-RUN /home/sorna/pyenv-run.sh pip install cvxpy
-RUN /home/sorna/pyenv-run.sh pip install pandas
-RUN /home/sorna/pyenv-run.sh pip install seaborn
-RUN /home/sorna/pyenv-run.sh pip install networkx
-RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
+RUN /home/sorna/pyenv-run.sh pip install pandas networkx cvxpy seaborn
+RUN /home/sorna/pyenv-run.sh pip install pillow sklearn
 
 # Matplotlib configuration
 USER root
