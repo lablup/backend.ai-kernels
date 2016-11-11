@@ -62,29 +62,40 @@ class ImageTestBase(object):
                            if os.path.exists(_apparmor_profile_path) else []
 
         ret = self.docker.inspect_image(self.image_name)
+        mem_limit    = ret['ContainerConfig']['Labels'].get('io.sorna.maxmem', '128m')
+        exec_timeout = int(ret['ContainerConfig']['Labels'].get('io.sorna.timeout', '10'))
+        max_cores    = int(ret['ContainerConfig']['Labels'].get('io.sorna.maxcores', '1'))
+        cores = '0-{}'.format(min(os.cpu_count(), max_cores) - 1)
         binds={self.work_dir: {'bind': '/home/work', 'mode': 'rw'}}
-        volumes = []
+        volumes = ['/home/work']
         devices = []
-        if 'yes' == ret['ContainerConfig']['Labels'].get('com.lablup.sorna.nvidia.enabled', 'no'):
+        if 'yes' == ret['ContainerConfig']['Labels'].get('io.sorna.nvidia.enabled', 'no'):
             extra_binds, extra_devices = self.prepare_nvidia()
             binds.update(extra_binds)
             devices.extend(extra_devices)
-        # Limit the CPU cores exposed to the container.
-        cpu_range = '0-{}'.format(min(os.cpu_count() - 1, 3))
-        result = self.docker.create_container(self.image_name,
-                                              name=container_name,
-                                              ports=[(2001, 'tcp')],
-                                              volumes=['/home/work'] + volumes,
-                                              host_config=self.docker.create_host_config(
-                                                 mem_limit='1g',
-                                                 memswap_limit=-1,
-                                                 security_opt=security_opt,
-                                                 devices=devices,
-                                                 port_bindings={2001: ('127.0.0.1', 2001)},
-                                                 binds=binds,
-                                                 cpuset_cpus=cpu_range,
-                                              ),
-                                              tty=False)
+        result = self.docker.create_container(
+            self.image_name,
+            name=container_name,
+            ports=[
+                (2001, 'tcp'),
+                (2002, 'tcp'),
+                (2003, 'tcp'),
+            ],
+            volumes=volumes,
+            host_config=self.docker.create_host_config(
+                cpuset_cpus=cores,
+                mem_limit=mem_limit,
+                memswap_limit=0,
+                security_opt=security_opt,
+                port_bindings={
+                    2001: ('127.0.0.1', 2001),
+                    2002: ('127.0.0.1', 2002),
+                    2003: ('127.0.0.1', 2003),
+                },
+                devices=devices,
+                binds=binds,
+            ),
+            tty=False)
         self.container_id = result['Id']
         self.docker.start(self.container_id)
         self.kernel_addr = 'tcp://{}:{}'.format(self.docker_host, 2001)
@@ -263,6 +274,11 @@ print(sess.run(d))
 sess.close()
 '''
 
+
+# NOTE: From the next version of TensorFlow (0.12),
+#       initialize_all_variables() should be changed to global_variables_initializer().
+#       The former one is deprecated and will be removed after March 2017.
+
 _complex_tf_example = '''
 import tensorflow as tf
 import numpy as np
@@ -276,7 +292,7 @@ with tf.device('/cpu:0'):
     optimizer = tf.train.GradientDescentOptimizer(0.5)
     train = optimizer.minimize(loss)
     sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-    sess.run(tf.global_variables_initializer())
+    sess.run(tf.initialize_all_variables())
     for step in range(201):
         sess.run(train)
         if step % 20 == 0:
@@ -308,7 +324,7 @@ with tf.device('/gpu:0'):
     optimizer = tf.train.GradientDescentOptimizer(0.5)
     train = optimizer.minimize(loss)
     sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-    sess.run(tf.global_variables_initializer())
+    sess.run(tf.initialize_all_variables())
     for step in range(201):
         sess.run(train)
         if step % 20 == 0:

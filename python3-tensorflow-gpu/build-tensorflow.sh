@@ -36,7 +36,8 @@ apt-get update && apt-get install -y bazel
 cd $BUILD_DIR
 
 PYTHON_BIN_PATH=`which python` \
-TF_NEED_GCP=1 \
+TF_NEED_GCP=0 \
+TF_NEED_HDFS=0 \
 TF_NEED_CUDA=1 \
 GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
 TF_CUDA_VERSION=`python detect-cuda.py --cuda-ver` CUDA_TOOLKIT_PATH=/usr/local/cuda \

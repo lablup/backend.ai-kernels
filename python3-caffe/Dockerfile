@@ -15,9 +15,11 @@ ENV HOME /home/work
 WORKDIR /home/work
 
 # Install Python
+USER root
+ENV SORNA_PYTHON_VERSION 3.5.2
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get build-dep -y python3
-RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev
+RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
@@ -29,19 +31,16 @@ RUN /home/sorna/install-python.sh
 
 # Install common Python packages
 USER root
+RUN apt-get update
 RUN apt-get install -y pkg-config
 RUN apt-get install -y libjpeg-dev libpng-dev
 RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
 USER work
-RUN /home/sorna/pyenv-run.sh pip install python-dateutil
-RUN /home/sorna/pyenv-run.sh pip install numpy matplotlib
-RUN /home/sorna/pyenv-run.sh pip install scipy
+RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six python-dateutil
+RUN /home/sorna/pyenv-run.sh pip install numpy scipy matplotlib bokeh
 RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
-RUN /home/sorna/pyenv-run.sh pip install cvxpy
-RUN /home/sorna/pyenv-run.sh pip install pandas
-RUN /home/sorna/pyenv-run.sh pip install seaborn
-RUN /home/sorna/pyenv-run.sh pip install networkx
-RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
+RUN /home/sorna/pyenv-run.sh pip install pandas networkx cvxpy seaborn
+RUN /home/sorna/pyenv-run.sh pip install pillow sklearn
 
 # Matplotlib configuration
 USER root
@@ -78,16 +77,16 @@ RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.so /usr/lib/x86_64-linux
 RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.a /usr/lib/x86_64-linux-gnu/libboost_python3.a
 RUN ldconfig
 USER work
-RUN /home/sorna/pyenv-run.sh pip install --upgrade protobuf==3.0.0b3
+RUN /home/sorna/pyenv-run.sh pip install -U "protobuf>=3.0"
 RUN cd /home/sorna/caffe-install; make pycaffe
 ENV PYTHONPATH=/home/sorna/caffe-install/python:.
 
 # Install Sorna Media support
 USER root
-ADD *.whl /tmp
+ADD sorna_media-*.whl /tmp
 ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
-RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any.whl
+RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-*.whl
 
 # Secure installation scripts
 USER root
@@ -98,14 +97,14 @@ RUN apt-get install -y libseccomp2
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
-RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
 
 VOLUME ["/home/work"]
 EXPOSE 2001
 
-LABEL com.lablup.sorna.timeout="30"
-LABEL com.lablup.sorna.maxmem="512m"
+LABEL io.sorna.timeout="180"
+LABEL io.sorna.maxmem="1g"
+LABEL io.sorna.maxcores="4"
 
 USER work
 ENV PYTHONUNBUFFERED 1

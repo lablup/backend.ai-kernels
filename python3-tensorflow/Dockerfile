@@ -36,18 +36,12 @@ RUN apt-get install -y libjpeg-dev libpng-dev
 RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
 USER work
 # matplotlib may install older version of dateutil; we first install it.
-RUN /home/sorna/pyenv-run.sh pip install python-dateutil
-RUN /home/sorna/pyenv-run.sh pip install numpy matplotlib
-RUN /home/sorna/pyenv-run.sh pip install scipy
+RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six python-dateutil
+RUN /home/sorna/pyenv-run.sh pip install numpy scipy matplotlib bokeh
 RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
-RUN /home/sorna/pyenv-run.sh pip install cvxpy
-RUN /home/sorna/pyenv-run.sh pip install pandas
-RUN /home/sorna/pyenv-run.sh pip install seaborn
-RUN /home/sorna/pyenv-run.sh pip install networkx
-RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
-RUN /home/sorna/pyenv-run.sh pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.11.0rc2-cp35-cp35m-linux_x86_64.whl
-RUN /home/sorna/pyenv-run.sh pip install pillow
-RUN /home/sorna/pyenv-run.sh pip install sklearn
+RUN /home/sorna/pyenv-run.sh pip install cvxpy seaborn
+RUN /home/sorna/pyenv-run.sh pip install pandas networkx
+RUN /home/sorna/pyenv-run.sh pip install pillow sklearn
 
 # Additional packages
 USER root
@@ -60,11 +54,15 @@ RUN /home/sorna/pyenv-run.sh python /tmp/matplotlib-fontcache.py
 RUN rm /tmp/matplotlib-fontcache.py
 
 # Install Sorna Media support
-USER root
-ADD *.whl /tmp
-ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
-RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any.whl
+ADD matplotlibrc /home/sorna/.matplotlib/
+ADD sorna_media-*.whl /tmp
+RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-*.whl
+
+# Install TensorFlow
+USER work
+ADD tensorflow-*.whl /tmp
+RUN /home/sorna/pyenv-run.sh pip install /tmp/tensorflow-*.whl
 
 # Secure installation scripts
 USER root
@@ -75,14 +73,14 @@ ADD run.sh /home/sorna/run.sh
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
-RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
 
 VOLUME ["/home/work"]
 EXPOSE 2001
 
-LABEL com.lablup.sorna.timeout="30"
-LABEL com.lablup.sorna.maxmem="512m"
+LABEL io.sorna.timeout="30"
+LABEL io.sorna.maxmem="512m"
+LABEL io.sorna.maxcores="4"
 
 USER work
 ENV PYTHONUNBUFFERED 1
