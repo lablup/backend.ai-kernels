@@ -203,6 +203,8 @@ class ImageTestBase(object):
                 err_name, err_arg = expected
                 if 'lablup/kernel-lua' in self.image_name:
                     self.assertIn(err_name, resp['exceptions'][0][0])
+                elif 'lablup/kernel-haskell' in self.image_name:
+                    self.assertIn(err_name, resp['exceptions'][0][0])
                 else:
                     self.assertRegex(resp['exceptions'][0][0], '^' + re.escape(err_name))
                 if err_arg:
@@ -520,6 +522,75 @@ class JailTest(ImageTestBase, unittest.TestCase):
         yield 'import os\nos.chmod("/home/sorna/.", 700)', ('PermissionError', None)
         yield 'import os\nos.mkdir("/home/work/test")\n' + \
               'os.chmod("/home/work/test/../../sorna/", 700)', ('PermissionError', None)
+
+
+_haskell_if_test = """
+main = do
+    if 7 `mod` 2 == 0
+        then putStrLn "7 is even"
+        else putStrLn "7 is odd"
+
+    if 8 `mod` 4 == 0
+        then putStrLn "8 is divisible by 4"
+        else return ()
+
+    let num = 9
+    putStrLn $
+        if num < 0
+            then show num ++ " is negative"
+            else if num < 10
+                then show num ++ " has 1 digit"
+                else show num ++ " has multiple digits"
+"""
+
+_haskell_for_test = """
+import Control.Monad.Cont
+
+main = do
+    forM_ [1..3] $ \i -> do
+        print i
+
+    forM_ [7..9] $ \j -> do
+        print j
+
+    withBreak $ \\break ->
+        forM_ [1..] $ \_ -> do
+            p "loop"
+            break ()
+
+    where
+    withBreak = (`runContT` return) . callCC
+    p = liftIO . putStrLn
+"""
+
+_haskell_function_test = """
+plus :: Int -> Int -> Int
+plus = (+)
+
+plusPlus :: Int -> Int -> Int -> Int
+plusPlus a b c = a + b + c
+
+main = do
+    let res = plus 1 2
+    putStrLn $ "1+2 = " ++ show res
+
+    let res = plusPlus 1 2 3
+    putStrLn $ "1+2+3 = " ++ show res
+"""
+
+class HaskellTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-haskell'
+
+    def basic_success(self):
+        yield 'main :: IO ()\nmain = putStrLn "hello world!"', 'hello world!\n'
+        yield _haskell_function_test, '1+2 = 3\n1+2+3 = 6\n'
+        yield _haskell_if_test, '7 is odd\n8 is divisible by 4\n9 has 1 digit\n'
+        yield _haskell_for_test, '1\n2\n3\n7\n8\n9\nloop'
+
+    # Exception handling is not yet supported
+    # def basic_failure(self):
+    #     yield '1', ('ParseError', None)
 
 
 if __name__ == '__main__':
