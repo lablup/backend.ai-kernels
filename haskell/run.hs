@@ -1,4 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
+--------------------------------------------------------------------------
+-- This code is not working. Just keep this for possible future reference.
+--------------------------------------------------------------------------
 
 import Control.Monad
 import GHC.Generics
