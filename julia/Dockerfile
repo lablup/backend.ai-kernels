@@ -50,7 +50,7 @@ ENV JULIA_PKGDIR "/usr/local/share/julia/site"
 RUN chown work:work /usr/local/share/julia/site/
 USER work
 ADD package.jl /home/sorna/package.jl
-RUN julia /home/sorna/package.jl
+# RUN julia /home/sorna/package.jl
 
 # Secure installation scripts
 USER root
