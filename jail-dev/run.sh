@@ -11,7 +11,7 @@ fi
 # run or start/attach the container
 runningName=$(docker ps -a | grep jail-dev)
 if [ -z "$runningName" ]; then
-    docker run -i -t -v $repoPath:/root/workspace/src/sorna-repl --security-opts seccomp:unconfined --name jail-dev jail-dev
+    docker run -i -t -v $repoPath:/root/workspace/src/sorna-repl --security-opt seccomp:unconfined --name jail-dev jail-dev
 else
     docker start jail-dev && docker attach jail-dev
 fi
