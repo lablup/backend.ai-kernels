@@ -44,12 +44,14 @@ func (p *PythonTensorFlowPolicy) GetPreservedEnvKeys() []string {
 	return []string{
 		"HOME", "PATH",
 		"PYENV_ROOT", "PYTHONPATH",
+		"PYTHONUNBUFFERED",
 		"MPLCONFIGDIR",
 		"OPENBLAS_NUM_THREADS",
 		// for nvidia-docker base image
 		"CUDA_VERSION",
 		"CUDA_PKG_VERSION",
 		"LD_LIBRARY_PATH",
+		"LD_PRELOAD",
 	}
 }
 

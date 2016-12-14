@@ -335,6 +335,12 @@ with tf.device('/gpu:0'):
 print('done')
 '''
 
+_tf_tutorial_mnist_load = '''
+from tensorflow.examples.tutorials.mnist import input_data
+mnist = input_data.read_data_sets("./samples/MNIST_data/", one_hot=True)
+print('done')
+'''
+
 class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-python3-tensorflow'
@@ -360,6 +366,7 @@ class Python3TensorFlowGPUImageTest(ImageTestBase, unittest.TestCase):
         yield _gpu_detect_example, 'ret = 0'
         yield _simple_tf_example, '30'
         yield _complex_tf_gpu_example, 'done'
+        yield _tf_tutorial_mnist_load, 'done'
         # If you encounter long delay on this test, try repeating the last sub-case.
         # If further runs takes short time, you need to rebuild tensorflow to match
         # your GPU's CUDA compute capabilities to avoid JIT-ing ptx codes on the first run.

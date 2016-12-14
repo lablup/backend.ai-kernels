@@ -44,6 +44,7 @@ func (p *PythonPolicy) GetPreservedEnvKeys() []string {
 	return []string{
 		"HOME", "PATH",
 		"PYENV_ROOT", "PYTHONPATH",
+		"PYTHONUNBUFFERED",
 		"MPLCONFIGDIR",
 		"OPENBLAS_NUM_THREADS",
 	}

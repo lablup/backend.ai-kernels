@@ -42,7 +42,12 @@ func (p *GitPolicy) GetExtraEnvs() []string {
 }
 
 func (p *GitPolicy) GetPreservedEnvKeys() []string {
-	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH", "MPLCONFIGDIR"}
+	return []string{
+		"HOME", "PATH",
+		"PYENV_ROOT", "PYTHONPATH",
+		"MPLCONFIGDIR",
+		"LD_PRELOAD",
+	}
 }
 
 // vim: ts=4 sts=4 sw=4 noet

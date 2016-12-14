@@ -45,7 +45,13 @@ func (p *JuliaPolicy) GetExtraEnvs() []string {
 }
 
 func (p *JuliaPolicy) GetPreservedEnvKeys() []string {
-	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH", "JULIA_PKGDIR", "MPLCONFIGDIR"}
+	return []string{
+		"HOME", "PATH",
+		"PYENV_ROOT", "PYTHONPATH",
+		"JULIA_PKGDIR",
+		"MPLCONFIGDIR",
+		"LD_PRELOAD",
+	}
 }
 
 // vim: ts=4 sts=4 sw=4 noet

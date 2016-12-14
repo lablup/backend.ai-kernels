@@ -45,7 +45,11 @@ func (p *DefaultPolicy) GetExtraEnvs() []string {
 }
 
 func (p *DefaultPolicy) GetPreservedEnvKeys() []string {
-	return []string{"HOME", "PATH", "PYENV_ROOT", "PYTHONPATH"}
+	return []string{
+		"HOME", "PATH",
+		"PYENV_ROOT", "PYTHONPATH",
+		"LD_PRELOAD",
+	}
 }
 
 // vim: ts=4 sts=4 sw=4 noet
