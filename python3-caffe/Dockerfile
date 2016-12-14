@@ -69,7 +69,7 @@ USER root
 RUN apt-get install -y libatlas-dev libatlas-base-dev libblas-dev
 RUN ldconfig
 USER work
-RUN cd /home/sorna/caffe-install; make all -j4
+RUN cd /home/sorna/caffe-install; make all -j2
 USER root
 RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py35.so /usr/lib/x86_64-linux-gnu/libboost_python-py3.so
 RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py35.a /usr/lib/x86_64-linux-gnu/libboost_python-py3.a
@@ -98,6 +98,8 @@ ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
+ADD patch-libs.so /home/sorna/patch-libs.so
+ENV LD_PRELOAD /home/sorna/patch-libs.so
 
 VOLUME ["/home/work"]
 EXPOSE 2001
