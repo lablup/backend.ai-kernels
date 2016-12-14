@@ -48,7 +48,10 @@ func (p *JuliaPolicy) GetPreservedEnvKeys() []string {
 	return []string{
 		"HOME", "PATH",
 		"PYENV_ROOT", "PYTHONPATH",
+		"PYTHONUNBUFFERED",
+		"JULIA_CPU_CORES",
 		"JULIA_PKGDIR",
+		"OPENBLAS_NUM_THREADS",
 		"MPLCONFIGDIR",
 		"LD_PRELOAD",
 	}

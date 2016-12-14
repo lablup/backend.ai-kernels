@@ -65,10 +65,16 @@ class ImageTestBase(object):
         mem_limit    = ret['ContainerConfig']['Labels'].get('io.sorna.maxmem', '128m')
         exec_timeout = int(ret['ContainerConfig']['Labels'].get('io.sorna.timeout', '10'))
         max_cores    = int(ret['ContainerConfig']['Labels'].get('io.sorna.maxcores', '1'))
-        cores = '0-{}'.format(min(os.cpu_count(), max_cores) - 1)
+        envs_corecount = ret['ContainerConfig']['Labels'].get('io.sorna.envs.corecount', '')
+        envs_corecount = envs_corecount.split(',') if envs_corecount else []
+
+        num_cores = min(os.cpu_count(), max_cores)
+        cores = '0-{}'.format(num_cores - 1)
         binds={self.work_dir: {'bind': '/home/work', 'mode': 'rw'}}
         volumes = ['/home/work']
         devices = []
+        envs = {k: str(num_cores) for k in envs_corecount}
+
         if 'yes' == ret['ContainerConfig']['Labels'].get('io.sorna.nvidia.enabled', 'no'):
             extra_binds, extra_devices = self.prepare_nvidia()
             binds.update(extra_binds)
@@ -81,6 +87,7 @@ class ImageTestBase(object):
                 (2002, 'tcp'),
                 (2003, 'tcp'),
             ],
+            environment=['{}={}'.format(k, v) for k, v in envs.items()],
             volumes=volumes,
             host_config=self.docker.create_host_config(
                 cpuset_cpus=cores,

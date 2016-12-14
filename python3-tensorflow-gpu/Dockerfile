@@ -91,6 +91,8 @@ EXPOSE 2001
 LABEL io.sorna.timeout="180"
 LABEL io.sorna.maxmem="1g"
 LABEL io.sorna.maxcores="4"
+LABEL io.sorna.mode="query"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS"
 LABEL io.sorna.nvidia.enabled="yes"
 
 USER work

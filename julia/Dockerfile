@@ -63,6 +63,14 @@ ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
 RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
+ADD patch-libs.so /home/sorna/patch-libs.so
+ENV LD_PRELOAD /home/sorna/patch-libs.so
+
+LABEL io.sorna.timeout="180"
+LABEL io.sorna.maxmem="512m"
+LABEL io.sorna.maxcores="4"
+LABEL io.sorna.mode="query"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,JULIA_CPU_CORES"
 
 ENV HOME /home/work
 WORKDIR /home/work

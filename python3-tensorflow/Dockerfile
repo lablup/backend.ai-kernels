@@ -83,8 +83,9 @@ EXPOSE 2001
 LABEL io.sorna.timeout="30"
 LABEL io.sorna.maxmem="512m"
 LABEL io.sorna.maxcores="4"
+LABEL io.sorna.mode="query"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS"
 
 USER work
 ENV PYTHONUNBUFFERED 1
-ENV OPENBLAS_NUM_THREADS 4
 CMD /home/sorna/run.sh

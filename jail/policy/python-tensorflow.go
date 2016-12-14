@@ -11,7 +11,13 @@ func (p *PythonTensorFlowPolicy) CheckPathOp(path string, op PathOps, mode int) 
 	var allow bool
 	switch op {
 	case OP_CHMOD:
-		allow = strings.HasPrefix(path, "/home/work/")
+		allow = false
+		for _, prefix := range WhitelistPaths[op] {
+			if strings.HasPrefix(path, prefix) {
+				allow = true
+				break
+			}
+		}
 	default:
 		allow = true
 	}

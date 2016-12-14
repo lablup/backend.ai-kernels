@@ -169,6 +169,7 @@ func init() {
 		"sched_get_priority_max",
 		"sched_get_priority_min",
 		"sched_rr_get_interval",
+		"sched_yield",
 		"getpriority",
 		"getcpu",
 		"eventfd",

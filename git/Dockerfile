@@ -84,12 +84,15 @@ ADD run.py /home/sorna/run.py
 RUN chown root:root /home/sorna/*
 RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
+ADD patch-libs.so /home/sorna/patch-libs.so
+ENV LD_PRELOAD /home/sorna/patch-libs.so
 
 VOLUME ["/home/work"]
 EXPOSE 2001
 
-LABEL com.lablup.sorna.timeout="10"
-LABEL com.lablup.sorna.maxmem="128m"
+LABEL io.sorna.timeout="10"
+LABEL io.sorna.maxmem="128m"
+LABEL io.sorna.mode="query+pty"
 
 USER work
 ENV PYTHONUNBUFFERED 1
