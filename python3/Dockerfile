@@ -18,8 +18,11 @@ WORKDIR /home/work
 USER root
 ENV SORNA_PYTHON_VERSION 3.5.2
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN apt-get update && apt-get build-dep -y python3
-RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
+RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
+RUN apt-get update
+RUN apt-get install -y build-essential git-core wget ca-certificates \
+                       libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
@@ -36,7 +39,7 @@ RUN apt-get install -y pkg-config
 RUN apt-get install -y libjpeg-dev libpng-dev
 RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
 USER work
-RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six python-dateutil
+RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six "python-dateutil>2"
 RUN /home/sorna/pyenv-run.sh pip install numpy scipy matplotlib bokeh
 RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
 RUN /home/sorna/pyenv-run.sh pip install pandas networkx cvxpy seaborn
@@ -80,7 +83,7 @@ LABEL io.sorna.timeout="10"
 LABEL io.sorna.maxmem="128m"
 LABEL io.sorna.maxcores="1"
 LABEL io.sorna.mode="query"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
 
 USER work
 ENV PYTHONUNBUFFERED 1
