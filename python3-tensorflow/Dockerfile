@@ -33,7 +33,7 @@ RUN /home/sorna/install-python.sh
 USER root
 RUN apt-get install -y pkg-config
 RUN apt-get install -y libjpeg-dev libpng-dev
-RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
+RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran libhdf5-7
 USER work
 # matplotlib may install older version of dateutil; we first install it.
 RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six python-dateutil
