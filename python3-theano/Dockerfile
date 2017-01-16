@@ -62,6 +62,8 @@ RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-*.whl
 # Install Theano
 USER work
 RUN /home/sorna/pyenv-run.sh pip install Theano
+# Install Keras
+RUN /home/sorna/pyenv-run.sh pip install keras
 
 # Secure installation scripts
 USER root
@@ -87,4 +89,5 @@ LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS"
 
 USER work
 ENV PYTHONUNBUFFERED 1
+ENV KERAS_BACKEND theano
 CMD /home/sorna/run.sh
