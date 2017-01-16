@@ -12,32 +12,35 @@ RUN chown -R work:work /home/sorna
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /home/work
+WORKDIR /home/work
 
 # Install latest Octave
 USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y software-properties-common build-essential
+RUN apt-get install -y software-properties-common build-essential libzmq3-dev
 RUN apt-get install -y liboctave-dev
 RUN add-apt-repository -y ppa:octave/stable
 RUN apt-get install -y octave
-ENV HOME /home/sorna
-WORKDIR /home/sorna
+ADD install_zeromq.m /home/sorna/install_zeromq.m
+RUN octave-cli /home/sorna/install_zeromq.m
 
 # Secure installation scripts
 USER root
+RUN apt-get install -y libseccomp2
 ADD run.m /home/sorna/run.m
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-RUN apt-get install -y libseccomp2
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
-RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
+ADD patch-libs.so /home/sorna/patch-libs.so
+ENV LD_PRELOAD /home/sorna/patch-libs.so
 
 ENV HOME /home/work
 WORKDIR /home/work
+
 VOLUME ["/home/work"]
 EXPOSE 2001
 
