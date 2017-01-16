@@ -16,7 +16,7 @@ WORKDIR /home/work
 
 # Install Python
 USER root
-ENV SORNA_PYTHON_VERSION 3.5.2
+ENV SORNA_PYTHON_VERSION 3.6.0
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf

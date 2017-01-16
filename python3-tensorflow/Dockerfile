@@ -16,7 +16,7 @@ WORKDIR /home/work
 
 # Install Python
 USER root
-ENV SORNA_PYTHON_VERSION 3.5.2
+ENV SORNA_PYTHON_VERSION 3.6.0
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get build-dep -y python3
 RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
@@ -40,7 +40,7 @@ RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six python-dateutil
 RUN /home/sorna/pyenv-run.sh pip install numpy scipy matplotlib bokeh
 RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
 RUN /home/sorna/pyenv-run.sh pip install cvxpy seaborn
-RUN /home/sorna/pyenv-run.sh pip install pandas networkx
+RUN /home/sorna/pyenv-run.sh pip install pandas networkx h5py
 RUN /home/sorna/pyenv-run.sh pip install pillow sklearn
 
 # Additional packages
@@ -63,6 +63,9 @@ RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-*.whl
 USER work
 ADD tensorflow-*.whl /tmp
 RUN /home/sorna/pyenv-run.sh pip install /tmp/tensorflow-*.whl
+
+# Install Keras
+RUN /home/sorna/pyenv-run.sh pip install keras
 
 # Secure installation scripts
 USER root

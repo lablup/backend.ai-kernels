@@ -7,4 +7,5 @@ imgdirs=$(find . -maxdepth 1 -type d -not -regex '^\(\.\|\./\(\.git\|tests\|old\
 for dest in $imgdirs; do
     cp $GOPATH/bin/jail $dest/
     cp $GOPATH/bin/intra-jail $dest/
+    cp $GOPATH/jail-hook/patch-libs.so $dest/
 done
