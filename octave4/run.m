@@ -1,20 +1,32 @@
 pkg load zeromq
 
-function [stdout, stderr, media, exceptions] = execute_code(code)
+addpath('./jsonlab-master');
+% Override memory specific function
+function clear (varargin)
+  %for i = 1:length(varargin)
+	%  printf (varargin{i})
+  %endfor
+endfunction
+
+function result = execute_code(code)
   stdout = [];
   stderr = [];
   media = [];
   exceptions = [];
   try
     evalc(code);
-    if strfind(code, "plot")
-	  print("test.svg")
-    elseif strfind(code, "figure")
-	  print("test.svg")
+    if strfind(code, "plot") || strfind(code, "figure")
+      print("octave_figure_internal.svg");
+      fstr = fileread("octave_figure_internal.svg");
+      media = fstr;
     endif
   catch
     exceptions = lasterror.message;
   end_try_catch
+  result.stdout = stdout;
+  result.stderr = stderr;
+  result.media = media;
+  result.exceptions = exceptions;
 endfunction
 
 sock = zmq_socket(ZMQ_PULL);
@@ -25,5 +37,5 @@ printf ("serving at port 2001...")
 while(true)
   codeid = zmq_recv(sock, 100, 0);
   code = zmq_recv(sock, 100000, 0);
-  [stdout, stderr, media, exceptions] = execute_code(char(code));
+  result = execute_code(char(code));
 endwhile

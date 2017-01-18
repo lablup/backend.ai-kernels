@@ -25,6 +25,11 @@ RUN apt-get install -y octave
 ADD install_zeromq.m /home/sorna/install_zeromq.m
 RUN octave-cli /home/sorna/install_zeromq.m
 
+RUN mkdir /home/sorna/jsonlab
+#COPY jsonlab/*.m /home/sorna/jsonlab/
+COPY jsonlab.tgz /home/sorna/jsonlab.tgz
+RUN tar xvzf /home/sorna/jsonlab.tgz -C /home/sorna/
+
 # Secure installation scripts
 USER root
 RUN apt-get install -y libseccomp2
