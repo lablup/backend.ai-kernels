@@ -6,7 +6,12 @@ function [stdout, stderr, media, exceptions] = execute_code(code)
   media = [];
   exceptions = [];
   try
-    eval(code);
+    evalc(code);
+    if strfind(code, "plot")
+	  print("test.svg")
+    elseif strfind(code, "figure")
+	  print("test.svg")
+    endif
   catch
     exceptions = lasterror.message;
   end_try_catch

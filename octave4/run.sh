@@ -1,2 +1,2 @@
 #! /bin/bash
-exec /home/sorna/jail default `which octave` /home/sorna/run.m
+exec /home/sorna/jail default `which octave` --no-window-system /home/sorna/run.m
