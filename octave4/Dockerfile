@@ -24,9 +24,12 @@ RUN apt-get install -y g++ make gawk gfortran gnuplot texi2html icoutils libxft-
 WORKDIR /home/sorna
 RUN apt-get install -y wget
 RUN wget ftp://ftp.gnu.org/gnu/octave/octave-4.2.0.tar.lz 
-RUN tar xf octave-4*.lz
-RUN cd octave-4*
-RUN ./configure --enable-jit
+RUN apt-get install -y lzip
+RUN lzip -d octave-4.2.0.tar.lz
+RUN tar xf octave-4.2.0.tar
+WORKDIR /home/sorna/octave-4.2.0
+#RUN ./configure --enable-jit
+RUN ./configure
 RUN make -j7
 RUN make install
 RUN make check
