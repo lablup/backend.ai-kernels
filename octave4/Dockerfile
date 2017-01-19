@@ -20,8 +20,19 @@ RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y software-properties-common build-essential libzmq3-dev
 RUN apt-get install -y liboctave-dev
-RUN add-apt-repository -y ppa:octave/stable
-RUN apt-get install -y octave
+RUN apt-get install -y g++ make gawk gfortran gnuplot texi2html icoutils libxft-dev gperf flex libbison-dev libqhull-dev libglpk-dev libcurl4-gnutls-dev libfltk1.3-dev librsvg2-dev libqrupdate-dev libgl2ps-dev libarpack2-dev libqscintilla2-dev libreadline-dev libncurses5-dev libhdf5-dev llvm-dev libqt4-dev default-jdk texinfo libfftw3-dev libgraphicsmagick++-dev libjasper-dev libfreeimage-dev transfig epstool librsvg2-bin libosmesa6-dev
+WORKDIR /home/sorna
+RUN apt-get install -y wget
+RUN wget ftp://ftp.gnu.org/gnu/octave/octave-4.2.0.tar.lz 
+RUN tar xf octave-4*.lz
+RUN cd octave-4*
+RUN ./configure --enable-jit
+RUN make -j7
+RUN make install
+RUN make check
+#RUN add-apt-repository -y ppa:octave/stable
+#RUN apt-get update
+#RUN apt-get install -y octave
 ADD install_zeromq.m /home/sorna/install_zeromq.m
 RUN octave-cli /home/sorna/install_zeromq.m
 
