@@ -33,14 +33,18 @@ RUN ./configure
 RUN make -j7
 RUN make install
 #RUN make check
+RUN rm -rf /home/sorna/octave-4.2.0
+
+# Use PPA (when public PPA supports octave 4.2)
 #RUN add-apt-repository -y ppa:octave/stable
 #RUN apt-get update
 #RUN apt-get install -y octave
+
+# Install script
 ADD install_zeromq.m /home/sorna/install_zeromq.m
 RUN octave-cli /home/sorna/install_zeromq.m
 
 RUN mkdir /home/sorna/jsonlab
-#COPY jsonlab/*.m /home/sorna/jsonlab/
 COPY jsonlab.tgz /home/sorna/jsonlab.tgz
 RUN tar xvzf /home/sorna/jsonlab.tgz -C /home/sorna/
 
