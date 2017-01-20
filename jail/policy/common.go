@@ -116,6 +116,8 @@ func init() {
 		"msync",
 		"sync",
 		"syncfs",
+		"mkfifo",
+		"mkfifoat",
 		"ftruncate",
 		"utimensat",
 		"futimens",
