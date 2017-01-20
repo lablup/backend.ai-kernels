@@ -36,6 +36,7 @@ func init() {
 		"access", // 2nd param is mode
 		"creat",  // 2nd param is mode
 		"mkdir",  // 2nd param is mode
+		"mknod",  // 2nd param is mode
 		"chmod",  // 2nd param is mode
 		"open",   // 3rd param is mode
 		// 2nd param is filename/path
@@ -44,6 +45,7 @@ func init() {
 		"fchmodat",  // 3rd param is mode
 		"faccessat", // 3rd param is mode
 		"mkdirat",   // 3rd param is mode
+		"mknodat",   // 3rd param is mode
 		"openat",    // 4th param is mode
 		// 1st & 2nd params are filename/paths
 		"link",
@@ -84,6 +86,7 @@ func init() {
 		"pwritev",
 		"pwrite64",
 		"sendfile",
+		"sendfile64",
 		"sendto",
 		"sendmsg",
 		"sendmmsg",
@@ -97,6 +100,7 @@ func init() {
 		"munmap",
 		"mbind",
 		"mlock",
+		"mlock2",
 		"munlock",
 		"mlockall",
 		"munlockall",
@@ -116,8 +120,7 @@ func init() {
 		"msync",
 		"sync",
 		"syncfs",
-		"mkfifo",
-		"mkfifoat",
+		"memfd_create",
 		"ftruncate",
 		"utimensat",
 		"futimens",
@@ -128,6 +131,20 @@ func init() {
 		"vmsplice",
 		"tkill",
 		"tgkill",
+		"io_cancel",
+		"io_destroy",
+		"io_getevents",
+		"ioprio_get",
+		"ioprio_set",
+		"io_setup",
+		"io_submit",
+		"ipc",
+		"mq_getsetattr",
+		"mq_notify",
+		"mq_open",
+		"mq_timedreceive",
+		"mq_timedsend",
+		"mq_unlink",
 		"rt_sigaction",
 		"rt_sigprocmask",
 		"rt_sigreturn",
@@ -138,14 +155,15 @@ func init() {
 		"rt_tgsigqueueinfo",
 		"sigaltstack",
 		"restart_syscall",
-		"semget",
-		"semat",
 		"semctl",
+		"semget",
+		"semop",
 		"semtimedop",
 		"shmget",
 		"shmat",
 		"shmctl",
 		"shmdt",
+		"shmget",
 		"msgget",
 		"msgsnd",
 		"msgrcv",
@@ -156,6 +174,7 @@ func init() {
 		"arch_prctl",
 		"prctl",
 		"getrlimit",
+		"ugetrlimit",
 		"set_tid_address",
 		"clear_tid_address",
 		"set_thread_area",
@@ -166,6 +185,7 @@ func init() {
 		"sched_getaffinity",
 		"sched_setaffinity",
 		"sched_getparam",
+		"sched_getattr",
 		"sched_getscheduler",
 		"sched_setscheduler",
 		"sched_get_priority_max",
@@ -215,6 +235,8 @@ func init() {
 		"select",
 		"pselect",
 		"pselect6",
+		"_newselect",
+		"pause",
 		"poll",
 		"ppoll",
 		"epoll_create",
@@ -222,6 +244,11 @@ func init() {
 		"epoll_wait",
 		"epoll_pwait",
 		"epoll_ctl",
+		"fanotify_mark",
+		"inotify_add_watch",
+		"inotify_init",
+		"inotify_init1",
+		"inotify_rm_watch",
 		"exit",
 		"exit_group",
 		"wait",
