@@ -32,7 +32,7 @@ WORKDIR /home/sorna/octave-4.2.0
 RUN ./configure
 RUN make -j7
 RUN make install
-RUN make check
+#RUN make check
 #RUN add-apt-repository -y ppa:octave/stable
 #RUN apt-get update
 #RUN apt-get install -y octave
