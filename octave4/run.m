@@ -1,7 +1,7 @@
 pkg load zeromq
-setenv ("GNUTERM", "x11")
-% addpath('/home/sorna/jsonlab-master');
-addpath('./jsonlab-master');
+addpath('/home/sorna/jsonlab-master');
+%addpath('./jsonlab-master');
+
 % Override memory specific function
 function clear (varargin)
   %for i = 1:length(varargin)
@@ -17,13 +17,13 @@ function result = execute_code(code)
   try
     stdout = evalc(code, 'stderr = lasterror.message;');
     if strfind(code, "plot") || strfind(code, "figure")
-      allFigInW = findall(0, 'type', 'figure')
+      allFigInW = findall(0, 'type', 'figure');
       _mediaCount = 1;
       for i = 1:length(allFigInW)
         print(allFigInW(i), "octave_figure_internal.svg");
         fstr = fileread("octave_figure_internal.svg");
         media{_mediaCount} = {"image/svg+xml", fstr};
-        _mediaCount = _mediaCount + 1
+        _mediaCount = _mediaCount + 1;
         unlink("octave_figure_internal.svg");
       endfor
     endif
@@ -41,12 +41,10 @@ zmq_bind(sock, "tcp://*:2001");
 printf (["Octave version : ", version, "\n"])
 printf ("serving at port 2001...")
 
-%cd /home/work;
 while(true)
   codeid = zmq_recv(sock, 100, 0);
   code = zmq_recv(sock, 100000, 0);
   result = execute_code(char(code));
   a = savejson('', result);
   zmq_send(sock, a);
-  printf (a)
 endwhile
