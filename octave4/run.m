@@ -14,7 +14,7 @@ function result = execute_code(code)
   media = [];
   exceptions = [];
   try
-    stdout = evalc(code);
+    stdout = evalc(code, 'stderr = lasterror.message;');
     if strfind(code, "plot") || strfind(code, "figure")
       print("octave_figure_internal.svg");
       fstr = fileread("octave_figure_internal.svg");
