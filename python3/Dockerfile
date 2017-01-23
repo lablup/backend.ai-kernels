@@ -39,7 +39,7 @@ RUN apt-get install -y pkg-config
 RUN apt-get install -y libjpeg-dev libpng-dev
 RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
 USER work
-RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six "python-dateutil>2"
+RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist simplejson six "python-dateutil>2"
 RUN /home/sorna/pyenv-run.sh pip install numpy scipy matplotlib bokeh
 RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
 RUN /home/sorna/pyenv-run.sh pip install pandas networkx cvxpy seaborn
