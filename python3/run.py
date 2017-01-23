@@ -9,7 +9,9 @@ import logging
 from namedlist import namedtuple, namedlist, FACTORY
 import os
 from os import path
+import queue
 import sys
+import threading
 import time
 import traceback
 import types
@@ -76,6 +78,10 @@ class InputRequestPending(Exception):
     pass
 
 
+class UserCodeFinished(Exception):
+    pass
+
+
 class CodeRunner(object):
     '''
     A thin wrapper for REPL.
@@ -91,6 +97,8 @@ class CodeRunner(object):
         self.stdout_buffer = io.StringIO()
         self.stderr_buffer = io.StringIO()
 
+        self.input_event = threading.Event()
+        self.input_queue = queue.Queue()
         self.executor = ThreadPoolExecutor(max_workers=1)
 
         # Initialize user module and namespaces.
@@ -102,9 +110,9 @@ class CodeRunner(object):
         self.user_ns = user_module.__dict__
 
     def handle_input(self, prompt=None, password=False):
-        log.debug('handle_input')
         print(prompt, end='')
-        return something  # TODO
+        self.input_event.set()
+        return self.input_queue.get()
 
     def flush_console(self):
         self.result.stdout = self.stdout_buffer.getvalue()
@@ -132,18 +140,14 @@ class CodeRunner(object):
         else:
 
             def run_user_code():
-                log = logging.getLogger('user-code')
                 sys.stdout, orig_stdout = self.stdout_buffer, sys.stdout
                 sys.stderr, orig_stderr = self.stderr_buffer, sys.stderr
                 try:
-                    log.debug('started')
                     exec(code_obj, self.user_ns)
                 except Exception as e:
-                    log.exception('error')
                     traceback.print_exc()
                     # TODO: format exception into stderr
                 finally:
-                    log.debug('finished')
                     sys.stdout = orig_stdout
                     sys.stderr = orig_stderr
 
@@ -167,15 +171,23 @@ class CodeRunner(object):
             self.result = ResultV1()
             try:
                 while not self.future.done():
-                    log.debug('cont poll')
                     try:
-                        self.future.result(2.0)
+                        for _ in range(10):
+                            if self.input_event.wait(0.2):
+                                self.input_event.clear()
+                                raise InputRequestPending
+                            if self.future.done():
+                                raise UserCodeFinished
+                        else:
+                            raise TimeoutError
                     except InputRequestPending:
                         self.flush_console()
                         code_id, user_input = yield ContinuationStatus.WAITING_INPUT, self.result
                         self.exceptions = []
                         self.result = ResultV1()
-                        # TODO: inject user_input
+                        self.input_queue.put(user_input)
+                    except UserCodeFinished:
+                        break
                     except TimeoutError:
                         self.flush_console()
                         yield ContinuationStatus.CONTINUED, self.result
@@ -220,7 +232,6 @@ def main():
                     gen = iter(continuation)
                     status, result = next(gen)
                     while True:
-                        log.debug(f'replying {status}')
                         sock.send_json({
                             'stdout': result.stdout,
                             'stderr': result.stderr,
