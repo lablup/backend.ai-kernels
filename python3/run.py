@@ -15,10 +15,9 @@ import threading
 import time
 import traceback
 import types
-import zmq
-import simplejson as json
 
-import sorna.drawing
+import simplejson as json
+import zmq
 
 ExceptionInfo = namedtuple('ExceptionInfo', [
     'exc',
