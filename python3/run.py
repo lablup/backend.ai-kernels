@@ -211,7 +211,7 @@ def main():
 
     # Replace stdin with a "null" file
     # (trying to read stdin will raise EOFError immediately afterwards.)
-    #sys.stdin = open(os.devnull, 'rb')
+    sys.stdin = open(os.devnull, 'rb')
 
     # Initialize context object.
     runner = CodeRunner()
