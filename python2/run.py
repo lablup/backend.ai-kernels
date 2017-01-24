@@ -124,8 +124,6 @@ class CodeRunner(object):
 
 
 if __name__ == '__main__':
-    # Use the "confined" working directory
-    os.chdir('/home/work')
     # Replace stdin with a "null" file
     # (trying to read stdin will raise EOFError immediately afterwards.)
     sys.stdin = open(os.devnull, 'rb')
