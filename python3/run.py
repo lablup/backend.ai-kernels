@@ -145,8 +145,9 @@ class CodeRunner(object):
                 try:
                     exec(code_obj, self.user_ns)
                 except Exception as e:
-                    traceback.print_exc()
-                    # TODO: format exception into stderr
+                    # strip the first frame
+                    exc_type, exc_val, tb = sys.exc_info()
+                    traceback.print_exception(exc_type, exc_val, tb.tb_next)
                 finally:
                     sys.stdout = orig_stdout
                     sys.stderr = orig_stderr
