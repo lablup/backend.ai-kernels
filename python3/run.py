@@ -193,10 +193,11 @@ class CodeRunner(object):
                         yield ContinuationStatus.CONTINUED, self.result
                         self.exceptions = []
                         self.result = ResultV1()
-                self.flush_console()
-                yield ContinuationStatus.FINISHED, self.result
             except:
                 log.exception('unexpected error')
+            finally:
+                self.flush_console()
+                yield ContinuationStatus.FINISHED, self.result
 
         return _continuation()
 
