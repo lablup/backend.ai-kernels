@@ -131,6 +131,7 @@ class CodeRunner(object):
         if self.input_supported:
             self.user_module.__builtins__.input = self.handle_input
 
+        self.user_module.__builtins__._sorna_media = []
         try:
             code_obj = code.compile_command(code_text, symbol='exec')
         except (OverflowError, IndentationError, SyntaxError,
