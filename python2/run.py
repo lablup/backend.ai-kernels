@@ -93,6 +93,7 @@ class CodeRunner(object):
             exceptions.append(ExceptionInfo.create(value, before_exec, tb))
         sys.excepthook = my_excepthook
 
+        self.user_module.__builtin__._sorna_media = []
         try:
             code_obj = code.compile_command(src, symbol='exec')
         except IndentationError as e:
@@ -100,7 +101,6 @@ class CodeRunner(object):
         except (OverflowError, SyntaxError, ValueError, TypeError, MemoryError) as e:
             exceptions.append(ExceptionInfo.create(e, before_exec, None))
         else:
-            self.user_module.__builtin__._sorna_media = []
             before_exec = False
             try:
                 exec code_obj in self.user_ns
