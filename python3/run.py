@@ -123,6 +123,15 @@ class CodeRunner(object):
         self.stderr_buffer.seek(0, io.SEEK_SET)
         self.stderr_buffer.truncate(0)
 
+    @staticmethod
+    def strip_traceback(tb):
+        while tb is not None:
+            frame_summary = traceback.extract_tb(tb, limit=1)[0]
+            if frame_summary[0] == '<input>':
+                break
+            tb = tb.tb_next
+        return tb
+
     def execute(self, code_id, code_text):
         self.exceptions = []
 
@@ -131,11 +140,17 @@ class CodeRunner(object):
             self.user_module.__builtins__.input = self.handle_input
 
         self.user_module.__builtins__._sorna_media = []
+        self.result = ResultV1()
         try:
             code_obj = code.compile_command(code_text, symbol='exec')
         except (OverflowError, IndentationError, SyntaxError,
                 ValueError, TypeError, MemoryError) as e:
-            self.exceptions.append(ExceptionInfo.create(e, True, None))
+            #self.exceptions.append(ExceptionInfo.create(e, True, None))
+            exc_type, exc_val, tb = sys.exc_info()
+            user_tb = type(self).strip_traceback(tb)
+            err_str = ''.join(traceback.format_exception(exc_type, exc_val, user_tb))
+            hdr_str = 'Traceback (most recent call last):\n' if not err_str.startswith('Traceback ') else ''
+            self.result.stderr = hdr_str + err_str
             self.has_early_exception = True
         else:
 
@@ -147,7 +162,8 @@ class CodeRunner(object):
                 except Exception as e:
                     # strip the first frame
                     exc_type, exc_val, tb = sys.exc_info()
-                    traceback.print_exception(exc_type, exc_val, tb.tb_next)
+                    user_tb = type(self).strip_traceback(tb)
+                    traceback.print_exception(exc_type, exc_val, user_tb)
                 finally:
                     sys.stdout = orig_stdout
                     sys.stderr = orig_stderr
@@ -164,7 +180,6 @@ class CodeRunner(object):
 
         def _continuation():
             if self.has_early_exception:
-                # TODO: format self.exception into stderr
                 yield ContinuationStatus.FINISHED, self.result
                 return
 
