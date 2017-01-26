@@ -18,23 +18,14 @@ WORKDIR /home/work
 USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y software-properties-common build-essential libzmq3-dev liboctave-dev
-#RUN apt-get install -y g++ make gawk gfortran gnuplot texi2html icoutils libxft-dev gperf flex libbison-dev libqhull-dev libglpk-dev libcurl4-gnutls-dev libfltk1.3-dev librsvg2-dev libqrupdate-dev libgl2ps-dev libarpack2-dev libqscintilla2-dev libreadline-dev libncurses5-dev libhdf5-dev llvm-dev libqt4-dev default-jdk texinfo libfftw3-dev libgraphicsmagick++-dev libjasper-dev libfreeimage-dev transfig epstool librsvg2-bin libosmesa6-dev
+RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
+RUN apt-get install -y build-essential
+RUN apt-get install -y liboctave-dev
+RUN apt-get install -y libzmq3-dev
 WORKDIR /home/sorna
-RUN apt-get install -y wget
-RUN wget ftp://ftp.gnu.org/gnu/octave/octave-4.2.0.tar.lz 
-RUN apt-get install -y lzip
-RUN lzip -d octave-4.2.0.tar.lz
-RUN tar xf octave-4.2.0.tar
-WORKDIR /home/sorna/octave-4.2.0
-RUN apt-get build-dep -y octave
-#RUN apt-get install -y icoutils gnuplot gfortran gperf libbison-dev libqhull-dev flex librsvg2-dev librsvg2-bin  
-#RUN ./configure --enable-jit
-RUN ./configure
-RUN make -j3
-RUN make install
-#RUN make check
-RUN rm -rf /home/sorna/octave-4.2.0
+ADD *.deb /tmp/
+RUN dpkg -i /tmp/*.deb
 
 # Use PPA (when public PPA supports octave 4.2)
 #RUN add-apt-repository -y ppa:octave/stable

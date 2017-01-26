@@ -22,6 +22,8 @@ function result = execute_code(code)
       for i = 1:length(allFigInW)
         print(allFigInW(i), "octave_figure_internal.svg");
         fstr = fileread("octave_figure_internal.svg");
+        fstr = strrep(fstr, '  ', ' ')
+        fstr = strrep(fstr, '	', ' ')
         media{_mediaCount} = {"image/svg+xml", fstr};
         _mediaCount = _mediaCount + 1;
         unlink("octave_figure_internal.svg");
