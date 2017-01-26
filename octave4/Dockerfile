@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Jonghyun Park "jpark@lablup.com"
+MAINTAINER Jeongkyu Shin "jshin@lablup.com"
 
 # Add an isolated user
 # /home/work: actual working directory for user codes
@@ -21,16 +21,11 @@ RUN apt-get update && apt-get upgrade -y
 RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
 RUN apt-get install -y build-essential
-RUN apt-get install -y liboctave-dev
+RUN apt-get install -y liboctave-dev info
 RUN apt-get install -y libzmq3-dev
 WORKDIR /home/sorna
 ADD *.deb /tmp/
 RUN dpkg -i /tmp/*.deb
-
-# Use PPA (when public PPA supports octave 4.2)
-#RUN add-apt-repository -y ppa:octave/stable
-#RUN apt-get update
-#RUN apt-get install -y octave
 
 # Install script
 ADD install_zeromq.m /home/sorna/install_zeromq.m
@@ -42,7 +37,7 @@ RUN tar xvzf /home/sorna/jsonlab.tgz -C /home/sorna/
 
 # Secure installation scripts
 USER root
-RUN apt-get install -y libseccomp2
+RUN apt-get install -yf libseccomp2
 ADD run.m /home/sorna/run.m
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
