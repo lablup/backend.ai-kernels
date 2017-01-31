@@ -60,7 +60,7 @@ USER root
 ADD *.whl /tmp
 ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
-RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any.whl
+RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.3.0-py2.py3-none-any.whl
 
 # Secure installation scripts
 USER root

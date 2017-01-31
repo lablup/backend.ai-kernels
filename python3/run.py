@@ -17,25 +17,9 @@ import types
 import simplejson as json
 import zmq
 
-# v2 API
-
-InputRequest = namedtuple('InputRequest', [
-    ('is_password', False),
-])
-
-ControlRecord = namedtuple('ControlRecord', [
-    ('event', None),
-])
-
-ConsoleRecord = namedtuple('ConsoleRecord', [
-    ('target', 'stdout'),  # or 'stderr'
-    ('data', ''),
-])
-
-MediaRecord = namedtuple('MediaRecord', [
-    ('type', None),  # mime-type
-    ('data', None),
-])
+from sorna.types import (
+    InputRequest, ControlRecord, ConsoleRecord, MediaRecord, HTMLRecord,
+)
 
 log = logging.getLogger('code-runner')
 
@@ -103,6 +87,11 @@ class CodeRunner:
                     'data': record.data,
                 }).encode('utf8'),
             ])
+        elif isinstance(record, HTMLRecord):
+            self.output_stream.send_multipart([
+                b'html',
+                record.html.encode('utf8'),
+            ])
         elif isinstance(record, InputRequest):
             self.output_stream.send_multipart([
                 b'waiting-input',
@@ -133,7 +122,7 @@ class CodeRunner:
             data = self.input_stream.recv_multipart()
             code_id = data[0].decode('ascii')
             code_text = data[1].decode('utf8')
-            self.user_module.__builtins__._sorna_emitter = self.emit
+            self.user_module.__builtins__._sorna_emit = self.emit
             if self.input_supported:
                 self.user_module.__builtins__.input = self.handle_input
             try:
