@@ -128,7 +128,7 @@ class CodeRunner(object):
             code_text = data[1].decode('utf8')
             self.user_module.__builtins__._sorna_emit = self.emit
             if self.input_supported:
-                self.user_module.__builtins__.input = self.handle_input
+                self.user_module.__builtins__.raw_input = self.handle_input
                 getpass.getpass = partial(self.handle_input, password=True)
             try:
                 code_obj = code.compile_command(code_text, symbol='exec')
