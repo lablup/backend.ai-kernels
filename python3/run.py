@@ -3,6 +3,7 @@
 import builtins as builtin_mod
 import code
 import enum
+from functools import partial
 import io
 import logging
 from namedlist import namedtuple, namedlist, FACTORY
@@ -16,6 +17,8 @@ import types
 
 import simplejson as json
 import zmq
+
+import getpass
 
 from sorna.types import (
     InputRequest, ControlRecord, ConsoleRecord, MediaRecord, HTMLRecord,
@@ -67,6 +70,8 @@ class CodeRunner:
         self.user_ns = user_module.__dict__
 
     def handle_input(self, prompt=None, password=False):
+        if prompt is None:
+            prompt = 'Password: ' if password else ''
         self.emit(ConsoleRecord('stdout', prompt))
         self.emit(InputRequest(is_password=password))
         data = self.input_stream.recv_multipart()
@@ -125,6 +130,7 @@ class CodeRunner:
             self.user_module.__builtins__._sorna_emit = self.emit
             if self.input_supported:
                 self.user_module.__builtins__.input = self.handle_input
+                getpass.getpass = partial(self.handle_input, password=True)
             try:
                 code_obj = code.compile_command(code_text, symbol='exec')
             except (OverflowError, IndentationError, SyntaxError,

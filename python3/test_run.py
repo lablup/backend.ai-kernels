@@ -60,11 +60,12 @@ for i in range(10):
 ''',
     'user_input': '''
 import hashlib
+import getpass
 print('Please type your name.')
 name = input('>> ')
 print(f'Hello, {name}')
 print('Please type your password.')
-pw = input('>> ', password=True)
+pw = getpass.getpass()
 m = hashlib.sha256()
 m.update(pw.encode('utf8'))
 print(f'Your password hash is {m.hexdigest()}')
