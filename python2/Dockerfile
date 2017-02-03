@@ -60,7 +60,7 @@ USER root
 ADD *.whl /tmp
 ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
-RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any.whl
+RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.3.0-py2.py3-none-any.whl
 
 # Secure installation scripts
 USER root
@@ -77,13 +77,14 @@ ADD patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
 
 VOLUME ["/home/work"]
-EXPOSE 2001
+EXPOSE 2000 2001
 
 LABEL io.sorna.timeout="10"
 LABEL io.sorna.maxmem="128m"
 LABEL io.sorna.maxcores="1"
 LABEL io.sorna.mode="query"
 LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+LABEL io.sorna.version="2"
 
 USER work
 ENV PYTHONUNBUFFERED 1

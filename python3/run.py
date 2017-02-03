@@ -4,12 +4,9 @@ import builtins as builtin_mod
 import code
 import enum
 from functools import partial
-import io
 import logging
-from namedlist import namedtuple, namedlist, FACTORY
+from namedlist import namedtuple, namedlist
 import os
-from os import path
-import queue
 import sys
 import time
 import traceback
