@@ -16,10 +16,14 @@ WORKDIR /home/work
 
 # Install Python
 USER root
-ENV SORNA_PYTHON_VERSION 3.5.2
+ENV SORNA_PYTHON_VERSION 3.5.3
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN apt-get update && apt-get build-dep -y python3
-RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
+RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
+RUN apt-get update
+RUN apt-get install -y build-essential git-core wget ca-certificates \
+                       libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev \
+                       libseccomp2
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
@@ -33,7 +37,7 @@ RUN /home/sorna/install-python.sh
 USER root
 RUN apt-get install -y pkg-config
 RUN apt-get install -y libjpeg-dev libpng-dev
-RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran libhdf5-7
+RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran libhdf5-dev
 USER work
 # matplotlib may install older version of dateutil; we first install it.
 RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six python-dateutil
@@ -69,7 +73,6 @@ RUN /home/sorna/pyenv-run.sh pip install keras
 
 # Secure installation scripts
 USER root
-RUN apt-get install -y libseccomp2
 ADD run.py /home/sorna/run.py
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
@@ -87,7 +90,8 @@ LABEL io.sorna.timeout="30"
 LABEL io.sorna.maxmem="512m"
 LABEL io.sorna.maxcores="4"
 LABEL io.sorna.mode="query"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+LABEL io.sorna.version="2"
 
 USER work
 ENV PYTHONUNBUFFERED 1
