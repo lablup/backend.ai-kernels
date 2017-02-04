@@ -22,7 +22,8 @@ RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
 RUN apt-get update
 RUN apt-get install -y build-essential git-core wget ca-certificates \
-                       libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
+		       libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev \
+		       libseccomp2
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
@@ -67,7 +68,6 @@ USER root
 ADD run.py /home/sorna/run.py
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-RUN apt-get install -y libseccomp2
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
