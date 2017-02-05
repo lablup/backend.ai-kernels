@@ -17,10 +17,14 @@ WORKDIR /home/work
 
 # Install Python
 USER root
-ENV SORNA_PYTHON_VERSION 3.5.2
+ENV SORNA_PYTHON_VERSION 3.6.0
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN apt-get update && apt-get build-dep -y python3
-RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
+RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
+RUN apt-get update
+RUN apt-get install -y build-essential git-core wget ca-certificates \
+                       libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev \
+                       libseccomp2
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
@@ -63,15 +67,14 @@ RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-*.whl
 
 # Install TensorFlow
 USER root
-ADD tensorflow-*.whl /tmp
+ADD tensorflow-0.12.1-cp36-cp36m-linux_x86_64.whl /tmp
 USER work
 RUN /home/sorna/pyenv-run.sh pip install /tmp/tensorflow-*.whl
 
 # Secure installation scripts
 USER root
-RUN apt-get install -y libseccomp2
-ADD run.py /home/sorna/run.py
 ADD run.sh /home/sorna/run.sh
+ADD run.py /home/sorna/run.py
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
@@ -86,16 +89,16 @@ RUN ln -s /usr/local/cuda/lib64/libcudnn.so.5 /usr/local/cuda/lib64/libcudnn.so
 RUN ldconfig
 
 VOLUME ["/home/work"]
-EXPOSE 2001
+EXPOSE 2000 2001
 
 LABEL io.sorna.timeout="180"
 LABEL io.sorna.maxmem="1g"
 LABEL io.sorna.maxcores="4"
 LABEL io.sorna.mode="query"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
 LABEL io.sorna.nvidia.enabled="yes"
+LABEL io.sorna.version="2"
 
 USER work
 ENV PYTHONUNBUFFERED 1
-ENV OPENBLAS_NUM_THREADS 4
 CMD /home/sorna/run.sh

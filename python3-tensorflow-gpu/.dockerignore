@@ -4,3 +4,4 @@ tensorflow_build
 !patch-libs.so
 *.o
 *.c
+venv*

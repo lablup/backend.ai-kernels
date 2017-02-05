@@ -16,7 +16,7 @@ WORKDIR /home/work
 
 # Install Python
 USER root
-ENV SORNA_PYTHON_VERSION 3.5.3
+ENV SORNA_PYTHON_VERSION 3.6.0
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
@@ -73,8 +73,8 @@ RUN /home/sorna/pyenv-run.sh pip install keras
 
 # Secure installation scripts
 USER root
-ADD run.py /home/sorna/run.py
 ADD run.sh /home/sorna/run.sh
+ADD run.py /home/sorna/run.py
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
@@ -84,7 +84,7 @@ ADD patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
 
 VOLUME ["/home/work"]
-EXPOSE 2001
+EXPOSE 2000 2001
 
 LABEL io.sorna.timeout="30"
 LABEL io.sorna.maxmem="512m"

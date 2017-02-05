@@ -2,13 +2,15 @@
 
 # You need to run this in the host, not inside containers!
 
-set -o nounset
+# set -o nounset  # to avoid error in venv activate script
 set -o errexit
 
 BUILD_DIR=./tensorflow_build
 
+source ../venv/bin/activate
+
 # Prepare TensorFlow source
-# NOTE: maybe skipped already done, just pull latest version)
+# NOTE: maybe skipped already done, just pull latest version
 git clone https://github.com/tensorflow/tensorflow $BUILD_DIR
 
 
@@ -35,18 +37,49 @@ apt-get update && apt-get install -y bazel
 # Build TensorFlow fitted for our system
 cd $BUILD_DIR
 
-PYTHON_BIN_PATH=`which python` \
-TF_NEED_GCP=0 \
-TF_NEED_HDFS=0 \
-TF_NEED_CUDA=1 \
-GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
-TF_CUDA_VERSION=`python detect-cuda.py --cuda-ver` CUDA_TOOLKIT_PATH=/usr/local/cuda \
-TF_CUDNN_VERSION=`python detect-cuda.py --cudnn-ver` CUDNN_INSTALL_PATH=/usr/local/cuda \
-TF_CUDA_COMPUTE_CAPABILITIES=`python detect-cuda.py --compute-caps` ./configure
 
-bazel build -c opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
-bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+# NOTE: patch for TensorFlow v0.12 series
+# monkey-patch ./configure as:
+#  - bazel fetch //tensorflow/...
+#  + bazel fetch $(bazel query "//tensorflow/... -//tensorflow/examples/android/...")
 
+# NOTE: To reuse cached external dependencies
+# Comment out the following line in ./configure:
+#    bazel_clean --expunge
+
+
+# For CUDA version:
+function build_cuda() {
+  PYTHON_BIN_PATH=`which python` \
+  TF_NEED_GCP=0 \
+  TF_NEED_HDFS=0 \
+  TF_NEED_OPENCL=0 \
+  TF_NEED_CUDA=1 \
+  GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
+  TF_CUDA_VERSION=`python detect-cuda.py --cuda-ver` CUDA_TOOLKIT_PATH=/usr/local/cuda \
+  TF_CUDNN_VERSION=`python detect-cuda.py --cudnn-ver` CUDNN_INSTALL_PATH=/usr/local/cuda \
+  TF_CUDA_COMPUTE_CAPABILITIES=`python detect-cuda.py --compute-caps` \
+  ./configure
+  bazel build -c opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
+  bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+}
+
+# For CPU version:
+function build_cpu() {
+  PYTHON_BIN_PATH=`which python` \
+  TF_NEED_GCP=0 \
+  TF_NEED_HDFS=0 \
+  TF_NEED_OPENCL=0 \
+  TF_NEED_CUDA=0 \
+  GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
+  ./configure
+  bazel build -c opt //tensorflow/tools/pip_package:build_pip_package
+  bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+}
+
+rm -rf /tmp/tensorflow_pkg
+# NOTE: change here to build cpu-only/cuda binaries
+build_cpu
 
 # Install the compiled wheel
-pip install /tmp/tensorflow_pkg/tensorflow-*.whl
+pip install -U /tmp/tensorflow_pkg/tensorflow-*.whl
