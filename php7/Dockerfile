@@ -21,10 +21,9 @@ RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
 
 # Install PHP 7.0
 RUN apt-get update
-RUN apt-get upgrade -y tzdata ca-certificates
-RUN apt-get install -y language-pack-en-base \
-		       python-software-properties software-properties-common \
-		       libseccomp2
+RUN apt-get install -y --only-upgrade tzdata
+RUN apt-get install -y language-pack-en-base libseccomp2 ca-certificates \
+		       python-software-properties software-properties-common
 ENV LC_ALL=en_US.UTF-8
 RUN apt-get install -y php7.0-cli php7.0-gd php7.0-sqlite3 php7.0-dev php-pear
 RUN apt-get install -y pkg-config libzmq3-dev

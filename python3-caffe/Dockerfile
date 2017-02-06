@@ -21,9 +21,9 @@ RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
 RUN apt-get update
-RUN apt-get install -y build-essential git-core wget ca-certificates \
-		       libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev \
-		       libseccomp2
+RUN apt-get install -y --only-upgrade tzdata
+RUN apt-get install -y build-essential git-core wget ca-certificates libseccomp2 \
+		       libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
