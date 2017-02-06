@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Jonghyun Park "jpark@lablup.com"
+MAINTAINER Jeongkyu Shin "jshin@lablup.com"
 
 # Add an isolated user
 # /home/work: actual working directory for user codes
@@ -18,28 +18,14 @@ WORKDIR /home/work
 USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y software-properties-common build-essential libzmq3-dev liboctave-dev
-#RUN apt-get install -y g++ make gawk gfortran gnuplot texi2html icoutils libxft-dev gperf flex libbison-dev libqhull-dev libglpk-dev libcurl4-gnutls-dev libfltk1.3-dev librsvg2-dev libqrupdate-dev libgl2ps-dev libarpack2-dev libqscintilla2-dev libreadline-dev libncurses5-dev libhdf5-dev llvm-dev libqt4-dev default-jdk texinfo libfftw3-dev libgraphicsmagick++-dev libjasper-dev libfreeimage-dev transfig epstool librsvg2-bin libosmesa6-dev
+RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
+RUN apt-get install -y build-essential
+RUN apt-get install -y liboctave-dev info
+RUN apt-get install -y libzmq3-dev
 WORKDIR /home/sorna
-RUN apt-get install -y wget
-RUN wget ftp://ftp.gnu.org/gnu/octave/octave-4.2.0.tar.lz 
-RUN apt-get install -y lzip
-RUN lzip -d octave-4.2.0.tar.lz
-RUN tar xf octave-4.2.0.tar
-WORKDIR /home/sorna/octave-4.2.0
-RUN apt-get build-dep -y octave
-#RUN apt-get install -y icoutils gnuplot gfortran gperf libbison-dev libqhull-dev flex librsvg2-dev librsvg2-bin  
-#RUN ./configure --enable-jit
-RUN ./configure
-RUN make -j3
-RUN make install
-#RUN make check
-RUN rm -rf /home/sorna/octave-4.2.0
-
-# Use PPA (when public PPA supports octave 4.2)
-#RUN add-apt-repository -y ppa:octave/stable
-#RUN apt-get update
-#RUN apt-get install -y octave
+ADD *.deb /tmp/
+RUN dpkg -i /tmp/*.deb
 
 # Install script
 ADD install_zeromq.m /home/sorna/install_zeromq.m
@@ -51,7 +37,7 @@ RUN tar xvzf /home/sorna/jsonlab.tgz -C /home/sorna/
 
 # Secure installation scripts
 USER root
-RUN apt-get install -y libseccomp2
+RUN apt-get install -yf libseccomp2
 ADD run.m /home/sorna/run.m
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
