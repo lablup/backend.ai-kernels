@@ -15,36 +15,41 @@ ENV HOME /home/work
 # Install latest R
 ENV DEBIAN_FRONTEND noninteractive
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install -y curl build-essential
-RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list
-ENV HOME /home/sorna
-WORKDIR /home/sorna
+RUN echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" >> /etc/apt/sources.list
+RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
 RUN gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
 RUN gpg -a --export E084DAB9 | apt-key add -
-RUN apt-get update && apt-get install -y r-base
+RUN apt-get update
+RUN apt-get install -y --only-upgrade tzdata ca-certificates
+RUN apt-get install -y curl build-essential libseccomp2
+
+ENV HOME /home/sorna
+WORKDIR /home/sorna
 
 # Install packages
-RUN apt-get install -y libzmq3-dev
+RUN apt-get install -y r-base libzmq3-dev
 ADD install-packages.R /home/sorna/install-packages.R
 RUN Rscript /home/sorna/install-packages.R
 
 # Secure installation scripts
 USER root
-ADD run.R /home/sorna/run.R
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-RUN apt-get install -y libseccomp2
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
 RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
+ADD patch-libs.so /home/sorna/patch-libs.so
+ENV LD_PRELOAD /home/sorna/patch-libs.so
 
 ENV HOME /home/work
 WORKDIR /home/work
 VOLUME ["/home/work"]
-EXPOSE 2001
+EXPOSE 2000 2001
+
+ADD run.R /home/sorna/run.R
 
 USER work
 CMD /home/sorna/run.sh

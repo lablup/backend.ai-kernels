@@ -1,6 +1,5 @@
 #! /usr/bin/env Rscript
 library(rzmq)
-library(rjson)
 
 # -- snippet from: http://stackoverflow.com/questions/32257970/ --
 require_namespace <- function(package) {
@@ -31,50 +30,48 @@ library_local <- function(package, parent = parent.frame()) {
 
 catchAll <- function(expr) {
     myWarnings <- NULL
-    myError <- NULL
+    myErrors <- NULL
     warningHandler <- function(w) {
         myWarnings <<- c(myWarnings, w$message)
         invokeRestart("muffleWarning")
     }
     errorHandler <- function(e) {
-        myError <<- list(
-            class(e)[[1]],
-            list(e$message),
-            F,
-            "" # traceback() func has side-effect on stdout. just ignore it. :(
-        )
-        NULL
+        myErrors <<- c(myErrors, e)
     }
     tryCatch(withCallingHandlers(expr, warning = warningHandler), error = errorHandler)
-    list(warnings = myWarnings, error = myError)
+    list(warnings = myWarnings, errors = myErrors)
 }
 
 ctx <- init.context()
-sock <- init.socket(ctx, "ZMQ_REP")
-bind.socket(sock, "tcp://*:2001")
+input_sock <- init.socket(ctx, "ZMQ_PULL")
+output_sock <- init.socket(ctx, "ZMQ_PUSH")
+bind.socket(input_sock, "tcp://*:2000")
+bind.socket(output_sock, "tcp://*:2001")
 user_env <- new.env(parent = baseenv())
 # Replace library() function with that works on a new base environment.
 assign("library", library_local, user_env)
 while (1) {
-    msg <- list(receive.string(sock))
-    while (get.rcvmore(sock)) {
-        msg <- append(msg, list(receive.string(sock)))
-    }
+    msg <- receive.multipart(input_sock)
     # We ignore cell ID (msg[[1]])
     stdout_buf <- textConnection('o', open = "w", local = F, encoding = "UTF-8")
+    stderr_buf <- textConnection('o', open = "w", local = F, encoding = "UTF-8")
     sink(stdout_buf, type = "output")
-    ret <- catchAll(eval(parse(text = msg[[2]]), envir = user_env))
-    flush(stdout_buf)
+    sink(stderr_buf, type = "message")
+    ret <- catchAll(eval(parse(text = rawToChar(msg[[2]])), envir = user_env))
+    cat('\n')
     sink(type = "output")
-    if (is.null(ret$error))
-        # Here, R's ifelse() func has side-effect: list() becomes list(NULL) -_-
-        exceptions = list()
-    else
-        exceptions = list(ret$error)
-    rep <- list(stdout = paste(textConnectionValue(stdout_buf), collapse='\n'),
-                stderr = paste(ret$warnings, collapse='\n'),
-                exceptions = exceptions)
+    sink(type = "message")
+    send.multipart(output_sock, list(charToRaw("stdout"), charToRaw(paste(textConnectionValue(stdout_buf), collapse='\n'))))
+    send.multipart(output_sock, list(charToRaw("stderr"), charToRaw(paste(textConnectionValue(stderr_buf), collapse='\n'))))
+    if (!is.null(ret$warnings)) {
+        send.multipart(output_sock, list(charToRaw('stderr'), charToRaw(paste(ret$warnings, collapse='\n'))))
+    }
+    if (!is.null(ret$errors)) {
+        send.multipart(output_sock, list(charToRaw('stderr'), charToRaw(paste(ret$errors, collapse='\n'))))
+    }
     close(stdout_buf)
-    json <- toJSON(rep)
-    send.raw.string(sock, json)
+    close(stderr_buf)
+    send.multipart(output_sock, list(charToRaw("finished"), charToRaw("")))
 }
+
+# vim: sts=4 sw=4 et
