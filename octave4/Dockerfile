@@ -38,15 +38,22 @@ RUN tar xvzf /home/sorna/jsonlab.tgz -C /home/sorna/
 # Secure installation scripts
 USER root
 RUN apt-get install -yf libseccomp2
-ADD run.m /home/sorna/run.m
-ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
-RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
-RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
+RUN chown root:root /home/sorna/jail /home/sorna/intra-jail
+RUN chmod 755 /home/sorna/jail /home/sorna/intra-jail
 ADD patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
+
+RUN apt-get install -y ghostscript epstool transfig
+RUN apt-get install -y pstoedit
+RUN apt-get install -y gnuplot
+
+ADD run.m /home/sorna/run.m
+ADD run.sh /home/sorna/run.sh
+RUN chown root:root /home/sorna/*.sh
+RUN chmod 755 /home/sorna/run.sh
 
 ENV HOME /home/work
 WORKDIR /home/work
