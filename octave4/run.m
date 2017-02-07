@@ -46,8 +46,8 @@ endfunction
 
 _sorna_sock = zmq_socket(ZMQ_REP);
 zmq_bind(_sorna_sock, "tcp://*:2001");
-printf (["Octave version : ", version, "\n"])
-printf ("serving at port 2001...")
+printf (["Octave version : ", version, "\n"]);
+printf ("serving at port 2001...");
 
 while(true)
   codeid = zmq_recv(_sorna_sock, 100, 0);
