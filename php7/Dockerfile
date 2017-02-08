@@ -33,7 +33,6 @@ RUN echo 'extension=zmq.so' > /etc/php/7.0/cli/conf.d/20-zmq.ini
 # Secure installation scripts
 USER root
 ADD run.sh /home/sorna/run.sh
-
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
