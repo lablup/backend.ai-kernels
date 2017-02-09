@@ -1,14 +1,12 @@
 function main() {
+  const assert = require('assert');
   const deasync = require('deasync');
   const domain = require('domain');
-  const streams = require('memory-streams');
   const vm = require('vm');
   const zmq = require('zmq');
   const Console = require('console').Console;
   const Module = require('module');
-
-  var socket = zmq.socket('rep');
-  var port = 'tcp://*:2001';
+  const Writable = require('stream').Writable;
 
   var requireDepth = 0;
 
@@ -24,7 +22,7 @@ function main() {
         requireDepth -= 1;
       }
     }
-    require.resolve = function(request) {
+    require.resolve = (request) => {
       return Module._resolveFilename(request, self);
     };
     require.main = process.mainModule;
@@ -35,69 +33,86 @@ function main() {
     return require;
   }
 
-  function exception_handler(e, exceptions) {
-    var exception_info = [e.stack.split('\n')[0], [], false, null];
-    exceptions.push(exception_info);
-  }
-
-  process.chdir('/home/work');
-
-  var mod = new Module('<repl>');
-  var ctx = vm.createContext();
+  let mod = new Module('<repl>');
+  let ctx = vm.createContext();
   ctx.module = module;
   ctx.require = makeRequireFunction.call(mod);
   for (var i in global) ctx[i] = global[i];
   ctx.global = ctx;
   ctx.global.global = ctx;
-  var userDomain = domain.create();
+  let userDomain = domain.create();
 
-  socket.on('message', function(code_id, code) {
+  let inSocket = zmq.socket('pull');
+  let outSocket = zmq.socket('push');
 
-    var stdout = new streams.WritableStream();
-    var stderr = new streams.WritableStream();
-    var exceptions = [];
-    ctx.console = new Console(stdout, stderr);
-    var result = {
-      'stdout': '',
-      'stderr': '',
-      'exceptions': exceptions
-    };
+  class OutputWritable extends Writable {
+    constructor(opts) {
+      super(opts);
+      this.target = opts.target;
+      assert(this.target == 'stdout' || this.target == 'stderr');
+    }
 
-    userDomain.on('error', function(err) {
-      exception_handler(err, exceptions);
+    write(chunk, encoding, cb) {
+      outSocket.send([this.target, chunk]);
+      if (cb) cb();
+    }
+  }
+
+  let stdout = new OutputWritable({ target: 'stdout' });
+  let stderr = new OutputWritable({ target: 'stderr' });
+  ctx.console = new Console(stdout, stderr);
+
+  /* TODO: implement this someday...
+  ctx.input = (prompt, opts, callback) => {
+    var opts = opts || {};
+    opts.is_password = opts.is_password || false;
+    inSocket.once('message', (code_id, code_txt) => {
+      console.log('recv input')
+      inSocket.unref();
+      callback(code_txt);
+    });
+    inSocket.ref();
+    outSocket.send(['stdout', prompt]);
+    outSocket.send(['waiting-input', JSON.stringify(opts)]);
+  };
+  */
+
+  function execute_handler(code_id, code_txt) {
+    userDomain.on('error', (err) => {
+      ctx.console.error(err);
     });
     try {
-      var script = new vm.Script(`'use strict'; void 0; ${code}`);
-      socket.unref();
-      userDomain.run(function() {
+      let script = new vm.Script(`'use strict'; void 0; ${code_txt}`);
+      inSocket.unref();
+      outSocket.unref();
+      userDomain.run(() => {
         script.runInContext(ctx);
         deasync.loopUntilNoMoreEvents();
       });
     } catch (err) {
-      exception_handler(err, exceptions);
+      ctx.console.error(err);
     } finally {
-      socket.ref();
-      result['stdout'] = stdout.toString();
-      result['stderr'] = stderr.toString();
-      socket.send(JSON.stringify(result));
+      inSocket.ref();
+      outSocket.ref();
+      process.nextTick(() => {
+        inSocket.once('message', execute_handler);
+      });
+      outSocket.send(['finished', '']);
     }
-
-  });
+  }
 
   function shutdown() {
-    socket.close();
+    inSocket.close();
+    outSocket.close();
     console.log('exit.');
   }
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 
-  socket.bind(port, function(err) {
-    if (err) {
-      throw err;
-    } else {
-      console.log('Serving at ' + port + '...');
-    }
-  });
+  inSocket.bind('tcp://*:2000', (err) => { });
+  outSocket.bind('tcp://*:2001', (err) => { });
+
+  inSocket.once('message', execute_handler);
 }
 
 if (require.main === module) {
