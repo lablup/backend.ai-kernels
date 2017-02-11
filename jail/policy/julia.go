@@ -46,7 +46,7 @@ func (p *JuliaPolicy) GetExtraEnvs() []string {
 
 func (p *JuliaPolicy) GetPreservedEnvKeys() []string {
 	return []string{
-		"HOME", "PATH",
+		"HOME", "PATH", "LANG",
 		"PYENV_ROOT", "PYTHONPATH",
 		"PYTHONUNBUFFERED",
 		"JULIA_CPU_CORES",

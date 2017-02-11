@@ -42,7 +42,7 @@ func (p *PythonPolicy) GetExtraEnvs() []string {
 
 func (p *PythonPolicy) GetPreservedEnvKeys() []string {
 	return []string{
-		"HOME", "PATH",
+		"HOME", "PATH", "LANG",
 		"PYENV_ROOT", "PYTHONPATH",
 		"PYTHONUNBUFFERED",
 		"MPLCONFIGDIR",

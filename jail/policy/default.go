@@ -46,7 +46,7 @@ func (p *DefaultPolicy) GetExtraEnvs() []string {
 
 func (p *DefaultPolicy) GetPreservedEnvKeys() []string {
 	return []string{
-		"HOME", "PATH",
+		"HOME", "PATH", "LANG",
 		"PYENV_ROOT", "PYTHONPATH",
 		"LD_PRELOAD",
 	}

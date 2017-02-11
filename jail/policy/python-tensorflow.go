@@ -48,7 +48,7 @@ func (p *PythonTensorFlowPolicy) GetExtraEnvs() []string {
 
 func (p *PythonTensorFlowPolicy) GetPreservedEnvKeys() []string {
 	return []string{
-		"HOME", "PATH",
+		"HOME", "PATH", "LANG",
 		"PYENV_ROOT", "PYTHONPATH",
 		"PYTHONUNBUFFERED",
 		"MPLCONFIGDIR",

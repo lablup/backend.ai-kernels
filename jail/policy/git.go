@@ -43,7 +43,7 @@ func (p *GitPolicy) GetExtraEnvs() []string {
 
 func (p *GitPolicy) GetPreservedEnvKeys() []string {
 	return []string{
-		"HOME", "PATH",
+		"HOME", "PATH", "LANG",
 		"PYENV_ROOT", "PYTHONPATH",
 		"MPLCONFIGDIR",
 		"LD_PRELOAD",

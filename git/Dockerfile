@@ -23,7 +23,7 @@ RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
 RUN apt-get update
 RUN apt-get install -y --only-upgrade tzdata
 RUN apt-get install -y build-essential git-core wget ca-certificates libseccomp2 \
-		       libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
+                       libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh /home/sorna/pyenv-run.sh
 RUN chmod +x /home/sorna/*.sh
@@ -83,6 +83,13 @@ RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.3.0-py2.py3-none-any
 USER root
 RUN apt-get install -y nano vim
 RUN apt-get install -y nodejs nodejs-legacy npm
+
+# Configure the shell to use Unicode characeters
+ENV LANG en_US.UTF-8
+RUN sed -i 's/# *\(set convert-meta off\)/\1/' /etc/inputrc; \
+    locale-gen en_US.UTF-8; \
+    echo 'set hlsearch incsearch sts=4 sw=4 et' >> /etc/vim/vimrc.local; \
+    echo 'set enc=utf8 tenc=utf8' >> /etc/vim/vimrc.local
 
 # Secure installation scripts
 USER root
