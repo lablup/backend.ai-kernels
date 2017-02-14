@@ -86,6 +86,7 @@ RUN apt-get install -y nodejs nodejs-legacy npm
 
 # Configure the shell to use Unicode characeters
 ENV LANG en_US.UTF-8
+ENV TERM xterm
 RUN sed -i 's/# *\(set convert-meta off\)/\1/' /etc/inputrc; \
     locale-gen en_US.UTF-8; \
     echo 'set hlsearch incsearch sts=4 sw=4 et' >> /etc/vim/vimrc.local; \
