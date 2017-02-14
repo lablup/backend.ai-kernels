@@ -2,7 +2,7 @@ package policy
 
 import seccomp "github.com/seccomp/libseccomp-golang"
 
-import "syscall"
+//import "syscall"
 
 var TracedSyscalls []string
 var AllowedSyscalls []string
@@ -65,15 +65,13 @@ func init() {
 
 	// Following syscalls are conditionally allowed.
 	ConditionallyAllowedSyscalls = map[string]seccomp.ScmpCondition{
-		// To make it tracee's initial synchronization working
-		"kill": {1, seccomp.CompareEqual, uint64(syscall.SIGSTOP), 0},
+	// To make it tracee's initial synchronization working
+	//"kill": {1, seccomp.CompareEqual, uint64(syscall.SIGSTOP), 0},
 	}
 
 	// Following syscalls are blindly allowed.
 	// IMPORTANT: ptrace MUST NOT be included!
 	AllowedSyscalls = []string{
-		// FIXME: If disabled here, job control in shells does not work. :(
-		"kill",
 		// blindly allowed
 		"read",
 		"readv",
