@@ -313,23 +313,25 @@ loop:
 					case id_Tgkill:
 						targetTgid := int(regs.Rdi)
 						targetTid := int(regs.Rsi)
-						signum := uint(regs.Rdx)
-						if signum == uint(syscall.SIGKILL) {
+						signum := syscall.Signal(uint(regs.Rdx))
+						switch signum {
+						case syscall.SIGKILL, syscall.SIGINT, syscall.SIGTERM:
 							allow = (targetTgid != os.Getpid() &&
 								targetTid != pid &&
 								targetTid != os.Getpid() &&
 								targetTid != 1)
-						} else {
+						default:
 							allow = true
 						}
 					case id_Kill, id_Killpg, id_Tkill:
 						targetPid := int(regs.Rdi)
-						signum := uint(regs.Rsi)
-						if signum == uint(syscall.SIGKILL) {
+						signum := syscall.Signal(uint(regs.Rsi))
+						switch signum {
+						case syscall.SIGKILL, syscall.SIGINT, syscall.SIGTERM:
 							allow = (targetPid != pid &&
 								targetPid != os.Getpid() &&
 								targetPid != 1)
-						} else {
+						default:
 							allow = true
 						}
 					case id_Execve:
