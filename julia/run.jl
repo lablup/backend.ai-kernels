@@ -1,8 +1,138 @@
-using ZMQ
+module SornaExecutor
+
+"""
+This submodule is exposed to the user codes as their "Main" module.
+"""
+module SornaExecutionEnv # submodule
+
+import ZMQ
 import JSON
+import Base: display, readline, flush, PipeEndpoint, info, warn
 
+# overloading hack from IJulia
+const StdioPipe = Base.PipeEndpoint
 
-function parseall(code)
+type SornaDisplay <: Display
+    isock::ZMQ.Socket
+    osock::ZMQ.Socket
+end
+
+function display(d::SornaDisplay, M::MIME"image/png", x)
+    local data = reprmime(M, x)
+    local o = Dict(
+        "type" => string(M),
+        "data" => Base64Encode(data),
+    )
+    ZMQ.send(d.osock, "media", true)
+    ZMQ.send(d.osock, JSON.json(o))
+end
+
+function display(d::SornaDisplay, M::MIME"image/svg", x)
+    local data = reprmime(M, x)
+    local o = Dict(
+        "type" => string(M),
+        "data" => x,
+    )
+    ZMQ.send(d.osock, "media", true)
+    ZMQ.send(d.osock, JSON.json(o))
+end
+
+function display(d::SornaDisplay, M::MIME"text/html", x)
+    local data = reprmime(M, x)
+    local o = Dict(
+        "type" => string(M),
+        "data" => x,
+    )
+    ZMQ.send(d.osock, "media", true)
+    ZMQ.send(d.osock, JSON.json(o))
+end
+
+function info(io::StdioPipe, msg...; kw...)
+    if io == STDERR
+        local o = chomp(string(msg...))
+        ZMQ.send(sorna.osock, "stderr", true)
+        ZMQ.send(sorna.osock, "INFO: $o")
+        #local o = Dict(
+        #    "level" => "info",
+        #    "msg"   => chomp(string(msg...)),
+        #)
+        #ZMQ.send(sorna.osock, "log", true)
+        #ZMQ.send(sorna.osock, JSON.json(o))
+    else
+        invoke(info, Tuple{supertype(StdioPipe)}, io, msg..., kw...)
+    end
+end
+
+function warn(io::StdioPipe, msg...; kw...)
+    if io == STDERR
+        local o = chomp(string(msg...))
+        ZMQ.send(sorna.osock, "stderr", true)
+        ZMQ.send(sorna.osock, "WARN: $o")
+        #local o = Dict(
+        #    "level" => "warn",
+        #    "msg"   => chomp(string(msg...)),
+        #)
+        #ZMQ.send(sorna.osock, "log", true)
+        #ZMQ.send(sorna.osock, "warn", true)
+        #ZMQ.send(sorna.osock, JSON.json(o))
+    else
+        invoke(warn, Tuple{supertype(StdioPipe)}, io, msg..., kw...)
+    end
+end
+
+"""
+Read a String from the front-end web browser.
+This function is a Sorna version of IJulia's readprompt.
+"""
+function readprompt(prompt::AbstractString; password::Bool=false)
+    global sorna
+    local opts = Dict("is_password" => password)
+    ZMQ.send(sorna.osock, "stdout", true)
+    ZMQ.send(sorna.osock, prompt)
+    ZMQ.send(sorna.osock, "waiting-input", true)
+    ZMQ.send(sorna.osock, JSON.json(opts))
+    code_id = unsafe_string(ZMQ.recv(sorna.isock))
+    code_txt = unsafe_string(ZMQ.recv(sorna.isock))
+    return code_txt
+end
+
+"Native-like readline function that emulates stdin using readprompt."
+function readline(io::StdioPipe)
+    if io == STDIN
+        return readprompt("STDIN> ")
+    else
+        invoke(readline, Tuple{supertype(StdioPipe)}, io)
+    end
+end
+
+function flush(io::StdioPipe)
+    invoke(flush, Tuple{supertype(StdioPipe)}, io)
+    oslibuv_flush()
+    if io == STDIN
+        # TODO: implement
+    elseif io == STDERR
+        # TODO: implement
+    end
+end
+
+function init_sorna(isock::ZMQ.Socket, osock::ZMQ.Socket)
+    global sorna
+    sorna = SornaDisplay(isock, osock)
+    pushdisplay(sorna)
+    println("sorna initialized")
+end
+
+end # submodule
+
+import ZMQ
+import .SornaExecutionEnv
+
+"""
+Makes a block expression from the given (multi-line) string.
+We need this special function since Julia's vanilla parse()
+function only takes a single line of string.
+"""
+function parseall(code::AbstractString)
     pos = start(code)
     exprs = []
 
@@ -20,70 +150,83 @@ function parseall(code)
     end
 end
 
-
-function execute_code(code_id, code)
-    # Intercept STDOUT and STDERR
-    const (OLDOUT, OLDERR) = STDOUT, STDERR
-    (outRead, outWrite) = redirect_stdout()
-    (errorRead, errorWrite) = redirect_stderr()
-
-    # Julia's Base.parse() does not parse multi-line string by design
-    exprs = parseall(code)
-
-    str = err = ""
-    exceptions = []
+function redirect_stream(rd::IO, target::AbstractString, osock::ZMQ.Socket)
     try
-        eval(exprs)
+        while !eof(rd)
+            nb = nb_available(rd)
+            if nb > 0
+                ZMQ.send(osock, target, true)
+                ZMQ.send(osock, read(rd, nb))
+            end
+        end
     catch e
-        exception_info = [split(string(e), "\n")[1], [], false, nothing]
-        push!(exceptions, exception_info)
+        if isa(e, InterruptException)
+            redirect_stream(rd, target, output_socket)
+        else
+            rethrow()
+        end
+    end
+end
+
+function execute_code(input_socket, output_socket, code_id, code_txt)
+    try
+        exprs = parseall(code_txt)
+        SornaExecutionEnv.eval(exprs)
+    catch e
+        catch_backtrace()
+        # TODO: print exception
     finally
-        # Store stdout and stderr during evaluation, and restore them with original ones
-        redirect_stdout(OLDOUT)
-        close(outWrite); out = readstring(outRead); close(outRead)
-        redirect_stderr(OLDERR)
-        close(errorWrite); err = readstring(errorRead); close(errorRead)
-
-        return out, err, exceptions
+        # ensure reader tasks to run once more.
+        sleep(0.001)
+        ZMQ.send(output_socket, "finished", true)
+        ZMQ.send(output_socket, "")
     end
 end
 
+function run_query_mode()
 
-# Set home directory
-cd("/home/work")
+    # ZMQ setup
+    ctx = ZMQ.Context()
+    input_socket = ZMQ.Socket(ctx, ZMQ.PULL)
+    output_socket = ZMQ.Socket(ctx, ZMQ.PUSH)
+    ZMQ.bind(input_socket, "tcp://*:2000")
+    ZMQ.bind(output_socket, "tcp://*:2001")
 
-# ZMQ setup
-ctx = Context()
-socket = Socket(ctx, REP)
-port = "tcp://*:2001"
-ZMQ.bind(socket, port)
-println("serving at port 2001...")
+    SornaExecutionEnv.init_sorna(input_socket, output_socket)
 
-try
-    while true
-        # Receive code_id
-        msg = ZMQ.recv(socket)
-        io = seek(convert(IOStream, msg), 0)
-        code_id = takebuf_string(io)
+    println("start serving...")
 
-        # Receive code
-        msg = ZMQ.recv(socket)
-        io = seek(convert(IOStream, msg), 0)
-        code = takebuf_string(io)
+    const read_stdout = Ref{Base.PipeEndpoint}()
+    const read_stderr = Ref{Base.PipeEndpoint}()
 
-        # Evaluate code
-        out, err, exceptions = execute_code(code_id, code)
+    read_stdout[], = redirect_stdout()
+    read_stderr[], = redirect_stderr()
 
-        # Return results
-        result = Dict(
-            "stdout" => out,
-            "stderr" => err,
-            "exceptions" => exceptions
-        )
-        ZMQ.send(socket, Message(JSON.json(result)))
+    # Intercept STDOUT and STDERR
+    readout_task = @async redirect_stream(read_stdout[], "stdout", output_socket)
+    readerr_task = @async redirect_stream(read_stderr[], "stderr", output_socket)
+
+    try
+        while true
+            # Receive code_id and code_txt
+            code_id = unsafe_string(ZMQ.recv(input_socket))
+            code_txt = unsafe_string(ZMQ.recv(input_socket))
+
+            # Evaluate code
+            execute_code(input_socket, output_socket, code_id, code_txt)
+        end
+    finally
+        ZMQ.close(input_socket)
+        ZMQ.close(output_socket)
+        ZMQ.close(ctx)
     end
-finally
-    ZMQ.close(socket)
-    ZMQ.close(ctx)
-    println("exit.")
 end
+
+end # module
+
+
+import SornaExecutor
+
+SornaExecutor.run_query_mode()
+
+# vim: ts=8 sts=4 sw=4 et
