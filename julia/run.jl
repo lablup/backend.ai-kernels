@@ -133,20 +133,30 @@ We need this special function since Julia's vanilla parse()
 function only takes a single line of string.
 """
 function parseall(code::AbstractString)
-    pos = start(code)
     exprs = []
-
-    while !done(code, pos)
-       expr, pos = parse(code, pos)
-       push!(exprs, expr)
+    pos = start(code)
+    lineno = 1
+    try
+        while !done(code, pos)
+            expr, pos = parse(code, pos)
+            push!(exprs, expr)
+            lineno += 1
+        end
+    catch ex
+        if isa(ex, ParseError)
+            # Add the line number to parsing errors
+            throw(ParseError("$(ex.msg) (Line $lineno)"))
+        else
+            rethrow()
+        end
     end
 
     if length(exprs) == 0
-       throw(ParseError("end of input"))
+        throw(ParseError("Premature end of input"))
     elseif length(exprs) == 1
-       return exprs[1]
+        return exprs[1]
     else
-       return Expr(:block, exprs...)
+        return Expr(:block, exprs...)
     end
 end
 
@@ -168,13 +178,57 @@ function redirect_stream(rd::IO, target::AbstractString, osock::ZMQ.Socket)
     end
 end
 
+# format_stackframe is taken from https://github.com/invenia/StackTraces.jl
+# which is now part of Julia's standard library since v0.5.
+# Unfortunately the standard library does not expose formatting functions... :(
+function format_stackframe(frame::StackFrame; full_path::Bool=false)
+    file_info = string(
+        full_path ? frame.file : basename(string(frame.file)),
+        ":", frame.line
+    )
+    if :inlined_file in fieldnames(frame) && frame.inlined_file != Symbol("")
+        inline_info = "[inlined code from $file_info] "
+        file_info = string(
+            full_path ? frame.inlined_file : basename(string(frame.inlined_file)),
+            ":", frame.inlined_line
+        )
+    else
+        inline_info = ""
+    end
+    func_name = string(frame.func)
+    if (func_name == "execute_code" || func_name == "parseall") && basename(string(frame.file)) == "run.jl"
+        nothing
+    else
+        "$inline_info$(frame.func != "" ? frame.func : "?") at $file_info"
+    end
+end
+
+function format_stacktrace(stack::StackTrace, ex::Exception = nothing; full_path::Bool=false)
+    prefix = (ex != nothing) ? "ERROR: $(typeof(ex)): $(ex.msg)" : ""
+    if isempty(stack)
+        return prefix
+    end
+    pieces = []
+    for f in stack
+        piece = format_stackframe(f, full_path=full_path)
+        if piece == nothing
+            break
+        end
+        push!(pieces, piece)
+    end
+    string(
+        prefix, "\n",
+        join(map(piece -> "  $piece", pieces), "\n"),
+    )
+end
+
 function execute_code(input_socket, output_socket, code_id, code_txt)
     try
         exprs = parseall(code_txt)
         SornaExecutionEnv.eval(exprs)
-    catch e
-        catch_backtrace()
-        # TODO: print exception
+    catch ex
+        st = catch_stacktrace()
+        write(STDERR, format_stacktrace(st, ex))
     finally
         # ensure reader tasks to run once more.
         sleep(0.001)
