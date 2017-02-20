@@ -7,7 +7,7 @@ module SornaExecutionEnv # submodule
 
 import ZMQ
 import JSON
-import Base: display, readline, flush, PipeEndpoint, info, warn
+import Base: Display, display, readline, flush, PipeEndpoint, info, warn
 
 # overloading hack from IJulia
 const StdioPipe = Base.PipeEndpoint
@@ -15,44 +15,63 @@ const StdioPipe = Base.PipeEndpoint
 type SornaDisplay <: Display
     isock::ZMQ.Socket
     osock::ZMQ.Socket
+    olock::Base.ReentrantLock
 end
 
 function display(d::SornaDisplay, M::MIME"image/png", x)
     local data = reprmime(M, x)
     local o = Dict(
         "type" => string(M),
-        "data" => Base64Encode(data),
+        "data" => base64encode(data),
     )
+    lock(d.olock)
     ZMQ.send(d.osock, "media", true)
     ZMQ.send(d.osock, JSON.json(o))
+    unlock(d.olock)
 end
 
-function display(d::SornaDisplay, M::MIME"image/svg", x)
+function display(d::SornaDisplay, M::MIME"image/svg+xml", x)
     local data = reprmime(M, x)
     local o = Dict(
         "type" => string(M),
-        "data" => x,
+        "data" => data,
     )
+    lock(d.olock)
     ZMQ.send(d.osock, "media", true)
     ZMQ.send(d.osock, JSON.json(o))
+    unlock(d.olock)
 end
 
-function display(d::SornaDisplay, M::MIME"text/html", x)
-    local data = reprmime(M, x)
-    local o = Dict(
-        "type" => string(M),
-        "data" => x,
+function display(d::SornaDisplay, ::MIME"text/html", x)
+    data = reprmime(M, x)
+    o = Dict(
+        "type" => "text/html",
+        "data" => data,
     )
+    lock(d.olock)
     ZMQ.send(d.osock, "media", true)
     ZMQ.send(d.osock, JSON.json(o))
+    unlock(d.olock)
 end
+
+function display(d::SornaDisplay, M::MIME"text/plain", x)
+    data = reprmime(M, x)
+    lock(d.olock)
+    ZMQ.send(d.osock, "stdout", true)
+    ZMQ.send(d.osock, data)
+    unlock(d.olock)
+end
+
+display(d::SornaDisplay, x) = display(d, MIME"text/plain"(), x)
 
 function info(io::StdioPipe, msg...; kw...)
     if io == STDERR
-        local o = chomp(string(msg...))
+        o = chomp(string(msg...))
+        lock(d.olock)
         ZMQ.send(sorna.osock, "stderr", true)
-        ZMQ.send(sorna.osock, "INFO: $o")
-        #local o = Dict(
+        ZMQ.send(sorna.osock, "INFO: $o\n")
+        unlock(d.olock)
+        #o = Dict(
         #    "level" => "info",
         #    "msg"   => chomp(string(msg...)),
         #)
@@ -65,10 +84,12 @@ end
 
 function warn(io::StdioPipe, msg...; kw...)
     if io == STDERR
-        local o = chomp(string(msg...))
+        o = chomp(string(msg...))
+        lock(d.olock)
         ZMQ.send(sorna.osock, "stderr", true)
-        ZMQ.send(sorna.osock, "WARN: $o")
-        #local o = Dict(
+        ZMQ.send(sorna.osock, "WARN: $o\n")
+        unlock(d.olock)
+        #o = Dict(
         #    "level" => "warn",
         #    "msg"   => chomp(string(msg...)),
         #)
@@ -87,10 +108,12 @@ This function is a Sorna version of IJulia's readprompt.
 function readprompt(prompt::AbstractString; password::Bool=false)
     global sorna
     local opts = Dict("is_password" => password)
+    lock(sorna.olock)
     ZMQ.send(sorna.osock, "stdout", true)
     ZMQ.send(sorna.osock, prompt)
     ZMQ.send(sorna.osock, "waiting-input", true)
     ZMQ.send(sorna.osock, JSON.json(opts))
+    unlock(sorna.olock)
     code_id = unsafe_string(ZMQ.recv(sorna.isock))
     code_txt = unsafe_string(ZMQ.recv(sorna.isock))
     return code_txt
@@ -115,11 +138,11 @@ function flush(io::StdioPipe)
     end
 end
 
-function init_sorna(isock::ZMQ.Socket, osock::ZMQ.Socket)
+function init_sorna(isock::ZMQ.Socket, osock::ZMQ.Socket,
+                    output_lock::Base.ReentrantLock)
     global sorna
-    sorna = SornaDisplay(isock, osock)
+    sorna = SornaDisplay(isock, osock, output_lock)
     pushdisplay(sorna)
-    println("sorna initialized")
 end
 
 end # submodule
@@ -145,6 +168,7 @@ function parseall(code::AbstractString)
     catch ex
         if isa(ex, ParseError)
             # Add the line number to parsing errors
+            println(STDERR, "--parseerror--")
             throw(ParseError("$(ex.msg) (Line $lineno)"))
         else
             rethrow()
@@ -160,19 +184,27 @@ function parseall(code::AbstractString)
     end
 end
 
-function redirect_stream(rd::IO, target::AbstractString, osock::ZMQ.Socket)
+function redirect_stream(rd::IO, target::AbstractString,
+                         osock::ZMQ.Socket,
+                         output_lock::Base.ReentrantLock)
     try
         while !eof(rd)
             nb = nb_available(rd)
             if nb > 0
+                lock(output_lock)
                 ZMQ.send(osock, target, true)
                 ZMQ.send(osock, read(rd, nb))
+                unlock(output_lock)
             end
         end
     catch e
+        if islocked(output_lock)
+            unlock(output_lock)
+        end
         if isa(e, InterruptException)
             redirect_stream(rd, target, output_socket)
         else
+            println(STDERR, "--runerror--")
             rethrow()
         end
     end
@@ -199,12 +231,24 @@ function format_stackframe(frame::StackFrame; full_path::Bool=false)
     if (func_name == "execute_code" || func_name == "parseall") && basename(string(frame.file)) == "run.jl"
         nothing
     else
-        "$inline_info$(frame.func != "" ? frame.func : "?") at $file_info"
+        "in $inline_info$(frame.func != "" ? frame.func : "?") at $file_info"
     end
 end
 
 function format_stacktrace(stack::StackTrace, ex::Exception = nothing; full_path::Bool=false)
-    prefix = (ex != nothing) ? "ERROR: $(typeof(ex)): $(ex.msg)" : ""
+    if ex == nothing
+        prefix = ""
+    else
+        if isa(ex, ErrorException)
+            prefix = "ERROR: $(ex.msg)"
+        elseif isa(ex, ArgumentError) ||
+               isa(ex, AssertionError) ||
+               isa(ex, ParseError)
+            prefix = "ERROR: $(typeof(ex)): $(ex.msg)"
+        else
+            prefix = "ERROR: $ex"
+        end
+    end
     if isempty(stack)
         return prefix
     end
@@ -222,18 +266,20 @@ function format_stacktrace(stack::StackTrace, ex::Exception = nothing; full_path
     )
 end
 
-function execute_code(input_socket, output_socket, code_id, code_txt)
+function execute_code(input_socket, output_socket, output_lock, code_id, code_txt)
     try
         exprs = parseall(code_txt)
         SornaExecutionEnv.eval(exprs)
     catch ex
         st = catch_stacktrace()
-        write(STDERR, format_stacktrace(st, ex))
+        println(STDERR, format_stacktrace(st, ex))
     finally
         # ensure reader tasks to run once more.
         sleep(0.001)
+        lock(output_lock)
         ZMQ.send(output_socket, "finished", true)
         ZMQ.send(output_socket, "")
+        unlock(output_lock)
     end
 end
 
@@ -246,7 +292,11 @@ function run_query_mode()
     ZMQ.bind(input_socket, "tcp://*:2000")
     ZMQ.bind(output_socket, "tcp://*:2001")
 
-    SornaExecutionEnv.init_sorna(input_socket, output_socket)
+    # Create a lock for coroutine task synchronization.
+    # This is to prevent interleaving during sending ZMQ multipart messages.
+    output_lock = Base.ReentrantLock()
+
+    SornaExecutionEnv.init_sorna(input_socket, output_socket, output_lock)
 
     println("start serving...")
 
@@ -257,8 +307,8 @@ function run_query_mode()
     read_stderr[], = redirect_stderr()
 
     # Intercept STDOUT and STDERR
-    readout_task = @async redirect_stream(read_stdout[], "stdout", output_socket)
-    readerr_task = @async redirect_stream(read_stderr[], "stderr", output_socket)
+    readout_task = @async redirect_stream(read_stdout[], "stdout", output_socket, output_lock)
+    readerr_task = @async redirect_stream(read_stderr[], "stderr", output_socket, output_lock)
 
     try
         while true
@@ -267,7 +317,7 @@ function run_query_mode()
             code_txt = unsafe_string(ZMQ.recv(input_socket))
 
             # Evaluate code
-            execute_code(input_socket, output_socket, code_id, code_txt)
+            execute_code(input_socket, output_socket, output_lock, code_id, code_txt)
         end
     finally
         ZMQ.close(input_socket)
