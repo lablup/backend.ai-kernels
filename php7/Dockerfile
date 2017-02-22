@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Joongi Kim "joongi@lablup.com"
+MAINTAINER DevOps "devops@lablup.com"
 
 # Add an isolated user
 # /home/work: actual working directory for user codes
@@ -10,20 +10,22 @@ RUN mkdir /home/sorna
 RUN chmod 755 /home/sorna
 RUN chown -R work:work /home/sorna
 
+ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /home/work
 WORKDIR /home/work
 
-# Set up package manager.
-ENV DEBIAN_FRONTEND noninteractive
+# Set up the base environment.
+USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
-
-# Install PHP 7.0
 RUN apt-get update
 RUN apt-get install -y --only-upgrade tzdata
-RUN apt-get install -y language-pack-en-base libseccomp2 ca-certificates \
-		       python-software-properties software-properties-common
+RUN apt-get install -y build-essential git-core curl wget ca-certificates libseccomp2 libzmq3-dev
+CMD /home/sorna/run.sh
+
+# Install PHP 7.0
+RUN apt-get install -y language-pack-en-base python-software-properties software-properties-common
 ENV LC_ALL=en_US.UTF-8
 RUN apt-get install -y php7.0-cli php7.0-gd php7.0-sqlite3 php7.0-dev php-pear
 RUN apt-get install -y pkg-config libzmq3-dev
@@ -52,6 +54,4 @@ LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
 LABEL io.sorna.version="2"
 
 ADD run.php /home/sorna/run.php
-
 USER work
-CMD /home/sorna/run.sh

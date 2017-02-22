@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Jeongkyu Shin "jshin@lablup.com"
+MAINTAINER DevOps "devops@lablup.com"
 
 # Add an isolated user
 # /home/work: actual working directory for user codes
@@ -14,15 +14,18 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /home/work
 WORKDIR /home/work
 
-# Install latest Octave
+# Set up the base environment.
 USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN apt-get update && apt-get upgrade -y
 RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
-RUN apt-get install -y build-essential
+RUN apt-get update
+RUN apt-get install -y --only-upgrade tzdata
+RUN apt-get install -y build-essential git-core curl wget ca-certificates libseccomp2 libzmq3-dev
+CMD /home/sorna/run.sh
+
+# Install Octave
 RUN apt-get install -y liboctave-dev info
-RUN apt-get install -y libzmq3-dev
 WORKDIR /home/sorna
 ADD *.deb /tmp/
 RUN dpkg -i /tmp/*.deb
@@ -34,25 +37,29 @@ RUN octave-cli /home/sorna/install_zeromq.m
 RUN mkdir /home/sorna/jsonlab
 COPY jsonlab.tgz /home/sorna/jsonlab.tgz
 RUN tar xvzf /home/sorna/jsonlab.tgz -C /home/sorna/
+WORKDIR /home/work
 
 # Secure installation scripts
 USER root
-RUN apt-get install -yf libseccomp2
-ADD run.m /home/sorna/run.m
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
+RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
 ADD patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
 
-ENV HOME /home/work
-WORKDIR /home/work
-
 VOLUME ["/home/work"]
-EXPOSE 2001
+EXPOSE 2000 2001
 
+LABEL io.sorna.timeout="10"
+LABEL io.sorna.maxmem="128m"
+LABEL io.sorna.maxcores="1"
+LABEL io.sorna.mode="query"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+LABEL io.sorna.version="2"
+
+ADD run.m /home/sorna/run.m
 USER work
-CMD /home/sorna/run.sh

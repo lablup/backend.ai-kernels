@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Jonghyun Park "jpark@lablup.com"
+MAINTAINER DevOps "devops@lablup.com"
 
 # Add an isolated user
 # /home/work: actual working directory for user codes
@@ -10,26 +10,32 @@ RUN mkdir /home/sorna
 RUN chmod 755 /home/sorna
 RUN chown -R work:work /home/sorna
 
-ENV HOME /home/work
-
-# Install latest node.js 4.x
 ENV DEBIAN_FRONTEND noninteractive
+ENV HOME /home/work
+WORKDIR /home/work
+
+# Set up the base environment.
+USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
 RUN apt-get update
 RUN apt-get install -y --only-upgrade tzdata
-RUN apt-get install -y curl wget build-essential ca-certificates libseccomp2 \
-                       libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev \
+RUN apt-get install -y build-essential git-core curl wget ca-certificates libseccomp2 libzmq3-dev
+CMD /home/sorna/run.sh
+
+# Install NodeJS dependencies
+RUN apt-get install -y libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev \
                        libgdbm-dev libc6-dev libbz2-dev python2.7-minimal python2.7-dev
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1; \
     update-alternatives --auto python
+
+# Install NodeJS
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get install -y nodejs
 
 # Install packages
 WORKDIR /home/sorna
-RUN apt-get install -y libzmq3-dev git-core
 ADD package.json /home/sorna/package.json
 RUN cd /home/sorna; npm install; cd $HOME
 
@@ -56,6 +62,4 @@ LABEL io.sorna.envs.corecount="NPROC"
 LABEL io.sorna.version="2"
 
 ADD run.js /home/sorna/run.js
-
 USER work
-CMD /home/sorna/run.sh

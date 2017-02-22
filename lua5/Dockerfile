@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Jonghyun Park "jpark@lablup.com"
+MAINTAINER DevOps "devops@lablup.com"
 
 # Add an isolated user
 # /home/work: actual working directory for user codes
@@ -12,19 +12,20 @@ RUN chown -R work:work /home/sorna
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /home/work
+WORKDIR /home/work
 
-# Install ZeroMQ
+# Set up the base environment.
+USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
 RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
 RUN apt-get update
 RUN apt-get install -y --only-upgrade tzdata
-RUN apt-get install -y wget unzip ca-certificates build-essential
-RUN apt-get install -y libzmq3-dev
+RUN apt-get install -y build-essential git-core curl wget ca-certificates libseccomp2 libzmq3-dev
+CMD /home/sorna/run.sh
 
 # Install Lua
-USER root
-RUN apt-get install -y lua5.2 liblua5.2-dev
+RUN apt-get install -y lua5.2 liblua5.2-dev unzip
 
 # Install Lua packages using luarocks pkg manager
 WORKDIR /home/sorna
@@ -38,7 +39,6 @@ RUN luarocks install lzmq
 
 # Secure installation scripts
 USER root
-ADD run.lua /home/sorna/run.lua
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
 ADD jail /home/sorna/jail
@@ -52,7 +52,7 @@ ENV LD_PRELOAD /home/sorna/patch-libs.so
 ENV HOME /home/work
 WORKDIR /home/work
 VOLUME ["/home/work"]
-EXPOSE 2001
+EXPOSE 2000 2001
 
 LABEL io.sorna.timeout="10"
 LABEL io.sorna.maxmem="128m"
@@ -61,5 +61,5 @@ LABEL io.sorna.mode="query"
 LABEL io.sorna.envs.corecount="NPROC"
 LABEL io.sorna.version="2"
 
+ADD run.lua /home/sorna/run.lua
 USER work
-CMD /home/sorna/run.sh
