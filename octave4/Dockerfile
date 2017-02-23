@@ -30,9 +30,12 @@ WORKDIR /home/sorna
 ADD *.deb /tmp/
 RUN dpkg -i /tmp/*.deb
 
+# Install gnuplot as default graphics toolkit
+RUN apt-get install -y ghostscript epstool transfig pstoedit gnuplot
+
 # Install script
-ADD install_zeromq.m /home/sorna/install_zeromq.m
-RUN octave-cli /home/sorna/install_zeromq.m
+ADD packages.m /home/sorna/packages.m
+RUN octave-cli /home/sorna/packages.m
 
 RUN mkdir /home/sorna/jsonlab
 COPY jsonlab.tgz /home/sorna/jsonlab.tgz
