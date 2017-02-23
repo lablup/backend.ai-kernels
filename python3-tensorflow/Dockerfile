@@ -41,7 +41,7 @@ ENV PYTHONUNBUFFERED 1
 ENV SORNA_PYTHON_VERSION 3.6.0
 ADD install-python.sh /home/sorna/install-python.sh
 ADD pyenv-run.sh      /home/sorna/pyenv-run.sh
-RUN sh /home/sorna/install-python.sh
+RUN /home/sorna/install-python.sh
 
 # Install common Python packages
 RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist simplejson six "python-dateutil>2"
@@ -68,7 +68,7 @@ RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-*.whl
 
 # Install TensorFlow
 USER work
-ADD tensorflow-*.whl /tmp
+ADD tensorflow-1.0.0-cp36-cp36m-linux_x86_64.whl /tmp
 RUN /home/sorna/pyenv-run.sh pip install /tmp/tensorflow-*.whl
 
 # Install Keras
