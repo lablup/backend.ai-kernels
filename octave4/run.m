@@ -1,11 +1,19 @@
 pkg load zeromq
 addpath('/home/sorna/jsonlab-master');
 
-% Override memory specific function to do nothing.
+% Override memory-clear function to preserve our precious sockets
 function clear (varargin)
-%  for i = 1:length(varargin)
-%    printf (varargin{i})
-%  endfor
+  if length(varargin) == 0
+    args = '-x _sorna_sock';
+  else
+    for i = 1:length(varargin)
+      if varargin{i} == "all"
+        varargin{i} = '-x _sorna_sock';
+      endif
+    endfor
+    args = sprintf (', "%s"', varargin{:});
+  endif
+  evalin ("caller", ['builtin ("clear"' args ')']);
 endfunction
 
 function result = execute_code(insock, outsock, code)
@@ -49,19 +57,19 @@ function result = execute_code(insock, outsock, code)
   endfor
 endfunction
 
-insock  = zmq_socket (ZMQ_PULL);
-outsock = zmq_socket (ZMQ_PUSH);
-zmq_bind (insock, 'tcp://*:2000');
-zmq_bind (outsock, 'tcp://*:2001');
+_sorna_insock  = zmq_socket (ZMQ_PULL);
+_sorna_outsock = zmq_socket (ZMQ_PUSH);
+zmq_bind (_sorna_insock, 'tcp://*:2000');
+zmq_bind (_sorna_outsock, 'tcp://*:2001');
 printf (['Octave version : ', version, '\n'])
 printf ('start serving...')
 
 while(true)
-  codeid  = zmq_recv (insock, 100, 0);
-  codetxt = zmq_recv (insock, 100000, 0);
-  execute_code (insock, outsock, char(codetxt));
-  zmq_send (outsock, 'finished', ZMQ_SNDMORE);
-  zmq_send (outsock, '');
+  codeid  = zmq_recv (_sorna_insock, 100, 0);
+  codetxt = zmq_recv (_sorna_insock, 100000, 0);
+  execute_code (_sorna_insock, _sorna_outsock, char(codetxt));
+  zmq_send (_sorna_outsock, 'finished', ZMQ_SNDMORE);
+  zmq_send (_sorna_outsock, '');
 endwhile
 
 % vim: sts=2 sw=2 et
