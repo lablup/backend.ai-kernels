@@ -3,57 +3,56 @@ addpath('/home/sorna/jsonlab-master');
 
 % Override memory-clear function to preserve our precious sockets
 function clear (varargin)
+  exclude_arg = '"-x", "_sorna_*"';
   if length(varargin) == 0
-    args = '-x _sorna_sock';
+    args = [', ' exclude_arg];
   else
     for i = 1:length(varargin)
       if varargin{i} == "all"
-        varargin{i} = '-x _sorna_sock';
+        varargin{i} = exclude_arg;
       endif
     endfor
-    args = sprintf (', "%s"', varargin{:});
+    args = [', ' varargin{:}];
   endif
-  evalin ("caller", ['builtin ("clear"' args ')']);
+  evalin ('caller', ['builtin ("clear"' args ')']);
 endfunction
 
-function result = execute_code(insock, outsock, code)
-  stdout = [];
-  stderr = [];
-  media = cell();
-  exceptions = [];
+function result = execute_code(_sorna_insock, _sorna_outsock, _sorna_code)
+  _sorna_stdout = [];
+  _sorna_stderr = [];
+  _sorna_media = cell();
   try
-    stdout = evalc (code, 'stderr = lasterror.message;');
-    if strfind (code, 'plot') || strfind (code, 'figure')
-      allFigInW = findall (0, 'type', 'figure');
-      _mediaCount = 1;
-      for i = 1:length(allFigInW)
+    _sorna_stdout = evalc (_sorna_code, '_sorna_stderr = lasterror.message;');
+    if strfind (_sorna_code, 'plot') || strfind (_sorna_code, 'figure')
+      gobjs = findall (0, 'type', 'figure');
+      disp(sprintf('has %d plots!', length(gobjs)))
+      for i = 1:length(gobjs)
         tmpf = tmpname ();
-        print (allFigInW (i), tmpf);
-        fstr = fileread(tmpf);
-        fstr = strrep(fstr, '  ', ' ')
-        fstr = strrep(fstr, '   ', ' ')
-        media{_mediaCount} = {'image/svg+xml', fstr};
-        _mediaCount = _mediaCount + 1;
+        print (gobjs(i), tmpf);
+        fstr = fileread (tmpf);
+        fstr = strrep (fstr, '  ', ' ');
+        fstr = strrep (fstr, '   ', ' ');
+        _sorna_media{i} = {'image/svg+xml', fstr};
         unlink (tmpf);
       endfor
     endif
   catch
-    exceptions = lasterror.message;
+    % do nothing
   end_try_catch
 
   if (!isempty (stdout))
-    zmq_send (outsock, 'stdout', ZMQ_SNDMORE);
-    zmq_send (outsock, char(stdout));
+    zmq_send (_sorna_outsock, 'stdout', ZMQ_SNDMORE);
+    zmq_send (_sorna_outsock, char(_sorna_stdout));
   endif
   if (!isempty (stderr))
-    zmq_send (outsock, 'stderr', ZMQ_SNDMORE);
-    zmq_send (outsock, char(stderr));
+    zmq_send (_sorna_outsock, 'stderr', ZMQ_SNDMORE);
+    zmq_send (_sorna_outsock, char(_sorna_stderr));
   endif
-  for m = media
+  for m = _sorna_media
     item.type = m{1}
     item.data = m{2}
-    zmq_send (outsock, 'media', ZMQ_SNDMORE);
-    zmq_send (outsock, savejson(item));
+    zmq_send (_sorna_outsock, 'media', ZMQ_SNDMORE);
+    zmq_send (_sorna_outsock, savejson(item));
   endfor
 endfunction
 

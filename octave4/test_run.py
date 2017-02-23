@@ -47,6 +47,11 @@ def execute(code):
 
 sources = {
     'simple': '''disp ("hello world")''',
+    'clear': '''
+disp ("ok");
+clear;
+disp ("ok2");
+''',
     'gt': '''
 graphics_toolkit ("gnuplot")
 disp("available")
@@ -56,9 +61,9 @@ disp(loaded_graphics_toolkits())
 ''',
     'plot': '''
 x = 0 : 0.1 : 7;
-y1 = sin (x);
+y1 = sin(x);
 plot (x, y1);
-y2 = cos(x) .* exp(−x / 3 );
+y2 = cos(x);
 plot (x, y1, '-@*r', x, y2, '+b');
 title ('two elementary graphs');
 grid on
