@@ -1,8 +1,7 @@
 local zmq = require "lzmq"
-local json = require "dkjson"
 
 
-function execute_code(code_id, code)
+function execute_code(in_socket, out_socket, code_id, code_txt)
     --[[ Replace global `print` (and `io.write`) functions to save contents to a
          variable (tmp_stdout).
 
@@ -32,59 +31,59 @@ function execute_code(code_id, code)
     confident that this is better approach.
     ]]
     local original_print, original_io_write = print, io.write
-    local tmp_stdout = ""
-    print = function (...) tmp_stdout = tmp_stdout .. ... .. '\n' end  -- `print` appends new line
-    io.write = function (...) tmp_stdout = tmp_stdout .. ... end  -- `io.write` do not append new line
-
-    local ok, result = pcall(assert(loadstring(code)))
-    local exceptions = {}
-
-    -- Restore original `print` function
-    print, io.write = original_print, original_io_write
-
-    if not ok then
-        local exception_info = {result, {}, false, nil}
-        table.insert(exceptions, exception_info)
+    print = function(...)
+        out_socket:sendx("stdout", "" .. ... .. "\n")
+    end
+    io.write = function(...)
+        out_socket:sendx("stdout", "" .. ...)
+    end
+    io.read = function()
+        out_socket:sendx("stdout", "STDIN> ")
+        out_socket:sendx("waiting-input", "{\"is_password\": false}")
+        local code_id = in_socket:recv()
+        local user_input = in_socket:recv()
+        return user_input
     end
 
-    -- I'm not sure there's a clear difference between stderr and exception in Lua.
-    local stdout, stderr = tmp_stdout, ""
-    return stdout, stderr, exceptions
+    local chunk, err = load(code_txt, "<user-input>", "t")
+
+    if chunk == nil then
+        out_socket:sendx("stderr", err)
+    else
+        -- Run!
+        local ok, result = pcall(chunk)
+
+        -- Restore original `print` function
+        print, io.write = original_print, original_io_write
+
+        if not ok then
+            out_socket:sendx("stderr", result)
+        end
+    end
+    out_socket:sendx("finished", "")
 end
 
--- main routine
-function main(socket)
+function main(in_socket, out_socket)
     while true do
-        -- Receive code id and code
-        local code_id = socket:recv()
-        local code = socket:recv()
-
-        -- Evaluate code
-        local out, err, exceptions = execute_code(code_id, code)
-
-        -- Return results
-        local result = {
-            stdout = out,
-            stderr = err,
-            exceptions = exceptions
-        }
-
-        local json_result = json.encode(result)
-        socket:send(json_result)
+        local code_id = in_socket:recv()
+        local code_txt = in_socket:recv()
+        execute_code(in_socket, out_socket, code_id, code_txt)
     end
 end
 
--- Create ZMQ context and socket
 local ctx = zmq.context()
-local socket = ctx:socket(zmq.REP)
-local port = "tcp://*:2001"
-socket:bind(port)
-print("serving at port 2001...")
+local in_socket = ctx:socket(zmq.PULL)
+local out_socket = ctx:socket(zmq.PUSH)
+in_socket:bind("tcp://*:2000")
+out_socket:bind("tcp://*:2001")
+print("start serving...")
 
--- Run main routine in a protected mode to destroy ZMQ socket and context in any case
-pcall(main, socket)
+-- Run in a protected mode to prevent destruction of ZMQ context/sockets
+main(in_socket, out_socket)
 
--- Terminate ZMQ socket and context
-socket:close()
+in_socket:close()
+out_socket:close()
 ctx:destroy()
 print("exit.")
+
+-- vim: sts=4 sw=4 et

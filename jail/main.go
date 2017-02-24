@@ -23,14 +23,6 @@ import (
 	"syscall"
 )
 
-/*
-#include <signal.h>
-#include <sys/types.h>
-// cgo requires an explicit export of anonymous typedefs.
-typedef siginfo_t Siginfo_t;
-*/
-import "C"
-
 const debug = false
 
 var (
@@ -45,6 +37,9 @@ var (
 	id_Vfork, _    = seccomp.GetSyscallFromNameByArch("vfork", arch)
 	id_Execve, _   = seccomp.GetSyscallFromNameByArch("execve", arch)
 	id_Kill, _     = seccomp.GetSyscallFromNameByArch("kill", arch)
+	id_Killpg, _   = seccomp.GetSyscallFromNameByArch("killpg", arch)
+	id_Tkill, _    = seccomp.GetSyscallFromNameByArch("tkill", arch)
+	id_Tgkill, _   = seccomp.GetSyscallFromNameByArch("tgkill", arch)
 	id_Chmod, _    = seccomp.GetSyscallFromNameByArch("chmod", arch)
 	id_Fchmodat, _ = seccomp.GetSyscallFromNameByArch("fchmodat", arch)
 )
@@ -53,18 +48,32 @@ var execCount int = 0
 var forkCount int = 0
 var childCount uint = 1
 
-func setPtraceOpts(l *log.Logger, pid int) {
-	var ptraceOpts int = 0
-	// EXITKILL option ensures to kill all children/tracee processes
-	// when the parent (me) exits.
-	ptraceOpts = (1 << 7 /*PTRACE_O_TRACESECCOMP*/)
-	ptraceOpts |= (1 << 20 /*PTRACE_O_EXITKILL, Linux >= 3.4 */)
-	ptraceOpts |= syscall.PTRACE_O_TRACECLONE
-	ptraceOpts |= syscall.PTRACE_O_TRACEFORK
-	ptraceOpts |= syscall.PTRACE_O_TRACEVFORK
-	if err := syscall.PtraceSetOptions(pid, ptraceOpts); err != nil {
-		l.Fatal("PtraceSetOptions: ", err)
-	}
+// Ref: https://github.com/torvalds/linux/blob/master/include/uapi/linux/ptrace.h
+const PTRACE_SEIZE uintptr = 0x4206     /* Linux >= 3.4 */
+const PTRACE_INTERRUPT uintptr = 0x4207 /* Linux >= 3.4 */
+const PTRACE_LISTEN uintptr = 0x4208    /* Linux >= 3.4 */
+const PTRACE_EVENT_SECCOMP uint = 7
+const PTRACE_EVENT_STOP uint = 128
+
+const ourPtraceOpts int = (1 << PTRACE_EVENT_SECCOMP /*PTRACE_O_TRACESECCOMP*/) |
+	(1 << 20 /*PTRACE_O_EXITKILL, Linux >= 3.4 */) |
+	syscall.PTRACE_O_TRACECLONE |
+	syscall.PTRACE_O_TRACEFORK |
+	syscall.PTRACE_O_TRACEVFORK
+
+func ptraceSeize(pid int, opts int) (uintptr, error) {
+	ret, _, err := syscall.Syscall6(syscall.SYS_PTRACE, PTRACE_SEIZE, uintptr(pid), 0, uintptr(opts), 0, 0)
+	return ret, err
+}
+
+func ptraceInterrupt(pid int) (uintptr, error) {
+	ret, _, err := syscall.Syscall6(syscall.SYS_PTRACE, PTRACE_INTERRUPT, uintptr(pid), 0, 0, 0, 0)
+	return ret, err
+}
+
+func ptraceListen(pid int, sig int) (uintptr, error) {
+	ret, _, err := syscall.Syscall6(syscall.SYS_PTRACE, PTRACE_LISTEN, uintptr(pid), 0, uintptr(sig), 0, 0)
+	return ret, err
 }
 
 type WaitResult struct {
@@ -73,73 +82,200 @@ type WaitResult struct {
 	status syscall.WaitStatus
 }
 
-func traceProcess(l *log.Logger, pid int) {
-	first_stop := true
-	mySignals := make(chan os.Signal, 1)
-	childrenWaits := make(chan WaitResult, 2)
-	signal.Notify(mySignals, os.Interrupt, syscall.SIGTERM)
-loop:
+func waitChildStop(pid int) syscall.WaitStatus {
+	var status syscall.WaitStatus
 	for {
-		go func() {
+		p, err := syscall.Wait4(pid, &status, syscall.WSTOPPED, nil)
+		if err == syscall.EINTR || p < 0 {
+			continue
+		} else {
+			break
+		}
+	}
+	return status
+}
+
+func traceProcess(l *log.Logger, pid int) {
+
+	mySignals := make(chan os.Signal)
+	childrenWaits := make(chan WaitResult)
+
+	signal.Notify(mySignals, os.Interrupt, syscall.SIGTERM)
+	signal.Ignore(syscall.SIGSTOP)
+	signal.Ignore(syscall.SIGTTOU)
+	signal.Ignore(syscall.SIGTTIN)
+	signal.Ignore(syscall.SIGTSTP)
+
+	// Child is first-stopped.
+	status := waitChildStop(pid)
+	if !status.Stopped() || status.StopSignal() != syscall.SIGSTOP {
+		color.Set(color.FgRed)
+		l.Printf("Unexpected wait status 0x%x", uint(status))
+		color.Unset()
+		return
+	}
+
+	ret, seizeErr := ptraceSeize(pid, ourPtraceOpts)
+	if ret != 0 {
+		color.Set(color.FgRed)
+		l.Printf("ptraceSeize error: %d\n", seizeErr)
+		color.Unset()
+		return
+	}
+	if debug {
+		color.Set(color.FgBlue)
+		l.Printf("attached child %d\n", pid)
+		color.Unset()
+	}
+
+	syscall.Kill(pid, syscall.SIGCONT)
+
+	go func() {
+		for {
 			var status syscall.WaitStatus
 			traceePid, err := syscall.Wait4(-1, &status, syscall.WALL, nil)
+			if err != nil {
+				switch err.(syscall.Errno) {
+				case syscall.EINTR:
+					// Retry the wait system call.
+					continue
+				case syscall.ECHILD:
+					// No child processes found. Terminate.
+					break
+				default:
+					color.Set(color.FgCyan)
+					l.Printf("unexpected errno %s", err)
+					color.Unset()
+					break
+				}
+			}
 			childrenWaits <- WaitResult{int(traceePid), err, status}
-		}()
+			if status.Exited() && traceePid == pid {
+				break
+			}
+		}
+		if debug {
+			color.Set(color.FgBlue)
+			l.Printf("monitoring goroutine terminating.")
+			color.Unset()
+		}
+	}()
+
+loop:
+	for {
 		select {
-		case sig := <-mySignals:
-			switch sig {
+		case mysig := <-mySignals:
+
+			switch mysig {
 			case os.Interrupt, syscall.SIGTERM:
 				// Terminate all my children.
 				// Since we set Setsid: true in SysProcAttr of syscall.ForkExec(),
 				// the signals we receive are NOT automatically delivered to children.
 				// We control the SIGINT/SIGTERM behvaiour gracefully for later
 				// extension of Sorna.
-				sid, _, _ := syscall.RawSyscall(syscall.SYS_GETSID, uintptr(pid), 0, 0)
-				syscall.Kill(int(sid), syscall.SIGINT)
+				pgid, _ := syscall.Getpgid(pid)
+				syscall.Kill(pgid, syscall.SIGKILL)
+
+				var status syscall.WaitStatus
+				syscall.Wait4(pid, &status, syscall.WALL, nil)
+				break loop
 			}
+
 		case result := <-childrenWaits:
+
 			var signalToChild syscall.Signal = 0
-			if result.err != nil {
-				switch result.err.(syscall.Errno) {
-				case syscall.EINTR:
-					// Retry the wait system call.
-					continue loop
-				case syscall.ECHILD:
-					// No child processes found. Terminate.
-					break loop
-				}
-			}
+
 			if result.status.Exited() {
 				if debug {
-					color.Set(color.FgYellow)
+					color.Set(color.FgBlue)
 					l.Printf("EXIT (pid %d) status %d\n", result.pid, result.status.ExitStatus())
 					color.Unset()
 				}
 				if pid == result.pid {
-					// Our very child has exited. Terminate.
+					if debug {
+						color.Set(color.FgBlue)
+						l.Printf("Our very child has exited. Done.")
+						color.Unset()
+					}
+					break loop
+				} else if result.pid == -1 {
+					if debug {
+						color.Set(color.FgRed)
+						l.Printf("waitpid error: %s (exit status %d). Terminating.", result.err, result.status.ExitStatus())
+						color.Unset()
+					}
 					break loop
 				} else {
 					// If we attach grand-children processes, this may be the case.
 					childCount--
 					if debug {
 						color.Set(color.FgBlue)
-						l.Printf("childCount decremented from exited subproc, now %d\n", childCount)
+						l.Printf("childCount is now %d\n", childCount)
 						color.Unset()
 					}
 				}
-			} else if result.status.Stopped() {
-				if debug {
-					l.Printf("STOP stopsignal: 0x%x, trapcause: %d\n",
-						uint(result.status.StopSignal()), result.status.TrapCause())
-				}
-				switch result.status.StopSignal() {
-				case syscall.SIGSTOP:
-					if first_stop {
-						setPtraceOpts(l, pid)
-						first_stop = false
+			}
+
+			if result.status.Signaled() {
+				continue loop
+			}
+
+			if !result.status.Stopped() {
+				continue loop
+			}
+
+			// Okay, we now have to deal with tracing stops.
+
+			stopsig := result.status.StopSignal()
+
+			if debug {
+				color.Set(color.FgYellow)
+				l.Printf("Received signal: 0x%x (%d) \"%s\"", uint(stopsig), uint(stopsig), stopsig)
+				color.Unset()
+			}
+
+			childStopped := false
+			event := uint(result.status) >> 16
+
+			switch event {
+			case 0:
+				// pass
+			case PTRACE_EVENT_STOP:
+				switch stopsig {
+				case syscall.SIGSTOP, syscall.SIGTSTP, syscall.SIGTTOU, syscall.SIGTTIN:
+					childStopped = true
+					if debug {
+						color.Set(color.FgYellow)
+						l.Printf("group-stop detected")
+						color.Unset()
 					}
-				case syscall.SIGTRAP:
+				}
+			default:
+				// pass
+			}
+
+			switch stopsig {
+			case syscall.SIGSTOP:
+				// pass
+			case syscall.SIGTRAP:
+				eventCause := ((uint(result.status) >> 8) & (^uint(syscall.SIGTRAP))) >> 8
+				if debug {
+					color.Set(color.FgYellow)
+					l.Printf("event-cause: %d\n", eventCause)
+					color.Unset()
+				}
+
+				switch eventCause {
+				case PTRACE_EVENT_SECCOMP:
 					allow := true
+					// Linux syscall convention for x86_64 arch:
+					//  - rax: syscall number
+					//  - rdi: 1st param
+					//  - rsi: 2nd param
+					//  - rdx: 3rd param
+					//  - r10: 4th param
+					//  - r8: 5th param
+					//  - r9: 6th param
 					var regs syscall.PtraceRegs
 					for {
 						err := syscall.PtraceGetRegs(result.pid, &regs)
@@ -152,135 +288,178 @@ loop:
 						break
 					}
 					syscallId := uint(regs.Orig_rax)
-					// Linux syscall convention for x86_64 arch:
-					//  - rax: syscall number
-					//  - rdi: 1st param
-					//  - rsi: 2nd param
-					//  - rdx: 3rd param
-					//  - r10: 4th param
-					//  - r8: 5th param
-					//  - r9: 6th param
-					switch result.status.TrapCause() {
-					case 7 /*PTRACE_EVENT_SECCOMP*/ :
-						switch seccomp.ScmpSyscall(syscallId) {
-						case id_Fork, id_Vfork, id_Clone:
-							execPath, _ := utils.GetExecutable(result.pid)
-							if execPath == myExecPath {
-								allow = true
-							} else if execPath == intraJailPath {
-								allow = true
-							} else {
-								maxForks := policyInst.GetForkAllowance()
-								allow = (maxForks == -1 || forkCount < maxForks)
-								forkCount++
-							}
-							allow = allow && (childCount < policyInst.GetMaxChildProcs())
-							if debug {
-								l.Printf("fork owner: %s\n", execPath)
-							}
-						case id_Kill:
-							targetPid := int(regs.Rdi)
-							allow = (targetPid != pid && targetPid != os.Getpid() && targetPid != 1)
-						case id_Execve:
-							execPath, _ := utils.GetExecutable(result.pid)
-							if execPath == myExecPath {
-								allow = true
-							} else if execPath == intraJailPath {
-								allow = true
-							} else if policyInst.CheckPathExecutable(execPath) {
-								allow = true
-							} else {
-								maxExec := policyInst.GetExecAllowance()
-								allow = (maxExec == -1 || execCount < maxExec)
-								execCount++
-							}
-							if debug {
-								l.Printf("execve owner: %s\n", execPath)
-							}
-						case id_Open:
-							pathPtr := uintptr(regs.Rdi)
-							path := utils.ReadString(result.pid, pathPtr)
-							// rsi is flags
-							mode := int(regs.Rdx)
-							allow = policyInst.CheckPathOp(path, policy.OP_OPEN, mode)
-						case id_Access:
-							pathPtr := uintptr(regs.Rdi)
-							path := utils.ReadString(result.pid, pathPtr)
-							mode := int(regs.Rsi)
-							allow = policyInst.CheckPathOp(path, policy.OP_ACCESS, mode)
-						case id_Fchmodat:
-							pathPtr := uintptr(regs.Rsi)
-							path := utils.ReadString(result.pid, pathPtr)
-							path = utils.GetAbsPathAs(path, result.pid)
-							mode := int(regs.Rdx)
-							allow = policyInst.CheckPathOp(path, policy.OP_CHMOD, mode)
-						case id_Chmod:
-							pathPtr := uintptr(regs.Rdi)
-							path := utils.ReadString(result.pid, pathPtr)
-							path = utils.GetAbsPathAs(path, result.pid)
-							mode := int(regs.Rsi)
-							allow = policyInst.CheckPathOp(path, policy.OP_CHMOD, mode)
+					if debug {
+						color.Set(color.FgYellow)
+						sn, _ := seccomp.ScmpSyscall(syscallId).GetName()
+						l.Printf("seccomp trap (%d %s)", syscallId, sn)
+						color.Unset()
+					}
+					switch seccomp.ScmpSyscall(syscallId) {
+					case id_Fork, id_Vfork, id_Clone:
+						execPath, _ := utils.GetExecutable(result.pid)
+						if execPath == myExecPath {
+							allow = true
+						} else if execPath == intraJailPath {
+							allow = true
+						} else {
+							maxForks := policyInst.GetForkAllowance()
+							allow = (maxForks == -1 || forkCount < maxForks)
+							forkCount++
+						}
+						allow = allow && (childCount < policyInst.GetMaxChildProcs())
+						if debug {
+							l.Printf("fork owner: %s\n", execPath)
+						}
+					case id_Tgkill:
+						targetTgid := int(regs.Rdi)
+						targetTid := int(regs.Rsi)
+						signum := syscall.Signal(uint(regs.Rdx))
+						switch signum {
+						case syscall.SIGKILL, syscall.SIGINT, syscall.SIGTERM:
+							allow = (targetTgid != os.Getpid() &&
+								targetTid != pid &&
+								targetTid != os.Getpid() &&
+								targetTid != 1)
 						default:
 							allow = true
 						}
-						if !allow {
-							if debug {
-								syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
-								color.Set(color.FgRed)
-								l.Printf("blocked syscall %s\n", syscallName)
-								color.Unset()
-							}
-							// Skip the system call with permission error
-							regs.Orig_rax = 0xFFFFFFFFFFFFFFFF // -1
-							regs.Rax = 0xFFFFFFFFFFFFFFFF - uint64(syscall.EPERM) + 1
-							syscall.PtraceSetRegs(result.pid, &regs)
-						} else {
-							if debug {
-								syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
-								color.Set(color.FgGreen)
-								l.Printf("allowed syscall %s\n", syscallName)
-								color.Unset()
-							}
+					case id_Kill, id_Killpg, id_Tkill:
+						targetPid := int(regs.Rdi)
+						signum := syscall.Signal(uint(regs.Rsi))
+						switch signum {
+						case syscall.SIGKILL, syscall.SIGINT, syscall.SIGTERM:
+							allow = (targetPid != pid &&
+								targetPid != os.Getpid() &&
+								targetPid != 1)
+						default:
+							allow = true
 						}
-					case syscall.PTRACE_EVENT_CLONE,
-						syscall.PTRACE_EVENT_FORK,
-						syscall.PTRACE_EVENT_VFORK:
-						childPid, _ := syscall.PtraceGetEventMsg(result.pid)
-						syscall.PtraceAttach(int(childPid))
-						childCount++
+					case id_Execve:
+						execPath, _ := utils.GetExecutable(result.pid)
+						if execPath == myExecPath {
+							allow = true
+						} else if execPath == intraJailPath {
+							allow = true
+						} else if policyInst.CheckPathExecutable(execPath) {
+							allow = true
+						} else {
+							maxExec := policyInst.GetExecAllowance()
+							allow = (maxExec == -1 || execCount < maxExec)
+							execCount++
+						}
 						if debug {
-							color.Set(color.FgBlue)
-							l.Printf("childCount incremented, now %d\n", childCount)
+							l.Printf("execve owner: %s\n", execPath)
+						}
+					case id_Open:
+						pathPtr := uintptr(regs.Rdi)
+						path := utils.ReadString(result.pid, pathPtr)
+						// rsi is flags
+						mode := int(regs.Rdx)
+						allow = policyInst.CheckPathOp(path, policy.OP_OPEN, mode)
+					case id_Access:
+						pathPtr := uintptr(regs.Rdi)
+						path := utils.ReadString(result.pid, pathPtr)
+						mode := int(regs.Rsi)
+						allow = policyInst.CheckPathOp(path, policy.OP_ACCESS, mode)
+					case id_Fchmodat:
+						pathPtr := uintptr(regs.Rsi)
+						path := utils.ReadString(result.pid, pathPtr)
+						path = utils.GetAbsPathAs(path, result.pid)
+						mode := int(regs.Rdx)
+						allow = policyInst.CheckPathOp(path, policy.OP_CHMOD, mode)
+					case id_Chmod:
+						pathPtr := uintptr(regs.Rdi)
+						path := utils.ReadString(result.pid, pathPtr)
+						path = utils.GetAbsPathAs(path, result.pid)
+						mode := int(regs.Rsi)
+						allow = policyInst.CheckPathOp(path, policy.OP_CHMOD, mode)
+					default:
+						allow = true
+					}
+					if !allow {
+						if debug {
+							syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
+							color.Set(color.FgRed)
+							l.Printf("blocked syscall %s\n", syscallName)
 							color.Unset()
 						}
-					case 0:
-						// ignore
-					default:
-						l.Printf("Unknown trap cause: %d\n", result.status.TrapCause())
-					}
-				case syscall.SIGCHLD:
-					// SIGCHLD is not a reliable method to determine grand-children exits,
-					// because multiple signals generated in a short period time may be merged
-					// into a single one.
-					// Instead, we use TRACE_FORK ptrace options and attaching grand-children
-					// processes manually.
-				default:
-					// Transparently deliver other signals.
-					if debug {
-						l.Printf("Injecting unhandled signal: %v\n", result.status.StopSignal())
-					}
-					signalToChild = result.status.StopSignal()
-				}
-				for {
-					// TODO: refactor using function-accepting function
-					err := syscall.PtraceCont(result.pid, int(signalToChild))
-					if err != nil {
-						errno := err.(syscall.Errno)
-						if errno == syscall.EBUSY || errno == syscall.EFAULT || errno == syscall.ESRCH {
-							continue
+						// Skip the system call with permission error
+						regs.Orig_rax = 0xFFFFFFFFFFFFFFFF // -1
+						regs.Rax = 0xFFFFFFFFFFFFFFFF - uint64(syscall.EPERM) + 1
+						syscall.PtraceSetRegs(result.pid, &regs)
+					} else {
+						if debug {
+							syscallName, _ := seccomp.ScmpSyscall(syscallId).GetName()
+							color.Set(color.FgGreen)
+							l.Printf("allowed syscall %s\n", syscallName)
+							color.Unset()
 						}
 					}
-					break
+				case syscall.PTRACE_EVENT_CLONE,
+					syscall.PTRACE_EVENT_FORK,
+					syscall.PTRACE_EVENT_VFORK:
+					childPid, _ := syscall.PtraceGetEventMsg(result.pid)
+					ptraceSeize(int(childPid), ourPtraceOpts)
+					childCount++
+					if debug {
+						color.Set(color.FgBlue)
+						l.Printf("Attached to new child %d\n", childPid)
+						l.Printf("childCount is now %d\n", childCount)
+						color.Unset()
+					}
+				case PTRACE_EVENT_STOP:
+					// already processed above
+				case 0:
+					// ignore
+				default:
+					if debug {
+						color.Set(color.FgRed)
+						l.Printf("Unknown trap cause: %d\n", result.status.TrapCause())
+						color.Unset()
+					}
+				}
+			//case syscall.SIGCHLD:
+			// SIGCHLD is not a reliable method to determine grand-children exits,
+			// because multiple signals generated in a short period time may be merged
+			// into a single one.
+			// Instead, we use TRACE_FORK ptrace options and attaching grand-children
+			// processes manually.
+			default:
+				// Transparently deliver other signals.
+				if !childStopped {
+					signalToChild = stopsig
+					if debug {
+						color.Set(color.FgCyan)
+						l.Printf("Injecting unhandled signal: %s", signalToChild)
+						color.Unset()
+					}
+				}
+			}
+
+			var err error
+			if childStopped && stopsig != syscall.SIGTRAP {
+				// may be a group-stop; we need to keep the child stopped.
+				if debug {
+					color.Set(color.FgYellow)
+					l.Printf("ptrace-listen")
+					color.Unset()
+				}
+				_, err = ptraceListen(result.pid, 0)
+			} else {
+				if debug {
+					color.Set(color.FgYellow)
+					l.Printf("ptrace-cont")
+					color.Unset()
+				}
+				err = syscall.PtraceCont(result.pid, int(signalToChild))
+			}
+			if err != nil && err.(syscall.Errno) != 0 {
+				color.Set(color.FgRed)
+				l.Printf("ptrace-continue error %s", err)
+				color.Unset()
+				errno := err.(syscall.Errno)
+				if errno == syscall.EBUSY || errno == syscall.EFAULT || errno == syscall.ESRCH {
+					break loop
 				}
 			}
 		} /* endselect */
@@ -309,11 +488,15 @@ func main() {
 	cwd, _ := os.Getwd()
 	envs := utils.FilterEnvs(os.Environ(), policyInst.GetPreservedEnvKeys())
 	envs = append(envs, policyInst.GetExtraEnvs()...)
-	pid, err := syscall.ForkExec(args[0], args, &syscall.ProcAttr{
+
+	var pid int
+	pid, err = syscall.ForkExec(args[0], args, &syscall.ProcAttr{
 		cwd,
 		envs,
 		[]uintptr{0, 1, 2},
-		&syscall.SysProcAttr{Setsid: true, Ptrace: true},
+		&syscall.SysProcAttr{
+			Ptrace: false, // should be disabled when using ptraceSeize
+		},
 	})
 	if err != nil {
 		l.Fatal("ForkExec: ", err)

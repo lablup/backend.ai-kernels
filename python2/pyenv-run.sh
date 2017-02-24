@@ -1,4 +1,4 @@
 #! /bin/bash
 eval "$(pyenv init -)"
-pyenv shell 2.7.12
+pyenv shell $SORNA_PYTHON_VERSION
 exec "$@"

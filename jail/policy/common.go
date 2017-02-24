@@ -60,11 +60,12 @@ func init() {
 		"vfork",
 		"clone",
 		"execve",
-		"kill",
+		// "kill" will be added by intra-jail
 	}
 
 	// Following syscalls are conditionally allowed.
 	ConditionallyAllowedSyscalls = map[string]seccomp.ScmpCondition{
+	// To make it tracee's initial synchronization working
 	//"kill": {1, seccomp.CompareEqual, uint64(syscall.SIGSTOP), 0},
 	}
 
@@ -153,7 +154,12 @@ func init() {
 		"rt_sigsuspend",
 		"rt_sigqueueinfo",
 		"rt_tgsigqueueinfo",
+		"signal",
 		"sigaltstack",
+		"sigpending",
+		"sigprocmask",
+		"sigsuspend",
+		"sigreturn",
 		"restart_syscall",
 		"semctl",
 		"semget",

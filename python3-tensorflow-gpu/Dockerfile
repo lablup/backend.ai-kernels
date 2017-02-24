@@ -1,6 +1,5 @@
-#FROM ubuntu:16.04
 FROM cuda:8.0-cudnn5-runtime
-MAINTAINER Joongi Kim "joongi@lablup.com"
+MAINTAINER DevOps "devops@lablup.com"
 
 # Add an isolated user
 # /home/work: actual working directory for user codes
@@ -15,33 +14,40 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /home/work
 WORKDIR /home/work
 
-# Install Python
+# Set up the base environment.
 USER root
-ENV SORNA_PYTHON_VERSION 3.5.2
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN apt-get update && apt-get build-dep -y python3
-RUN apt-get install -y git-core wget libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
-ADD install-python.sh /home/sorna/install-python.sh
-ADD pyenv-run.sh /home/sorna/pyenv-run.sh
-RUN chmod +x /home/sorna/*.sh
+RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
+RUN apt-get update
+RUN apt-get install -y --only-upgrade tzdata
+RUN apt-get install -y build-essential git-core curl wget ca-certificates libseccomp2 libzmq3-dev
+
+# Install common Python dependencies
+RUN apt-get install -y libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
+RUN apt-get install -y pkg-config libjpeg-dev libpng-dev
+RUN apt-get install -y libjpeg-dev libpng-dev
+RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
+CMD /home/sorna/run.sh
+
+# Install Python installer (pyenv)
 USER work
 ENV PYENV_ROOT /home/sorna/.pyenv
 ENV PATH /home/sorna/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN git clone https://github.com/yyuu/pyenv /home/sorna/.pyenv
+
+# Install Python
+ENV PYTHONUNBUFFERED 1
+ENV SORNA_PYTHON_VERSION 3.6.0
+ADD install-python.sh /home/sorna/install-python.sh
+ADD pyenv-run.sh      /home/sorna/pyenv-run.sh
 RUN /home/sorna/install-python.sh
 
 # Install common Python packages
-USER root
-RUN apt-get install -y pkg-config
-RUN apt-get install -y libjpeg-dev libpng-dev
-RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
-USER work
-# matplotlib may install older version of dateutil; we first install it.
-RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six python-dateutil
+RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist simplejson six "python-dateutil>2"
 RUN /home/sorna/pyenv-run.sh pip install numpy scipy matplotlib bokeh
 RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
-RUN /home/sorna/pyenv-run.sh pip install cvxpy seaborn
-RUN /home/sorna/pyenv-run.sh pip install pandas networkx
+RUN /home/sorna/pyenv-run.sh pip install pandas networkx cvxpy seaborn
 RUN /home/sorna/pyenv-run.sh pip install pillow sklearn
 
 # Additional packages
@@ -63,14 +69,12 @@ RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-*.whl
 
 # Install TensorFlow
 USER root
-ADD tensorflow-*.whl /tmp
+ADD tensorflow-1.0.0-cp36-cp36m-linux_x86_64.whl /tmp
 USER work
 RUN /home/sorna/pyenv-run.sh pip install /tmp/tensorflow-*.whl
 
 # Secure installation scripts
 USER root
-RUN apt-get install -y libseccomp2
-ADD run.py /home/sorna/run.py
 ADD run.sh /home/sorna/run.sh
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
 ADD jail /home/sorna/jail
@@ -86,16 +90,15 @@ RUN ln -s /usr/local/cuda/lib64/libcudnn.so.5 /usr/local/cuda/lib64/libcudnn.so
 RUN ldconfig
 
 VOLUME ["/home/work"]
-EXPOSE 2001
+EXPOSE 2000 2001
 
 LABEL io.sorna.timeout="180"
 LABEL io.sorna.maxmem="1g"
 LABEL io.sorna.maxcores="4"
 LABEL io.sorna.mode="query"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
 LABEL io.sorna.nvidia.enabled="yes"
+LABEL io.sorna.version="2"
 
+ADD run.py /home/sorna/run.py
 USER work
-ENV PYTHONUNBUFFERED 1
-ENV OPENBLAS_NUM_THREADS 4
-CMD /home/sorna/run.sh

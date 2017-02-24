@@ -12,10 +12,10 @@ import struct
 import subprocess
 import sys
 import termios
+import traceback
 import types
 
 import aiozmq
-from namedlist import namedtuple, namedlist, FACTORY
 json_opts = {}
 try:
     import simplejson as json
@@ -27,42 +27,25 @@ import uvloop
 import zmq
 
 
-ExceptionInfo = namedtuple('ExceptionInfo', [
-    'exc',
-    ('args', tuple()),
-    ('raised_before_exec', False),
-    ('traceback', None),
-])
-
-Result = namedlist('Result', [
-    ('stdout', ''),
-    ('stderr', ''),
-    ('media', FACTORY(list)),
-    ('options', FACTORY(dict)),
-])
-
-
 class StdoutProtocol(asyncio.Protocol):
 
-    transport = None
-    sock_out = None
-
-    def __init__(self, sock_out, runner):
-        self.sock_out = sock_out
+    def __init__(self, sock_term_out, runner):
+        self.transport = None
+        self.sock_term_out = sock_term_out
         self.runner = runner
 
     def connection_made(self, transport):
         self.transport = transport
 
     def data_received(self, data):
-        self.sock_out.write([data])
+        self.sock_term_out.write([data])
 
     def connection_lost(self, exc):
         if not self.runner.ev_term.is_set():
             print("shell exited, restarting it.")
-            self.sock_out.write([b'Restarting the shell...\r\n'])
+            self.sock_term_out.write([b'Restarting the shell...\r\n'])
+            os.waitpid(self.runner.pid, 0)
             asyncio.ensure_future(self.runner.start_shell(), loop=self.runner.loop)
-        os.waitpid(self.runner.pid, 0)
 
 
 class TerminalRunner(object):
@@ -73,14 +56,21 @@ class TerminalRunner(object):
     (e.g., variables and functions).
     '''
 
-    def __init__(self, loop, ev_term):
+    def __init__(self, ev_term, sock_in, sock_out, loop=None):
         self._sorna_media = []
-        self.loop = loop
+        self.loop = loop if loop else asyncio.get_event_loop()
+
         self.ev_term = ev_term
         self.pid = None
         self.fd = None
-        self.sock_in = None
-        self.sock_out = None
+
+        # For control commands
+        self.sock_in  = sock_in
+        self.sock_out = sock_out
+
+        # For terminal I/O
+        self.sock_term_in  = None
+        self.sock_term_out = None
 
         self.cmdparser = argparse.ArgumentParser()
         subparsers = self.cmdparser.add_subparsers()
@@ -104,11 +94,14 @@ class TerminalRunner(object):
         #parser_show.set_defaults(func=self.do_show)
 
     def do_ping(self, args):
-        return Result('pong!', '')
+        self.sock_out.write([b'stdout', b'pong!'])
 
     def do_chdir(self, args):
         os.chdir(args.path)
-        return Result('changed working directory to {}'.format(args.path), '')
+        self.sock_out.write([
+            b'stdout',
+            f'OK; changed working directory to {args.path}'.encode(),
+        ])
 
     def do_resize_term(self, args):
         origsz = struct.pack('HHHH', 0, 0, 0, 0)
@@ -117,9 +110,13 @@ class TerminalRunner(object):
         newsz = struct.pack('HHHH', args.rows, args.cols, origx, origy)
         newsz = fcntl.ioctl(self.fd, termios.TIOCSWINSZ, newsz)
         newr, newc, _, _ = struct.unpack('HHHH', newsz)
-        return Result('OK; terminal resized to {} rows and {} cols'.format(newr, newc), '')
+        self.sock_out.write([
+            b'stdout',
+            f'OK; terminal resized to {newr} rows and {newc} cols'.encode(),
+        ])
 
     def do_show(self, args):
+        # TODO: rewrite
         if args.target == 'graph':
             repo_path = pygit2.discover_repository(args.path)
             repo = pygit2.Repository(repo_path)
@@ -131,35 +128,45 @@ class TerminalRunner(object):
         else:
             raise ValueError('Unsupported show target', args.target)
 
-    async def handle_command(self, cell_id, src):
-        if src.startswith('%'):
-            args = self.cmdparser.parse_args(shlex.split(src[1:], comments=True))
-            if asyncio.iscoroutine(args.func) or asyncio.iscoroutinefunction(args.func):
-                return (await args.func(args))
+    async def handle_command(self, code_id, code_txt):
+        try:
+            if code_txt.startswith('%'):
+                args = self.cmdparser.parse_args(shlex.split(code_txt[1:], comments=True))
+                if asyncio.iscoroutine(args.func) or asyncio.iscoroutinefunction(args.func):
+                    await args.func(args)
+                else:
+                    args.func(args)
             else:
-                return args.func(args)
-        else:
-            return Result('', 'Invalid command.')
+                self.sock_out.write([b'stderr', b'Invalid command.'])
+        except:
+            exc_type, exc_val, tb = sys.exc_info()
+            trace = traceback.format_exception(exc_type, exc_val, tb)
+            self.sock_out.write([b'stderr', trace.encode()])
+        finally:
+            opts = {
+                'upload_output_files': False,
+            }
+            self.sock_out.write([b'finished', json.dumps(opts).encode()])
 
     async def start_shell(self):
         self.pid, self.fd = pty.fork()
         if self.pid == 0:
             os.execv('/bin/bash', ['/bin/bash'])
         else:
-            if self.sock_in is None:
-                self.sock_in  = await aiozmq.create_zmq_stream(zmq.SUB, bind='tcp://*:2002')
-                self.sock_in.transport.subscribe(b'')
-            if self.sock_out is None:
-                self.sock_out = await aiozmq.create_zmq_stream(zmq.PUB, bind='tcp://*:2003')
-            await loop.connect_read_pipe(lambda: StdoutProtocol(self.sock_out, self),
-                                         os.fdopen(self.fd, 'rb'))
+            if self.sock_term_in is None:
+                self.sock_term_in  = await aiozmq.create_zmq_stream(zmq.SUB, bind='tcp://*:2002')
+                self.sock_term_in.transport.subscribe(b'')
+            if self.sock_term_out is None:
+                self.sock_term_out = await aiozmq.create_zmq_stream(zmq.PUB, bind='tcp://*:2003')
+            await self.loop.connect_read_pipe(lambda: StdoutProtocol(self.sock_term_out, self),
+                                              os.fdopen(self.fd, 'rb'))
             asyncio.ensure_future(self.terminal_in())
             print('opened shell pty: stdin at port 2002, stdout at port 2003')
 
     async def terminal_in(self):
         while True:
             try:
-                data = await self.sock_in.read()
+                data = await self.sock_term_in.read()
             except aiozmq.ZmqStreamClosed:
                 break
             try:
@@ -167,64 +174,73 @@ class TerminalRunner(object):
             except OSError:
                 break
 
-    def kill_shell(self):
-        self.sock_in.close()
-        self.sock_out.close()
+    async def kill_shell(self):
+        self.sock_term_in.close()
+        self.sock_term_out.close()
         os.kill(self.pid, signal.SIGHUP)
         os.kill(self.pid, signal.SIGCONT)
+        await asyncio.sleep(0)
         ret = os.waitpid(self.pid, 0)
         self.pid = None
         self.fd = None
         print('killed shell')
 
 
-async def repl(sock, runner):
+async def repl(ev_term, sock_in, sock_out):
+    runner = TerminalRunner(ev_term, sock_in, sock_out)
     await runner.start_shell()
     try:
         while True:
             try:
-                data = await sock.read()
+                data = await sock_in.read()
                 result = await runner.handle_command(data[0].decode(),
                                                      data[1].decode())
             except (aiozmq.ZmqStreamClosed, asyncio.CancelledError):
                 break
-            result.options['upload_output_files'] = False
-            response = {
-                'stdout': result.stdout,
-                'stderr': result.stderr,
-                'media': result.media,
-                'options': result.options,
-                'exceptions': [],
-            }
-            sock.write([json.dumps(response, **json_opts).encode()])
-            await sock.drain()
+            await sock_out.drain()
+    except asyncio.CancelledError:
+        pass
     finally:
-        runner.kill_shell()
+        await runner.kill_shell()
 
-def signal_handler(loop, ev_term):
-    if not ev_term.is_set():
-        loop.stop()
-
-
-if __name__ == '__main__':
+def main():
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     loop = asyncio.get_event_loop()
-    sock_repl = loop.run_until_complete(
-        aiozmq.create_zmq_stream(zmq.REP, bind='tcp://*:2001', loop=loop))
 
+    sock_in  = None
+    sock_out = None
+    repl_task = None
     ev_term = asyncio.Event()
+
+    def signal_handler(loop, ev_term):
+        if not ev_term.is_set():
+            loop.stop()
+
     loop.add_signal_handler(signal.SIGTERM, signal_handler, loop, ev_term)
     loop.add_signal_handler(signal.SIGINT, signal_handler, loop, ev_term)
 
-    runner = TerminalRunner(loop, ev_term)
-    asyncio.ensure_future(repl(sock_repl, runner))
+    async def init():
+        nonlocal sock_in, sock_out, repl_task
+        sock_in  = await aiozmq.create_zmq_stream(zmq.PULL, bind='tcp://*:2000')
+        sock_out = await aiozmq.create_zmq_stream(zmq.PUSH, bind='tcp://*:2001')
+        repl_task = loop.create_task(repl(ev_term, sock_in, sock_out))
+
+    async def shutdown():
+        repl_task.cancel()
+        await repl_task
+        sock_in.close()
+        sock_out.close()
+        await asyncio.sleep(0)
+
     try:
-        print('serving at port 2001...')
+        loop.run_until_complete(init())
         loop.run_forever()
+        # interrupted
         ev_term.set()
-        sock_repl.close()
-        loop.run_until_complete(asyncio.sleep(0.05))
-        loop.stop()
+        loop.run_until_complete(shutdown())
     finally:
         print('exit.')
         loop.close()
+
+if __name__ == '__main__':
+    main()

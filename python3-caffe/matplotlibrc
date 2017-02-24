@@ -1,4 +1,5 @@
 backend : module://sorna.matplotlib.backend_sorna
+svg.fonttype : none
 figure.facecolor : FFFFFF
 figure.edgecolor : FFFFFF
 savefig.facecolor : FFFFFF

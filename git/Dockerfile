@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Joongi Kim "joongi@lablup.com"
+MAINTAINER DevOps "devops@lablup.com"
 
 # Add an isolated user
 # /home/work: actual working directory for user codes
@@ -14,39 +14,57 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /home/work
 WORKDIR /home/work
 
-# Install Git
+# Set up the base environment.
 USER root
 RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y git-core git-flow wget
+RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
+RUN apt-get update
+RUN apt-get install -y --only-upgrade tzdata
+RUN apt-get install -y build-essential git-core curl wget ca-certificates libseccomp2 libzmq3-dev
 
-# Install Python
-USER root
-ENV SORNA_PYTHON_VERSION 3.5.2
-RUN apt-get build-dep -y python3
-RUN apt-get install -y pkg-config
-RUN apt-get install -y libreadline-dev libsqlite3-dev libssl-dev libbz2-dev tk-dev
-ADD install-python.sh /home/sorna/install-python.sh
-ADD pyenv-run.sh /home/sorna/pyenv-run.sh
-RUN chmod +x /home/sorna/*.sh
+# Install common Python dependencies
+RUN apt-get install -y libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
+RUN apt-get install -y pkg-config libjpeg-dev libpng-dev
+RUN apt-get install -y libjpeg-dev libpng-dev
+RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
+CMD /home/sorna/run.sh
+
+# Install Python installer (pyenv)
 USER work
 ENV PYENV_ROOT /home/sorna/.pyenv
 ENV PATH /home/sorna/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN git clone https://github.com/yyuu/pyenv /home/sorna/.pyenv
+
+# Install Python
+ENV PYTHONUNBUFFERED 1
+ENV SORNA_PYTHON_VERSION 3.6.0
+ADD install-python.sh /home/sorna/install-python.sh
+ADD pyenv-run.sh      /home/sorna/pyenv-run.sh
 RUN /home/sorna/install-python.sh
 
-# Install common Python packages
+# Install Git extras
 USER root
-RUN apt-get install -y libjpeg-dev libpng-dev libzmq3-dev
+RUN apt-get install -y git-flow
+
+# Install common Python packages
 USER work
-# matplotlib may install older version of dateutil; we first install it.
 RUN /home/sorna/pyenv-run.sh pip install python-dateutil
 RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
 RUN /home/sorna/pyenv-run.sh pip install matplotlib
 
 # Install specialization packages
 USER root
-RUN apt-get install -y libgit2-dev libffi-dev
+RUN apt-get install -y libffi-dev cmake
+RUN mkdir -p /tmp/libgit-build; \
+    cd /tmp/libgit-build; \
+    wget https://github.com/libgit2/libgit2/archive/v0.25.0.tar.gz; \
+    tar xzf v0.25.0.tar.gz; \
+    cd libgit2-0.25.0/; \
+    /home/sorna/pyenv-run.sh cmake .; \
+    /home/sorna/pyenv-run.sh make ; \
+    /home/sorna/pyenv-run.sh make install; \
+    rm -rf /tmp/libgit-build
 USER work
 RUN /home/sorna/pyenv-run.sh pip install pygit2
 RUN /home/sorna/pyenv-run.sh pip install aiozmq uvloop
@@ -66,21 +84,26 @@ USER root
 ADD *.whl /tmp
 ADD matplotlibrc /home/sorna/.matplotlib/
 USER work
-RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.2.0-py2.py3-none-any.whl
+RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.3.0-py2.py3-none-any.whl
 
 # Editors and other packages
 USER root
 RUN apt-get install -y nano vim
-RUN apt-get install -y nodejs nodejs-legacy npm
+
+# Configure the shell to use Unicode characeters
+ENV LANG en_US.UTF-8
+ENV TERM xterm
+RUN sed -i 's/# *\(set convert-meta off\)/\1/' /etc/inputrc; \
+    locale-gen en_US.UTF-8; \
+    echo 'set hlsearch incsearch sts=4 sw=4 et' >> /etc/vim/vimrc.local; \
+    echo 'set enc=utf8 tenc=utf8' >> /etc/vim/vimrc.local
 
 # Secure installation scripts
 USER root
 # NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-RUN apt-get install -y libseccomp2
 ADD jail /home/sorna/jail
 ADD intra-jail /home/sorna/intra-jail
 ADD run.sh /home/sorna/run.sh
-ADD run.py /home/sorna/run.py
 RUN chown root:root /home/sorna/*
 RUN chmod 600 /home/sorna/*.sh
 RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
@@ -88,13 +111,14 @@ ADD patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
 
 VOLUME ["/home/work"]
-EXPOSE 2001
+EXPOSE 2000 2001 2002 2003
 
 LABEL io.sorna.timeout="10"
 LABEL io.sorna.maxmem="128m"
 LABEL io.sorna.mode="query+pty"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+LABEL io.sorna.version="2"
+LABEL io.sorna.version="2"
 
+ADD run.py /home/sorna/run.py
 USER work
-ENV PYTHONUNBUFFERED 1
-ENV IGNOREEOF 99999
-CMD /home/sorna/run.sh
