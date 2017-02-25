@@ -168,7 +168,6 @@ function parseall(code::AbstractString)
     catch ex
         if isa(ex, ParseError)
             # Add the line number to parsing errors
-            println(STDERR, "--parseerror--")
             throw(ParseError("$(ex.msg) (Line $lineno)"))
         else
             rethrow()
@@ -204,7 +203,6 @@ function redirect_stream(rd::IO, target::AbstractString,
         if isa(e, InterruptException)
             redirect_stream(rd, target, output_socket)
         else
-            println(STDERR, "--runerror--")
             rethrow()
         end
     end
