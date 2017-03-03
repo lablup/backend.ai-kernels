@@ -96,9 +96,9 @@ RUN cd /usr/local/bin \
         && ln -s python3-config python-config
 
 # Lablup extension: install Sorna's common Python packages
-RUN apk add --no-cache --virtual .pybuild-deps gcc g++ libc-dev \
-    && apk add --no-cache --virtual .sorna-deps zeromq \
-    && pip install --no-cache-dir pyzmq namedlist simplejson six "python-dateutil>2" \
+RUN apk add --no-cache --virtual .pybuild-deps gcc g++ make libc-dev \
+    && apk add --no-cache --virtual .sorna-deps zeromq libuv \
+    && pip install --no-cache-dir pyzmq uvloop namedlist simplejson six "python-dateutil>2" \
     && apk del .pybuild-deps
 
 # vim: sts=4 sw=4 et

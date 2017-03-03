@@ -5,13 +5,13 @@ import code
 import enum
 from functools import partial
 import logging
-from namedlist import namedtuple, namedlist
 import os
 import sys
 import time
 import traceback
 import types
 
+from namedlist import namedtuple, namedlist
 import simplejson as json
 import zmq
 
