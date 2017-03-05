@@ -70,7 +70,6 @@ old/*/jail-check
 old/*/intra-jail-check
 
 node_modules/
-*.gz
 
 .*.swp
 venv*
