@@ -45,4 +45,4 @@ COPY run.py /home/sorna/run.py
 USER work
 CMD ["/home/sorna/jail", "python3", "/usr/local/bin/python3", "/home/sorna/run.py"]
 
-# vim: sts=4 sw=4 et ft=Dockerfile
+# vim: sts=4 sw=4 et ft=dockerfile

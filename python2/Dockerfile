@@ -1,93 +1,48 @@
-FROM ubuntu:16.04
-MAINTAINER DevOps "devops@lablup.com"
+FROM lablup/kernel-base-python2-minimal:latest
 
-# Add an isolated user
-# /home/work: actual working directory for user codes
-# /home/sorna: place for Python and REPL script
-RUN adduser --disabled-password --gecos "" work
-RUN chmod 700 /home/work
-RUN mkdir /home/sorna
-RUN chmod 755 /home/sorna
-RUN chown -R work:work /home/sorna
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV HOME /home/work
-WORKDIR /home/work
+COPY *.whl /tmp
 
-# Set up the base environment.
-USER root
-RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
-    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
-RUN apt-get update
-RUN apt-get install -y --only-upgrade tzdata
-RUN apt-get install -y build-essential git-core curl wget ca-certificates libseccomp2 libzmq3-dev
-CMD /home/sorna/run.sh
+# Prepare build environment and libraries
+RUN apk add --no-cache --virtual .sorna-deps \
+        libgfortran libquadmath libjpeg libpng freetype openblas lapack \
+    && apk add --no-cache --virtual .pybuild-deps \
+        gcc g++ gfortran make linux-headers libc-dev freetype-dev openblas-dev \
+    # Hack for numpy
+    && ln -s /usr/include/locale.h /usr/include/xlocale.h
 
-# Install common Python dependencies
-RUN apt-get install -y libreadline-dev libsqlite3-dev libssl-dev libbz2-dev tk-dev
-RUN apt-get install -y pkg-config libjpeg-dev libpng-dev
-RUN apt-get install -y libjpeg-dev libpng-dev
-RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
-
-# Install Python installer (pyenv)
-USER work
-ENV PYENV_ROOT /home/sorna/.pyenv
-ENV PATH /home/sorna/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-RUN git clone https://github.com/yyuu/pyenv /home/sorna/.pyenv
-
-# Install Python
-ENV PYTHONUNBUFFERED 1
-ENV SORNA_PYTHON_VERSION 2.7.13
-ADD install-python.sh /home/sorna/install-python.sh
-ADD pyenv-run.sh      /home/sorna/pyenv-run.sh
-RUN sh /home/sorna/install-python.sh
-
-# Install common Python packages
-RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six "python-dateutil>=1.4,<2"
-RUN /home/sorna/pyenv-run.sh pip install numpy scipy matplotlib bokeh
-RUN /home/sorna/pyenv-run.sh pip install scikit-learn scikit-image
-RUN /home/sorna/pyenv-run.sh pip install pandas networkx cvxpy seaborn
-RUN /home/sorna/pyenv-run.sh pip install pillow sklearn
-
-# Matplotlib configuration
-USER root
-ENV MPLCONFIGDIR /home/sorna/.matplotlib
-RUN mkdir /home/sorna/.matplotlib
-RUN chown -R work:work /home/sorna/.matplotlib
-USER work
-RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py
-RUN /home/sorna/pyenv-run.sh python /tmp/matplotlib-fontcache.py
-RUN rm /tmp/matplotlib-fontcache.py
+# Install science packages
+RUN pip install --no-cache-dir cython \
+    && pip install --no-cache-dir numpy \
+    && pip install --no-cache-dir matplotlib bokeh \
+    && pip install --no-cache-dir pandas \
+    && pip install --no-cache-dir scipy seaborn
+RUN apk add --no-cache --virtual .sorna-deps jpeg libpng tiff \
+    && apk add --no-cache --virtual .pybuild-deps jpeg-dev libpng-dev tiff-dev \
+    && pip install --no-cache-dir pillow \
+    && pip install --no-cache-dir scikit-learn scikit-image \
+    && pip install --no-cache-dir networkx cvxpy
 
 # Install Sorna Media support
-USER root
-ADD *.whl /tmp
-ADD matplotlibrc /home/sorna/.matplotlib/
+RUN pip install --no-cache-dir /tmp/sorna_media-0.3.0-py2.py3-none-any.whl \
+    && rm -f /tmp/*.whl
+
+# Clean up build dependencies
+RUN apk del .pybuild-deps
+
+# Matplotlib configuration and pre-heating
+ENV MPLCONFIGDIR /home/sorna/.matplotlib
+RUN mkdir /home/sorna/.matplotlib
+COPY matplotlibrc /home/sorna/.matplotlib/
+RUN chown -R work:work /home/sorna/.matplotlib \
+    && echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
+    && python /tmp/matplotlib-fontcache.py \
+    && rm /tmp/matplotlib-fontcache.py
+
+COPY run.py /home/sorna/run.py
+
 USER work
-RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.3.0-py2.py3-none-any.whl
+CMD ["/home/sorna/jail", "python", "/usr/local/bin/python", "/home/sorna/run.py"]
 
-# Secure installation scripts
-USER root
-ADD run.sh /home/sorna/run.sh
-# NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-ADD jail /home/sorna/jail
-ADD intra-jail /home/sorna/intra-jail
-RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
-RUN chmod 600 /home/sorna/*.sh
-RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
-ADD patch-libs.so /home/sorna/patch-libs.so
-ENV LD_PRELOAD /home/sorna/patch-libs.so
-
-VOLUME ["/home/work"]
-EXPOSE 2000 2001
-
-LABEL io.sorna.timeout="10"
-LABEL io.sorna.maxmem="128m"
-LABEL io.sorna.maxcores="1"
-LABEL io.sorna.mode="query"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
-LABEL io.sorna.version="2"
-
-ADD run.py /home/sorna/run.py
-USER work
+# vim: sts=4 sw=4 et ft=dockerfile
