@@ -1,65 +1,17 @@
-FROM ubuntu:16.04
-MAINTAINER DevOps "devops@lablup.com"
-
-# Add an isolated user
-# /home/work: actual working directory for user codes
-# /home/sorna: place for REPL script
-RUN adduser --disabled-password --gecos "" work
-RUN chmod 700 /home/work
-RUN mkdir /home/sorna
-RUN chmod 755 /home/sorna
-RUN chown -R work:work /home/sorna
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV HOME /home/work
-WORKDIR /home/work
-
-# Set up the base environment.
-USER root
-RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
-    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
-RUN apt-get update
-RUN apt-get install -y --only-upgrade tzdata
-RUN apt-get install -y build-essential git-core curl wget ca-certificates libseccomp2 libzmq3-dev
-CMD /home/sorna/run.sh
+FROM lablup/kernel-base:latest
 
 # Install Lua
-RUN apt-get install -y lua5.2 liblua5.2-dev unzip
+RUN apk add --no-cache lua5.3 lua5.3-libs unzip zeromq \
+    && apk add --no-cache --virtual .build-deps build-base libc-dev curl lua5.3-dev zeromq-dev \
+    && cd /home/sorna \
+    && curl -L http://luarocks.org/releases/luarocks-2.4.2.tar.gz -o luarocks-2.4.2.tar.gz \
+    && tar zxpf luarocks-2.4.2.tar.gz \
+    && cd /home/sorna/luarocks-2.4.2 \
+    && ./configure; make bootstrap \
+    && cd /home/sorna \
+    && rm -rf luarocks-2.4.2 \
+    && luarocks install lzmq
 
-# Install Lua packages using luarocks pkg manager
-WORKDIR /home/sorna
-RUN wget http://luarocks.org/releases/luarocks-2.4.2.tar.gz
-RUN tar zxpf luarocks-2.4.2.tar.gz
-WORKDIR /home/sorna/luarocks-2.4.2
-RUN ./configure; make bootstrap
-WORKDIR /home/sorna
-RUN rm -rf luarocks-2.4.2
-RUN luarocks install lzmq
-
-# Secure installation scripts
-USER root
-ADD run.sh /home/sorna/run.sh
-# NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-ADD jail /home/sorna/jail
-ADD intra-jail /home/sorna/intra-jail
-RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
-RUN chmod 600 /home/sorna/*.sh
-RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
-ADD patch-libs.so /home/sorna/patch-libs.so
-ENV LD_PRELOAD /home/sorna/patch-libs.so
-
-ENV HOME /home/work
-WORKDIR /home/work
-VOLUME ["/home/work"]
-EXPOSE 2000 2001
-
-LABEL io.sorna.timeout="10"
-LABEL io.sorna.maxmem="128m"
-LABEL io.sorna.maxcores="1"
-LABEL io.sorna.mode="query"
-LABEL io.sorna.envs.corecount="NPROC"
-LABEL io.sorna.version="2"
-
-ADD run.lua /home/sorna/run.lua
+COPY run.lua /home/sorna/run.lua
 USER work
+CMD ["/home/sorna/jail", "default", "/usr/bin/lua5.3", "/home/sorna/run.lua"]
