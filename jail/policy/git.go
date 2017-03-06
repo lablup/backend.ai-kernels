@@ -38,12 +38,13 @@ func (p *GitPolicy) CheckPathExecutable(path string) bool {
 }
 
 func (p *GitPolicy) GetExtraEnvs() []string {
-	return []string{"TERM=xterm"}
+	return []string{}
 }
 
 func (p *GitPolicy) GetPreservedEnvKeys() []string {
 	return []string{
 		"HOME", "PATH", "LANG", "TERM",
+		"USER", "SHELL",
 		"PYENV_ROOT", "PYTHONPATH",
 		"MPLCONFIGDIR",
 		"LD_PRELOAD",

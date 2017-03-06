@@ -1,124 +1,49 @@
-FROM ubuntu:16.04
-MAINTAINER DevOps "devops@lablup.com"
+FROM lablup/kernel-base-python3-minimal:latest
 
-# Add an isolated user
-# /home/work: actual working directory for user codes
-# /home/sorna: place for Python and REPL script
-RUN adduser --disabled-password --gecos "" work
-RUN chmod 700 /home/work
-RUN mkdir /home/sorna
-RUN chmod 755 /home/sorna
-RUN chown -R work:work /home/sorna
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV HOME /home/work
-WORKDIR /home/work
-
-# Set up the base environment.
+# Install Git extras and some Python packages
 USER root
-RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
-RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
-    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
-RUN apt-get update
-RUN apt-get install -y --only-upgrade tzdata
-RUN apt-get install -y build-essential git-core curl wget ca-certificates libseccomp2 libzmq3-dev
-
-# Install common Python dependencies
-RUN apt-get install -y libreadline-dev libsqlite3-dev libssl-dev libbz2-dev libzmq3-dev tk-dev
-RUN apt-get install -y pkg-config libjpeg-dev libpng-dev
-RUN apt-get install -y libjpeg-dev libpng-dev
-RUN apt-get install -y libfreetype6-dev libblas-dev liblapack-dev libatlas-dev gfortran
-CMD /home/sorna/run.sh
-
-# Install Python installer (pyenv)
-USER work
-ENV PYENV_ROOT /home/sorna/.pyenv
-ENV PATH /home/sorna/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-RUN git clone https://github.com/yyuu/pyenv /home/sorna/.pyenv
-
-# Install Python
-ENV PYTHONUNBUFFERED 1
-ENV SORNA_PYTHON_VERSION 3.6.0
-ADD install-python.sh /home/sorna/install-python.sh
-ADD pyenv-run.sh      /home/sorna/pyenv-run.sh
-RUN /home/sorna/install-python.sh
-
-# Install Git extras
-USER root
-RUN apt-get install -y git-flow
-
-# Install common Python packages
-USER work
-RUN /home/sorna/pyenv-run.sh pip install python-dateutil
-RUN /home/sorna/pyenv-run.sh pip install pyzmq namedlist six
-RUN /home/sorna/pyenv-run.sh pip install matplotlib
-
-# Install specialization packages
-USER root
-RUN apt-get install -y libffi-dev cmake
-RUN mkdir -p /tmp/libgit-build; \
-    cd /tmp/libgit-build; \
-    wget https://github.com/libgit2/libgit2/archive/v0.25.0.tar.gz; \
-    tar xzf v0.25.0.tar.gz; \
-    cd libgit2-0.25.0/; \
-    /home/sorna/pyenv-run.sh cmake .; \
-    /home/sorna/pyenv-run.sh make ; \
-    /home/sorna/pyenv-run.sh make install; \
-    rm -rf /tmp/libgit-build
-USER work
-RUN /home/sorna/pyenv-run.sh pip install pygit2
-RUN /home/sorna/pyenv-run.sh pip install aiozmq uvloop
-
-# Matplotlib configuration
-USER root
-ENV MPLCONFIGDIR /home/sorna/.matplotlib
-RUN mkdir /home/sorna/.matplotlib
-RUN chown -R work:work /home/sorna/.matplotlib
-USER work
-RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py
-RUN MPLBACKEND=Agg /home/sorna/pyenv-run.sh python /tmp/matplotlib-fontcache.py
-RUN rm /tmp/matplotlib-fontcache.py
+RUN apk add --no-cache --virtual .sorna-deps \
+        libgit2 libffi wget bash git nano vim \
+        libgfortran libquadmath libjpeg libpng freetype openblas lapack \
+    && apk add --no-cache --virtual .build-deps \
+        build-base libc-dev libffi-dev cmake \
+        gfortran linux-headers libc-dev freetype-dev openblas-dev \
+    # Hack for numpy
+    && ln -s /usr/include/locale.h /usr/include/xlocale.h \
+    && mkdir -p /tmp/git-flow && cd /tmp/git-flow \
+    && wget --no-check-certificate -q https://raw.githubusercontent.com/petervanderdoes/gitflow-avh/develop/contrib/gitflow-installer.sh \
+        && bash gitflow-installer.sh install stable \
+    && cd /tmp && rm -rf /tmp/git-flow \
+    && mkdir -p /tmp/libgit-build && cd /tmp/libgit-build \
+        && wget https://github.com/libgit2/libgit2/archive/v0.25.0.tar.gz \
+        && tar xzf v0.25.0.tar.gz \
+        && cd libgit2-0.25.0/ \
+        && cmake . \
+        && make \
+        && make install \
+    && cd /tmp && rm -rf /tmp/libgit-build \
+    && pip install --no-cache-dir pygit2 aiozmq numpy matplotlib
 
 # Install Sorna Media support
-USER root
-ADD *.whl /tmp
-ADD matplotlibrc /home/sorna/.matplotlib/
-USER work
-RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-0.3.0-py2.py3-none-any.whl
-
-# Editors and other packages
-USER root
-RUN apt-get install -y nano vim
+COPY *.whl /tmp
+RUN pip install --no-cache-dir /tmp/sorna_media-0.3.0-py2.py3-none-any.whl \
+    && rm -f /tmp/*.whl
+RUN apk del .build-deps
 
 # Configure the shell to use Unicode characeters
-ENV LANG en_US.UTF-8
 ENV TERM xterm
-RUN sed -i 's/# *\(set convert-meta off\)/\1/' /etc/inputrc; \
-    locale-gen en_US.UTF-8; \
+RUN echo 'set convert-meta off' >> /etc/inputrc; \
     echo 'set hlsearch incsearch sts=4 sw=4 et' >> /etc/vim/vimrc.local; \
-    echo 'set enc=utf8 tenc=utf8' >> /etc/vim/vimrc.local
+    echo 'set enc=utf8 tenc=utf8' >> /etc/vim/vimrc.local; \
+    rm -f /usr/bin/vi && ln -s /usr/bin/vim /usr/bin/vi
 
-# Secure installation scripts
-USER root
-# NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-ADD jail /home/sorna/jail
-ADD intra-jail /home/sorna/intra-jail
-ADD run.sh /home/sorna/run.sh
-RUN chown root:root /home/sorna/*
-RUN chmod 600 /home/sorna/*.sh
-RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
-ADD patch-libs.so /home/sorna/patch-libs.so
-ENV LD_PRELOAD /home/sorna/patch-libs.so
-
-VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
-
-LABEL io.sorna.timeout="10"
-LABEL io.sorna.maxmem="128m"
 LABEL io.sorna.mode="query+pty"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
-LABEL io.sorna.version="2"
-LABEL io.sorna.version="2"
 
-ADD run.py /home/sorna/run.py
+COPY run.py /home/sorna/run.py
+COPY jail /home/sorna/
+COPY intra-jail /home/sorna/
+ENV USER work
+ENV SHELL /bin/bash
 USER work
+CMD ["/home/sorna/jail", "git", "/usr/local/bin/python3", "/home/sorna/run.py"]

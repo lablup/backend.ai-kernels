@@ -215,10 +215,12 @@ func init() {
 		"listen",
 		"gettid",
 		"getuid",
+		"setuid", // for shell
 		"geteuid",
 		"getreuid",
 		"getresuid",
 		"getgid",
+		"setgid", // for shell
 		"getegid",
 		"getregid",
 		"getresgid",
