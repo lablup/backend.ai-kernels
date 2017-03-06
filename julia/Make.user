@@ -1,3 +1,7 @@
+# If not set, EC2 instances and other mahcines
+# may raise "target architecture mismatch" error.
+override MARCH=x86-64
+
 USE_SYSTEM_LLVM:=1
 USE_SYSTEM_PCRE:=1
 USE_SYSTEM_ARPACK:=1
@@ -22,5 +26,6 @@ USE_SYSTEM_LIBUV:=0
 USE_SYSTEM_BLAS:=1
 USE_SYSTEM_LAPACK:=0
 
+# must be set to use the system blas.
 LIBBLAS=-lopenblas
 LIBBLASNAME=libopenblas

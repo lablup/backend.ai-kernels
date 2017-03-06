@@ -66,6 +66,7 @@ RUN apk add --no-cache --virtual .sorna-deps \
         build-base libc-dev linux-headers pkgconf \
     && julia /home/sorna/package.jl \
     && julia /home/sorna/precompile.jl \
+    && chown -R work:work $JULIA_PKGDIR \
     && apk del .build-deps
 USER work
 
