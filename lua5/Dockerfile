@@ -10,7 +10,8 @@ RUN apk add --no-cache lua5.3 lua5.3-libs unzip zeromq \
     && ./configure; make bootstrap \
     && cd /home/sorna \
     && rm -rf luarocks-2.4.2 \
-    && luarocks install lzmq
+    && luarocks install lzmq \
+    && apk del .build-deps
 
 COPY run.lua /home/sorna/run.lua
 USER work
