@@ -1,3 +1,6 @@
+include("IJuliaEmul.jl")
+
+
 module SornaExecutor
 
 """
@@ -8,6 +11,7 @@ module SornaExecutionEnv # submodule
 import ZMQ
 import JSON
 import Base: Display, display, readline, flush, PipeEndpoint, info, warn
+import IJulia
 
 # overloading hack from IJulia
 const StdioPipe = Base.PipeEndpoint
@@ -145,7 +149,26 @@ function init_sorna(isock::ZMQ.Socket, osock::ZMQ.Socket,
     pushdisplay(sorna)
 end
 
-end # submodule
+function eval_sorna(exprs)
+    for hook in IJulia.preexecute_hooks
+        @eval $hook()
+    end
+    try
+        Core.eval(SornaExecutionEnv, exprs)
+        for hook in IJulia.postexecute_hooks
+            @eval $hook()
+        end
+    catch ex
+        st = catch_stacktrace()
+        println(STDERR, format_stacktrace(st, ex))
+        for hook in IJulia.posterror_hooks
+            @eval $hook()
+        end
+    end
+end
+
+end # submodule SornaExecutionEnv
+
 
 import ZMQ
 import .SornaExecutionEnv
@@ -267,10 +290,7 @@ end
 function execute_code(input_socket, output_socket, output_lock, code_id, code_txt)
     try
         exprs = parseall(code_txt)
-        SornaExecutionEnv.eval(exprs)
-    catch ex
-        st = catch_stacktrace()
-        println(STDERR, format_stacktrace(st, ex))
+        SornaExecutionEnv.eval_sorna(exprs)
     finally
         # ensure reader tasks to run once more.
         sleep(0.001)
@@ -324,7 +344,7 @@ function run_query_mode()
     end
 end
 
-end # module
+end # module SornaExecutor
 
 
 import SornaExecutor

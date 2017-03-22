@@ -79,6 +79,7 @@ LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,JULIA_CPU_CORES"
 LABEL io.sorna.version="2"
 
 COPY run.jl /home/sorna/run.jl
+COPY IJuliaEmul.jl /home/sorna/IJuliaEmul.jl
 
 CMD ["/home/sorna/jail", "julia", "/usr/local/julia/julia", "/home/sorna/run.jl"]
 
