@@ -89,10 +89,10 @@ VOLUME ["/home/work"]
 EXPOSE 2000 2001
 
 LABEL io.sorna.timeout="30"
-LABEL io.sorna.maxmem="512m"
+LABEL io.sorna.maxmem="4g"
 LABEL io.sorna.maxcores="4"
 LABEL io.sorna.mode="query"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC"
 LABEL io.sorna.version="2"
 
 ADD run.py /home/sorna/run.py
