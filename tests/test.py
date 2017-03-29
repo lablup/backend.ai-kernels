@@ -547,6 +547,18 @@ class Lua5ImageTest(ImageTestBase, unittest.TestCase):
         yield 'error("test-error")', ('test-error', None)
 
 
+class Octave4ImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-octave4'
+
+    def basic_success(self):
+        yield 'printf("hello world")', 'hello world'
+        yield 'a = 1\nb = 2\nc = a + b\nc', '3'
+
+    def basic_failure(self):
+        yield 'printf(some_undef_var)', ('undefined near line 1', None)
+
+
 class JailTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-python3'
