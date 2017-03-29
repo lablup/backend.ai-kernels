@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 from abc import abstractmethod
+import codecs
 from distutils.version import LooseVersion
+import io
 import os
 import re
 import shutil
@@ -39,13 +41,9 @@ class ImageTestBase(object):
 
     @classmethod
     def setUpClass(cls):
-        docker_args = docker.utils.kwargs_from_env()
-        cls.docker = docker.Client(**docker_args)
-        if 'base_url' in docker_args:
-            cls.docker_host = urllib.parse.urlparse(docker_args['base_url']).hostname
-        else:
-            cls.docker_host = '127.0.0.1'
-        if not cls.docker.images(cls.image_name):
+        cls.docker = docker.APIClient()
+        cls.docker_host = '127.0.0.1'
+        if not cls.docker.get_image(cls.image_name):
             raise unittest.SkipTest('The image {} is not available. Build or import it first.'
                                     .format(cls.image_name))
 
@@ -83,6 +81,7 @@ class ImageTestBase(object):
             self.image_name,
             name=container_name,
             ports=[
+                (2000, 'tcp'),
                 (2001, 'tcp'),
                 (2002, 'tcp'),
                 (2003, 'tcp'),
@@ -95,6 +94,7 @@ class ImageTestBase(object):
                 memswap_limit=0,
                 security_opt=security_opt,
                 port_bindings={
+                    2000: ('127.0.0.1', 2000),
                     2001: ('127.0.0.1', 2001),
                     2002: ('127.0.0.1', 2002),
                     2003: ('127.0.0.1', 2003),
@@ -105,7 +105,6 @@ class ImageTestBase(object):
             tty=False)
         self.container_id = result['Id']
         self.docker.start(self.container_id)
-        self.kernel_addr = 'tcp://{}:{}'.format(self.docker_host, 2001)
         time.sleep(0.1)  # prevent corruption of containers when killed immediately
 
     def tearDown(self):
@@ -145,14 +144,53 @@ class ImageTestBase(object):
     def execute(self, cell_id, code):
         ctx = zmq.Context()
         ctx.setsockopt(zmq.LINGER, 50)
-        cli = ctx.socket(zmq.REQ)
-        cli.connect(self.kernel_addr)
-        with cli:
-            msg = ('{}'.format(cell_id).encode('ascii'), code.encode('utf8'))
-            cli.send_multipart(msg)
-            if cli.poll(timeout=180000) == 0:  # timeout in millisec
-                raise TimeoutError('Container does not respond.')
-            resp = cli.recv_json()
+        kin = ctx.socket(zmq.PUSH)
+        kin.connect(f'tcp://{self.docker_host}:2000')
+        kout = ctx.socket(zmq.PULL)
+        kout.connect(f'tcp://{self.docker_host}:2001')
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        log = []
+        media = []
+        html = io.StringIO()
+        decoders = (
+            codecs.getincrementaldecoder('utf8')(),
+            codecs.getincrementaldecoder('utf8')(),
+        )
+        try:
+            msg_in = (b'', code.encode('utf8'))
+            kin.send_multipart(msg_in)
+            while True:
+                if kout.poll(timeout=180000) == 0:  # timeout in millisec
+                    raise TimeoutError('Container does not respond.')
+                reply_type, reply_data = kout.recv_multipart()
+                if reply_type == b'finished':
+                    decoders[0].decode(b'', True)
+                    decoders[1].decode(b'', True)
+                    break
+                elif reply_type == b'stdout':
+                    stdout.write(decoders[0].decode(reply_data))
+                elif reply_type == b'stderr':
+                    stderr.write(decoders[1].decode(reply_data))
+                elif reply_type == b'log':
+                    log.append(json.loads(reply_data.decode()))
+                elif reply_type == b'media':
+                    media.append(json.loads(reply_data.decode()))
+                elif reply_type == b'html':
+                    html.write(reply_data.decode())
+        finally:
+            resp = {
+                'stdout': stdout.getvalue(),
+                'stderr': stderr.getvalue(),
+                'log': log,
+                'media': media,
+                'html': html.getvalue(),
+            }
+            stdout.close()
+            stderr.close()
+            html.close()
+            kin.close()
+            kout.close()
         ctx.destroy()
         return resp
 
@@ -179,7 +217,6 @@ class ImageTestBase(object):
                     break
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
-                self.assertIn('exceptions', resp)
                 self.assertIsInstance(resp['stdout'], str)
                 self.assertIn(expected_stdout, resp['stdout'])
                 if expected_stderr:
@@ -204,18 +241,10 @@ class ImageTestBase(object):
                     break
                 self.assertIn('stdout', resp)
                 self.assertIn('stderr', resp)
-                self.assertIn('exceptions', resp)
-                self.assertIs(type(resp['exceptions']), list)
-                self.assertGreater(len(resp['exceptions']), 0)
                 err_name, err_arg = expected
-                if 'lablup/kernel-lua' in self.image_name:
-                    self.assertIn(err_name, resp['exceptions'][0][0])
-                elif 'lablup/kernel-haskell' in self.image_name:
-                    self.assertIn(err_name, resp['exceptions'][0][0])
-                else:
-                    self.assertRegex(resp['exceptions'][0][0], '^' + re.escape(err_name))
+                self.assertIn(err_name, resp['stderr'])
                 if err_arg:
-                    self.assertIn(err_arg, resp['exceptions'][0][1])
+                    self.assertIn(err_arg, resp['stderr'])
         if inner_exception:
             self.fail(inner_exception)
 
@@ -455,14 +484,14 @@ class PHP7ImageTest(ImageTestBase, unittest.TestCase):
         yield '$x = 0 / 0;', ('Division by zero', None)
 
 
-class Nodejs4ImageTest(ImageTestBase, unittest.TestCase):
+class Nodejs6ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'lablup/kernel-nodejs4'
+    image_name = 'lablup/kernel-nodejs6'
 
     def basic_success(self):
         yield 'console.log("hello world");', 'hello world'
         yield 'var a = 1; var b = 2; var c = a + b; console.log(c);', '3'
-        yield 'console.log(process.version);', 'v4.'
+        yield 'console.log(process.version);', 'v6.'
         yield 'setTimeout(() => { console.log("async"); }, 100);', 'async'
 
     def basic_failure(self):
