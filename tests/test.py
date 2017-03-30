@@ -3,6 +3,7 @@ from abc import abstractmethod
 import codecs
 from distutils.version import LooseVersion
 import io
+import json
 import os
 import re
 import shutil
@@ -141,7 +142,7 @@ class ImageTestBase(object):
         devices = ['{0}:{0}:rwm'.format(dev) for dev in nvidia_params['Devices']]
         return binds, devices
 
-    def execute(self, cell_id, code):
+    def execute(self, code, user_input=None):
         ctx = zmq.Context()
         ctx.setsockopt(zmq.LINGER, 50)
         kin = ctx.socket(zmq.PUSH)
@@ -161,13 +162,18 @@ class ImageTestBase(object):
             msg_in = (b'', code.encode('utf8'))
             kin.send_multipart(msg_in)
             while True:
-                if kout.poll(timeout=180000) == 0:  # timeout in millisec
+                if kout.poll(timeout=10_000) == 0:  # 10 sec
                     raise TimeoutError('Container does not respond.')
                 reply_type, reply_data = kout.recv_multipart()
                 if reply_type == b'finished':
                     decoders[0].decode(b'', True)
                     decoders[1].decode(b'', True)
                     break
+                elif reply_type == b'waiting-input':
+                    assert isinstance(user_input, str), 'User input required'
+                    msg_in = (b'', user_input.encode('utf8'))
+                    time.sleep(0.1)
+                    kin.send_multipart(msg_in)
                 elif reply_type == b'stdout':
                     stdout.write(decoders[0].decode(reply_data))
                 elif reply_type == b'stderr':
@@ -209,14 +215,13 @@ class ImageTestBase(object):
                 continue
             with self.subTest(subcase=idx + 1):
                 try:
-                    resp = self.execute(idx, code)
+                    resp = self.execute(code)
                 except TimeoutError as e:
                     # (Re-)raised exception here is captured by subTest ctxmgr.
                     # We just store the exception object and break out of the sub-case loop.
                     inner_exception = AssertionError('Timeout detected at sub-case {}'.format(idx + 1))
                     break
                 self.assertIn('stdout', resp)
-                self.assertIn('stderr', resp)
                 self.assertIsInstance(resp['stdout'], str)
                 self.assertIn(expected_stdout, resp['stdout'])
                 if expected_stderr:
@@ -235,16 +240,33 @@ class ImageTestBase(object):
                 continue
             with self.subTest(subcase=idx + 1):
                 try:
-                    resp = self.execute(idx, code)
+                    resp = self.execute(code)
+                except TimeoutError as e:
+                    inner_exception = AssertionError('Timeout detected at sub-case {}'.format(idx + 1))
+                    break
+                self.assertIn('stderr', resp)
+                err_name, err_arg = expected
+                if not (err_name in resp['stderr'] or err_name in resp['stdout']):
+                    self.fail('Given exception name is not found in the output.')
+                if err_arg and not (err_arg in resp['stderr'] or err_arg in resp['stdout']):
+                    self.fail('Given exception argument is not found in the output.')
+        if inner_exception:
+            self.fail(inner_exception)
+
+    def test_user_input(self):
+        inner_exception = None
+        user_input_gen = getattr(self, 'user_input', None)
+        if user_input_gen is None:
+            self.skipTest('No user input test cases provided for this image.')
+        for idx, (code, user_input, expected) in enumerate(user_input_gen()):
+            with self.subTest(subclass=idx + 1):
+                try:
+                    resp = self.execute(code, user_input)
                 except TimeoutError as e:
                     inner_exception = AssertionError('Timeout detected at sub-case {}'.format(idx + 1))
                     break
                 self.assertIn('stdout', resp)
-                self.assertIn('stderr', resp)
-                err_name, err_arg = expected
-                self.assertIn(err_name, resp['stderr'])
-                if err_arg:
-                    self.assertIn(err_arg, resp['stderr'])
+                self.assertIn(expected, resp['stdout'])
         if inner_exception:
             self.fail(inner_exception)
 
@@ -258,8 +280,12 @@ class Python2ImageTest(ImageTestBase, unittest.TestCase):
         yield 'a = 1\nb = 2\nc = a + b\nprint c', '3'
 
     def basic_failure(self):
+        yield '!@*@*@*!', ('SyntaxError', None)
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
+
+    def user_input(self):
+        yield "name = raw_input('>> ')\nprint('Hello, %s' % name)", 'ASDF', 'Hello, ASDF'
 
 
 _simple_plot_example = '''
@@ -296,8 +322,12 @@ class Python3ImageTest(ImageTestBase, unittest.TestCase):
         yield _simple_plot_example, '20'
 
     def basic_failure(self):
+        yield '!@*@*@*!', ('SyntaxError', None)
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
+
+    def user_input(self):
+        yield "name = input('>> ')\nprint(f'Hello, {name}')", 'ASDF', 'Hello, ASDF'
 
 
 _simple_tf_example = '''
@@ -388,8 +418,12 @@ class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
         yield _complex_tf_example, 'done'
 
     def basic_failure(self):
+        yield '!@*@*@*!', ('SyntaxError', None)
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
+
+    def user_input(self):
+        yield "name = input('>> ')\nprint(f'Hello, {name}')", 'ASDF', 'Hello, ASDF'
 
 
 class Python3TensorFlowGPUImageTest(ImageTestBase, unittest.TestCase):
@@ -408,8 +442,12 @@ class Python3TensorFlowGPUImageTest(ImageTestBase, unittest.TestCase):
         # your GPU's CUDA compute capabilities to avoid JIT-ing ptx codes on the first run.
 
     def basic_failure(self):
+        yield '!@*@*@*!', ('SyntaxError', None)
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
+
+    def user_input(self):
+        yield "name = input('>> ')\nprint(f'Hello, {name}')", 'ASDF', 'Hello, ASDF'
 
 
 _py3_caffe_example = '''
@@ -429,9 +467,12 @@ class Python3CaffeImageTest(ImageTestBase, unittest.TestCase):
         yield _py3_caffe_example, 'done'
 
     def basic_failure(self):
+        yield '!@*@*@*!', ('SyntaxError', None)
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
 
+    def user_input(self):
+        yield "name = input('>> ')\nprint(f'Hello, {name}')", 'ASDF', 'Hello, ASDF'
 
 
 class R3ImageTest(ImageTestBase, unittest.TestCase):
@@ -450,23 +491,6 @@ class R3ImageTest(ImageTestBase, unittest.TestCase):
         yield 'print(ctx)', ('simpleError', "object 'ctx' not found")
 
 
-class PHP5ImageTest(ImageTestBase, unittest.TestCase):
-
-    image_name = 'lablup/kernel-php5'
-
-    def basic_success(self):
-        yield 'echo "hello world";', 'hello world'
-        yield '$a = 1; $b = 2; $c = $a + $b; echo "$c";', '3'
-        yield 'echo isset($my_nonexistent_variable) ? "1" : "0";', '0'
-        # checks if our internal REPL code is NOT exposed.
-        yield 'echo isset($context) ? "1" : "0";', '0'
-        yield 'global $context; echo isset($context) ? "1" : "0";', '0'
-
-    def basic_failure(self):
-        yield 'throw new Exception("asdf");', ('Exception', 'asdf')
-        yield '$x = 0 / 0;', ('Division by zero', None)
-
-
 class PHP7ImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-php7'
@@ -481,7 +505,9 @@ class PHP7ImageTest(ImageTestBase, unittest.TestCase):
 
     def basic_failure(self):
         yield 'throw new Exception("asdf");', ('Exception', 'asdf')
-        yield '$x = 0 / 0;', ('Division by zero', None)
+        # changed in PHP 7: divisino by zero error only occurs with modulo operator.
+        # Division operator produces NAN.
+        yield '$x = 0 % 0;', ('DivisionByZeroError', None)
 
 
 class Nodejs6ImageTest(ImageTestBase, unittest.TestCase):
