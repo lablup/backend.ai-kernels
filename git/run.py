@@ -88,10 +88,10 @@ class TerminalRunner(object):
         parser_chdir.set_defaults(func=self.do_chdir)
 
         # TODO: Temporarily disabled.
-        #parser_show = subparsers.add_parser('show')
-        #parser_show.add_argument('target', choices=('graph',), default='graph')
-        #parser_show.add_argument('path', type=str)
-        #parser_show.set_defaults(func=self.do_show)
+        parser_show = subparsers.add_parser('show')
+        parser_show.add_argument('target', choices=('graph',), default='graph')
+        parser_show.add_argument('path', type=str)
+        parser_show.set_defaults(func=self.do_show)
 
     def do_ping(self, args):
         self.sock_out.write([b'stdout', b'pong!'])
@@ -116,15 +116,24 @@ class TerminalRunner(object):
         ])
 
     def do_show(self, args):
-        # TODO: rewrite
         if args.target == 'graph':
-            repo_path = pygit2.discover_repository(args.path)
-            repo = pygit2.Repository(repo_path)
-            for b in repo.listall_branches():
-                print('Branch: {}'.format(b))
-                branch = repo.lookup_branch(b)
-                for log in branch.log():
-                    print('  {}'.format(log.oid_new))
+            try:
+                # TODO: how to organize branch/commit structure?
+                repo_path = pygit2.discover_repository(args.path)
+                repo = pygit2.Repository(repo_path)
+                for b in repo.listall_branches():
+                    branch = repo.lookup_branch(b)
+                    for log in branch.log():
+                        print('  {}'.format(log.oid_new))
+                self.sock_out.write([
+                    b'stdout',
+                    b'Information of branch/commit structure.\nNot implemented'
+                ])
+            except KeyError:
+                self.sock_out.write([
+                    b'stderr',
+                    b'Not a git repository'
+                ])
         else:
             raise ValueError('Unsupported show target', args.target)
 
