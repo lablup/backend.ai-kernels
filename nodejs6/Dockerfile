@@ -38,6 +38,6 @@ RUN apk add --no-cache zeromq \
 COPY run.js /home/sorna/run.js
 
 USER work
-CMD ["/home/sorna/jail", "default", "/usr/local/bin/node", "/home/sorna/run.js"]
+CMD ["/home/sorna/jail", "default", "/usr/bin/node", "/home/sorna/run.js"]
 
 # vim: sts=4 sw=4 et

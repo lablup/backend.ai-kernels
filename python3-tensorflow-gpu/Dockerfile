@@ -93,10 +93,10 @@ VOLUME ["/home/work"]
 EXPOSE 2000 2001
 
 LABEL io.sorna.timeout="180"
-LABEL io.sorna.maxmem="1g"
+LABEL io.sorna.maxmem="4g"
 LABEL io.sorna.maxcores="4"
 LABEL io.sorna.mode="query"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC"
 LABEL io.sorna.nvidia.enabled="yes"
 LABEL io.sorna.version="2"
 
