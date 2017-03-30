@@ -23,6 +23,7 @@ try:
 except ImportError:
     import json
 import pygit2
+from pygit2 import GIT_SORT_TOPOLOGICAL, GIT_SORT_REVERSE
 import uvloop
 import zmq
 
@@ -118,16 +119,26 @@ class TerminalRunner(object):
     def do_show(self, args):
         if args.target == 'graph':
             try:
-                # TODO: how to organize branch/commit structure?
+                # Commit info format: (w/ topo-/reverse-order)
+                # oid|[parent_id1, parent_id2, ...]|author|msg
+                commit_info = []
                 repo_path = pygit2.discover_repository(args.path)
                 repo = pygit2.Repository(repo_path)
-                for b in repo.listall_branches():
-                    branch = repo.lookup_branch(b)
-                    for log in branch.log():
-                        print('  {}'.format(log.oid_new))
+                for commit in repo.walk(repo.head.target, GIT_SORT_TOPOLOGICAL | GIT_SORT_REVERSE):
+                    oid = commit.hex[:6]
+                    parent_ids = list(map(lambda oid: oid.hex[:6], commit.parent_ids))
+                    author = commit.author.name
+                    message = commit.message.split('\n')[0]
+                    info = dict(
+                        oid=oid,
+                        parent_ids=parent_ids,
+                        author=author,
+                        message=message
+                    )
+                    commit_info.append(info)
                 self.sock_out.write([
                     b'stdout',
-                    b'Information of branch/commit structure.\nNot implemented'
+                    json.dumps(commit_info).encode()
                 ])
             except KeyError:
                 self.sock_out.write([
