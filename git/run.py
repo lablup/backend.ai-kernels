@@ -137,8 +137,11 @@ class TerminalRunner(object):
                     )
                     commit_info.append(info)
                 self.sock_out.write([
-                    b'stdout',
-                    json.dumps(commit_info).encode()
+                    b'media',
+                    json.dumps({
+                        'type': 'application/vnd.sorna.gitgraph',
+                        'data': commit_info
+                    }).encode('utf-8')
                 ])
             except KeyError:
                 self.sock_out.write([
