@@ -6,6 +6,7 @@ import fcntl
 import io
 import os
 import pty
+import re
 import shlex
 import signal
 import struct
@@ -119,23 +120,46 @@ class TerminalRunner(object):
     def do_show(self, args):
         if args.target == 'graph':
             try:
-                # Commit info format: (w/ topo-/reverse-order)
-                # oid|[parent_id1, parent_id2, ...]|author|msg
+                commit_branch_table = {}
                 commit_info = []
-                repo_path = pygit2.discover_repository(args.path)
-                repo = pygit2.Repository(repo_path)
-                for commit in repo.walk(repo.head.target, GIT_SORT_TOPOLOGICAL | GIT_SORT_REVERSE):
-                    oid = commit.hex[:6]
-                    parent_ids = list(map(lambda oid: oid.hex[:6], commit.parent_ids))
-                    author = commit.author.name
-                    message = commit.message.split('\n')[0]
+
+                # TODO: get current working directory of user terminal
+                # Currently, target path is always set to /home/work.
+
+                # Create commit-branch matching table.
+                tree_cmd = ['git', 'log', '--pretty=oneline', '--graph',
+                            '--source', '--branches']
+                run_res = subprocess.run(tree_cmd, stdout=subprocess.PIPE)
+                stdout = run_res.stdout.decode('utf-8')
+                prog = re.compile(r'([a-z0-9]+)\s+(\S+).*')
+                for line in stdout.split('\n'):
+                    r = prog.search(line)
+                    if r and hasattr(r, 'group') and r.group(1) and r.group(2):
+                        oid = r.group(1)[:7]  # short oid
+                        branch = r.group(2)
+                        commit_branch_table[oid] = branch
+
+                # Gather commit info w/ branch name.
+                log_cmd = ['git', 'log', '--pretty=format:%h||%p||%s||%cn',
+                           '--all', '--topo-order', '--reverse']
+                run_res = subprocess.run(log_cmd, stdout=subprocess.PIPE)
+                stdout = run_res.stdout.decode('utf-8')
+                for log in stdout.split('\n'):
+                    items = log.split('||')
+                    oid = items[0]
+                    parent_ids = items[1].split(' ')
+                    message = items[2]
+                    author = items[3]
+                    branch = commit_branch_table.get(oid, None)
                     info = dict(
                         oid=oid,
                         parent_ids=parent_ids,
                         author=author,
-                        message=message
+                        message=message,
+                        branch=branch
                     )
                     commit_info.append(info)
+
                 self.sock_out.write([
                     b'media',
                     json.dumps({
