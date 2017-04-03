@@ -126,6 +126,8 @@ class TerminalRunner(object):
                 # TODO: get current working directory of user terminal
                 # Currently, target path is always set to /home/work.
 
+                # TODO: do not raise error when there is no commit
+
                 # Create commit-branch matching table.
                 tree_cmd = ['git', 'log', '--pretty=oneline', '--graph',
                             '--source', '--branches']
@@ -151,12 +153,15 @@ class TerminalRunner(object):
                     message = items[2]
                     author = items[3]
                     branch = commit_branch_table.get(oid, None)
+                    parent_branches = [commit_branch_table.get(pid, None)
+                                       for pid in parent_ids]
                     info = dict(
                         oid=oid,
                         parent_ids=parent_ids,
                         author=author,
                         message=message,
-                        branch=branch
+                        branch=branch,
+                        parent_branches=parent_branches
                     )
                     commit_info.append(info)
 
