@@ -5,6 +5,7 @@ import asyncio
 import fcntl
 import io
 import os
+from pathlib import Path
 import pty
 import re
 import shlex
@@ -121,7 +122,11 @@ class TerminalRunner(object):
             commit_branch_table = {}
             commit_info = []
 
-            os.chdir(args.path)
+            if args.path in ['.', None]:
+                current_dir = Path(f'/proc/{self.pid}/cwd').resolve()
+            else:
+                current_dir = Path(args.path).resolve()
+            os.chdir(current_dir)
 
             # Create commit-branch matching table.
             tree_cmd = ['git', 'log', '--pretty=oneline', '--graph',
