@@ -41,44 +41,45 @@ class TestDoShow:
                                                      mock_args, tmpdir):
         # Build commit tree
         os.chdir(tmpdir)
-        run_cmd('git init')
-        run_cmd('git config --global user.email "tester@lablup.com"')
-        run_cmd('git config --global user.name "Tester Park"')
-        run_cmd('touch test.txt')
-        run_cmd('git add test.txt')
-        run_cmd('git commit -m "first commit"')
-        run_cmd('touch test2.txt')
-        run_cmd('git add test2.txt')
-        run_cmd('git commit -m "second commit"')
-        run_cmd('touch test3.txt')
-        run_cmd('git add test3.txt')
-        run_cmd('git commit -m "third commit"')
-        run_cmd('git branch new-branch')
-        run_cmd('git checkout new-branch')
-        run_cmd('touch test4.txt')
-        run_cmd('git add test4.txt')
-        run_cmd('git commit -m "new branch commit"')
-        run_cmd('touch test5.txt')
-        run_cmd('git add test5.txt')
-        run_cmd('git commit -m "second branch commit"')
-        run_cmd('git checkout master')
-        run_cmd('git branch another-branch')
-        run_cmd('git checkout another-branch')
-        run_cmd('touch test6.txt')
-        run_cmd('git add test6.txt')
-        run_cmd('git commit -m "another branch commit"')
-        run_cmd('touch test7.txt')
-        run_cmd('git add test7.txt')
-        run_cmd('git commit -m "another second branch commit"')
-        run_cmd('git checkout master')
-        run_cmd('touch test8.txt')
-        run_cmd('git add test8.txt')
-        run_cmd('git commit -m "fourth commit"')
-        run_cmd('git merge new-branch --no-edit')
-        run_cmd('touch test9.txt')
-        run_cmd('git add test9.txt')
-        run_cmd('git commit -m "fifth commit"')
-
+        run_cmd('''
+git init
+git config --global user.email "tester@lablup.com"
+git config --global user.name "Tester Park"
+touch test.txt
+git add test.txt
+git commit -m "first commit"
+touch test2.txt
+git add test2.txt
+git commit -m "second commit"
+touch test3.txt
+git add test3.txt
+git commit -m "third commit"
+git branch new-branch
+git checkout new-branch
+touch test4.txt
+git add test4.txt
+git commit -m "new branch commit"
+touch test5.txt
+git add test5.txt
+git commit -m "second branch commit"
+git checkout master
+git branch another-branch
+git checkout another-branch
+touch test6.txt
+git add test6.txt
+git commit -m "another branch commit"
+touch test7.txt
+git add test7.txt
+git commit -m "another second branch commit"
+git checkout master
+touch test8.txt
+git add test8.txt
+git commit -m "fourth commit"
+git merge new-branch --no-edit
+touch test9.txt
+git add test9.txt
+git commit -m "fifth commit"
+''')
         mock_runner.do_show(mock_args)
 
         call_args = mock_runner.sock_out.write.call_args_list[0][0][0]
