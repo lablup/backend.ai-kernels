@@ -137,11 +137,7 @@ class TerminalRunner(object):
             stderr = run_res.stderr.decode('utf-8')
             prog = re.compile(r'([a-z0-9]+)\s+(\S+).*')
             if stderr:
-                if 'does not have any commits' in stderr:
-                    errmsg = b'Does not have any commits'
-                else:
-                    errmsg = b'Not a git repository'
-                self.sock_out.write([b'stderr', errmsg])
+                self.sock_out.write([b'stderr', stderr.encode('utf-8')])
                 return
 
             for line in stdout.split('\n'):
