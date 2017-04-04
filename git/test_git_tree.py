@@ -98,18 +98,18 @@ git commit -m "fifth commit"
         with pytest.raises(ValueError):
             mock_runner.do_show(mock_args)
 
-    def test_send_stderr_if_dir_is_not_git_repo(self, mock_runner, mock_args):
+    def test_send_stderr_if_dir_is_not_git_repo(self, mock_runner, mock_args,
+                                                mocker):
         mock_runner.do_show(mock_args)
-        mock_runner.sock_out.write.assert_called_once_with([
-            b'stderr', b'Not a git repository'
-        ])
+        mock_runner.sock_out.write.assert_called_once_with([b'stderr',
+                                                            mocker.ANY])
 
-    def test_send_stderr_if_no_commit(self, mock_runner, mock_args, tmpdir):
+    def test_send_stderr_if_no_commit(self, mock_runner, mock_args, tmpdir,
+                                      mocker):
         # Directory is git initialized, but no commit.
         os.chdir(tmpdir)
         subprocess.run('git init', shell=True)
 
         mock_runner.do_show(mock_args)
-        mock_runner.sock_out.write.assert_called_once_with([
-            b'stderr', b'Does not have any commits'
-        ])
+        mock_runner.sock_out.write.assert_called_once_with([b'stderr',
+                                                            mocker.ANY])
