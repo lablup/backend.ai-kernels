@@ -407,6 +407,27 @@ mnist = input_data.read_data_sets("./samples/MNIST_data/", one_hot=True)
 print('done')
 '''
 
+_keras_tf_example = '''
+import numpy as np
+from keras.models import Sequential
+from keras.layers import Dense
+input_dim = 16
+num_hidden = 8
+num_class = 4
+batch_size = 32
+model = Sequential()
+model.add(Dense(num_hidden, input_dim=input_dim))
+model.add(Dense(num_class))
+model.compile(loss='mse', optimizer='sgd')
+x = np.random.random((batch_size, input_dim))
+y = np.random.random((batch_size, num_class))
+model.fit(x, y)
+model.pop()
+print(len(model.layers))
+print(model.output_shape)
+'''
+
+
 class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-python3-tensorflow'
@@ -421,6 +442,8 @@ class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
         yield '!@*@*@*!', ('SyntaxError', None)
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
+        yield 'import keras; print(keras.__name__)', 'keras'
+        yield _keras_tf_example, '1\n(None, 8)'
 
     def user_input(self):
         yield "name = input('>> ')\nprint(f'Hello, {name}')", 'ASDF', 'Hello, ASDF'
