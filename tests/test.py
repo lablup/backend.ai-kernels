@@ -437,13 +437,13 @@ class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
         yield 'a = 1\nb = 2\nc = a + b\nprint(c)', '3'
         yield _simple_tf_example, '30'
         yield _complex_tf_example, 'done'
+        yield 'import keras; print(keras.__name__)', 'keras'
+        yield _keras_tf_example, '1\n(None, 8)'
 
     def basic_failure(self):
         yield '!@*@*@*!', ('SyntaxError', None)
         yield 'raise RuntimeError("asdf")', ('RuntimeError', 'asdf')
         yield 'x = 0 / 0', ('ZeroDivisionError', None)
-        yield 'import keras; print(keras.__name__)', 'keras'
-        yield _keras_tf_example, '1\n(None, 8)'
 
     def user_input(self):
         yield "name = input('>> ')\nprint(f'Hello, {name}')", 'ASDF', 'Hello, ASDF'
@@ -460,6 +460,8 @@ class Python3TensorFlowGPUImageTest(ImageTestBase, unittest.TestCase):
         yield _simple_tf_example, '30'
         yield _complex_tf_gpu_example, 'done'
         yield _tf_tutorial_mnist_load, 'done'
+        yield 'import keras; print(keras.__name__)', 'keras'
+        yield _keras_tf_example, '1\n(None, 8)'
         # If you encounter long delay on this test, try repeating the last sub-case.
         # If further runs takes short time, you need to rebuild tensorflow to match
         # your GPU's CUDA compute capabilities to avoid JIT-ing ptx codes on the first run.
