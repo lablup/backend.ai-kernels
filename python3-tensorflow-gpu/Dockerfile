@@ -73,6 +73,9 @@ ADD tensorflow-1.0.0-cp36-cp36m-linux_x86_64.whl /tmp
 USER work
 RUN /home/sorna/pyenv-run.sh pip install /tmp/tensorflow-*.whl
 
+# Install Keras
+RUN /home/sorna/pyenv-run.sh pip install keras
+
 # Secure installation scripts
 USER root
 ADD run.sh /home/sorna/run.sh
