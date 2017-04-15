@@ -360,7 +360,7 @@ with tf.device('/cpu:0'):
     optimizer = tf.train.GradientDescentOptimizer(0.5)
     train = optimizer.minimize(loss)
     sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
     for step in range(201):
         sess.run(train)
         if step % 20 == 0:
@@ -392,7 +392,7 @@ with tf.device('/gpu:0'):
     optimizer = tf.train.GradientDescentOptimizer(0.5)
     train = optimizer.minimize(loss)
     sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
     for step in range(201):
         sess.run(train)
         if step % 20 == 0:
@@ -437,7 +437,9 @@ class Python3TensorFlowImageTest(ImageTestBase, unittest.TestCase):
         yield 'a = 1\nb = 2\nc = a + b\nprint(c)', '3'
         yield _simple_tf_example, '30'
         yield _complex_tf_example, 'done'
-        yield 'import keras; print(keras.__name__)', 'keras'
+        # Keras prints to stderr which backend is active upon backend initialization.
+        # https://github.com/raindeer/keras/commit/60bf55badb36273c9a65da6242699655f73b122f
+        yield 'import keras; print(keras.__name__)', 'keras', 'Using TensorFlow backend.'
         yield _keras_tf_example, '1\n(None, 8)'
 
     def basic_failure(self):
@@ -460,7 +462,9 @@ class Python3TensorFlowGPUImageTest(ImageTestBase, unittest.TestCase):
         yield _simple_tf_example, '30'
         yield _complex_tf_gpu_example, 'done'
         yield _tf_tutorial_mnist_load, 'done'
-        yield 'import keras; print(keras.__name__)', 'keras'
+        # Keras prints to stderr which backend is active upon backend initialization.
+        # https://github.com/raindeer/keras/commit/60bf55badb36273c9a65da6242699655f73b122f
+        yield 'import keras; print(keras.__name__)', 'keras', 'Using TensorFlow backend.'
         yield _keras_tf_example, '1\n(None, 8)'
         # If you encounter long delay on this test, try repeating the last sub-case.
         # If further runs takes short time, you need to rebuild tensorflow to match
