@@ -14,11 +14,12 @@ import types
 from namedlist import namedtuple, namedlist
 import simplejson as json
 import zmq
+from IPython.core.completer import Completer
 
 import getpass
 
 from sorna.types import (
-    InputRequest, ControlRecord, ConsoleRecord, MediaRecord, HTMLRecord,
+    InputRequest, ControlRecord, ConsoleRecord, MediaRecord, HTMLRecord, CompletionRecord,
 )
 
 log = logging.getLogger('code-runner')
@@ -66,6 +67,9 @@ class CodeRunner:
         self.user_module = user_module
         self.user_ns = user_module.__dict__
 
+        self.completer = Completer(namespace=self.user_ns, global_namespace={})
+        self.completer.limit_to__all__ = True
+
     def handle_input(self, prompt=None, password=False):
         if prompt is None:
             prompt = 'Password: ' if password else ''
@@ -73,6 +77,18 @@ class CodeRunner:
         self.emit(InputRequest(is_password=password))
         data = self.input_stream.recv_multipart()
         return data[1].decode('utf8')
+
+    def handle_complete(self, data):
+        args = json.loads(data)
+        state = 0
+        matches = []
+        while True:
+            ret = self.completer.complete(args['line'], state)
+            if ret is None:
+                break
+            matches.append(ret)
+            state += 1
+        return matches
 
     def emit(self, record):
         if isinstance(record, ConsoleRecord):
@@ -101,6 +117,11 @@ class CodeRunner:
                     'is_password': record.is_password,
                 }).encode('utf8'),
             ])
+        elif isinstance(record, CompletionRecord):
+            self.output_stream.send_multipart([
+                b'completion',
+                json.dumps(record.matches).encode('utf8'),
+            ])
         elif isinstance(record, ControlRecord):
             self.output_stream.send_multipart([
                 record.event.encode('ascii'),
@@ -124,6 +145,18 @@ class CodeRunner:
             data = self.input_stream.recv_multipart()
             code_id = data[0].decode('ascii')
             code_text = data[1].decode('utf8')
+            log.debug(f'recv input: {code_id}, {code_text}')
+            if code_id == 'complete':
+                try:
+                    completions = self.handle_complete(code_text)
+                    self.emit(CompletionRecord(completions))
+                    log.debug('completion-sent')
+                except:
+                    log.exception('Unexpected error during handle_complete()')
+                finally:
+                    self.emit(ControlRecord('finished'))
+                    log.debug('completion-finished')
+                continue
             self.user_module.__builtins__._sorna_emit = self.emit
             if self.input_supported:
                 self.user_module.__builtins__.input = self.handle_input

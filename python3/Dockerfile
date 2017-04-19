@@ -16,6 +16,7 @@ RUN apk add --no-cache --virtual .sorna-deps \
 RUN pip install --no-cache-dir cython \
     && pip install --no-cache-dir numpy \
     && pip install --no-cache-dir matplotlib bokeh \
+    && pip install --no-cache-dir ipython \
     && pip install --no-cache-dir pandas \
     && pip install --no-cache-dir scipy seaborn
 RUN apk add --no-cache --virtual .sorna-deps jpeg libpng tiff \
@@ -25,7 +26,7 @@ RUN apk add --no-cache --virtual .sorna-deps jpeg libpng tiff \
     && pip install --no-cache-dir networkx cvxpy
 
 # Install Sorna Media support
-RUN pip install --no-cache-dir /tmp/sorna_media-0.3.0-py2.py3-none-any.whl \
+RUN pip install --no-cache-dir /tmp/sorna_media-0.4.0-py2.py3-none-any.whl \
     && rm -f /tmp/*.whl
 
 # Clean up build dependencies
