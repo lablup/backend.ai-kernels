@@ -110,6 +110,7 @@ class ImageTestBase(object):
 
     def tearDown(self):
         try:
+            print(self.docker.logs(self.container_id).decode('utf-8'))
             self.docker.kill(self.container_id)
         except docker.errors.NotFound:
             # The container might have been terminated during tests due to errors.
@@ -701,6 +702,37 @@ class HaskellTest(ImageTestBase, unittest.TestCase):
     # Exception handling is not yet supported
     # def basic_failure(self):
     #     yield '1', ('ParseError', None)
+
+
+_c_if_test = """
+#include <stdio.h>
+int main() 
+{
+    int a = 1;
+    if (1 == a) { printf("true"); }
+    else { printf("false"); }
+}
+"""
+
+_c_for_test = """
+#include <stdio.h>
+int main() 
+{
+    int i;
+    for (i = 0; i < 3; i++) { printf("%d ", i*2); }
+}
+"""
+
+class CTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-c'
+
+    def basic_success(self):
+        # yield _c_hello_test, 'hello'
+        yield '#include <stdio.h>\nint main() { printf("hello\\n"); }', 'hello\n'
+        yield '#include <stdio.h>\nint main() { printf("%d",1+2); }', '3'
+        yield _c_if_test, 'true'
+        yield _c_for_test, '0 2 4'
 
 
 if __name__ == '__main__':
