@@ -728,11 +728,41 @@ class CTest(ImageTestBase, unittest.TestCase):
     image_name = 'lablup/kernel-c'
 
     def basic_success(self):
-        # yield _c_hello_test, 'hello'
         yield '#include <stdio.h>\nint main() { printf("hello\\n"); }', 'hello\n'
         yield '#include <stdio.h>\nint main() { printf("%d",1+2); }', '3'
         yield _c_if_test, 'true'
         yield _c_for_test, '0 2 4'
+
+
+_cpp_if_test = """
+#include <iostream>
+using namespace std;
+int main() 
+{
+    int a = 1;
+    if (1 == a) { cout << "true"; }
+    else { cout << "false"; }
+}
+"""
+
+_cpp_for_test = """
+#include <iostream>
+using namespace std;
+int main() 
+{
+    for (int i = 0; i < 3; i++) { cout << i*2; }
+}
+"""
+
+class CPPTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-cpp'
+
+    def basic_success(self):
+        yield '#include <iostream>\nusing namespace std;\nint main() { cout << "hello"; }', 'hello'
+        yield '#include <iostream>\nusing namespace std;\nint main() { cout << 1+2; }', '3'
+        yield _cpp_if_test, 'true'
+        yield _cpp_for_test, '024'
 
 
 if __name__ == '__main__':

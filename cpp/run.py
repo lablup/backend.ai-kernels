@@ -15,7 +15,7 @@ import zmq, aiozmq
 
 log = logging.getLogger()
 
-cmdspec = 'gcc {mainpath} && ./a.out'
+cmdspec = 'g++ {mainpath} && ./a.out'
 
 
 '''
@@ -28,7 +28,7 @@ async def execute(insock, outsock, code_id, code_data):
     loop = asyncio.get_event_loop()
 
     # Save code to a temporary file
-    tmpf = tempfile.NamedTemporaryFile(suffix='.c', dir='.')
+    tmpf = tempfile.NamedTemporaryFile(suffix='.cpp', dir='.')
     tmpf.write(code_data)
     tmpf.flush()
 
