@@ -615,26 +615,6 @@ class Octave4ImageTest(ImageTestBase, unittest.TestCase):
         yield 'printf(some_undef_var)', ('undefined near line 1', None)
 
 
-class JailTest(ImageTestBase, unittest.TestCase):
-
-    image_name = 'lablup/kernel-python3'
-
-    def basic_success(self):
-        yield 'import os; os.chmod("/home/work", 700)', '', ''
-
-        # Since Python 3.5.1, we need to allow getrandom() syscall.
-        yield 'import random; print(random.randint(0, 0))', '0', ''
-
-    def basic_failure(self):
-        yield 'import os\nos.chmod("/home/sorna", 700)', ('PermissionError', None)
-        yield 'import os\nos.chmod("../sorna", 700)', ('PermissionError', None)
-        yield 'import os\nos.chmod("/home/work/../sorna", 700)', ('PermissionError', None)
-        yield 'import os\nos.chmod("/home/work/./../sorna", 700)', ('PermissionError', None)
-        yield 'import os\nos.chmod("/home/sorna/.", 700)', ('PermissionError', None)
-        yield 'import os\nos.mkdir("/home/work/test")\n' + \
-              'os.chmod("/home/work/test/../../sorna/", 700)', ('PermissionError', None)
-
-
 _haskell_if_test = """
 main = do
     if 7 `mod` 2 == 0
@@ -763,6 +743,80 @@ class CPPTest(ImageTestBase, unittest.TestCase):
         yield '#include <iostream>\nusing namespace std;\nint main() { cout << 1+2; }', '3'
         yield _cpp_if_test, 'true'
         yield _cpp_for_test, '024'
+
+
+_go_hello_test = """
+package main
+import "fmt"
+func main() {
+    fmt.Println("hello")
+}
+"""
+
+_go_var_test = """
+package main
+import "fmt"
+func main() {
+    var b, c int = 1, 2
+    fmt.Println(b, c)
+    var d = true
+    fmt.Println(d)
+}
+"""
+
+_go_if_test = """
+package main
+import "fmt"
+func main() {
+    if 7%2 == 0 {
+        fmt.Println("7 is even")
+    } else {
+        fmt.Println("7 is odd")
+    }
+}
+"""
+
+_go_for_test = """
+package main
+import "fmt"
+func main() {
+    i := 1
+    for i <= 3 {
+        fmt.Println(i)
+        i = i + 1
+    }
+}
+"""
+
+class GoTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-go'
+
+    def basic_success(self):
+        yield _go_hello_test, 'hello'
+        yield _go_var_test, '1 2\ntrue'
+        yield _go_if_test, '7 is odd'
+        yield _go_for_test, '1\n2\n3'
+
+
+class JailTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-python3'
+
+    def basic_success(self):
+        yield 'import os; os.chmod("/home/work", 700)', '', ''
+
+        # Since Python 3.5.1, we need to allow getrandom() syscall.
+        yield 'import random; print(random.randint(0, 0))', '0', ''
+
+    def basic_failure(self):
+        yield 'import os\nos.chmod("/home/sorna", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("../sorna", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/work/../sorna", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/work/./../sorna", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/sorna/.", 700)', ('PermissionError', None)
+        yield 'import os\nos.mkdir("/home/work/test")\n' + \
+              'os.chmod("/home/work/test/../../sorna/", 700)', ('PermissionError', None)
 
 
 if __name__ == '__main__':

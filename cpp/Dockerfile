@@ -4,7 +4,7 @@ MAINTAINER DevOps "devops@lablup.com"
 # Install Python packages
 RUN pip install --no-cache-dir aiozmq
 
-# Install minimal C compile environments
+# Install minimal C++ compile environments
 RUN apk add --no-cache g++
 
 COPY run.py /home/sorna/run.py
