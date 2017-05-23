@@ -799,6 +799,63 @@ class GoTest(ImageTestBase, unittest.TestCase):
         yield _go_for_test, '1\n2\n3'
 
 
+_java_hello_test = """
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World");
+    }
+}
+"""
+
+_java_hello_test2 = """
+class Dummy {}
+
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World");
+    }
+}
+"""
+
+_java_hello_test3 = """
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World");
+    }
+    public class Dummy {}
+}
+"""
+
+_java_reverse_number_test = """
+public class ReverseNumberWhile
+{
+   public static void main(String args[])
+   {
+      int num = 1234;
+      int reversenum = 0;
+      //While Loop: Logic to find out the reverse number
+      while( num != 0 )
+      {
+          reversenum = reversenum * 10;
+          reversenum = reversenum + num%10;
+          num = num/10;
+      }
+      System.out.println("Reverse of input number is: "+ reversenum);
+   }
+}
+"""
+
+class JavaTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-java'
+
+    def basic_success(self):
+        yield _java_hello_test, 'Hello, World'
+        yield _java_hello_test2, 'Hello, World'
+        yield _java_hello_test3, 'Hello, World'
+        yield _java_reverse_number_test, '4321'
+
+
 class JailTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-python3'

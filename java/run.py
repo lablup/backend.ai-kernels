@@ -1,14 +1,12 @@
 #! /usr/bin/env python
 import asyncio
-import io
 import logging
 import os
+import re
 import signal
 import sys
 import tempfile
 
-from namedlist import namedtuple, namedlist
-import simplejson as json
 import uvloop
 import zmq, aiozmq
 
@@ -27,15 +25,30 @@ returns the outputs of the execution.
 async def execute(insock, outsock, code_id, code_data):
     loop = asyncio.get_event_loop()
 
+    # Parse public class name
+    # If public class exists in source file, get the name. The name of the
+    # file and the (unique) public class name should match in Java. This
+    # approach may not be perfect, so other parsing strategy should be applied
+    # in the future.
+    m = re.search('public[\s]+class[\s]+([\w]+)[\s]*{',
+                  code_data.decode('ascii'))
+    filename = None
+    if m and len(m.groups()) > 0:
+        filename = '/home/work/' + m.group(1) + '.java'
+
     # Save code to a temporary file
-    tmpf = tempfile.NamedTemporaryFile(suffix='.java', dir='.')
+    if filename:
+        tmpf = open(filename, 'w+b')
+    else:
+        tmpf = tempfile.NamedTemporaryFile(suffix='.java', dir='.')
     tmpf.write(code_data)
     tmpf.flush()
 
     try:
         # Compile and run saved code.
         proc = await asyncio.create_subprocess_shell(
-            cmdspec.format(mainpath=tmpf.name, filename=tmpf.name[:-5]),
+            cmdspec.format(mainpath=tmpf.name,
+                           filename=tmpf.name.split('/')[-1][:-5]),
             stdin=None,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
@@ -53,6 +66,8 @@ async def execute(insock, outsock, code_id, code_data):
     finally:
         # Close and delete the temporary file.
         tmpf.close()
+        if filename:
+            os.remove(filename)
 
 
 async def pipe_output(stream, outsock, target):
