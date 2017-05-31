@@ -75,6 +75,7 @@ RUN /home/sorna/pyenv-run.sh pip install /tmp/tensorflow-*.whl
 
 # Install Keras
 RUN /home/sorna/pyenv-run.sh pip install keras
+RUN /home/sorna/pyenv-run.sh pip install h5py
 
 # Secure installation scripts
 USER root
