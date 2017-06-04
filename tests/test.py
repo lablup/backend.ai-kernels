@@ -669,7 +669,7 @@ main = do
     putStrLn $ "1+2+3 = " ++ show res
 """
 
-class HaskellTest(ImageTestBase, unittest.TestCase):
+class HaskellImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-haskell'
 
@@ -703,7 +703,7 @@ int main()
 }
 """
 
-class CTest(ImageTestBase, unittest.TestCase):
+class CImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-c'
 
@@ -734,7 +734,7 @@ int main()
 }
 """
 
-class CPPTest(ImageTestBase, unittest.TestCase):
+class CPPImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-cpp'
 
@@ -788,7 +788,7 @@ func main() {
 }
 """
 
-class GoTest(ImageTestBase, unittest.TestCase):
+class GoImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-go'
 
@@ -845,7 +845,7 @@ public class ReverseNumberWhile
 }
 """
 
-class JavaTest(ImageTestBase, unittest.TestCase):
+class JavaImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-java'
 
@@ -854,6 +854,43 @@ class JavaTest(ImageTestBase, unittest.TestCase):
         yield _java_hello_test2, 'Hello, World'
         yield _java_hello_test3, 'Hello, World'
         yield _java_reverse_number_test, '4321'
+
+
+_rust_if_test = """
+fn main() {
+    let n = 5;
+
+    if n < 0 {
+        print!("{} is negative", n);
+    } else if n > 0 {
+        print!("{} is positive", n);
+    } else {
+        print!("{} is zero", n);
+    }
+}
+"""
+
+_rust_loop_test = """
+fn main() {
+    let mut count = 0u32;
+    loop {
+        count += 1;
+        println!("{}", count);
+        if count == 3 {
+            break;
+        }
+    }
+}
+"""
+
+class RustImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-rust'
+
+    def basic_success(self):
+        yield 'fn main() { println!("Hello, World!"); }', 'Hello, World'
+        yield _rust_if_test, '5 is positive'
+        yield _rust_loop_test, '1\n2\n3'
 
 
 class JailTest(ImageTestBase, unittest.TestCase):
