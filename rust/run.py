@@ -15,7 +15,7 @@ import zmq, aiozmq
 
 log = logging.getLogger()
 
-cmdspec = 'rustc {mainpath} && ./{filename}'
+cmdspec = 'rustc {mainpath} && chmod 755 ./{filename} && ./{filename}'
 
 
 '''

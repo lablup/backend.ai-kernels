@@ -69,7 +69,7 @@ class ImageTestBase(object):
 
         num_cores = min(os.cpu_count(), max_cores)
         cores = '0-{}'.format(num_cores - 1)
-        binds={self.work_dir: {'bind': '/home/work', 'mode': 'rw'}}
+        binds = {self.work_dir: {'bind': '/home/work', 'mode': 'rw'}}
         volumes = ['/home/work']
         devices = []
         envs = {k: str(num_cores) for k in envs_corecount}
@@ -110,7 +110,9 @@ class ImageTestBase(object):
 
     def tearDown(self):
         try:
+            print('\n==== Container logs ====')
             print(self.docker.logs(self.container_id).decode('utf-8'))
+            print('====\n')
             self.docker.kill(self.container_id)
         except docker.errors.NotFound:
             # The container might have been terminated during tests due to errors.

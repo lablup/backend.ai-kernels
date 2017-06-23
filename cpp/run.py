@@ -15,7 +15,7 @@ import zmq, aiozmq
 
 log = logging.getLogger()
 
-cmdspec = 'g++ {mainpath} && ./a.out'
+cmdspec = 'g++ {mainpath} && chmod 755 ./a.out && ./a.out'
 
 
 '''

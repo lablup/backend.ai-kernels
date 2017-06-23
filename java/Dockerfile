@@ -75,6 +75,4 @@ RUN set -ex && \
 COPY run.py /home/sorna/run.py
 
 USER work
-# TODO: With jail, `sh: setgid: Operation not permitted` error is raised.
-# CMD ["/home/sorna/jail", "python3", "/usr/local/bin/python3", "/home/sorna/run.py"]
-CMD ["/usr/local/bin/python3", "/home/sorna/run.py"]
+CMD ["/home/sorna/jail", "python3", "/usr/local/bin/python3", "/home/sorna/run.py"]

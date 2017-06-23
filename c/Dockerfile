@@ -8,8 +8,9 @@ RUN pip install --no-cache-dir aiozmq
 RUN apk add --no-cache gcc musl-dev
 
 COPY run.py /home/sorna/run.py
+#COPY sorna-jail /home/sorna/sorna-jail
+#COPY policy.yml /home/sorna/policy.yml
 
 USER work
-# TODO: With jail, `sh: setgid: Operation not permitted` error is raised.
-# CMD ["/home/sorna/jail", "python3", "/usr/local/bin/python3", "/home/sorna/run.py"]
-CMD ["/usr/local/bin/python3", "/home/sorna/run.py"]
+CMD ["/home/sorna/jail", "python3", "/usr/local/bin/python3", "/home/sorna/run.py"]
+#CMD ["/home/sorna/sorna-jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python3", "/home/sorna/run.py"]
