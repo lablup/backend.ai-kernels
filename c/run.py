@@ -1,8 +1,11 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
+
 import asyncio
 import io
 import logging
 import os
+from pathlib import Path
+import shlex
 import signal
 import sys
 import tempfile
@@ -15,27 +18,28 @@ import zmq, aiozmq
 
 log = logging.getLogger()
 
-cmdspec = 'gcc {mainpath} && chmod 755 ./a.out && ./a.out'
+
+DEFAULT_CFLAGS = '-Wall'
+DEFAULT_LDFLAGS = '-lrt -lm -pthread'
 
 
-'''
-A thin wrapper for an external command.
-
-It creates a temporary file with user code, compile and run it, and
-returns the outputs of the execution.
-'''
-async def execute(insock, outsock, code_id, code_data):
+async def run_subproc(insock, outsock, cmd):
+    '''
+    A thin wrapper for an external command.
+    '''
     loop = asyncio.get_event_loop()
-
-    # Save code to a temporary file
-    tmpf = tempfile.NamedTemporaryFile(suffix='.c', dir='.')
-    tmpf.write(code_data)
-    tmpf.flush()
-
     try:
-        # Compile and run saved code.
+        child_env = {
+            'TERM': 'xterm',
+            'LANG': 'C.UTF-8',
+            'SHELL': '/bin/ash',
+            'USER': 'work',
+            'HOME': '/home/work',
+            'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+        }
         proc = await asyncio.create_subprocess_shell(
-            cmdspec.format(mainpath=tmpf.name),
+            cmd,
+            env=child_env,
             stdin=None,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
@@ -49,10 +53,64 @@ async def execute(insock, outsock, code_id, code_data):
             t.cancel()
             await t
     except:
-        log.exception()
-    finally:
-        # Close and delete the temporary file.
-        tmpf.close()
+        log.exception('unexpected error')
+
+
+async def execute_build(insock, outsock, build_cmd):
+    if build_cmd is None or build_cmd == '':
+        # skipped
+        return
+    elif build_cmd == '*':
+        # use the default heuristic
+        outsock.write([
+            b'stderr',
+            b'c-kernel: running heuristic build step...\n',
+        ])
+        if Path('Makefile').is_file():
+            await run_subproc(insock, outsock, 'make')
+        elif Path('main.c').is_file():
+            cfiles = Path('.').glob('**/*.c')
+            cfiles = ' '.join(map(lambda p: shlex.quote(str(p)), cfiles))
+            cmd = (f'gcc {cfiles} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS}; '
+                   f'chmod 755 ./main')
+            await run_subproc(insock, outsock, cmd)
+        else:
+            outsock.write([
+                b'stderr',
+                b'c-kernel: cannot find build script ("Makefile").\n',
+            ])
+    else:
+        await run_subproc(insock, outsock, build_cmd)
+
+
+async def execute_execute(insock, outsock, exec_cmd):
+    if exec_cmd is None or exec_cmd == '':
+        # skipped
+        return
+    elif exec_cmd == '*':
+        if Path('./main').is_file():
+            await run_subproc(insock, outsock, 'chmod 755 ./main; ./main')
+        elif Path('./a.out').is_file():
+            await run_subproc(insock, outsock, 'chmod 755 ./a.out; ./a.out')
+        else:
+            outsock.write([
+                b'stderr',
+                b'c-kernel: cannot find executable ("a.out" or "main").\n',
+            ])
+    else:
+        await run_subproc(insock, outsock, exec_cmd)
+
+
+async def execute_query(insock, outsock, code_text):
+    '''
+    Run the user code by creating a temporary file and compiling it.
+    '''
+    with tempfile.NamedTemporaryFile(suffix='.c', dir='.') as tmpf:
+        tmpf.write(code_text)
+        tmpf.flush()
+        cmd = (f'gcc {tmpf.name} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS} '
+               f'&& chmod 755 ./main && ./main')
+        await run_subproc(insock, outsock, cmd)
 
 
 async def pipe_output(stream, outsock, target):
@@ -66,6 +124,9 @@ async def pipe_output(stream, outsock, target):
             await outsock.drain()
     except (aiozmq.ZmqStreamClosed, asyncio.CancelledError):
         pass
+    except:
+        log.exception('unexpected error')
+
 
 async def main_loop():
     insock  = await aiozmq.create_zmq_stream(zmq.PULL, bind='tcp://*:2000')
@@ -74,15 +135,22 @@ async def main_loop():
     while True:
         try:
             data = await insock.read()
-            code_id = data[0].decode('ascii')
-            code_data = data[1]
-            await execute(insock, outsock, code_id, code_data)
-            outsock.write([b'finished', b''])
+            op_type = data[0].decode('ascii')
+            text = data[1].decode('utf8')
+            if op_type == 'build':    # batch-mode step 1
+                await execute_build(insock, outsock, text)
+                outsock.write([b'build-finished', b''])
+            elif op_type == 'exec':   # batch-mode step 2
+                await execute_execute(insock, outsock, text)
+                outsock.write([b'finished', b''])
+            elif op_type == 'input':  # query-mode
+                await execute_query(insock, outsock, text)
+                outsock.write([b'finished', b''])
             await outsock.drain()
         except asyncio.CancelledError:
             break
         except:
-            log.exception()
+            log.exception('unexpected error')
             break
     insock.close()
     outsock.close()
@@ -118,6 +186,7 @@ def main():
     finally:
         loop.close()
         print('exit.')
+
 
 if __name__ == '__main__':
     main()

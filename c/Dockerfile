@@ -1,11 +1,11 @@
 FROM lablup/kernel-base-python3-minimal:latest
 MAINTAINER DevOps "devops@lablup.com"
 
-# Install Python packages
-RUN pip install --no-cache-dir aiozmq
-
 # Install minimal C compile environments
 RUN apk add --no-cache gcc musl-dev
+
+# Install Python packages
+RUN pip install --no-cache-dir aiozmq
 
 COPY run.py /home/sorna/run.py
 #COPY sorna-jail /home/sorna/sorna-jail
