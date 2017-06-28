@@ -62,10 +62,6 @@ async def execute_build(insock, outsock, build_cmd):
         return
     elif build_cmd == '*':
         # use the default heuristic
-        outsock.write([
-            b'stderr',
-            b'c-kernel: running heuristic build step...\n',
-        ])
         if Path('Makefile').is_file():
             await run_subproc(insock, outsock, 'make')
         elif Path('main.c').is_file():
