@@ -33,7 +33,7 @@ class CProgramRunner(BaseRunner):
 
     def __init__(self):
         super().__init__()
-        self.child_env = CHILD_ENV
+        self.child_env.update(CHILD_ENV)
 
     async def build(self, build_cmd):
         if build_cmd is None or build_cmd == '':
@@ -56,6 +56,9 @@ class CProgramRunner(BaseRunner):
             await self.run_subproc(build_cmd)
 
     async def execute(self, exec_cmd):
+        self.child_env.update({
+            'LD_PRELOAD': os.environ.get('LD_PRELOAD', '/home/sorna/patch-libs.so'),
+        })
         if exec_cmd is None or exec_cmd == '':
             # skipped
             return

@@ -7,6 +7,8 @@ RUN apk add --no-cache gcc musl-dev
 # Install Python packages
 RUN pip install --no-cache-dir aiozmq
 
+COPY base_run.py /home/sorna/base_run.py
+COPY patch-libs.so /home/sorna/patch-libs.so
 COPY run.py /home/sorna/run.py
 #COPY sorna-jail /home/sorna/sorna-jail
 #COPY policy.yml /home/sorna/policy.yml

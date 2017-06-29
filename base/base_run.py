@@ -90,13 +90,26 @@ class BaseRunner(ABC):
         except:
             log.exception('unexpected error')
 
+    async def handle_user_input(self, reader, writer):
+        try:
+            self.outsock.write([b'waiting-input', b''])
+            data = await self.insock.read()
+            user_input = data[1]
+            writer.write(user_input)
+            await writer.drain()
+            writer.close()
+        except:
+            log.exception('unexpected error (handle_user_input)')
+
     async def main_loop(self):
         self.insock = await aiozmq.create_zmq_stream(zmq.PULL, bind='tcp://*:2000')
         self.outsock = await aiozmq.create_zmq_stream(zmq.PUSH, bind='tcp://*:2001')
+        user_input_server = \
+            await asyncio.start_server(self.handle_user_input, '127.0.0.1', 65000)
 
         # configure logging to publish logs via outsock as well
         logging.basicConfig(
-            level=logging.INFO,  # NOTE: change this to DEBUG when debugging
+            level=logging.DEBUG,  # NOTE: change this to DEBUG when debugging
             format=self.log_prefix + ': {message}',
             style='{',
             handlers=[logging.StreamHandler(), OutsockHandler(self.outsock)],
@@ -125,6 +138,8 @@ class BaseRunner(ABC):
             except:
                 log.exception('unexpected error')
                 break
+        user_input_server.close()
+        await user_input_server.wait_closed()
         self.insock.close()
         self.outsock.close()
 
