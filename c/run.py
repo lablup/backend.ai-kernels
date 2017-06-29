@@ -8,7 +8,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.abspath('.'))
-from base_run import BaseRun
+from base_run import BaseRunner
 # For debugging
 # sys.path.insert(0, os.path.abspath('..'))
 # from base.run import BaseRun
@@ -27,7 +27,9 @@ CHILD_ENV = {
 }
 
 
-class Run(BaseRun):
+class CProgramRunner(BaseRunner):
+
+    log_prefix = 'c-kernel'
 
     def __init__(self):
         super().__init__()
@@ -48,10 +50,8 @@ class Run(BaseRun):
                        f'chmod 755 ./main')
                 await self.run_subproc(cmd)
             else:
-                self.outsock.write([
-                    b'stderr',
-                    b'c-kernel: cannot find build script ("Makefile").\n',
-                ])
+                log.error('cannot find build script ("Makefile") '
+                          'or the main file ("main.c").')
         else:
             await self.run_subproc(build_cmd)
 
@@ -65,24 +65,18 @@ class Run(BaseRun):
             elif Path('./a.out').is_file():
                 await self.run_subproc('chmod 755 ./a.out; ./a.out')
             else:
-                self.outsock.write([
-                    b'stderr',
-                    b'c-kernel: cannot find executable ("a.out" or "main").\n',
-                ])
+                log.error('cannot find executable ("a.out" or "main").')
         else:
             await self.run_subproc(exec_cmd)
 
     async def query(self, code_text):
         with tempfile.NamedTemporaryFile(suffix='.c', dir='.') as tmpf:
-            tmpf.write(code_text)
+            tmpf.write(code_text.encode('utf8'))
             tmpf.flush()
             cmd = (f'gcc {tmpf.name} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS} '
                    f'&& chmod 755 ./main && ./main')
             await self.run_subproc(cmd)
 
 
-def main():
-    Run().run()
-
 if __name__ == '__main__':
-    main()
+    CProgramRunner().run()

@@ -3,6 +3,8 @@
 from abc import ABC, abstractmethod
 import asyncio
 import logging
+import logging.config
+from logging.handlers import QueueHandler
 import os
 import signal
 import sys
@@ -12,6 +14,22 @@ import uvloop
 import zmq
 
 log = logging.getLogger()
+
+
+class OutsockHandler(QueueHandler):
+    def enqueue(self, record):
+        msg = self.formatter.format(record)
+        self.queue.write([
+            b'stderr',
+            (msg + '\n').encode('utf8'),
+        ])
+
+
+class BraceLogRecord(logging.LogRecord):
+    def getMessage(self):
+        if self.args is not None:
+            return self.msg.format(*self.args)
+        return self.msg
 
 
 async def pipe_output(stream, outsock, target):
@@ -29,14 +47,14 @@ async def pipe_output(stream, outsock, target):
         log.exception('unexpected error')
 
 
-class BaseRun(ABC):
+class BaseRunner(ABC):
 
-    insock = None
-    outsock = None
-    child_env = None
+    log_prefix = 'generic-kernel'
 
     def __init__(self):
-        super().__init__()
+        self.child_env = {}
+        self.insock = None
+        self.outsock = None
 
     @abstractmethod
     async def build(self, build_cmd):
@@ -49,12 +67,6 @@ class BaseRun(ABC):
     @abstractmethod
     async def query(self, code_text):
         """Run user code by creating a temporary file and compiling it."""
-
-    def set_child_env(self, env=None):
-        if not env:
-            log.info('subprocess environment variables are not set')
-            env = dict()
-        self.child_env = env
 
     async def run_subproc(self, cmd):
         """A thin wrapper for an external command."""
@@ -79,34 +91,42 @@ class BaseRun(ABC):
             log.exception('unexpected error')
 
     async def main_loop(self):
-        insock = await aiozmq.create_zmq_stream(zmq.PULL, bind='tcp://*:2000')
-        outsock = await aiozmq.create_zmq_stream(zmq.PUSH, bind='tcp://*:2001')
-        outsock.write([b'stdout', b'akdj;fajwe;f\n'])
-        self.insock, self.outsock = insock, outsock
-        self.set_child_env()
-        print('start serving...')
+        self.insock = await aiozmq.create_zmq_stream(zmq.PULL, bind='tcp://*:2000')
+        self.outsock = await aiozmq.create_zmq_stream(zmq.PUSH, bind='tcp://*:2001')
+
+        # configure logging to publish logs via outsock as well
+        logging.basicConfig(
+            level=logging.INFO,  # NOTE: change this to DEBUG when debugging
+            format=self.log_prefix + ': {message}',
+            style='{',
+            handlers=[logging.StreamHandler(), OutsockHandler(self.outsock)],
+        )
+        _factory = lambda *args, **kwargs: BraceLogRecord(*args, **kwargs)
+        logging.setLogRecordFactory(_factory)
+
+        log.debug('start serving...')
         while True:
             try:
-                data = await insock.read()
+                data = await self.insock.read()
                 op_type = data[0].decode('ascii')
                 text = data[1].decode('utf8')
                 if op_type == 'build':  # batch-mode step 1
                     await self.build(text)
-                    outsock.write([b'build-finished', b''])
+                    self.outsock.write([b'build-finished', b''])
                 elif op_type == 'exec':  # batch-mode step 2
                     await self.execute(text)
-                    outsock.write([b'finished', b''])
+                    self.outsock.write([b'finished', b''])
                 elif op_type == 'input':  # query-mode
                     await self.query(text)
-                    outsock.write([b'finished', b''])
-                await outsock.drain()
+                    self.outsock.write([b'finished', b''])
+                await self.outsock.drain()
             except asyncio.CancelledError:
                 break
             except:
                 log.exception('unexpected error')
                 break
-        insock.close()
-        outsock.close()
+        self.insock.close()
+        self.outsock.close()
 
     def run(self):
         # Replace stdin with a "null" file
@@ -123,7 +143,7 @@ class BaseRun(ABC):
                 stopped.set()
                 loop.stop()
             else:
-                print('forced shutdown!', file=sys.stderr)
+                log.warning('forced shutdown!', file=sys.stderr)
                 sys.exit(1)
 
         loop.add_signal_handler(signal.SIGINT, interrupt, loop, stopped)
@@ -137,4 +157,4 @@ class BaseRun(ABC):
             loop.run_until_complete(main_task)
         finally:
             loop.close()
-            print('exit.')
+            log.debug('exit.')
