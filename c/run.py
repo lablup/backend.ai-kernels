@@ -73,6 +73,9 @@ class CProgramRunner(BaseRunner):
             await self.run_subproc(exec_cmd)
 
     async def query(self, code_text):
+        self.child_env.update({
+            'LD_PRELOAD': os.environ.get('LD_PRELOAD', '/home/sorna/patch-libs.so'),
+        })
         with tempfile.NamedTemporaryFile(suffix='.c', dir='.') as tmpf:
             tmpf.write(code_text.encode('utf8'))
             tmpf.flush()

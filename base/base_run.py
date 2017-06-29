@@ -109,7 +109,7 @@ class BaseRunner(ABC):
 
         # configure logging to publish logs via outsock as well
         logging.basicConfig(
-            level=logging.DEBUG,  # NOTE: change this to DEBUG when debugging
+            level=logging.INFO,  # NOTE: change this to DEBUG when debugging
             format=self.log_prefix + ': {message}',
             style='{',
             handlers=[logging.StreamHandler(), OutsockHandler(self.outsock)],
