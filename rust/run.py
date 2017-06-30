@@ -1,124 +1,72 @@
-#! /usr/bin/env python
-import asyncio
-import io
+#! /usr/bin/env python3
+
 import logging
 import os
-import signal
+from pathlib import Path
+import shlex
 import sys
 import tempfile
 
-from namedlist import namedtuple, namedlist
-import simplejson as json
-import uvloop
-import zmq, aiozmq
-
+sys.path.insert(0, os.path.abspath('.'))
+from base_run import BaseRunner
+# For debugging
+# sys.path.insert(0, os.path.abspath('..'))
+# from base.run import BaseRun
 
 log = logging.getLogger()
 
-cmdspec = 'rustc {mainpath} && chmod 755 ./{filename} && ./{filename}'
+CHILD_ENV = {
+    'TERM': 'xterm',
+    'LANG': 'C.UTF-8',
+    'SHELL': '/bin/ash',
+    'USER': 'work',
+    'HOME': '/home/work',
+    'PATH': '/sbin:/usr/sbin:/bin:/usr/bin'
+}
 
 
-'''
-A thin wrapper for an external command.
+class RustProgramRunner(BaseRunner):
 
-It creates a temporary file with user code, compile and run it, and
-returns the outputs of the execution.
-'''
-async def execute(insock, outsock, code_id, code_data):
-    loop = asyncio.get_event_loop()
+    log_prefix = 'rust-kernel'
 
-    # Save code to a temporary file
-    tmpf = tempfile.NamedTemporaryFile(suffix='.rs', dir='.')
-    tmpf.write(code_data)
-    tmpf.flush()
+    def __init__(self):
+        super().__init__()
+        self.child_env.update(CHILD_ENV)
 
-    try:
-        # Compile and run saved code.
-        proc = await asyncio.create_subprocess_shell(
-            cmdspec.format(mainpath=tmpf.name,
-                           filename=tmpf.name.split('/')[-1][:-3]),
-            stdin=None,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        pipe_tasks = [
-            loop.create_task(pipe_output(proc.stdout, outsock, 'stdout')),
-            loop.create_task(pipe_output(proc.stderr, outsock, 'stderr')),
-        ]
-        await proc.wait()
-        for t in pipe_tasks:
-            t.cancel()
-            await t
-    except:
-        log.exception()
-    finally:
-        # Close and delete the temporary file.
-        tmpf.close()
-
-
-async def pipe_output(stream, outsock, target):
-    assert target in ('stdout', 'stderr')
-    try:
-        while True:
-            data = await stream.read(4096)
-            if not data:
-                break
-            outsock.write([target.encode('ascii'), data])
-            await outsock.drain()
-    except (aiozmq.ZmqStreamClosed, asyncio.CancelledError):
-        pass
-
-async def main_loop():
-    insock  = await aiozmq.create_zmq_stream(zmq.PULL, bind='tcp://*:2000')
-    outsock = await aiozmq.create_zmq_stream(zmq.PUSH, bind='tcp://*:2001')
-    print('start serving...')
-    while True:
-        try:
-            data = await insock.read()
-            code_id = data[0].decode('ascii')
-            code_data = data[1]
-            await execute(insock, outsock, code_id, code_data)
-            outsock.write([b'finished', b''])
-            await outsock.drain()
-        except asyncio.CancelledError:
-            break
-        except:
-            log.exception()
-            break
-    insock.close()
-    outsock.close()
-
-
-def main():
-    # Replace stdin with a "null" file
-    # (trying to read stdin will raise EOFError immediately afterwards.)
-    sys.stdin = open(os.devnull, 'rb')
-
-    # Initialize event loop.
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-    loop = asyncio.get_event_loop()
-    stopped = asyncio.Event()
-
-    def interrupt(loop, stopped):
-        if not stopped.is_set():
-            stopped.set()
-            loop.stop()
+    async def build(self, build_cmd):
+        if build_cmd is None or build_cmd == '':
+            # skipped
+            return
+        elif build_cmd == '*':
+            # use the default heuristic
+            if Path('main.rs').is_file():
+                cmd = f'rustc main.rs && chmod 755 ./main'
+                await self.run_subproc(cmd)
+            else:
+                log.error('cannot find the main file ("main.rs").')
         else:
-            print('forced shutdown!', file=sys.stderr)
-            sys.exit(1)
+            await self.run_subproc(build_cmd)
 
-    loop.add_signal_handler(signal.SIGINT, interrupt, loop, stopped)
-    loop.add_signal_handler(signal.SIGTERM, interrupt, loop, stopped)
+    async def execute(self, exec_cmd):
+        if exec_cmd is None or exec_cmd == '':
+            # skipped
+            return
+        elif exec_cmd == '*':
+            if Path('./main').is_file():
+                await self.run_subproc('./main')
+            else:
+                log.error('cannot find executable ("main").')
+        else:
+            await self.run_subproc(exec_cmd)
 
-    try:
-        main_task = loop.create_task(main_loop())
-        loop.run_forever()
-        # interrupted
-        main_task.cancel()
-        loop.run_until_complete(main_task)
-    finally:
-        loop.close()
-        print('exit.')
+    async def query(self, code_text):
+        with tempfile.NamedTemporaryFile(suffix='.rs', dir='.') as tmpf:
+            tmpf.write(code_text.encode('utf8'))
+            tmpf.flush()
+            fname = tmpf.name.split('/')[-1].split('.')[0]
+            cmd = f'rustc {tmpf.name} && chmod 755 ./{fname} && ./{fname}'
+            await self.run_subproc(cmd)
+
 
 if __name__ == '__main__':
-    main()
+    RustProgramRunner().run()
