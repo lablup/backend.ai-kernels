@@ -17,6 +17,9 @@ ADD intra-jail /home/sorna/intra-jail
 ADD patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
 
+# Common files
+ADD base_run.py /home/sorna/base_run.py
+
 ENV HOME /home/work
 WORKDIR /home/work
 VOLUME ["/home/work"]
