@@ -45,6 +45,11 @@ class JavaProgramRunner(BaseRunner):
             # use the default heuristic
             if Path('makefile').is_file():
                 await self.run_subproc('make')
+            elif Path('Main.java').is_file():
+                javafiles = Path('.').glob('**/*.java')
+                javafiles = ' '.join(map(lambda p: shlex.quote(str(p)), javafiles))
+                cmd = f'{JCC} {DEFAULT_JFLAGS} {javafiles}'
+                await self.run_subproc(cmd)
             else:
                 javafiles = Path('.').glob('**/*.java')
                 javafiles = ' '.join(map(lambda p: shlex.quote(str(p)), javafiles))
@@ -58,10 +63,10 @@ class JavaProgramRunner(BaseRunner):
             # skipped
             return
         elif exec_cmd == '*':
-            if Path('./Main.java').is_file():
-                await self.run_subproc(f'{JCR} Main')
+            if Path('./main/Main.class').is_file():
+                await self.run_subproc(f'{JCR} main.Main')
             else:
-                log.error('cannot distinguish entry class (Main.class).')
+                log.error('cannot find entry class (main.Main).')
         else:
             # TODO: enable user-specified execution options.
             await self.run_subproc(exec_cmd)
