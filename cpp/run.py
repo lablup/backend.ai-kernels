@@ -44,9 +44,9 @@ class CPPProgramRunner(BaseRunner):
             if Path('Makefile').is_file():
                 await self.run_subproc('make')
             elif Path('main.cpp').is_file():
-                cfiles = Path('.').glob('**/*.cpp')
-                cfiles = ' '.join(map(lambda p: shlex.quote(str(p)), cfiles))
-                cmd = (f'g++ {cfiles} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS}; '
+                cppfiles = Path('.').glob('**/*.cpp')
+                cppfiles = ' '.join(map(lambda p: shlex.quote(str(p)), cppfiles))
+                cmd = (f'g++ {cppfiles} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS}; '
                        f'chmod 755 ./main')
                 await self.run_subproc(cmd)
             else:
