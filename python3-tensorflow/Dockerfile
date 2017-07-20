@@ -77,24 +77,24 @@ RUN /home/sorna/pyenv-run.sh pip install h5py
 
 # Secure installation scripts
 USER root
-ADD run.sh /home/sorna/run.sh
-# NOTE: you must copy $GOPATH/bin to <dockerfile_dir>/
-ADD jail /home/sorna/jail
-ADD intra-jail /home/sorna/intra-jail
-RUN chown root:root /home/sorna/*.sh /home/sorna/jail /home/sorna/intra-jail
-RUN chmod 755 /home/sorna/run.sh /home/sorna/jail /home/sorna/intra-jail
-ADD patch-libs.so /home/sorna/patch-libs.so
+COPY run.sh /home/sorna/run.sh
+# taken from "make manylinux" in lablup/sorna-jail repo.
+COPY jail /home/sorna/jail
+RUN chown root:root /home/sorna/*.sh /home/sorna/jail
+RUN chmod 755 /home/sorna/run.sh /home/sorna/jail
+COPY patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
 
 VOLUME ["/home/work"]
 EXPOSE 2000 2001
 
-LABEL io.sorna.timeout="30"
-LABEL io.sorna.maxmem="4g"
+LABEL io.sorna.timeout="600"
+LABEL io.sorna.maxmem="8g"
 LABEL io.sorna.maxcores="4"
 LABEL io.sorna.mode="query"
 LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC"
 LABEL io.sorna.version="2"
 
-ADD run.py /home/sorna/run.py
+COPY run.py /home/sorna/run.py
+COPY tensorflow.yml /home/sorna/tensorflow.yml
 USER work
