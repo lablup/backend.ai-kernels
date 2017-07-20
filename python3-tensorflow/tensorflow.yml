@@ -6,7 +6,7 @@ whitelist_paths:
   OP_CHMOD: ["/home/work/*", "/tmp/*"]
 exec_allowance: -1
 fork_allowance: -1
-max_child_procs: 64
+max_child_procs: 256
 extra_envs: []
 preserved_env_keys: [
   "HOME", "PATH", "LANG",
@@ -15,6 +15,7 @@ preserved_env_keys: [
   "MPLCONFIGDIR",
   "OPENBLAS_NUM_THREADS",
   "OMP_NUM_THREADS",
+  "NPROC",
   "LD_LIBRARY_PATH",
   "LD_PRELOAD",
 ]
