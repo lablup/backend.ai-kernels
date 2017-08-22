@@ -24,6 +24,8 @@ CHILD_ENV = {
     'USER': 'work',
     'HOME': '/home/work',
     'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    'LD_PRELOAD': os.environ.get('LD_PRELOAD',
+                                 '/home/sorna/patch-libs.so'),
 }
 
 
@@ -56,9 +58,6 @@ class CProgramRunner(BaseRunner):
             await self.run_subproc(build_cmd)
 
     async def execute(self, exec_cmd):
-        self.child_env.update({
-            'LD_PRELOAD': os.environ.get('LD_PRELOAD', '/home/sorna/patch-libs.so'),
-        })
         if exec_cmd is None or exec_cmd == '':
             # skipped
             return
@@ -73,9 +72,6 @@ class CProgramRunner(BaseRunner):
             await self.run_subproc(exec_cmd)
 
     async def query(self, code_text):
-        self.child_env.update({
-            'LD_PRELOAD': os.environ.get('LD_PRELOAD', '/home/sorna/patch-libs.so'),
-        })
         with tempfile.NamedTemporaryFile(suffix='.c', dir='.') as tmpf:
             tmpf.write(code_text.encode('utf8'))
             tmpf.flush()

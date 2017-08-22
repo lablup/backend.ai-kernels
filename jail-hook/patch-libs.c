@@ -83,6 +83,8 @@ int scanf(const char *restrict format, ...)
         return -errno;
     }
 
+    fflush(stdout);
+
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -112,6 +114,8 @@ int vscanf(const char *restrict format, va_list args)
         perror("socket");
         return -errno;
     }
+
+    fflush(stdout);
 
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
