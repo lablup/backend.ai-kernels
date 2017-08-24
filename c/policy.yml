@@ -20,3 +20,4 @@ diff_to_default: true
 # Following syscalls are blindly allowed.
 # IMPORTANT: ptrace MUST NOT be included!
 allowed_syscalls:
+  - "umask"

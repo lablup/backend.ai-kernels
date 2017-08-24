@@ -51,7 +51,7 @@ class CProgramRunner(BaseRunner):
                     await self.run_subproc(cmd)
                 cfiles = ' '.join(map(lambda p: shlex.quote(str(p)), cfiles))
                 ofiles = ' '.join(map(lambda p: shlex.quote(str(p)), ofiles))
-                cmd = f'gcc {ofiles} {DEFAULT_LDFLAGS} -o ./main && chmod 755 ./main'
+                cmd = f'gcc {ofiles} {DEFAULT_LDFLAGS} -o ./main'
                 await self.run_subproc(cmd)
             else:
                 log.error('cannot find build script ("Makefile") '
@@ -68,9 +68,9 @@ class CProgramRunner(BaseRunner):
             return
         elif exec_cmd == '*':
             if Path('./main').is_file():
-                await self.run_subproc('chmod 755 ./main; ./main')
+                await self.run_subproc('./main')
             elif Path('./a.out').is_file():
-                await self.run_subproc('chmod 755 ./a.out; ./a.out')
+                await self.run_subproc('./a.out')
             else:
                 log.error('cannot find executable ("a.out" or "main").')
         else:
@@ -83,8 +83,8 @@ class CProgramRunner(BaseRunner):
         with tempfile.NamedTemporaryFile(suffix='.c', dir='.') as tmpf:
             tmpf.write(code_text.encode('utf8'))
             tmpf.flush()
-            cmd = (f'gcc {tmpf.name} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS} '
-                   f'&& chmod 755 ./main && ./main')
+            cmd = (f'gcc {tmpf.name} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS} && '
+                   f'./main')
             await self.run_subproc(cmd)
 
 
