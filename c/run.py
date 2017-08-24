@@ -16,7 +16,7 @@ from base_run import BaseRunner
 log = logging.getLogger()
 
 DEFAULT_CFLAGS = '-Wall'
-DEFAULT_LDFLAGS = '-lrt -lm -pthread'
+DEFAULT_LDFLAGS = '-lrt -lm -pthread -ldl'
 CHILD_ENV = {
     'TERM': 'xterm',
     'LANG': 'C.UTF-8',
@@ -24,8 +24,6 @@ CHILD_ENV = {
     'USER': 'work',
     'HOME': '/home/work',
     'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
-    'LD_PRELOAD': os.environ.get('LD_PRELOAD',
-                                 '/home/sorna/patch-libs.so'),
 }
 
 
@@ -46,10 +44,14 @@ class CProgramRunner(BaseRunner):
             if Path('Makefile').is_file():
                 await self.run_subproc('make')
             elif Path('main.c').is_file():
-                cfiles = Path('.').glob('**/*.c')
+                cfiles = list(Path('.').glob('**/*.c'))
+                ofiles = [Path(p.stem + '.o') for p in cfiles]
+                for cf in cfiles:
+                    cmd = f'gcc -c {cf} {DEFAULT_CFLAGS}'
+                    await self.run_subproc(cmd)
                 cfiles = ' '.join(map(lambda p: shlex.quote(str(p)), cfiles))
-                cmd = (f'gcc {cfiles} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS}; '
-                       f'chmod 755 ./main')
+                ofiles = ' '.join(map(lambda p: shlex.quote(str(p)), ofiles))
+                cmd = f'gcc {ofiles} {DEFAULT_LDFLAGS} -o ./main && chmod 755 ./main'
                 await self.run_subproc(cmd)
             else:
                 log.error('cannot find build script ("Makefile") '
@@ -58,6 +60,9 @@ class CProgramRunner(BaseRunner):
             await self.run_subproc(build_cmd)
 
     async def execute(self, exec_cmd):
+        self.child_env.update({
+            'LD_PRELOAD': os.environ.get('LD_PRELOAD', '/home/sorna/patch-libs.so'),
+        })
         if exec_cmd is None or exec_cmd == '':
             # skipped
             return
@@ -72,6 +77,9 @@ class CProgramRunner(BaseRunner):
             await self.run_subproc(exec_cmd)
 
     async def query(self, code_text):
+        self.child_env.update({
+            'LD_PRELOAD': os.environ.get('LD_PRELOAD', '/home/sorna/patch-libs.so'),
+        })
         with tempfile.NamedTemporaryFile(suffix='.c', dir='.') as tmpf:
             tmpf.write(code_text.encode('utf8'))
             tmpf.flush()
