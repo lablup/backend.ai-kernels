@@ -12,13 +12,12 @@ RUN adduser -D -g "" work \
 
 # Install jail
 RUN apk add --no-cache libseccomp
-ADD jail /home/sorna/jail
-ADD intra-jail /home/sorna/intra-jail
-ADD patch-libs.so /home/sorna/patch-libs.so
+COPY sorna-jail /home/sorna/sorna-jail
+COPY patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
 
 # Common files
-ADD base_run.py /home/sorna/base_run.py
+COPY base_run.py /home/sorna/base_run.py
 
 ENV HOME /home/work
 WORKDIR /home/work
