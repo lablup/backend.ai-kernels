@@ -1,0 +1,7 @@
+FROM ubuntu:16.04
+
+RUN sed -i 's/archive\.ubuntu\.com/kr.archive.ubuntu.com/' /etc/apt/sources.list
+RUN echo 'APT::Install-Recommends "false";' >> /etc/apt/apt.conf; \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf
+RUN apt-get update
+RUN apt-get install -y build-essential

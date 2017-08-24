@@ -11,7 +11,7 @@ RUN adduser -D -g "" work \
     && chown -R work:work /home/sorna
 
 # Install jail
-RUN apk add --no-cache libseccomp
+RUN apk add --no-cache libseccomp shadow
 COPY sorna-jail /home/sorna/sorna-jail
 COPY patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
