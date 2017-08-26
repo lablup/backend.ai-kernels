@@ -1,7 +1,0 @@
-namedlist
-pyzmq
-colorama
--e git+ssh://git@github.com/lablup/sorna-media@master#egg=sorna_media
-numpy
-pandas
-matplotlib

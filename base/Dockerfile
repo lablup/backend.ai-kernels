@@ -1,34 +1,26 @@
 FROM alpine:3.6
 MAINTAINER DevOps "devops@lablup.com"
 
-# Add an isolated user
-# /home/work: actual working directory for user codes
-# /home/sorna: place for Python and REPL script
-RUN adduser -D -g "" work \
-    && chmod 700 /home/work \
-    && mkdir /home/sorna \
-    && chmod 755 /home/sorna \
-    && chown -R work:work /home/sorna
+RUN apk add --no-cache libseccomp shadow su-exec; \
+    mkdir /home/sorna && chmod 755 /home/sorna
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Install jail
-RUN apk add --no-cache libseccomp shadow
-COPY sorna-jail /home/sorna/sorna-jail
+COPY jail /home/sorna/jail
 COPY patch-libs.so /home/sorna/patch-libs.so
 ENV LD_PRELOAD /home/sorna/patch-libs.so
 
-# Common files
-COPY base_run.py /home/sorna/base_run.py
-
-ENV HOME /home/work
-WORKDIR /home/work
 VOLUME ["/home/work"]
-EXPOSE 2000 2001
+EXPOSE 2000 2001 2002 2003
 
 LABEL io.sorna.timeout="30"
 LABEL io.sorna.maxmem="128m"
 LABEL io.sorna.maxcores="1"
 LABEL io.sorna.version="2"
+LABEL io.sorna.features="uidmatch"
 
-CMD ["/home/sorna/jail", "default", "/bin/ash"]
+CMD ["/home/sorna/jail", "/bin/ash"]
 
 # vim: sts=4 sw=4 et

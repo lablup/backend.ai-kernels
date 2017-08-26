@@ -1,48 +1,60 @@
+FROM lablup/kernel-base-python2-wheels:latest as wheel-builds
+RUN ls -lh /root
+
+
+# -------------------
 FROM lablup/kernel-base-python2-minimal:latest
 
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
-
-COPY *.whl /tmp
-
-# Prepare build environment and libraries
+# Install system packages for wheels
 RUN apk add --no-cache --virtual .sorna-deps \
-        libgfortran libquadmath libjpeg libpng freetype openblas lapack \
-    && apk add --no-cache --virtual .pybuild-deps \
-        gcc g++ gfortran make linux-headers libc-dev freetype-dev openblas-dev \
-    # Hack for numpy
-    && ln -s /usr/include/locale.h /usr/include/xlocale.h
+        libstdc++ libgfortran libquadmath libjpeg libpng freetype openblas lapack \
+        jpeg libpng tiff
 
-# Install science packages
-RUN pip install --no-cache-dir cython \
-    && pip install --no-cache-dir numpy \
-    && pip install --no-cache-dir matplotlib bokeh \
-    && pip install --no-cache-dir pandas \
-    && pip install --no-cache-dir scipy seaborn
-RUN apk add --no-cache --virtual .sorna-deps jpeg libpng tiff \
-    && apk add --no-cache --virtual .pybuild-deps jpeg-dev libpng-dev tiff-dev \
-    && pip install --no-cache-dir pillow \
-    && pip install --no-cache-dir scikit-learn scikit-image \
-    && pip install --no-cache-dir networkx cvxpy
+# Copy pre-built wheels
+COPY *.whl /tmp/
+COPY --from=wheel-builds /root/*.whl /tmp/
 
-# Install Sorna Media support
-RUN pip install --no-cache-dir /tmp/sorna_media-0.3.0-py2.py3-none-any.whl \
+# Install pre-built wheels (the ordering matters!)
+RUN pip install --no-cache-dir /tmp/Cython*.whl \
+    && pip install --no-cache-dir /tmp/subprocess32*.whl \
+    && pip install --no-cache-dir /tmp/numpy*.whl \
+    \
+    && pip install --no-cache-dir /tmp/matplotlib*.whl \
+    && pip install --no-cache-dir /tmp/Pillow*.whl \
+    && pip install --no-cache-dir /tmp/scipy*.whl \
+    && pip install --no-cache-dir /tmp/pandas*.whl \
+    && pip install --no-cache-dir /tmp/seaborn*.whl \
+    \
+    && pip install --no-cache-dir /tmp/Pygments*.whl \
+    && pip install --no-cache-dir /tmp/scandir*.whl \
+    && pip install --no-cache-dir /tmp/pathlib2*.whl \
+    && pip install --no-cache-dir /tmp/ipython*.whl \
+    \
+    && pip install --no-cache-dir /tmp/PyWavelets*.whl \
+    && pip install --no-cache-dir /tmp/networkx*.whl \
+    && pip install --no-cache-dir /tmp/CVXcanon*.whl \
+    && pip install --no-cache-dir /tmp/fastcache*.whl \
+    && pip install --no-cache-dir /tmp/ecos*.whl \
+    && pip install --no-cache-dir /tmp/cvxpy*.whl \
+    \
+    && pip install --no-cache-dir /tmp/scikit*.whl \
+    \
+    && pip install --no-cache-dir /tmp/sorna*.whl \
     && rm -f /tmp/*.whl
-
-# Clean up build dependencies
-RUN apk del .pybuild-deps
 
 # Matplotlib configuration and pre-heating
 ENV MPLCONFIGDIR /home/sorna/.matplotlib
 RUN mkdir /home/sorna/.matplotlib
 COPY matplotlibrc /home/sorna/.matplotlib/
-RUN chown -R work:work /home/sorna/.matplotlib \
-    && echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
+RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
     && python /tmp/matplotlib-fontcache.py \
     && rm /tmp/matplotlib-fontcache.py
 
-COPY run.py /home/sorna/run.py
+COPY policy.yml /home/sorna/
+COPY run.py /home/sorna/
 
-USER work
-CMD ["/home/sorna/jail", "python", "/usr/local/bin/python", "/home/sorna/run.py"]
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python", "/home/sorna/run.py"]
 
 # vim: sts=4 sw=4 et ft=dockerfile

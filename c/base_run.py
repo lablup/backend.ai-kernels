@@ -92,9 +92,14 @@ class BaseRunner(ABC):
 
     async def handle_user_input(self, reader, writer):
         try:
+            log.info(f'== waiting user input')
             self.outsock.write([b'waiting-input', b''])
             data = await self.insock.read()
             user_input = data[1]
+            log.info(f'== received user input 1 {data!r}')
+            data = await self.insock.read()
+            user_input = data[1]
+            log.info(f'== received user input 2 {data!r}')
             writer.write(user_input)
             await writer.drain()
             writer.close()
