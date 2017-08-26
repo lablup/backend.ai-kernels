@@ -27,6 +27,7 @@ RUN python -c 'import sys; print(sys.version_info); import ssl'
 # Lablup extension: install Sorna's common Python packages
 RUN apk add --no-cache --virtual .sorna-deps zeromq libuv \
     && pip install --no-cache-dir /tmp/*.whl \
-    && pip install --no-cache-dir namedlist six "python-dateutil<2"
+    && pip install --no-cache-dir namedlist six "python-dateutil<2" \
+    && rm /tmp/*.whl
 
 # vim: sts=4 sw=4 et
