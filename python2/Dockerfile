@@ -54,6 +54,7 @@ COPY policy.yml /home/sorna/
 COPY run.py /home/sorna/
 
 LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+LABEL io.sorna.features "query uid-match user-input"
 
 CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python", "/home/sorna/run.py"]
 

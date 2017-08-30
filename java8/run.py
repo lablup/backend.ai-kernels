@@ -18,14 +18,17 @@ log = logging.getLogger()
 
 JCC = 'javac'
 JCR = 'java'
-DEFAULT_JFLAGS = '-d .'
+
+# Let Java respect container resource limits
+DEFAULT_JFLAGS = '-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -d .'
+
 CHILD_ENV = {
     'TERM': 'xterm',
     'LANG': 'C.UTF-8',
     'SHELL': '/bin/ash',
     'USER': 'work',
     'HOME': '/home/work',
-    'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/jdk/bin',
+    'PATH': '/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
 }
 
 

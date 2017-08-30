@@ -1,13 +1,12 @@
 FROM lablup/kernel-base-python3-minimal:latest
 MAINTAINER DevOps "devops@lablup.com"
 
-# Install Python packages
-RUN pip install --no-cache-dir aiozmq
-
 # Install minimal C++ compile environments
-RUN apk add --no-cache g++
+RUN apk add --no-cache g++ libstdc++
 
 COPY run.py /home/sorna/run.py
+COPY policy.yml /home/sorna/policy.yml
 
-USER work
-CMD ["/home/sorna/jail", "python3", "/usr/local/bin/python3", "/home/sorna/run.py"]
+LABEL io.sorna.features "batch query uid-match user-input"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python3", "/home/sorna/run.py"]

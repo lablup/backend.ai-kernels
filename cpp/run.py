@@ -47,7 +47,7 @@ class CPPProgramRunner(BaseRunner):
                 cppfiles = Path('.').glob('**/*.cpp')
                 cppfiles = ' '.join(map(lambda p: shlex.quote(str(p)), cppfiles))
                 cmd = (f'g++ {cppfiles} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS}; '
-                       f'chmod 755 ./main')
+                       f'./main')
                 await self.run_subproc(cmd)
             else:
                 log.error('cannot find build script ("Makefile") '
@@ -65,9 +65,9 @@ class CPPProgramRunner(BaseRunner):
             return
         elif exec_cmd == '*':
             if Path('./main').is_file():
-                await self.run_subproc('chmod 755 ./main; ./main')
+                await self.run_subproc('./main')
             elif Path('./a.out').is_file():
-                await self.run_subproc('chmod 755 ./a.out; ./a.out')
+                await self.run_subproc('./a.out')
             else:
                 log.error('cannot find executable ("a.out" or "main").')
         else:
@@ -82,7 +82,7 @@ class CPPProgramRunner(BaseRunner):
             tmpf.write(code_text.encode('utf8'))
             tmpf.flush()
             cmd = (f'g++ {tmpf.name} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS} '
-                   f'&& chmod 755 ./main && ./main')
+                   f'&& ./main')
             await self.run_subproc(cmd)
 
 
