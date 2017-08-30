@@ -7,10 +7,9 @@
 USER_ID=${LOCAL_USER_ID:-9001}
 USER_NAME=work
 
-echo "Starting with UID : $USER_ID"
-useradd --shell /bin/ash -u $USER_ID -o -c "" -m $USER_NAME
-export HOME="/home/$USER_NAME"
-
+echo "Starting with user $USER_NAME ($USER_ID)"
+useradd -s /bin/ash -d "/home/$USER_NAME" -M -r -u $USER_ID -U -o -c "User" $USER_NAME
 chown -R work:work /home/sorna
+export HOME="/home/$USER_NAME"
 
 exec su-exec $USER_NAME "$@"
