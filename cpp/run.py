@@ -85,6 +85,9 @@ class CPPProgramRunner(BaseRunner):
                    f'&& ./main')
             await self.run_subproc(cmd)
 
+    async def complete(self, data):
+        return []
+
 
 if __name__ == '__main__':
     CPPProgramRunner().run()

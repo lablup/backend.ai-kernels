@@ -12,6 +12,7 @@ import sys
 import aiozmq
 import uvloop
 import zmq
+import simplejson as json
 
 log = logging.getLogger()
 
@@ -55,6 +56,7 @@ class BaseRunner(ABC):
         self.child_env = {}
         self.insock = None
         self.outsock = None
+        self.loop = None
 
     @abstractmethod
     async def build(self, build_cmd):
@@ -67,6 +69,10 @@ class BaseRunner(ABC):
     @abstractmethod
     async def query(self, code_text):
         """Run user code by creating a temporary file and compiling it."""
+
+    @abstractmethod
+    async def complete(self, completion_data):
+        """Return the list of strings to be shown in the auto-complete list."""
 
     async def run_subproc(self, cmd):
         """A thin wrapper for an external command."""
@@ -132,6 +138,11 @@ class BaseRunner(ABC):
                 elif op_type == 'input':  # query-mode
                     await self.query(text)
                     self.outsock.write([b'finished', b''])
+                elif op_type == 'complete':  # auto-completion
+                    completion_data = json.loads(text)
+                    completions = await self.complete(completion_data)
+                    self.outsock.write([b'completion', json.dumps(completions)])
+                    self.outsock.write([b'finished', b''])
                 await self.outsock.drain()
             except asyncio.CancelledError:
                 break
@@ -151,6 +162,7 @@ class BaseRunner(ABC):
         # Initialize event loop.
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
         loop = asyncio.get_event_loop()
+        self.loop = loop
         stopped = asyncio.Event()
 
         def interrupt(loop, stopped):

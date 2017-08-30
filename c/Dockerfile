@@ -2,7 +2,7 @@ FROM lablup/kernel-base-python3-minimal:latest
 MAINTAINER DevOps "devops@lablup.com"
 
 # Install minimal C compile environments
-RUN apk add --no-cache gcc musl-dev
+RUN apk add --no-cache gcc musl-dev make
 
 COPY run.py /home/sorna/run.py
 COPY policy.yml /home/sorna/policy.yml

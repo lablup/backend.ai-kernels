@@ -102,6 +102,9 @@ class JavaProgramRunner(BaseRunner):
             if filename:
                 os.remove(filename)
 
+    async def complete(self, data):
+        return []
+
 
 def main():
     JavaProgramRunner().run()

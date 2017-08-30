@@ -49,6 +49,7 @@ RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
 
 COPY policy.yml /home/sorna/
 COPY run.py /home/sorna/
+COPY inproc_run.py /home/sorna/
 
 LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
 LABEL io.sorna.features "batch query uid-match user-input"
