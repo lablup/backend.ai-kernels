@@ -13,6 +13,9 @@ RUN cd /tmp; curl -Lo cuda-all.run https://developer.nvidia.com/compute/cuda/8.0
     && ls -l /tmp
 RUN cd /tmp; ./cuda-linux64-rel-*.run -noprompt
 
+# Some CUDA samples requires C++ runtime
+RUN apk add --no-cache libstdc++
+
 CMD /bin/ash
 
 # ft=dockerfile
