@@ -16,7 +16,7 @@ import IJulia
 # overloading hack from IJulia
 const StdioPipe = Base.PipeEndpoint
 
-type SornaDisplay <: Display
+mutable struct SornaDisplay <: Display
     isock::ZMQ.Socket
     osock::ZMQ.Socket
     olock::Base.ReentrantLock

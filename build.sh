@@ -33,25 +33,22 @@ build_common() {
 
 
 # dual stack
-#build_kernel "base"
-#build_squashed_kernel "base-python3-minimal"
-#build_squashed_kernel "python3"
-#build_common "bazel"
+build_kernel "base"
+build_squashed_kernel "base-python3-minimal"
+build_squashed_kernel "python3"
+build_common "bazel"
 
 # alpine stack
 if [ "$TAG" = latest ]; then
-  #build_squashed_kernel "base-python2-minimal"
-  #build_squashed_kernel "python2"
-  #build_squashed_kernel "git"
-  #build_squashed_kernel "c"
-  #build_squashed_kernel "cpp"
-  #build_squashed_kernel "java8"
-  #build_squashed_kernel "rust"
+  build_squashed_kernel "base-python2-minimal"
+  build_squashed_kernel "python2"
+  build_squashed_kernel "git"
+  build_kernel "c"
+  build_kernel "cpp"
+  build_kernel "java8"
+  build_kernel "rust"
   build_squashed_kernel "julia" "--build-arg JULIA_VERSION=0.6.0"
 fi
-
-#---
-exit 0
 
 
 # debian stack
