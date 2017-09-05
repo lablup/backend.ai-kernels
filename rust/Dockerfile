@@ -1,13 +1,7 @@
 FROM lablup/kernel-base-python3-minimal:latest
-MAINTAINER DevOps "devops@lablup.com"
 
-# Install Python packages
-RUN pip install --no-cache-dir aiozmq
-
-# Install minimal C compile environments
-RUN apk add --no-cache cargo g++ rust
+# Install minimal Rust compile environments
+RUN apk add --no-cache build-base cargo rust
 
 COPY run.py /home/sorna/run.py
-
-USER work
-CMD ["/home/sorna/jail", "python3", "/usr/local/bin/python3", "/home/sorna/run.py"]
+COPY policy.yml /home/sorna/policy.yml

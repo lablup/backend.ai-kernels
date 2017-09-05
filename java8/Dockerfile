@@ -1,5 +1,4 @@
 FROM lablup/kernel-base-python3-minimal:latest
-MAINTAINER DevOps "devops@lablup.com"
 
 # Install Java compile environments
 # ref: https://github.com/docker-library/openjdk/blob/master/8-jdk/alpine/Dockerfile
@@ -25,5 +24,3 @@ COPY run.py /home/sorna/run.py
 COPY policy.yml /home/sorna/policy.yml
 
 LABEL io.sorna.features "batch query uid-match user-input"
-
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python3", "/home/sorna/run.py"]

@@ -35,6 +35,4 @@ COPY inproc_run.py /home/sorna/
 LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
 LABEL io.sorna.features "batch query uid-match user-input"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python3", "/home/sorna/run.py"]
-
 # vim: sts=4 sw=4 et ft=dockerfile
