@@ -6,4 +6,4 @@ RUN apk add --no-cache build-base libstdc++
 COPY run.py /home/sorna/run.py
 COPY policy.yml /home/sorna/policy.yml
 
-LABEL io.sorna.features "batch query uid-match user-input"
+LABEL io.sorna.features "batch query uid-match"

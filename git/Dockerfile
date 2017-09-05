@@ -1,7 +1,6 @@
 FROM lablup/kernel-base-python3-minimal:latest
 
 # Install Git extras and some Python packages
-USER root
 RUN apk add --no-cache --virtual .sorna-deps \
         libgit2 libffi wget bash git nano vim \
         libgfortran libquadmath libjpeg libpng freetype openblas lapack \
@@ -30,20 +29,17 @@ RUN pip install --no-cache-dir /tmp/sorna_media-0.3.0-py2.py3-none-any.whl \
     && rm -f /tmp/*.whl
 RUN apk del .build-deps
 
-# Configure the shell to use Unicode characeters
+# Configure the shell environment
 ENV TERM xterm
+ENV USER work
+ENV SHELL /bin/bash
+
 RUN echo 'set convert-meta off' >> /etc/inputrc; \
     echo 'set hlsearch incsearch sts=4 sw=4 et' >> /etc/vim/vimrc.local; \
     echo 'set enc=utf8 tenc=utf8' >> /etc/vim/vimrc.local; \
     rm -f /usr/bin/vi && ln -s /usr/bin/vim /usr/bin/vi
 
-EXPOSE 2000 2001 2002 2003
-LABEL io.sorna.mode="query+pty"
-
 COPY run.py /home/sorna/run.py
-COPY jail /home/sorna/
-COPY intra-jail /home/sorna/
-ENV USER work
-ENV SHELL /bin/bash
-USER work
-CMD ["/home/sorna/jail", "git", "/usr/local/bin/python3", "/home/sorna/run.py"]
+COPY policy.py /home/sorna/policy.yml
+
+LABEL io.sorna.features "query tty uid-match user-input"
