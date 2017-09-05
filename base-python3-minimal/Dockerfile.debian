@@ -1,4 +1,4 @@
-FROM python:3.6-stretch as python-binary
+FROM python:3.6-jessie as python-binary
 # /usr/local in this image only has its own built Python.
 RUN cd /; tar czpf python.tar.gz /usr/local/
 
@@ -10,10 +10,13 @@ ENV PYTHONUNBUFFERED 1
 
 RUN install_packages \
         libexpat1 libgdbm3 bzip2 libffi6 libsqlite3-0 liblzma5 zlib1g \
-        openssl libmpdec2 \
-        libncursesw5 libtinfo5 libreadline7 \
+        libssl1.0.0. libmpdec2 \
+        libncursesw5 libtinfo5 libreadline6 \
         mime-support \
-        libzmq5 libuv1
+        libzmq3 libuv0.10
+
+# Future versions for Debian Stretch:
+# libreadline7 libzmq5 libuv1
 
 # Copy the whole Python from the docker library image
 COPY --from=python-binary /python.tar.gz /

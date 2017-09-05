@@ -39,4 +39,4 @@ RUN : install Bazel to build TensorFlow \
 
 RUN ls -l /usr/local/bin/bazel*
 
-# ft=dockerfile
+# vim: ft=dockerfile

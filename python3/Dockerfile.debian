@@ -16,7 +16,8 @@ RUN install_packages gcc g++ \
     && pip install --no-cache-dir scikit-learn scikit-image \
     && pip install --no-cache-dir pygments \
     && pip install --no-cache-dir /tmp/sorna*.whl \
-    && apt autoremove --purge -y gcc g++ \
+    && apt-get remove --purge -y gcc g++ \
+    && apt-get autoremove -y \
     && rm -f /tmp/*.whl
 
 # Matplotlib configuration and pre-heating
