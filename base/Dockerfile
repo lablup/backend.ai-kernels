@@ -1,13 +1,13 @@
 FROM golang:1.8-alpine as jail-builder
-RUN apk add --no-cache build-base libseccomp-dev git linux-headers
-RUN mkdir -p /go/src/github.com/lablup/sorna-jail
+RUN apk add --no-cache build-base libseccomp-dev git linux-headers && \
+    mkdir -p /go/src/github.com/lablup/sorna-jail
 WORKDIR /go/src/github.com/lablup/sorna-jail
 RUN git clone https://github.com/lablup/sorna-jail . && \
     go get -u github.com/fatih/color && \
     go get -u github.com/seccomp/libseccomp-golang && \
     go get -u github.com/gobwas/glob && \
-    go get -u gopkg.in/yaml.v2 && \
-    make inside-container
+    go get -u gopkg.in/yaml.v2
+RUN make inside-container
 
 
 # ------------

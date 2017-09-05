@@ -1,21 +1,20 @@
 FROM golang:1.8 as jail-builder
 # Debian jessie ships libseccomp 2.1 but golang binding requires 2.2+
-RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list \
-    && apt update && apt -t jessie-backports install -y libseccomp-dev
-
-RUN mkdir -p /go/src/github.com/lablup/sorna-jail
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
+    apt update && apt -t jessie-backports install -y libseccomp-dev && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    mkdir -p /go/src/github.com/lablup/sorna-jail
 WORKDIR /go/src/github.com/lablup/sorna-jail
 RUN git clone https://github.com/lablup/sorna-jail . && \
     go get -u github.com/fatih/color && \
     go get -u github.com/seccomp/libseccomp-golang && \
     go get -u github.com/gobwas/glob && \
-    go get -u gopkg.in/yaml.v2 && \
-    make inside-container
+    go get -u gopkg.in/yaml.v2
+RUN make inside-container
 
 
 # ------------
 FROM bitnami/minideb:jessie as hook-builder
-
 RUN install_packages gcc libc6-dev make git-core ca-certificates
 WORKDIR /root
 RUN git clone https://github.com/lablup/sorna-hook && \
@@ -27,9 +26,12 @@ RUN git clone https://github.com/lablup/sorna-hook && \
 FROM bitnami/minideb:jessie
 MAINTAINER DevOps "devops@lablup.com"
 
-RUN install_packages libseccomp2 gosu; \
-    ln -s /usr/sbin/gosu /usr/sbin/su-exec; \
-    mkdir /home/work && chmod 755 /home/work; \
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
+    export DEBIAN_FRONTEND=noninteractive && \
+    apt update && apt -t jessie-backports install -y libseccomp2 gosu && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    ln -s /usr/sbin/gosu /usr/sbin/su-exec && \
+    mkdir /home/work && chmod 755 /home/work && \
     mkdir /home/sorna && chmod 755 /home/sorna
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
