@@ -37,21 +37,22 @@ tag_debian_as_latest() {
 
 
 # dual stack
-build_kernel "base"
-build_squashed_kernel "base-python3-minimal"
-build_squashed_kernel "python3"
-build_common "bazel"
+#build_kernel "base"
+#build_squashed_kernel "base-python3-minimal"
+#build_squashed_kernel "python3"
+#build_common "bazel"
 
 # alpine stack
 if [ "$TAG" = latest ]; then
-  build_squashed_kernel "base-python2-minimal"
-  build_squashed_kernel "python2"
-  build_squashed_kernel "git"
-  build_kernel "c"
-  build_kernel "cpp"
-  build_kernel "java8"
-  build_kernel "rust"
-  build_squashed_kernel "julia" "--build-arg JULIA_VERSION=0.6.0"
+  echo "pass"
+  #build_squashed_kernel "base-python2-minimal"
+  #build_squashed_kernel "python2"
+  #build_squashed_kernel "git"
+  #build_kernel "c"
+  #build_kernel "cpp"
+  #build_kernel "java8"
+  #build_kernel "rust"
+  #build_squashed_kernel "julia" "--build-arg JULIA_VERSION=0.6.0"
 fi
 
 
@@ -70,28 +71,32 @@ if [ "$TAG" = debian ]; then
   CUDNN_MINOR="$(echo $CUDNN_VERSION | cut -d. -f2)"
   CUDNN_MAJMIN="$CUDNN_MAJOR.$CUDNN_MINOR"
 
-  docker build -t lablup/common-cuda:debian \
-    --build-arg CUDA_FULL=$CUDA_FULL \
-    --build-arg CUDA_MAJOR=$CUDA_MAJOR \
-    --build-arg CUDA_MINOR=$CUDA_MINOR \
-    --build-arg CUDA_MAJMIN=$CUDA_MAJMIN \
-    --build-arg CUDNN_FULL=$CUDNN_FULL \
-    --build-arg CUDNN_MAJOR=$CUDNN_MAJOR \
-    --build-arg CUDNN_MINOR=$CUDNN_MINOR \
-    --build-arg CUDNN_MAJMIN=$CUDNN_MAJMIN \
-    -f Dockerfile.cuda-debian commons
+  #docker build -t lablup/common-cuda:debian \
+  #  --build-arg CUDA_FULL=$CUDA_FULL \
+  #  --build-arg CUDA_MAJOR=$CUDA_MAJOR \
+  #  --build-arg CUDA_MINOR=$CUDA_MINOR \
+  #  --build-arg CUDA_MAJMIN=$CUDA_MAJMIN \
+  #  --build-arg CUDNN_FULL=$CUDNN_FULL \
+  #  --build-arg CUDNN_MAJOR=$CUDNN_MAJOR \
+  #  --build-arg CUDNN_MINOR=$CUDNN_MINOR \
+  #  --build-arg CUDNN_MAJMIN=$CUDNN_MAJMIN \
+  #  -f Dockerfile.cuda-debian commons
 
-  docker build -t lablup/common-py3-tensorflow-cpu:1.3-debian --build-arg TF_VERSION=1.3.0 -f Dockerfile.tensorflow-py3-cpu commons
-  docker build -t lablup/common-py3-tensorflow-gpu:1.3-debian --build-arg TF_VERSION=1.3.0 -f Dockerfile.tensorflow-py3-gpu commons
+  #docker build -t lablup/common-py3-tensorflow-cpu:1.3-debian --build-arg TF_VERSION=1.3.0 -f Dockerfile.tensorflow-py3-cpu commons
+  #docker build -t lablup/common-py3-tensorflow-gpu:1.3-debian --build-arg TF_VERSION=1.3.0 -f Dockerfile.tensorflow-py3-gpu commons
   #docker build -t lablup/common-py3-tensorflow-cpu:1.2-debian --build-arg TF_VERSION=1.2.0 -f Dockerfile.tensorflow-py3-cpu commons
   #docker build -t lablup/common-py3-tensorflow-gpu:1.2-debian --build-arg TF_VERSION=1.2.0 -f Dockerfile.tensorflow-py3-gpu commons
   #docker build -t lablup/common-py3-tensorflow-cpu:1.1-debian --build-arg TF_VERSION=1.1.0 -f Dockerfile.tensorflow-py3-cpu commons
   #docker build -t lablup/common-py3-tensorflow-gpu:1.1-debian --build-arg TF_VERSION=1.1.0 -f Dockerfile.tensorflow-py3-gpu commons
 
-  build_squashed_kernel "python3-tensorflow"
-  build_squashed_kernel "python3-tensorflow-gpu"
+  #build_squashed_kernel "python3-tensorflow"
+  #build_squashed_kernel "python3-tensorflow-gpu"
+  build_squashed_kernel "python3-torch"
+  build_squashed_kernel "python3-torch-gpu"
 
-  tag_debian_as_latest "python3-tensorflow"
-  tag_debian_as_latest "python3-tensorflow-gpu"
+  #tag_debian_as_latest "python3-tensorflow"
+  #tag_debian_as_latest "python3-tensorflow-gpu"
+  tag_debian_as_latest "python3-torch"
+  tag_debian_as_latest "python3-torch-gpu"
 
 fi
