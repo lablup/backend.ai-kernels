@@ -1,7 +1,7 @@
-FROM lablup/common-py3-tensorflow-cpu:1.3-alpine as tf-binary
+FROM lablup/common-py3-tensorflow-cpu:1.3-debian as tf-binary
 
 
-FROM lablup/kernel-python3:latest
+FROM lablup/kernel-python3:debian
 
 # Install TensorFlow and Keras
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp

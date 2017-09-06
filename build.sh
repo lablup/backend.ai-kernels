@@ -31,6 +31,10 @@ build_common() {
   docker build -t lablup/common-$1:$TAG $2 -f commons/Dockerfile.$1$suffix commons
 }
 
+tag_debian_as_latest() {
+  docker tag lablup/kernel-$1:debian lablup/kernel-$1:latest
+}
+
 
 # dual stack
 build_kernel "base"
@@ -79,9 +83,15 @@ if [ "$TAG" = debian ]; then
 
   docker build -t lablup/common-py3-tensorflow-cpu:1.3-debian --build-arg TF_VERSION=1.3.0 -f Dockerfile.tensorflow-py3-cpu commons
   docker build -t lablup/common-py3-tensorflow-gpu:1.3-debian --build-arg TF_VERSION=1.3.0 -f Dockerfile.tensorflow-py3-gpu commons
-  docker build -t lablup/common-py3-tensorflow-cpu:1.2-debian --build-arg TF_VERSION=1.2.0 -f Dockerfile.tensorflow-py3-cpu commons
-  docker build -t lablup/common-py3-tensorflow-gpu:1.2-debian --build-arg TF_VERSION=1.2.0 -f Dockerfile.tensorflow-py3-gpu commons
+  #docker build -t lablup/common-py3-tensorflow-cpu:1.2-debian --build-arg TF_VERSION=1.2.0 -f Dockerfile.tensorflow-py3-cpu commons
+  #docker build -t lablup/common-py3-tensorflow-gpu:1.2-debian --build-arg TF_VERSION=1.2.0 -f Dockerfile.tensorflow-py3-gpu commons
   #docker build -t lablup/common-py3-tensorflow-cpu:1.1-debian --build-arg TF_VERSION=1.1.0 -f Dockerfile.tensorflow-py3-cpu commons
   #docker build -t lablup/common-py3-tensorflow-gpu:1.1-debian --build-arg TF_VERSION=1.1.0 -f Dockerfile.tensorflow-py3-gpu commons
+
+  build_squashed_kernel "python3-tensorflow"
+  build_squashed_kernel "python3-tensorflow-gpu"
+
+  tag_debian_as_latest "python3-tensorflow"
+  tag_debian_as_latest "python3-tensorflow-gpu"
 
 fi

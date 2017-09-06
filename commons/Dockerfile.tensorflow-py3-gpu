@@ -2,7 +2,6 @@ FROM lablup/common-bazel:debian as bazel-binary
 
 
 FROM lablup/common-cuda:debian as cuda-binary
-RUN cd /; tar czpf /root/cuda.tar.gz usr/local/cuda-8.0
 
 
 # Build target: lablup/common-py3-tensorflow-gpu:1.3-debian
@@ -36,9 +35,8 @@ RUN bazel version
 RUN pip3 install --no-cache-dir wheel
 
 # Copy-and-extract CUDA and cuDNN library
-COPY --from=cuda-binary /root/cuda.tar.gz /root
-RUN cd /; tar xzpf /root/cuda.tar.gz; rm -f /root/cuda.tar.gz && \
-    ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
+COPY --from=cuda-binary /usr/local/cuda-8.0 /usr/local/cuda-8.0
+RUN ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
     ln -s /usr/local/cuda/lib64/libcudnn.so /usr/local/cuda/lib64/libcudnn.so.6.0 && \
     #sed -r -i'' "s:(#error -- unsupported GNU version)://\1:" /usr/local/cuda/include/host_config.h && \
     #sed -r -i'' "s:(__cudart_builtin__) int (isnan|isinf)(\(double x\)) throw\(\):\1 constexpr bool \2\3:" /usr/local/cuda-8.0/include/math_functions.h && \

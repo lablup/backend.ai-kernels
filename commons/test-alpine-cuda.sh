@@ -8,7 +8,8 @@ docker run --rm -it \
  --device /dev/nvidia1:/dev/nvidia1:mrw \
  -e LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/nvidia/lib64 \
  -e PATH=/usr/local/cuda/bin:/usr/local/nvidia/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
- lablup/common-cuda:debian /bin/bash
+ lablup/kernel-python3-tensorflow-gpu /bin/bash
+ #lablup/common-cuda:debian /bin/bash
 
 #nvidia-docker run -it --name alpine-cuda-2 lablup/common-cuda:8.0 /bin/ash
 
