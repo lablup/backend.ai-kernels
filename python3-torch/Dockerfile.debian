@@ -1,0 +1,17 @@
+FROM lablup/kernel-python3:debian
+
+# Install TensorFlow and Keras
+RUN pip install --no-cache-dir \
+        http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp36-cp36m-manylinux1_x86_64.whl && \
+    rm -rf /root/.cache
+
+COPY policy.yml /home/sorna/policy.yml
+
+LABEL io.sorna.timeout="600"
+LABEL io.sorna.maxmem="8g"
+LABEL io.sorna.maxcores="4"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC"
+LABEL io.sorna.features "batch query uid-match user-input"
+
+
+# vim: ft=dockerfile sts=4 sw=4 et tw=0
