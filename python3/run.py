@@ -1,10 +1,12 @@
 #! /usr/bin/env python
 
 import asyncio
+import ctypes
 import logging
 import os
 from pathlib import Path
 import sys
+import threading
 
 import janus
 import simplejson as json
@@ -95,6 +97,27 @@ class PythonProgramRunner(BaseRunner):
             b'completion',
             json.dumps(matches).encode('utf8'),
         ])
+
+    async def interrupt(self):
+        if self.inproc_runner is None:
+            log.error('No user code is running!')
+            return
+        # A dirty hack to raise an exception inside a running thread.
+        target_tid = self.inproc_runner.ident
+        if target_tid not in {t.ident for t in threading.enumerate()}:
+            log.error('Interrupt failed due to missing thread.')
+            return
+        affected_count = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+            ctypes.c_long(target_tid),
+            ctypes.py_object(KeyboardInterrupt))
+        if affected_count == 0:
+            log.error('Interrupt failed due to invalid thread identity.')
+        elif affected_count > 1:
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(
+                ctypes.c_long(target_tid),
+                ctypes.c_long(0))
+            log.error('Interrupt broke the interpreter state -- '
+                      'recommended to reset the session.')
 
     def ensure_inproc_runner(self):
         if self.inproc_runner is None:

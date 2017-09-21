@@ -96,11 +96,14 @@ class PythonInprocRunner(threading.Thread):
                 sys.stderr, orig_stderr = self.stderr_emitter, sys.stderr
                 try:
                     exec(code_obj, self.user_ns)
-                except Exception as e:
+                except KeyboardInterrupt:
+                    self.emit(ConsoleRecord('stderr', 'Interrupted!'))
+                except Exception:
                     # strip the first frame
                     exc_type, exc_val, tb = sys.exc_info()
                     user_tb = type(self).strip_traceback(tb)
-                    traceback.print_exception(exc_type, exc_val, user_tb)
+                    err_str = traceback.format_exception(exc_type, exc_val, user_tb)
+                    self.emit(ConsoleRecord('stderr', err_str))
                 finally:
                     sys.stdout = orig_stdout
                     sys.stderr = orig_stderr

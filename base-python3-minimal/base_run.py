@@ -59,6 +59,7 @@ class BaseRunner(ABC):
         self.insock = None
         self.outsock = None
         self.loop = None
+        self.subproc = None
 
         # If the subclass implements interatcive user inputs, it should set a
         # asyncio.Queue-like object to self.user_input_queue in the
@@ -120,6 +121,23 @@ class BaseRunner(ABC):
     async def complete(self, completion_data):
         """Return the list of strings to be shown in the auto-complete list."""
 
+    async def _interrupt(self):
+        try:
+            if self.subproc:
+                self.subproc.send_signal(signal.SIGINT)
+                return
+            return await self.interrupt()
+        except:
+            log.exception('unexpected error')
+        finally:
+            # this is a unidirectional command -- no explicit finish!
+            await self.outsock.drain()
+
+    @abstractmethod
+    async def interrupt(self):
+        """Interrupt the running user code (only called for query-mode)."""
+        pass
+
     async def run_subproc(self, cmd):
         """A thin wrapper for an external command."""
         loop = asyncio.get_event_loop()
@@ -131,6 +149,7 @@ class BaseRunner(ABC):
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
+            self.subproc = proc
             pipe_tasks = [
                 loop.create_task(pipe_output(proc.stdout, self.outsock, 'stdout')),
                 loop.create_task(pipe_output(proc.stderr, self.outsock, 'stderr')),
@@ -141,6 +160,8 @@ class BaseRunner(ABC):
                 await t
         except:
             log.exception('unexpected error')
+        finally:
+            self.subproc = None
 
     async def handle_user_input(self, reader, writer):
         try:
@@ -201,6 +222,8 @@ class BaseRunner(ABC):
                 elif op_type == 'complete':  # auto-completion
                     data = json.loads(text)
                     await self._complete(data)
+                elif op_type == 'interrupt':
+                    await self._interrupt()
             except asyncio.CancelledError:
                 break
             except:
