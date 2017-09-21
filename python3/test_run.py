@@ -9,7 +9,7 @@ import colorama
 from colorama import Fore
 
 
-def execute(code):
+def execute(code_type, code_text):
     ctx = zmq.Context.instance()
     ctx.setsockopt(zmq.LINGER, 50)
     repl_in = ctx.socket(zmq.PUSH)
@@ -17,7 +17,7 @@ def execute(code):
     repl_out = ctx.socket(zmq.PULL)
     repl_out.connect('tcp://127.0.0.1:2001')
     with repl_in, repl_out:
-        msg = (b'xcode1', code.encode('utf8'))
+        msg = (code_type.encode('ascii'), code_text.encode('utf8'))
         repl_in.send_multipart(msg)
         while True:
             data = repl_out.recv_multipart()
@@ -26,6 +26,9 @@ def execute(code):
 
             if msg_type == 'finished':
                 print('--- finished ---')
+                break
+            elif msg_type == 'completion':
+                print(msg_data)
                 break
             elif msg_type == 'stdout':
                 print(msg_data, end='')
@@ -46,19 +49,19 @@ def execute(code):
                 print(msg_data)
 
 sources = {
-    'interleaving': '''
+    'interleaving': ('code', '''
 import sys
 print('asdf', end='', file=sys.stderr)
 print('qwer', end='', file=sys.stdout)
 print('zxcv', file=sys.stderr)
-''',
-    'long_running': '''
+'''),
+    'long_running': ('code', '''
 import time
 for i in range(10):
     time.sleep(1)
     print(i)
-''',
-    'user_input': '''
+'''),
+    'user_input': ('code', '''
 import hashlib
 import getpass
 print('Please type your name.')
@@ -69,27 +72,30 @@ pw = getpass.getpass()
 m = hashlib.sha256()
 m.update(pw.encode('utf8'))
 print(f'Your password hash is {m.hexdigest()}')
-''',
-    'early_exception': '''a = wrong-+****syntax''',
-    'runtime_error': '''
+'''),
+    'early_exception': ('code', '''a = wrong-+****syntax'''),
+    'runtime_error': ('code', '''
 def x():
     raise RuntimeError('asdf')
 def s():
     x()
 if __name__ == '__main__':
     s()
-''',
+'''),
+    'completion': ('complete', json.dumps({
+        'line': 'import pathlib; p',
+    })),
 }
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('program_name')
-    args  =parser.parse_args()
-    src = sources[args.program_name]
-    print('Test code:')
-    print(textwrap.indent(src, '  '))
+    args = parser.parse_args()
+    code_type, code_text = sources[args.program_name]
+    print(f'Test {code_type}:')
+    print(textwrap.indent(code_text, '  '))
     print('Execution log:')
-    execute(src)
+    execute(code_type, code_text)
 
 
 if __name__ == '__main__':

@@ -47,11 +47,13 @@ RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
     && python /tmp/matplotlib-fontcache.py \
     && rm /tmp/matplotlib-fontcache.py
 
+RUN pip install --no-cache-dir janus
+
 COPY policy.yml /home/sorna/
 COPY run.py /home/sorna/
 COPY inproc_run.py /home/sorna/
 
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
-LABEL io.sorna.features "batch query uid-match user-input"
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
+      io.sorna.features="batch query uid-match user-input"
 
 # vim: sts=4 sw=4 et ft=dockerfile
