@@ -27,7 +27,7 @@ RUN rm -f /tmp/*.whl
 
 COPY policy.yml /home/sorna/policy.yml
 
-LABEL io.sorna.timeout="600"
+LABEL io.sorna.timeout="0"
 LABEL io.sorna.maxmem="8g"
 LABEL io.sorna.maxcores="4"
 LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC"

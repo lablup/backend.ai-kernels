@@ -12,11 +12,11 @@ RUN rm -f /tmp/*.whl
 
 COPY policy.yml /home/sorna/policy.yml
 
-LABEL io.sorna.timeout="600"
-LABEL io.sorna.maxmem="8g"
-LABEL io.sorna.maxcores="4"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC"
-LABEL io.sorna.features "batch query uid-match user-input"
+LABEL io.sorna.timeout="0" \
+      io.sorna.maxmem="8g" \
+      io.sorna.maxcores="4" \
+      io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      io.sorna.features "batch query uid-match user-input"
 
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0

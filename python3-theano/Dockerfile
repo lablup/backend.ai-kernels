@@ -88,11 +88,11 @@ ENV LD_PRELOAD /home/sorna/patch-libs.so
 VOLUME ["/home/work"]
 EXPOSE 2000 2001
 
-LABEL io.sorna.timeout="30"
-LABEL io.sorna.maxmem="512m"
-LABEL io.sorna.maxcores="4"
-LABEL io.sorna.mode="query"
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+LABEL io.sorna.timeout="0" \
+      io.sorna.maxmem="8g" \
+      io.sorna.maxcores="4" \
+      io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      io.sorna.features "batch query uid-match user-input"
 
 ADD run.py /home/sorna/run.py
 USER work
