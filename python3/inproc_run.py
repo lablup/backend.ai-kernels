@@ -90,7 +90,7 @@ class PythonInprocRunner(threading.Thread):
                 err_str = ''.join(traceback.format_exception(exc_type, exc_val, user_tb))
                 hdr_str = 'Traceback (most recent call last):\n' if not err_str.startswith('Traceback ') else ''
                 self.emit(ConsoleRecord('stderr', hdr_str + err_str))
-                self.emit(ControlRecord('finished'))
+                self.output_queue.put(self.sentinel)
             else:
                 sys.stdout, orig_stdout = self.stdout_emitter, sys.stdout
                 sys.stderr, orig_stderr = self.stderr_emitter, sys.stderr
@@ -102,8 +102,8 @@ class PythonInprocRunner(threading.Thread):
                     # strip the first frame
                     exc_type, exc_val, tb = sys.exc_info()
                     user_tb = type(self).strip_traceback(tb)
-                    err_str = traceback.format_exception(exc_type, exc_val, user_tb)
-                    self.emit(ConsoleRecord('stderr', err_str))
+                    traceback.print_exception(exc_type, exc_val, user_tb,
+                                              file=sys.stderr)
                 finally:
                     sys.stdout = orig_stdout
                     sys.stderr = orig_stderr

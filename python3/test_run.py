@@ -12,6 +12,11 @@ from colorama import Fore
 def execute(code_type, code_text):
     ctx = zmq.Context.instance()
     ctx.setsockopt(zmq.LINGER, 50)
+    if code_type == 'interrupt':
+        repl_in = ctx.socket(zmq.PUSH)
+        repl_in.connect('tcp://127.0.0.1:2000')
+        repl_in.send_multipart([b'interrupt', b''])
+        return
     repl_in = ctx.socket(zmq.PUSH)
     repl_in.connect('tcp://127.0.0.1:2000')
     repl_out = ctx.socket(zmq.PULL)
@@ -55,6 +60,9 @@ print('asdf', end='', file=sys.stderr)
 print('qwer', end='', file=sys.stdout)
 print('zxcv', file=sys.stderr)
 '''),
+    'exception': ('code', '''
+raise RuntimeError("ooops")
+'''),
     'long_running': ('code', '''
 import time
 for i in range(10):
@@ -85,6 +93,7 @@ if __name__ == '__main__':
     'completion': ('complete', json.dumps({
         'line': 'import pathlib; p',
     })),
+    'interrupt': ('interrupt', ''),
 }
 
 def main():

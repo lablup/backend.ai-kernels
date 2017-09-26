@@ -77,7 +77,6 @@ class PythonProgramRunner(BaseRunner):
 
     async def query(self, code_text):
         self.ensure_inproc_runner()
-        query_done = False
         await self.input_queue.async_q.put(code_text)
         # Read the generated outputs until done
         while True:
