@@ -35,6 +35,9 @@ class CProgramRunner(BaseRunner):
         super().__init__()
         self.child_env.update(CHILD_ENV)
 
+    async def init_with_loop(self):
+        pass
+
     async def build(self, build_cmd):
         if build_cmd is None or build_cmd == '':
             # skipped
@@ -89,6 +92,10 @@ class CProgramRunner(BaseRunner):
 
     async def complete(self, data):
         return []
+
+    async def interrupt(self):
+        # subproc interrupt is already handled by BaseRunner
+        pass
 
 
 if __name__ == '__main__':
