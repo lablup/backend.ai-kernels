@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import asyncio
 import logging
 import os
 from pathlib import Path
@@ -36,7 +37,7 @@ class CProgramRunner(BaseRunner):
         self.child_env.update(CHILD_ENV)
 
     async def init_with_loop(self):
-        pass
+        self.user_input_queue = asyncio.Queue()
 
     async def build(self, build_cmd):
         if build_cmd is None or build_cmd == '':
