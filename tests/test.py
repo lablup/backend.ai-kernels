@@ -15,7 +15,7 @@ import docker
 import requests
 import zmq
 
-from sorna.utils import generate_uuid
+from ai.backend.common.utils import generate_uuid
 
 _apparmor_profile_path = '/etc/apparmor.d/docker-ptrace'
 
