@@ -1,12 +1,9 @@
 FROM lablup/kernel-base-python3-minimal:latest
-MAINTAINER DevOps "devops@lablup.com"
 
 # Install minimal C++ compile environments
-RUN apk add --no-cache g++ libstdc++
+RUN apk add --no-cache build-base libstdc++
 
 COPY run.py /home/sorna/run.py
 COPY policy.yml /home/sorna/policy.yml
 
-LABEL io.sorna.features "batch query uid-match user-input"
-
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python3", "/home/sorna/run.py"]
+LABEL io.sorna.features "batch query uid-match"

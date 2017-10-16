@@ -1,0 +1,40 @@
+FROM lablup/kernel-base-python3-minimal:debian
+
+COPY *.whl /tmp/
+
+# As we mostly have "manylinux" glibc-compatible binary packaes,
+# we don't have to rebuild these!
+RUN install_packages gcc g++ \
+    && pip install --no-cache-dir Cython numpy \
+    && pip install --no-cache-dir matplotlib bokeh \
+    && pip install --no-cache-dir ipython \
+    && pip install --no-cache-dir pandas \
+    && pip install --no-cache-dir seaborn \
+    && pip install --no-cache-dir pillow \
+    && pip install --no-cache-dir networkx cvxpy \
+    && pip install --no-cache-dir scipy \
+    && pip install --no-cache-dir scikit-learn scikit-image \
+    && pip install --no-cache-dir pygments \
+    && pip install --no-cache-dir /tmp/sorna*.whl \
+    && apt-get remove --purge -y gcc g++ \
+    && apt-get autoremove -y \
+    && rm -f /tmp/*.whl
+
+# Matplotlib configuration and pre-heating
+ENV MPLCONFIGDIR /home/sorna/.matplotlib
+RUN mkdir /home/sorna/.matplotlib
+COPY matplotlibrc /home/sorna/.matplotlib/
+RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
+    && python /tmp/matplotlib-fontcache.py \
+    && rm /tmp/matplotlib-fontcache.py
+
+RUN pip install --no-cache-dir janus
+
+COPY policy.yml /home/sorna/
+COPY run.py /home/sorna/
+COPY inproc_run.py /home/sorna/
+
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
+      io.sorna.features="batch query uid-match user-input"
+
+# vim: sts=4 sw=4 et ft=dockerfile

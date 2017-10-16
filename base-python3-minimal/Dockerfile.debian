@@ -1,0 +1,37 @@
+FROM python:3.6-jessie as python-binary
+# /usr/local in this image only has its own built Python.
+RUN cd /; tar czpf python.tar.gz /usr/local/
+
+
+# ------------------------
+FROM lablup/kernel-base:debian
+ENV LANG=C.UTF-8
+ENV PYTHONUNBUFFERED 1
+
+RUN install_packages \
+        libexpat1 libgdbm3 bzip2 libffi6 libsqlite3-0 liblzma5 zlib1g \
+        libssl1.0.0. libmpdec2 \
+        libncursesw5 libtinfo5 libreadline6 \
+        mime-support \
+        libzmq3 libuv0.10
+
+# Future versions for Debian Stretch:
+# libreadline7 libzmq5 libuv1
+
+# Copy the whole Python from the docker library image
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
+
+# Test if Python is working
+RUN python -c 'import sys; print(sys.version_info); import ssl'
+
+# As we mostly have "manylinux" glibc-compatible binary packaes,
+# we don't have to rebuild these!
+RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
+    pip install --no-cache-dir aiozmq namedlist six "python-dateutil>=2"
+
+COPY base_run.py /home/sorna
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python", "/home/sorna/run.py"]
+
+# vim: ft=dockerfile sts=4 sw=4 et

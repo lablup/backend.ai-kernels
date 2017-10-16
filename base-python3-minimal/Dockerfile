@@ -1,4 +1,4 @@
-FROM python:3.6-alpine3.6 as python-source
+FROM python:3.6-alpine3.6 as python-binary
 # /usr/local in this image only has its own built Python.
 RUN cd /; tar czpf python.tar.gz /usr/local/
 
@@ -18,7 +18,7 @@ RUN apk add --no-cache ca-certificates \
         expat gdbm libbz2 libffi openssl ncurses-libs readline sqlite-libs xz-libs zlib
 
 # Copy the whole Python from the docker library image
-COPY --from=python-source /python.tar.gz /
+COPY --from=python-binary /python.tar.gz /
 COPY --from=wheel-builds /root/pyzmq*.whl /tmp/
 COPY --from=wheel-builds /root/simplejson*.whl /tmp/
 COPY --from=wheel-builds /root/msgpack*.whl /tmp/
@@ -35,5 +35,7 @@ RUN apk add --no-cache --virtual .sorna-deps zeromq libuv \
     && rm /tmp/*.whl
 
 COPY base_run.py /home/sorna
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python", "/home/sorna/run.py"]
 
 # vim: sts=4 sw=4 et

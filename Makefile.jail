@@ -1,7 +1,0 @@
-ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-
-all:
-	cd $(ROOT_DIR)/intra-jail; go install
-	cd $(ROOT_DIR)/jail; go install
-	cd $(ROOT_DIR)/jail-check; go install
-	cd $(ROOT_DIR)/intra-jail-check; go install

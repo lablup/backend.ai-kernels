@@ -1,0 +1,108 @@
+FROM lablup/kernel-python3:debian as caffe-builder
+
+# Build caffe
+RUN install_packages \
+        libprotobuf-dev \
+        libgflags-dev \
+        libgoogle-glog-dev \
+        liblmdb-dev \
+        libleveldb-dev \
+        libsnappy-dev \
+        libopencv-dev \
+        libhdf5-dev libhdf5-serial-dev \
+        protobuf-compiler \
+        libboost-all-dev \
+        libopenblas-base \
+        libopenblas-dev
+RUN install_packages git-core ca-certificates
+RUN install_packages build-essential
+RUN git clone https://github.com/BVLC/caffe /home/sorna/caffe-install
+RUN cd /home/sorna/caffe-install && \
+    pip install --no-cache-dir -r python/requirements.txt && \
+    pip install --no-cache-dir -U "python-dateutil>=2" && \
+    pip install --no-cache-dir -U "protobuf>=3.0"
+COPY Makefile.config /home/sorna/caffe-install/Makefile.config
+RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.so /usr/lib/x86_64-linux-gnu/libboost_python-py3.so && \
+    ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.a  /usr/lib/x86_64-linux-gnu/libboost_python-py3.a  && \
+    ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.so  /usr/lib/x86_64-linux-gnu/libboost_python3.so    && \
+    ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.a   /usr/lib/x86_64-linux-gnu/libboost_python3.a     && \
+    ldconfig
+RUN cd /home/sorna/caffe-install; make all -j8
+RUN cd /home/sorna/caffe-install; make pycaffe
+RUN cd /root; pip wheel "leveldb>=0.191"
+
+ENV PYTHONPATH=/home/sorna/caffe-install/python:.
+
+
+FROM lablup/kernel-python3:debian
+
+# Install Caffe dependencies
+RUN install_packages \
+        libprotobuf-dev \
+        libgflags2 \
+        libgoogle-glog0 \
+        liblmdb0 \
+        libleveldb1 \
+        libsnappy1 \
+        libopencv-core2.4 \
+        libopencv-highgui2.4 \
+        libopencv-features2d2.4 \
+        libopencv-flann2.4 \
+        libopencv-contrib2.4 \
+        libopencv-imgproc2.4 \
+        libopencv-legacy2.4 \
+        libhdf5-8 \
+        libboost-system1.55.0 \
+        libboost-python1.55.0 \
+        libboost-wave1.55.0 \
+        libboost-random1.55.0 \
+        libboost-regex1.55.0 \
+        libboost-serialization1.55.0 \
+        libboost-program-options1.55.0 \
+        libboost-date-time1.55.0 \
+        libboost-filesystem1.55.0 \
+        libboost-iostreams1.55.0 \
+        libboost-signals1.55.0 \
+        libboost-thread1.55.0 \
+        libboost-test1.55.0 \
+        libboost-math1.55.0 \
+        libboost-mpi1.55.0 \
+        libboost-mpi-python1.55.0 \
+        libboost-locale1.55.0 \
+        libboost-context1.55.0 \
+        libboost-chrono1.55.0 \
+        libboost-atomic1.55.0 \
+        libboost-log1.55.0 \
+        libboost-graph1.55.0 \
+        libboost-graph-parallel1.55.0 \
+        libopenblas-base
+
+# Install Caffe
+COPY --from=caffe-builder /home/sorna/caffe-install/python/requirements.txt /root/caffe-requirements.txt
+COPY --from=caffe-builder /home/sorna/caffe-install/python/caffe /usr/local/lib/python3.6/site-packages/caffe
+COPY --from=caffe-builder /home/sorna/caffe-install/build/lib /usr/local/lib/caffe
+RUN echo '/usr/local/lib/caffe' > /etc/ld.so.conf.d/caffe.conf && \
+    ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.so /usr/lib/x86_64-linux-gnu/libboost_python-py3.so && \
+    ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.a  /usr/lib/x86_64-linux-gnu/libboost_python-py3.a  && \
+    ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.so  /usr/lib/x86_64-linux-gnu/libboost_python3.so    && \
+    ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.a   /usr/lib/x86_64-linux-gnu/libboost_python3.a     && \
+    ldconfig
+COPY --from=caffe-builder /root/leveldb*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/leveldb*.whl && \
+    pip install --no-cache-dir -r /root/caffe-requirements.txt && \
+    pip install --no-cache-dir -U "python-dateutil>=2" && \
+    pip install --no-cache-dir -U "protobuf>=3.0"
+
+# Workaround for libdc1394 initialization error
+RUN ln /dev/null /dev/raw1394
+
+COPY policy.yml /home/sorna/policy.yml
+
+LABEL io.sorna.timeout="0" \
+      io.sorna.maxmem="8g" \
+      io.sorna.maxcores="4" \
+      io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      io.sorna.features="batch query uid-match user-input"
+
+
+# vim: ft=dockerfile sts=4 sw=4 et tw=0

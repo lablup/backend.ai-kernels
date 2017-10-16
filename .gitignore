@@ -57,8 +57,9 @@ docs/_build/
 # PyBuilder
 target/
 
-# etc
+# autoenv / direnv
 .env
+.envrc
 
 # Generate binaries for images
 */jail
@@ -71,6 +72,7 @@ old/*/jail-check
 old/*/intra-jail-check
 
 node_modules/
+yarn.lock
 
 .*.swp
 venv*

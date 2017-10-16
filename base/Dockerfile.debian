@@ -1,5 +1,8 @@
-FROM golang:1.8-alpine as jail-builder
-RUN apk add --no-cache build-base libseccomp-dev git linux-headers && \
+FROM golang:1.8 as jail-builder
+# Debian jessie ships libseccomp 2.1 but golang binding requires 2.2+
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
+    apt update && apt -t jessie-backports install -y libseccomp-dev && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
     mkdir -p /go/src/github.com/lablup/sorna-jail
 WORKDIR /go/src/github.com/lablup/sorna-jail
 RUN git clone https://github.com/lablup/sorna-jail . && \
@@ -11,8 +14,8 @@ RUN make inside-container
 
 
 # ------------
-FROM alpine:3.6 as hook-builder
-RUN apk add --no-cache gcc musl-dev make git ca-certificates
+FROM bitnami/minideb:jessie as hook-builder
+RUN install_packages gcc libc6-dev make git-core ca-certificates
 WORKDIR /root
 RUN git clone https://github.com/lablup/sorna-hook && \
     cd sorna-hook && \
@@ -20,11 +23,15 @@ RUN git clone https://github.com/lablup/sorna-hook && \
 
 
 # ------------
-FROM alpine:3.6
+FROM bitnami/minideb:jessie
 MAINTAINER DevOps "devops@lablup.com"
 
-RUN apk add --no-cache libseccomp shadow su-exec; \
-    mkdir /home/work && chmod 755 /home/work; \
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
+    export DEBIAN_FRONTEND=noninteractive && \
+    apt update && apt -t jessie-backports install -y libseccomp2 gosu && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    ln -s /usr/sbin/gosu /usr/sbin/su-exec && \
+    mkdir /home/work && chmod 755 /home/work && \
     mkdir /home/sorna && chmod 755 /home/sorna
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -45,6 +52,6 @@ LABEL io.sorna.timeout="30" \
       io.sorna.version="2" \
       io.sorna.features="uid-match"
 
-CMD ["/home/sorna/jail", "/bin/ash"]
+CMD ["/home/sorna/jail", "/bin/bash"]
 
-# vim: sts=4 sw=4 et
+# vim: ft=dockerfile sts=4 sw=4 et

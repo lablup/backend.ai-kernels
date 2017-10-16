@@ -1,211 +1,132 @@
 #! /usr/bin/env python
 
-import builtins as builtin_mod
-import code
-import enum
-from functools import partial
+import asyncio
+import ctypes
 import logging
 import os
+from pathlib import Path
 import sys
-import time
-import traceback
-import types
+import threading
 
-from namedlist import namedtuple, namedlist
+import janus
 import simplejson as json
-import zmq
-from IPython.core.completer import Completer
 
-import getpass
+sys.path.insert(0, os.path.abspath('.'))
+from base_run import BaseRunner
+from inproc_run import PythonInprocRunner
 
-from sorna.types import (
-    InputRequest, ControlRecord, ConsoleRecord, MediaRecord, HTMLRecord, CompletionRecord,
-)
+log = logging.getLogger()
 
-log = logging.getLogger('code-runner')
-
-
-class StreamToEmitter:
-
-    def __init__(self, emitter, stream_type):
-        self.emit = emitter
-        self.stream_type = stream_type
-
-    def write(self, s):
-        self.emit(ConsoleRecord(self.stream_type, s))
-
-    def flush(self):
-        pass
+DEFAULT_PYFLAGS = ''
+CHILD_ENV = {
+    'TERM': 'xterm',
+    'LANG': 'C.UTF-8',
+    'SHELL': '/bin/ash',
+    'USER': 'work',
+    'HOME': '/home/work',
+    'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    'LD_PRELOAD': '/home/sorna/patch-libs.so',
+}
 
 
-class CodeRunner:
-    '''
-    A thin wrapper for REPL.
+class PythonProgramRunner(BaseRunner):
 
-    It creates a dummy module that user codes run and keeps the references to user-created objects
-    (e.g., variables and functions).
-    '''
+    log_prefix = 'python-kernel'
 
-    def __init__(self, api_version=1):
-        self.api_version = api_version
-        self.input_supported = (api_version >= 2)
+    def __init__(self):
+        super().__init__()
+        self.child_env.update(CHILD_ENV)
+        self.inproc_runner = None
+        self.sentinel = object()
+        self.input_queue = None
+        self.output_queue = None
 
-        ctx = zmq.Context.instance()
-        self.input_stream = ctx.socket(zmq.PULL)
-        self.input_stream.bind('tcp://*:2000')
-        self.output_stream = ctx.socket(zmq.PUSH)
-        self.output_stream.bind('tcp://*:2001')
+    async def init_with_loop(self):
+        self.input_queue = janus.Queue(loop=self.loop)
+        self.output_queue = janus.Queue(loop=self.loop)
 
-        self.stdout_emitter = StreamToEmitter(self.emit, 'stdout')
-        self.stderr_emitter = StreamToEmitter(self.emit, 'stderr')
+        # We have interactive input functionality!
+        self._user_input_queue = janus.Queue(loop=self.loop)
+        self.user_input_queue = self._user_input_queue.async_q
 
-        # Initialize user module and namespaces.
-        user_module = types.ModuleType('__main__',
-                                       doc='Automatically created module for the interactive shell.')
-        user_module.__dict__.setdefault('__builtin__', builtin_mod)
-        user_module.__dict__.setdefault('__builtins__', builtin_mod)
-        self.user_module = user_module
-        self.user_ns = user_module.__dict__
-
-        self.completer = Completer(namespace=self.user_ns, global_namespace={})
-        self.completer.limit_to__all__ = True
-
-    def handle_input(self, prompt=None, password=False):
-        if prompt is None:
-            prompt = 'Password: ' if password else ''
-        self.emit(ConsoleRecord('stdout', prompt))
-        self.emit(InputRequest(is_password=password))
-        data = self.input_stream.recv_multipart()
-        return data[1].decode('utf8')
-
-    def handle_complete(self, data):
-        args = json.loads(data)
-        state = 0
-        matches = []
-        while True:
-            ret = self.completer.complete(args['line'], state)
-            if ret is None:
-                break
-            matches.append(ret)
-            state += 1
-        return matches
-
-    def emit(self, record):
-        if isinstance(record, ConsoleRecord):
-            assert record.target in ('stdout', 'stderr')
-            self.output_stream.send_multipart([
-                record.target.encode('ascii'),
-                record.data.encode('utf8'),
-            ])
-        elif isinstance(record, MediaRecord):
-            self.output_stream.send_multipart([
-                b'media',
-                json.dumps({
-                    'type': record.type,
-                    'data': record.data,
-                }).encode('utf8'),
-            ])
-        elif isinstance(record, HTMLRecord):
-            self.output_stream.send_multipart([
-                b'html',
-                record.html.encode('utf8'),
-            ])
-        elif isinstance(record, InputRequest):
-            self.output_stream.send_multipart([
-                b'waiting-input',
-                json.dumps({
-                    'is_password': record.is_password,
-                }).encode('utf8'),
-            ])
-        elif isinstance(record, CompletionRecord):
-            self.output_stream.send_multipart([
-                b'completion',
-                json.dumps(record.matches).encode('utf8'),
-            ])
-        elif isinstance(record, ControlRecord):
-            self.output_stream.send_multipart([
-                record.event.encode('ascii'),
-                b'',
-            ])
-        else:
-            raise TypeError('Unsupported record type.')
-
-    @staticmethod
-    def strip_traceback(tb):
-        while tb is not None:
-            frame_summary = traceback.extract_tb(tb, limit=1)[0]
-            if frame_summary[0] == '<input>':
-                break
-            tb = tb.tb_next
-        return tb
-
-    def run(self):
-        json_opts = {'namedtuple_as_object': False}
-        while True:
-            data = self.input_stream.recv_multipart()
-            code_id = data[0].decode('ascii')
-            code_text = data[1].decode('utf8')
-            log.debug(f'recv input: {code_id}, {code_text}')
-            if code_id == 'complete':
-                try:
-                    completions = self.handle_complete(code_text)
-                    self.emit(CompletionRecord(completions))
-                    log.debug('completion-sent')
-                except:
-                    log.exception('Unexpected error during handle_complete()')
-                finally:
-                    self.emit(ControlRecord('finished'))
-                    log.debug('completion-finished')
-                continue
-            self.user_module.__builtins__._sorna_emit = self.emit
-            if self.input_supported:
-                self.user_module.__builtins__.input = self.handle_input
-                getpass.getpass = partial(self.handle_input, password=True)
-            try:
-                code_obj = code.compile_command(code_text, symbol='exec')
-            except (OverflowError, IndentationError, SyntaxError,
-                    ValueError, TypeError, MemoryError) as e:
-                exc_type, exc_val, tb = sys.exc_info()
-                user_tb = type(self).strip_traceback(tb)
-                err_str = ''.join(traceback.format_exception(exc_type, exc_val, user_tb))
-                hdr_str = 'Traceback (most recent call last):\n' if not err_str.startswith('Traceback ') else ''
-                self.emit(ConsoleRecord('stderr', hdr_str + err_str))
-                self.emit(ControlRecord('finished'))
+    async def build(self, build_cmd):
+        if build_cmd is None or build_cmd == '':
+            # skipped
+            return
+        elif build_cmd == '*':
+            if Path('setup.py').is_file():
+                cmd = f'python {DEFAULT_PYFLAGS} setup.py develop'
+                await self.run_subproc(cmd)
             else:
-                sys.stdout, orig_stdout = self.stdout_emitter, sys.stdout
-                sys.stderr, orig_stderr = self.stderr_emitter, sys.stderr
-                try:
-                    exec(code_obj, self.user_ns)
-                except Exception as e:
-                    # strip the first frame
-                    exc_type, exc_val, tb = sys.exc_info()
-                    user_tb = type(self).strip_traceback(tb)
-                    traceback.print_exception(exc_type, exc_val, user_tb)
-                finally:
-                    self.emit(ControlRecord('finished'))
-                    sys.stdout = orig_stdout
-                    sys.stderr = orig_stderr
+                log.warning('skipping build phase due to missing "setup.py" file')
+        else:
+            await self.run_subproc(build_cmd)
 
+    async def execute(self, exec_cmd):
+        if exec_cmd is None or exec_cmd == '':
+            # skipped
+            return
+        elif exec_cmd == '*':
+            if Path('main.py').is_file():
+                cmd = f'python {DEFAULT_PYFLAGS} main.py'
+                await self.run_subproc(cmd)
+            else:
+                log.error('cannot find the main script ("main.py").')
+        else:
+            await self.run_subproc(exec_cmd)
 
-def main():
-    log = logging.getLogger('main')
+    async def query(self, code_text):
+        self.ensure_inproc_runner()
+        await self.input_queue.async_q.put(code_text)
+        # Read the generated outputs until done
+        while True:
+            try:
+                msg = await self.output_queue.async_q.get()
+            except asyncio.CancelledError:
+                break
+            self.output_queue.async_q.task_done()
+            if msg is self.sentinel:
+                break
+            self.outsock.write(msg)
 
-    # Replace stdin with a "null" file
-    # (trying to read stdin will raise EOFError immediately afterwards.)
-    sys.stdin = open(os.devnull, 'rb')
+    async def complete(self, data):
+        self.ensure_inproc_runner()
+        matches = self.inproc_runner.complete(data)
+        self.outsock.write([
+            b'completion',
+            json.dumps(matches).encode('utf8'),
+        ])
 
-    # Initialize context object.
-    runner = CodeRunner(api_version=2)
-    try:
-        runner.run()
-    except (KeyboardInterrupt, SystemExit):
-        pass
-    except:
-        log.exception('unexpected error')
-    finally:
-        print('exit.')
+    async def interrupt(self):
+        if self.inproc_runner is None:
+            log.error('No user code is running!')
+            return
+        # A dirty hack to raise an exception inside a running thread.
+        target_tid = self.inproc_runner.ident
+        if target_tid not in {t.ident for t in threading.enumerate()}:
+            log.error('Interrupt failed due to missing thread.')
+            return
+        affected_count = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+            ctypes.c_long(target_tid),
+            ctypes.py_object(KeyboardInterrupt))
+        if affected_count == 0:
+            log.error('Interrupt failed due to invalid thread identity.')
+        elif affected_count > 1:
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(
+                ctypes.c_long(target_tid),
+                ctypes.c_long(0))
+            log.error('Interrupt broke the interpreter state -- '
+                      'recommended to reset the session.')
+
+    def ensure_inproc_runner(self):
+        if self.inproc_runner is None:
+            self.inproc_runner = PythonInprocRunner(
+                self.input_queue.sync_q,
+                self.output_queue.sync_q,
+                self._user_input_queue.sync_q,
+                self.sentinel)
+            self.inproc_runner.start()
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    main()
+    PythonProgramRunner().run()

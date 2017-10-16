@@ -10,20 +10,18 @@ FROM lablup/kernel-python3:latest
 
 # Check Julia dependencies: https://pkgs.alpinelinux.org/package/edge/testing/x86_64/julia
 
+ARG JULIA_VERSION
+
 ENV JULIA_PATH /usr/local/julia
-ENV JULIA_VERSION 0.5.1
-ENV JULIA_VERSION_SHORT 0.5
+ENV JULIA_VERSION ${JULIA_VERSION:-0.6.0}
 ENV JULIA_PKGDIR "/usr/local/share/julia/site"
 
-USER root
 RUN mkdir -p $JULIA_PATH
 
 COPY Make.user /tmp/
-COPY sysctl-fix.patch /tmp/
-COPY julia-*.tar.gz /usr/local/julia/
+COPY julia-${JULIA_VERSION}-full.tar.gz /usr/local/julia/
 
 RUN mkdir -p /usr/local/share/julia/site/ \
-    && chown work:work /usr/local/share/julia/site/ \
     && apk add --no-cache --virtual .sorna-deps curl \
     && apk add --no-cache --virtual .build-deps git tar \
     && cd $JULIA_PATH \
@@ -32,7 +30,7 @@ RUN mkdir -p /usr/local/share/julia/site/ \
     && apk add --no-cache --virtual .sorna-deps \
         libgcc libc-dev llvm-libs m4 pcre2 patchelf \
         gmp fftw arpack mpfr3 dsfmt openblas openlibm openspecfun \
-        libgit2 libssh2 libressl libressl2.4-libcrypto libressl2.4-libssl libressl2.4-libtls \
+        libgit2 libssh2 libressl \
         libunwind libexecinfo suitesparse utf8proc \
     && apk add --no-cache --virtual .build-deps \
         build-base llvm-dev pcre2-dev linux-headers gfortran perl \
@@ -41,7 +39,6 @@ RUN mkdir -p /usr/local/share/julia/site/ \
         libgit2-dev libssh2-dev libressl-dev \
         libunwind-dev libexecinfo-dev suitesparse-dev utf8proc-dev \
     && mv /tmp/Make.user . \
-    && patch -p0 < /tmp/sysctl-fix.patch \
     && make -j8 \
     && apk del .build-deps \
     && rm -rf julia-*.tar.gz deps
@@ -57,20 +54,19 @@ RUN apk add --no-cache --virtual .sorna-deps \
         build-base libc-dev linux-headers pkgconf \
     && julia /home/sorna/package.jl \
     && julia /home/sorna/precompile.jl \
-    && chown -R work:work $JULIA_PKGDIR \
     && apk del .build-deps
-USER work
 
 # Apply higher resource limits
 LABEL io.sorna.timeout="180"
 LABEL io.sorna.maxmem="512m"
 LABEL io.sorna.maxcores="4"
-LABEL io.sorna.mode="query"
 LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,JULIA_CPU_CORES"
-LABEL io.sorna.version="2"
+LABEL io.sorna.features "query uid-match user-input"
 
 COPY run.jl /home/sorna/run.jl
 COPY IJuliaEmul.jl /home/sorna/IJuliaEmul.jl
+
+# TODO: chown -R work:work $JULIA_PKGDIR \
 
 CMD ["/home/sorna/jail", "julia", "/usr/local/julia/julia", "/home/sorna/run.jl"]
 

@@ -40,6 +40,9 @@ class JavaProgramRunner(BaseRunner):
         super().__init__()
         self.child_env = CHILD_ENV
 
+    async def init_with_loop(self):
+        pass
+
     async def build(self, build_cmd):
         if build_cmd is None or build_cmd == '':
             # skipped
@@ -101,6 +104,13 @@ class JavaProgramRunner(BaseRunner):
             tmpf.close()
             if filename:
                 os.remove(filename)
+
+    async def complete(self, data):
+        return []
+
+    async def interrupt(self):
+        # subproc interrupt is already handled by BaseRunner
+        pass
 
 
 def main():

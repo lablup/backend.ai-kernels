@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import asyncio
 import logging
 import os
 from pathlib import Path
@@ -34,6 +35,9 @@ class CProgramRunner(BaseRunner):
     def __init__(self):
         super().__init__()
         self.child_env.update(CHILD_ENV)
+
+    async def init_with_loop(self):
+        self.user_input_queue = asyncio.Queue()
 
     async def build(self, build_cmd):
         if build_cmd is None or build_cmd == '':
@@ -86,6 +90,13 @@ class CProgramRunner(BaseRunner):
             cmd = (f'gcc {tmpf.name} {DEFAULT_CFLAGS} -o ./main {DEFAULT_LDFLAGS} && '
                    f'./main')
             await self.run_subproc(cmd)
+
+    async def complete(self, data):
+        return []
+
+    async def interrupt(self):
+        # subproc interrupt is already handled by BaseRunner
+        pass
 
 
 if __name__ == '__main__':
