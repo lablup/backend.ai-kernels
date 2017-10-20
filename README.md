@@ -1,2 +1,6 @@
-# sorna-repl
-REPL (read-evaluate-print loop) handlers in various programming languages
+# backend.ai-kernels
+Kernels in various programming languages
+
+ * REPL (read-evaluate-print loop) kernels
+ * Compile kernels
+ * Streaming kernels 
