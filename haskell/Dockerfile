@@ -17,13 +17,12 @@ RUN echo 'deb http://ppa.launchpad.net/hvr/ghc/ubuntu trusty main' > /etc/apt/so
     rm -rf "$GNUPGHOME" /var/lib/apt/lists/* /stack.tar.gz.asc /stack.tar.gz
 
 ENV PATH /root/.cabal/bin:/root/.local/bin:/opt/cabal/2.0/bin:/opt/ghc/8.2.1/bin:/opt/happy/1.19.5/bin:/opt/alex/3.1.7/bin:$PATH
-RUN cabal update && cabal install mtl
+RUN cabal update && cabal install mtl --global
 
 # Install kernel-runner scripts package
 # TODO: use PyPI's package if available
-# RUN cd /home/sorna && \
-#     git clone https://github.com/lablup/backend.ai-kernel-runner.git
-ADD backend.ai-kernel-runner /home/sorna/backend.ai-kernel-runner
+RUN cd /home/sorna && \
+    git clone https://github.com/lablup/backend.ai-kernel-runner.git
 RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[haskell]
 # RUN pip install backend.ai-kernel-runner[haskell]
 
@@ -32,4 +31,4 @@ COPY policy.yml /home/sorna/policy.yml
 LABEL io.sorna.features "batch query uid-match"
 
 CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
-     "/usr/local/bin/python", "-m", "ai.backend.kernel", "--debug", "haskell"]
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "haskell"]
