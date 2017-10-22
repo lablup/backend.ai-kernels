@@ -162,7 +162,7 @@ class ImageTestBase(object):
             codecs.getincrementaldecoder('utf8')(),
         )
         try:
-            msg_in = (b'', code.encode('utf8'))
+            msg_in = (b'code', code.encode('utf8'))
             kin.send_multipart(msg_in)
             while True:
                 if kout.poll(timeout=10_000) == 0:  # 10 sec
@@ -174,7 +174,7 @@ class ImageTestBase(object):
                     break
                 elif reply_type == b'waiting-input':
                     assert isinstance(user_input, str), 'User input required'
-                    msg_in = (b'', user_input.encode('utf8'))
+                    msg_in = (b'code', user_input.encode('utf8'))
                     time.sleep(0.1)
                     kin.send_multipart(msg_in)
                 elif reply_type == b'stdout':
