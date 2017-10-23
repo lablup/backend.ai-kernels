@@ -25,5 +25,7 @@ RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[lua]
 # RUN pip install backend.ai-kernel-runner[lua]
 RUN apk add --no-cache ${LUA_PACKAGE}
 
+LABEL io.sorna.features "query uid-match"
+
 CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "lua"]
