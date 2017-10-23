@@ -1,14 +1,23 @@
-FROM lablup/kernel-base:latest
+FROM lablup/kernel-base-python3-minimal:latest
 
 # Install PHP 7.0
-RUN apk add --no-cache --virtual .build-deps build-base zeromq-dev pkgconf autoconf automake \
-    && apk add --no-cache php7 php7-dev php7-xml php7-pcntl php7-pear zeromq php7-iconv php7-zlib php7-json php7-gd php7-sqlite3 \
+RUN apk add --no-cache --virtual .build-deps build-base pkgconf autoconf automake \
+    && apk add --no-cache php7 php7-dev php7-xml php7-pcntl php7-pear php7-iconv php7-zlib php7-json php7-gd php7-sqlite3 \
     # PECL patch (ref: http://stackoverflow.com/questions/40999752)
     && sed -i "$ s|\-n||g" /usr/bin/pecl \
-    && echo '' | pecl install zmq-beta \
-    && echo 'extension=zmq.so' >> /etc/php7/php.ini \
     && apk del .build-deps
 
-ADD run.php /home/sorna/run.php
-USER work
-CMD ["/home/sorna/jail", "default", "/usr/bin/php7", "/home/sorna/run.php"]
+# Install kernel-runner scripts package
+# TODO: use PyPI's package if available
+RUN apk add --no-cache git
+RUN cd /home/sorna && \
+    git clone https://github.com/lablup/backend.ai-kernel-runner.git
+RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[php]
+# RUN pip install backend.ai-kernel-runner[php]
+
+COPY policy.yml /home/sorna/policy.yml
+
+LABEL io.sorna.features "query uid-match"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "php"]
