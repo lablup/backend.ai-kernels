@@ -39,6 +39,18 @@ RUN pip install --no-cache-dir /tmp/Cython*.whl \
     && pip install --no-cache-dir /tmp/sorna*.whl \
     && rm -f /tmp/*.whl
 
+RUN pip install --no-cache-dir janus
+
+COPY policy.yml /home/sorna/
+
+# Install kernel-runner scripts package 
+# TODO: use PyPI's package if available
+RUN apk add --no-cache git
+RUN cd /home/sorna && \
+    git clone https://github.com/lablup/backend.ai-kernel-runner.git
+RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[python]
+# RUN pip install backend.ai-kernel-runner[python]
+
 # Matplotlib configuration and pre-heating
 ENV MPLCONFIGDIR /home/sorna/.matplotlib
 RUN mkdir /home/sorna/.matplotlib
@@ -47,13 +59,10 @@ RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
     && python /tmp/matplotlib-fontcache.py \
     && rm /tmp/matplotlib-fontcache.py
 
-RUN pip install --no-cache-dir janus
-
-COPY policy.yml /home/sorna/
-COPY run.py /home/sorna/
-COPY inproc_run.py /home/sorna/
-
 LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
       io.sorna.features="batch query uid-match user-input"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
 
 # vim: sts=4 sw=4 et ft=dockerfile
