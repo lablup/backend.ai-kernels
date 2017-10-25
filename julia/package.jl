@@ -3,7 +3,6 @@ Pkg.init()
 # Let PyCall use system Python instead of Conda.
 ENV["PYTHON"] = "/usr/local/bin/python3"
 
-Pkg.add("ZMQ")
 Pkg.add("DataFrames")
 Pkg.add("JSON")
 Pkg.add("PyCall")
