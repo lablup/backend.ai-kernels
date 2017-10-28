@@ -68,7 +68,7 @@ RUN /home/sorna/pyenv-run.sh pip install /tmp/sorna_media-*.whl
 
 # Install Theano
 USER work
-#RUN /home/sorna/pyenv-run.sh pip install Theano
+RUN /home/sorna/pyenv-run.sh pip install --upgrade && \
     PIP_INSTALL="pip --no-cache-dir install --upgrade" && \
     $PIP_INSTALL \
         . && \
