@@ -34,8 +34,4 @@ RUN apk add --no-cache --virtual .sorna-deps zeromq libuv \
     && pip install --no-cache-dir aiozmq namedlist six "python-dateutil>=2" \
     && rm /tmp/*.whl
 
-COPY base_run.py /home/sorna
-
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python", "/home/sorna/run.py"]
-
 # vim: sts=4 sw=4 et

@@ -30,8 +30,4 @@ RUN python -c 'import sys; print(sys.version_info); import ssl'
 RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq namedlist six "python-dateutil>=2"
 
-COPY base_run.py /home/sorna
-
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "/usr/local/bin/python", "/home/sorna/run.py"]
-
 # vim: ft=dockerfile sts=4 sw=4 et
