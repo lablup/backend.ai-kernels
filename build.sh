@@ -92,19 +92,19 @@ if [ "$TAG" = debian ]; then
     -f commons/Dockerfile.cuda-debian commons
 
   print_header "Building common (tensorflow-cpu:1.3)"
-  docker build -t lablup/common-py3-tensorflow-cpu:1.3-debian --build-arg TF_VERSION=1.3.0 -f commons/Dockerfile.tensorflow-py3-cpu commons
+  docker build -t lablup/common-py3-tensorflow-cpu:1.3-debian --build-arg TF_VERSION=1.3 -f commons/Dockerfile.tensorflow-py3-cpu commons
   print_header "Building common (tensorflow-gpu:1.3)"
-  docker build -t lablup/common-py3-tensorflow-gpu:1.3-debian --build-arg TF_VERSION=1.3.0 -f commons/Dockerfile.tensorflow-py3-gpu commons
+  docker build -t lablup/common-py3-tensorflow-gpu:1.3-debian --build-arg TF_VERSION=1.3 -f commons/Dockerfile.tensorflow-py3-gpu commons
 
   print_header "Building common (tensorflow-cpu:1.2)"
-  docker build -t lablup/common-py3-tensorflow-cpu:1.2-debian --build-arg TF_VERSION=1.2.0 -f commons/Dockerfile.tensorflow-py3-cpu commons
+  docker build -t lablup/common-py3-tensorflow-cpu:1.2-debian --build-arg TF_VERSION=1.2 -f commons/Dockerfile.tensorflow-py3-cpu commons
   print_header "Building common (tensorflow-gpu:1.2)"
-  docker build -t lablup/common-py3-tensorflow-gpu:1.2-debian --build-arg TF_VERSION=1.2.0 -f commons/Dockerfile.tensorflow-py3-gpu commons
+  docker build -t lablup/common-py3-tensorflow-gpu:1.2-debian --build-arg TF_VERSION=1.2 -f commons/Dockerfile.tensorflow-py3-gpu commons
 
   print_header "Building common (tensorflow-cpu:1.1)"
-  docker build -t lablup/common-py3-tensorflow-cpu:1.1-debian --build-arg TF_VERSION=1.1.0 -f commons/Dockerfile.tensorflow-py3-cpu commons
+  docker build -t lablup/common-py3-tensorflow-cpu:1.1-debian --build-arg TF_VERSION=1.1 -f commons/Dockerfile.tensorflow-py3-cpu commons
   print_header "Building common (tensorflow-gpu:1.1)"
-  docker build -t lablup/common-py3-tensorflow-gpu:1.1-debian --build-arg TF_VERSION=1.1.0 -f commons/Dockerfile.tensorflow-py3-gpu commons
+  docker build -t lablup/common-py3-tensorflow-gpu:1.1-debian --build-arg TF_VERSION=1.1 -f commons/Dockerfile.tensorflow-py3-gpu commons
 
   build_squashed_kernel "python3-tensorflow"
   build_squashed_kernel "python3-tensorflow-gpu"
