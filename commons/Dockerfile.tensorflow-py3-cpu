@@ -43,6 +43,8 @@ RUN : build TensorFlow pip package \
     && curl -SL https://github.com/tensorflow/tensorflow/archive/v${TF_VERSION}.tar.gz \
         | tar xzf -
 RUN cd /tmp/tensorflow-${TF_VERSION} \
+    # temporary fix for tensorflow/tensorflow#12979
+    && sed -i '\@https://github.com/google/protobuf/archive/0b059a3d8a8f8aa40dde7bea55edca4ec5dfea66.tar.gz@d' tensorflow/workspace.bzl \
     && PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
