@@ -76,3 +76,6 @@ yarn.lock
 
 .*.swp
 venv*
+
+# Local modification of build script
+build-local.sh
