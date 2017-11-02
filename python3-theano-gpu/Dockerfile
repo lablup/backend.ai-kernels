@@ -104,7 +104,10 @@ ENV LD_PRELOAD /home/sorna/patch-libs.so
 VOLUME ["/home/work"]
 EXPOSE 2000 2001
 
-LABEL io.sorna.timeout="0" \
+LABEL io.sorna.nvidia.enabled="yes" \
+      com.nvidia.cuda.version="8.0.61" \
+      com.nvidia.volumes.needed="nvidia_driver" \
+      io.sorna.timeout="0" \
       io.sorna.maxmem="8g" \
       io.sorna.maxcores="4" \
       io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \

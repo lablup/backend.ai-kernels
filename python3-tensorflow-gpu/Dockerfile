@@ -27,7 +27,10 @@ RUN rm -f /tmp/*.whl
 
 COPY policy.yml /home/sorna/policy.yml
 
-LABEL io.sorna.timeout="0" \
+LABEL io.sorna.nvidia.enabled="yes" \
+      com.nvidia.cuda.version="8.0.61" \
+      com.nvidia.volumes.needed="nvidia_driver" \
+      io.sorna.timeout="0" \
       io.sorna.maxmem="8g" \
       io.sorna.maxcores="4" \
       io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
