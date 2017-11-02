@@ -27,7 +27,7 @@ build_kernel() {
 }
 
 build_squashed_kernel() {
-  print_header "Squashing ($1)"
+  print_header "Building and squashing ($1)"
   [[ "$TAG" = latest ]] && suffix="" || suffix=".debian"
   docker build -t lablup/kernel-$1:$TAG $2 -f $1/Dockerfile$suffix --squash $1
 }
