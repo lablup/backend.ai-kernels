@@ -1,7 +1,5 @@
 FROM lablup/kernel-base-python3-minimal:debian
 
-COPY *.whl /tmp/
-
 # As we mostly have "manylinux" glibc-compatible binary packaes,
 # we don't have to rebuild these!
 RUN install_packages gcc g++ git-core \
@@ -14,21 +12,11 @@ RUN install_packages gcc g++ git-core \
     && pip install --no-cache-dir networkx cvxpy \
     && pip install --no-cache-dir scipy \
     && pip install --no-cache-dir scikit-learn scikit-image \
-    && pip install --no-cache-dir pygments \
-    && pip install --no-cache-dir /tmp/sorna*.whl \
-    && apt-get remove --purge -y gcc g++ \
-    && apt-get autoremove -y \
+    && pip install --no-cache-dir pygments
+
+COPY *.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl \
     && rm -f /tmp/*.whl
-
-# Matplotlib configuration and pre-heating
-ENV MPLCONFIGDIR /home/sorna/.matplotlib
-RUN mkdir /home/sorna/.matplotlib
-COPY matplotlibrc /home/sorna/.matplotlib/
-RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
-    && python /tmp/matplotlib-fontcache.py \
-    && rm /tmp/matplotlib-fontcache.py
-
-RUN pip install --no-cache-dir janus
 
 COPY policy.yml /home/sorna/
 

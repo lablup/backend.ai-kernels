@@ -39,8 +39,6 @@ RUN pip install --no-cache-dir /tmp/Cython*.whl \
     && pip install --no-cache-dir /tmp/sorna*.whl \
     && rm -f /tmp/*.whl
 
-RUN pip install --no-cache-dir janus
-
 COPY policy.yml /home/sorna/
 
 # Install kernel-runner scripts package 
