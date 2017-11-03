@@ -517,10 +517,10 @@ class R3ImageTest(ImageTestBase, unittest.TestCase):
         yield 'library("ggplot2"); cat("success\n")', 'success'
 
     def basic_failure(self):
-        yield 'stop("my error")', ('simpleError', 'my error')
-        yield 'some_undefined_func()', ('simpleError', 'could not find function "some_undefined_func"')
+        yield 'stop("my error")', ('my error', None)
+        yield 'some_undefined_func()', ('could not find function', None)
         # checks if environment is properly isolated.
-        yield 'print(ctx)', ('simpleError', "object 'ctx' not found")
+        yield 'print(ctx)', ("object 'ctx' not found", None)
 
 
 class PHP7ImageTest(ImageTestBase, unittest.TestCase):
