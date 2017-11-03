@@ -92,7 +92,7 @@ LABEL io.sorna.timeout="0" \
       io.sorna.maxmem="8g" \
       io.sorna.maxcores="4" \
       io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      io.sorna.features "batch query uid-match user-input"
+      io.sorna.features="batch query uid-match user-input"
 
 ADD run.py /home/sorna/run.py
 USER work
