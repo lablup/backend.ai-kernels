@@ -12,11 +12,9 @@ FROM lablup/kernel-python3:latest
 # Install CUDA
 COPY --from=cuda-libs /usr/local/cuda-8.0 /usr/local
 RUN ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
-    ln -s /usr/local/cuda/lib64/libcudnn.so /usr/local/cuda/lib64/libcudnn.so.6.0 && \
-    mkdir -p /etc/ld.so.conf.d && \
-    echo "/usr/local/cuda/lib64" > /etc/ld.so.conf.d/cuda.conf && \
-    echo "/usr/local/nvidia/lib64" > /etc/ld.so.conf.d/nvidia.conf && \
-    ldconfig
+    ln -s /usr/local/cuda/lib64/libcudnn.so /usr/local/cuda/lib64/libcudnn.so.6.0
+ENV LD_LIBRARY_PATH="/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/local/cuda/lib64/stubs" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # Install TensorFlow and Keras
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
