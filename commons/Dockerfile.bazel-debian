@@ -9,14 +9,11 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     install_packages \
         build-essential \
         curl \
-        patch \
-        perl \
-        rsync \
-        swig \
+        python \
         git-core \
         unzip zip
 
-ENV BAZEL_VERSION 0.5.2
+ENV BAZEL_VERSION 0.7.0
 
 # install Bazel to build TensorFlow
 RUN curl -SLO https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-dist.zip \

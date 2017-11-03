@@ -23,7 +23,7 @@ RUN apk add --no-cache --virtual=.build-deps \
         zip
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
-ENV BAZEL_VERSION 0.5.2
+ENV BAZEL_VERSION 0.7.0
 
 RUN : install Bazel to build TensorFlow \
     && curl -SLO https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-dist.zip \
