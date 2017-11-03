@@ -72,12 +72,7 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
 COPY package.json /home/sorna/package.json
 
 # Install kernel-runner scripts package
-# TODO: use PyPI's package if available
-RUN apk add --no-cache git
-RUN cd /home/sorna && \
-    git clone https://github.com/lablup/backend.ai-kernel-runner.git
-RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[nodejs]
-# RUN pip install backend.ai-kernel-runner[nodejs]
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[nodejs]~=1.0.2"
 
 LABEL io.sorna.features "query uid-match"
 

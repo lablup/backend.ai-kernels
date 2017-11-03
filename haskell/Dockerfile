@@ -20,11 +20,7 @@ ENV PATH /root/.cabal/bin:/root/.local/bin:/opt/cabal/2.0/bin:/opt/ghc/8.2.1/bin
 RUN cabal update && cabal install mtl --global
 
 # Install kernel-runner scripts package
-# TODO: use PyPI's package if available
-RUN cd /home/sorna && \
-    git clone https://github.com/lablup/backend.ai-kernel-runner.git
-RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[haskell]
-# RUN pip install backend.ai-kernel-runner[haskell]
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[haskell]~=1.0.2"
 
 COPY policy.yml /home/sorna/policy.yml
 

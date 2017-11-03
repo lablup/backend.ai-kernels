@@ -13,13 +13,8 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 WORKDIR $GOPATH
 
-# Install kernel-runner scripts package 
-# TODO: use PyPI's package if available
-RUN apk add --no-cache git
-RUN cd /home/sorna && \
-    git clone https://github.com/lablup/backend.ai-kernel-runner.git
-RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[golang]
-# RUN pip install backend.ai-kernel-runner[golang]
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[golang]~=1.0.2"
 
 COPY policy.yml /home/sorna/
 

@@ -17,12 +17,8 @@ RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs unzip \
 RUN ln -s /usr/bin/${LUA_PACKAGE} /usr/bin/lua
 
 # Install kernel-runner scripts package
-# TODO: use PyPI's package if available
-RUN apk add --no-cache git
-RUN cd /home/sorna && \
-    git clone https://github.com/lablup/backend.ai-kernel-runner.git
-RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[lua]
-# RUN pip install backend.ai-kernel-runner[lua]
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[lua]~=1.0.2"
+
 RUN apk add --no-cache ${LUA_PACKAGE}
 
 LABEL io.sorna.features "query uid-match"

@@ -41,7 +41,7 @@ RUN pip install --no-cache-dir /tmp/Cython*.whl \
 
 COPY policy.yml /home/sorna/
 
-# Install kernel-runner scripts package 
+# Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.0.2"
 
 # Matplotlib configuration and pre-heating

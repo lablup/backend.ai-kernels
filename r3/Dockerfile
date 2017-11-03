@@ -16,7 +16,7 @@ RUN apk add --no-cache git
 RUN cd /home/sorna && \
     git clone https://github.com/lablup/backend.ai-kernel-runner.git
 RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[r]
-# RUN pip install backend.ai-kernel-runner[r]
+# RUN pip install --no-cache-dir "backend.ai-kernel-runner[r]~=1.0.0"
 
 CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "r"]
