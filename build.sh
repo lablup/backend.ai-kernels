@@ -16,8 +16,11 @@ case "$TAG" in
 esac
 echo "Building for the target tag: $TAG"
 
+_HDR_COLOR="$(tput setaf 3)$(tput bold)"
+_COLOR_RESET="$(tput sgr0)"
+
 print_header() {
-  printf "\e[93;1m$1\e[0m\n"
+  printf "$_HDR_COLOR$1$_COLOR_RESET\n"
 }
 
 build_kernel() {
