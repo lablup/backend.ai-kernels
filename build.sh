@@ -49,8 +49,6 @@ tag_debian_as_latest() {
 # dual stack
 build_kernel "base"
 build_squashed_kernel "base-python3-minimal"
-build_squashed_kernel "python3"
-build_common "bazel"
 
 # alpine stack
 if [ "$TAG" = latest ]; then
@@ -69,6 +67,9 @@ fi
 
 # debian stack
 if [ "$TAG" = debian ]; then
+
+  build_squashed_kernel "python3"
+  build_common "bazel"
 
   CUDA_VERSION="8.0.61_375.26"
   CUDNN_VERSION="6.0"
