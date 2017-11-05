@@ -11,7 +11,6 @@ RUN apk add --no-cache --virtual .sorna-deps \
         jpeg libpng tiff
 
 # Copy pre-built wheels
-COPY *.whl /tmp/
 COPY --from=wheel-builds /root/*.whl /tmp/
 
 # Install pre-built wheels (the ordering matters!)
@@ -36,7 +35,6 @@ RUN pip install --no-cache-dir /tmp/Cython*.whl \
     \
     && pip install --no-cache-dir /tmp/scikit*.whl \
     \
-    && pip install --no-cache-dir /tmp/sorna*.whl \
     && rm -f /tmp/*.whl
 
 COPY policy.yml /home/sorna/
