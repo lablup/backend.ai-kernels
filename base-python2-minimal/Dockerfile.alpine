@@ -4,11 +4,11 @@ RUN cd /; tar czpf python.tar.gz /usr/local/
 
 
 # ------------------------
-FROM lablup/kernel-base-python2-wheels:latest as wheel-builds
+FROM lablup/kernel-base-python2-wheels:alpine as wheel-builds
 
 
 # ------------------------
-FROM lablup/kernel-base:latest
+FROM lablup/kernel-base:alpine
 
 # Consult this on https://pkgs.alpinelinux.org/package/edge/main/x86_64/python3
 # NOTE: it should depend only on libressl but for somehow reason it actually requires openssl.

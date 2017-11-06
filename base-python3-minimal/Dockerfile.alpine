@@ -4,11 +4,11 @@ RUN cd /; tar czpf python.tar.gz /usr/local/
 
 
 # ------------------------
-FROM lablup/kernel-base-python3-wheels:latest as wheel-builds
+FROM lablup/kernel-base-python3-wheels:alpine as wheel-builds
 
 
 # ------------------------
-FROM lablup/kernel-base:latest
+FROM lablup/kernel-base:alpine
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
 

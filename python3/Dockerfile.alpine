@@ -1,9 +1,9 @@
-FROM lablup/kernel-base-python3-wheels:latest as wheel-builds
+FROM lablup/kernel-base-python3-wheels:alpine as wheel-builds
 RUN ls -lh /root
 
 
 # -------------------
-FROM lablup/kernel-base-python3-minimal:latest
+FROM lablup/kernel-base-python3-minimal:alpine
 
 # Install system packages for wheels
 RUN apk add --no-cache --virtual .sorna-deps \

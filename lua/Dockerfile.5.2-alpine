@@ -1,4 +1,4 @@
-FROM lablup/kernel-base-python3-minimal:latest
+FROM lablup/kernel-base-python3-minimal:alpine
 
 ENV LUA_VERSION 5.2
 ENV LUA_PACKAGE lua${LUA_VERSION}

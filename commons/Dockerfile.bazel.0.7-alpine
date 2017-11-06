@@ -1,5 +1,4 @@
-# Build target: lablup/common-bazel-alpine
-FROM lablup/kernel-python3:latest
+FROM lablup/kernel-python3:alpine
 
 RUN apk add --no-cache --virtual=.build-deps \
         bash \

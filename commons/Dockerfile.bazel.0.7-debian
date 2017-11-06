@@ -1,4 +1,3 @@
-# Build target: lablup/common-bazel:debian
 FROM bitnami/minideb:jessie
 
 RUN export DEBIAN_FRONTEND=noninteractive && \

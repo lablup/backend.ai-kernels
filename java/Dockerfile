@@ -1,4 +1,4 @@
-FROM lablup/kernel-base-python3-minimal:latest
+FROM lablup/kernel-base-python3-minimal:alpine
 
 # Install Java compile environments
 # ref: https://github.com/docker-library/openjdk/blob/master/8-jdk/alpine/Dockerfile
