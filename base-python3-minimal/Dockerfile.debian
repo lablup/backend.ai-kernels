@@ -30,4 +30,4 @@ RUN python -c 'import sys; print(sys.version_info); import ssl'
 RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq namedlist six "python-dateutil>=2"
 
-# vim: ft=dockerfile sts=4 sw=4 et
+# vim: ft=dockerfile

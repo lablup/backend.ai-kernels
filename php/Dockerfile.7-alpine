@@ -1,0 +1,20 @@
+FROM lablup/kernel-base-python3-minimal:latest
+
+# Install PHP 7.1
+RUN apk add --no-cache --virtual .build-deps build-base pkgconf autoconf automake \
+    && apk add --no-cache php7 php7-dev php7-xml php7-pcntl php7-pear php7-iconv php7-zlib php7-json php7-gd php7-sqlite3 \
+    # PECL patch (ref: http://stackoverflow.com/questions/40999752)
+    && sed -i "$ s|\-n||g" /usr/bin/pecl \
+    && apk del .build-deps
+
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[php]~=1.0.2"
+
+COPY policy.yml /home/sorna/policy.yml
+
+LABEL io.sorna.features "query uid-match"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "php"]
+
+# vim: ft=dockerfile

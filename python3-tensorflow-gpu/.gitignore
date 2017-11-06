@@ -1,5 +1,0 @@
-_cuda_query.c
-_cuda_query.o
-_cuda_query.*.so
-venv
-tensorflow_build

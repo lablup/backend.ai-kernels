@@ -1,0 +1,59 @@
+FROM lablup/kernel-base-python3-wheels:latest as wheel-builds
+RUN ls -lh /root
+
+
+# -------------------
+FROM lablup/kernel-base-python3-minimal:latest
+
+# Install system packages for wheels
+RUN apk add --no-cache --virtual .sorna-deps \
+        libstdc++ libgfortran libquadmath libjpeg libpng freetype openblas lapack \
+        jpeg libpng tiff
+
+# Copy pre-built wheels
+COPY --from=wheel-builds /root/*.whl /tmp/
+
+# Install pre-built wheels (the ordering matters!)
+RUN pip install --no-cache-dir /tmp/Cython*.whl \
+    && pip install --no-cache-dir /tmp/numpy*.whl \
+    \
+    && pip install --no-cache-dir /tmp/matplotlib*.whl \
+    && pip install --no-cache-dir /tmp/Pillow*.whl \
+    && pip install --no-cache-dir /tmp/scipy*.whl \
+    && pip install --no-cache-dir /tmp/pandas*.whl \
+    && pip install --no-cache-dir /tmp/seaborn*.whl \
+    \
+    && pip install --no-cache-dir /tmp/Pygments*.whl \
+    && pip install --no-cache-dir /tmp/ipython*.whl \
+    \
+    && pip install --no-cache-dir /tmp/PyWavelets*.whl \
+    && pip install --no-cache-dir /tmp/networkx*.whl \
+    && pip install --no-cache-dir /tmp/CVXcanon*.whl \
+    && pip install --no-cache-dir /tmp/fastcache*.whl \
+    && pip install --no-cache-dir /tmp/ecos*.whl \
+    && pip install --no-cache-dir /tmp/cvxpy*.whl \
+    \
+    && pip install --no-cache-dir /tmp/scikit*.whl \
+    \
+    && rm -f /tmp/*.whl
+
+COPY policy.yml /home/sorna/
+
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.0.2"
+
+# Matplotlib configuration and pre-heating
+ENV MPLCONFIGDIR /home/sorna/.matplotlib
+RUN mkdir /home/sorna/.matplotlib
+COPY matplotlibrc /home/sorna/.matplotlib/
+RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
+    && python /tmp/matplotlib-fontcache.py \
+    && rm /tmp/matplotlib-fontcache.py
+
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
+      io.sorna.features="batch query uid-match user-input"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
+
+# vim: ft=dockerfile

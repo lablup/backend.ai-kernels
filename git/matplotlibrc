@@ -1,4 +1,4 @@
-backend : module://sorna.matplotlib.backend_sorna
+backend : module://ai.backend.kernel.python.matplotlib.ingen
 svg.fonttype : none
 figure.facecolor : FFFFFF
 figure.edgecolor : FFFFFF
