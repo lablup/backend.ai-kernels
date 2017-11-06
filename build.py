@@ -57,7 +57,7 @@ build_kernel('python',              '3.6-debian', squash=True, latest=True)
 # TODO: (kernel-runner update required) build_kernel('base-python-minimal', '2.7-alpine', squash=True)
 # TODO: (kernel-runner update required) build_kernel('python',              '2.7-debian', squash=True, latest=True)
 
-build_kernel('git',     'alpine',     latest=True)
+build_kernel('git',     'alpine', squash=True, latest=True)
 build_kernel('c',       'gcc6.3-alpine', latest=True)
 build_kernel('cpp',     'gcc6.3-alpine', latest=True)
 build_kernel('java',    '8-alpine',      latest=True)

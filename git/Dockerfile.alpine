@@ -35,6 +35,10 @@ RUN pip install --no-cache-dir \
 RUN apk del .build-deps && \
     rm /tmp/*.whl
 
+# Install kernel-runner scripts package
+# (python extras are required for git graph plotting)
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[git,python]~=1.0.3"
+
 # Matplotlib configuration and pre-heating
 ENV MPLCONFIGDIR /home/sorna/.matplotlib
 RUN mkdir /home/sorna/.matplotlib
@@ -53,9 +57,11 @@ RUN echo 'set convert-meta off' >> /etc/inputrc; \
     echo 'set enc=utf8 tenc=utf8' >> /etc/vim/vimrc.local; \
     rm -f /usr/bin/vi && ln -s /usr/bin/vim /usr/bin/vi
 
-COPY run.py /home/sorna/run.py
 COPY policy.yml /home/sorna/policy.yml
 
-LABEL io.sorna.features "query tty uid-match"
+LABEL io.sorna.features="query tty uid-match"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "git"]
 
 # vim: ft=dockerfile
