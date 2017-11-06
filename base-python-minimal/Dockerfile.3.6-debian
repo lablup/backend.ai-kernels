@@ -9,6 +9,7 @@ ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
 
 RUN install_packages \
+        ca-certificates \
         libexpat1 libgdbm3 bzip2 libffi6 libsqlite3-0 liblzma5 zlib1g \
         libssl1.0.0. libmpdec2 \
         libncursesw5 libtinfo5 libreadline6 \

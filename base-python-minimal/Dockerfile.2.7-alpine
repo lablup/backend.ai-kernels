@@ -4,7 +4,7 @@ RUN cd /; tar czpf python.tar.gz /usr/local/
 
 
 # ------------------------
-FROM lablup/kernel-base-python2-wheels:alpine as wheel-builds
+FROM lablup/kernel-base-python-wheels:2.7-alpine as wheel-builds
 
 
 # ------------------------

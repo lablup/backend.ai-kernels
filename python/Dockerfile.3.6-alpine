@@ -6,7 +6,7 @@ RUN ls -lh /root
 FROM lablup/kernel-base-python-minimal:3.6-alpine
 
 # Install system packages for wheels
-RUN apk add --no-cache --virtual .sorna-deps \
+RUN apk add --no-cache \
         libstdc++ libgfortran libquadmath libjpeg libpng freetype openblas lapack \
         jpeg libpng tiff
 

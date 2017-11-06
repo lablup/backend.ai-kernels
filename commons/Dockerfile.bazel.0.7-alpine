@@ -1,4 +1,4 @@
-FROM lablup/kernel-python3:alpine
+FROM lablup/kernel-python:3.6-alpine
 
 RUN apk add --no-cache --virtual=.build-deps \
         bash \
