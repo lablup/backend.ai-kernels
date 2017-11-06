@@ -1,9 +1,9 @@
-FROM lablup/kernel-base-python2-wheels:alpine as wheel-builds
+FROM lablup/kernel-base-python-wheels:2.7-alpine as wheel-builds
 RUN ls -lh /root
 
 
 # -------------------
-FROM lablup/kernel-base-python2-minimal:alpine
+FROM lablup/kernel-base-python-minimal:2.7-alpine
 
 # Install system packages for wheels
 RUN apk add --no-cache --virtual .sorna-deps \

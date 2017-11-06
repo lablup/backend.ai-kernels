@@ -1,4 +1,4 @@
-FROM lablup/kernel-base-python3-minimal:alpine
+FROM lablup/kernel-base-python-minimal:3.6-alpine
 
 LABEL io.sorna.envs.corecount="NPROC"
 

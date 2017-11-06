@@ -1,4 +1,4 @@
-FROM lablup/kernel-python3:debian
+FROM lablup/kernel-python:3.6-debian
 
 # Install TensorFlow and Keras
 RUN pip install --no-cache-dir \

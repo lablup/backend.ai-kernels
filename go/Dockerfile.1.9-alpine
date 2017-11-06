@@ -1,7 +1,7 @@
 FROM golang:1.9-alpine3.6 as go-binary
 
 
-FROM lablup/kernel-base-python3-minimal:alpine
+FROM lablup/kernel-base-python-minimal:3.6-alpine
 
 # Install Go environments
 COPY --from=go-binary /usr/local/go /usr/local/

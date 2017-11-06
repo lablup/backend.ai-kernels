@@ -1,5 +1,5 @@
 # Ref: https://github.com/freebroccolo/docker-haskell/blob/master/8.2/Dockerfile
-FROM lablup/kernel-base-python3-minimal:debian
+FROM lablup/kernel-base-python-minimal:3.6-debian
 
 RUN echo 'deb http://ppa.launchpad.net/hvr/ghc/ubuntu trusty main' > /etc/apt/sources.list.d/ghc.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F6F88286 && \

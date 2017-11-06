@@ -1,4 +1,4 @@
-FROM lablup/kernel-base-python3-minimal:debian
+FROM lablup/kernel-base-python-minimal:3.6-debian
 
 # Install pre-build matplotlib
 RUN install_packages gcc g++ \

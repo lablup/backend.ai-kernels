@@ -1,4 +1,4 @@
-FROM lablup/kernel-base-python3-minimal:alpine
+FROM lablup/kernel-base-python-minimal:3.6-alpine
 
 # Install minimal Rust compile environments
 # (TODO: this is hold back to 1.17... we need to build newer version!)

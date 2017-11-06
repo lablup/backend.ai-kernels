@@ -1,4 +1,4 @@
-FROM lablup/kernel-base-python3-minimal:debian
+FROM lablup/kernel-base-python-minimal:3.6-debian
 
 # As we mostly have "manylinux" glibc-compatible binary packaes,
 # we don't have to rebuild these!

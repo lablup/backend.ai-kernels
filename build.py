@@ -3,6 +3,8 @@
 import subprocess
 from pathlib import Path
 
+auto_push = False
+
 
 def run(shellcmd):
     return subprocess.run(shellcmd, shell=True, check=True)
@@ -28,11 +30,17 @@ def build_kernel(name, tag, extra_opts='', *, latest=False, squash=False):
     run(f'docker build -t lablup/kernel-{name}:{tag} {extra_opts} -f {name}/Dockerfile.{tag} {sq} {name}')
     if latest:
         run(f'docker tag lablup/kernel-{name}:{tag} lablup/kernel-{name}:latest')
+    if auto_push:
+        run(f'docker push lablup/kernel-{name}:{tag}')
+        if latest:
+            run(f'docker push lablup/kernel-{name}:latest')
 
 
 def build_common(name, tag, extra_opts=''):
     print_header(f'Building common.{name}:{tag}')
     run(f'docker build -t lablup/common-{name}:{tag} {extra_opts} -f commons/Dockerfile.{name}.{tag} commons')
+    if auto_push:
+        run(f'docker push lablup/common-{name}:{tag}')
 
 
 
@@ -50,12 +58,11 @@ build_kernel('python',              '3.6-debian', squash=True, latest=True)
 # TODO: (kernel-runner update required) build_kernel('python',              '2.7-debian', squash=True, latest=True)
 
 build_kernel('git',     'alpine',     latest=True)
-build_kernel('c',       '11-alpine',  latest=True)
-build_kernel('cpp',     '14-alpine',  latest=True)
-build_kernel('java',    '9-alpine',   latest=True)
-build_kernel('java',    '8-alpine')
-build_kernel('rust',    '1.17-alpine', latest=True)
-build_kernel('go',      '1.9-alpine', latest=True)
+build_kernel('c',       'gcc6.3-alpine', latest=True)
+build_kernel('cpp',     'gcc6.3-alpine', latest=True)
+build_kernel('java',    '8-alpine',      latest=True)
+build_kernel('rust',    '1.17-alpine',   latest=True)
+build_kernel('go',      '1.9-alpine',    latest=True)
 build_kernel('go',      '1.8-alpine')
 build_kernel('haskell', 'ghc8.2-debian', latest=True)
 build_kernel('lua',     '5.3-alpine', latest=True)
@@ -109,6 +116,6 @@ build_common('tensorflow', '1.3-py36-dense')
 build_common('tensorflow', '1.3-py36-dense-gpu')
 
 build_kernel('python-tensorflow', '1.4-py36-dense')
-build_kernel('python-tensorflow', '1.4-py36-dense-gpu', latest=True)
+build_kernel('python-tensorflow', '1.4-py36-dense-gpu')
 build_kernel('python-tensorflow', '1.3-py36-dense')
 build_kernel('python-tensorflow', '1.3-py36-dense-gpu')

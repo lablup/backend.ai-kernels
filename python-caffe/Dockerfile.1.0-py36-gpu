@@ -1,4 +1,4 @@
-FROM lablup/kernel-python3:debian as caffe-builder
+FROM lablup/kernel-python:3.6-debian as caffe-builder
 
 # Build caffe
 RUN install_packages \
@@ -34,7 +34,7 @@ RUN cd /root; pip wheel "leveldb>=0.191"
 ENV PYTHONPATH=/home/sorna/caffe-install/python:.
 
 
-FROM lablup/kernel-python3:debian
+FROM lablup/kernel-python:3.6-debian
 
 # Install Caffe dependencies
 RUN install_packages \
