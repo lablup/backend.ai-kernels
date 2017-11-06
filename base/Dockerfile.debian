@@ -1,4 +1,4 @@
-FROM golang:1.8 as jail-builder
+FROM golang:1.8-jessie as jail-builder
 # Debian jessie ships libseccomp 2.1 but golang binding requires 2.2+
 RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
     apt update && apt -t jessie-backports install -y libseccomp-dev && \
