@@ -1,4 +1,4 @@
-FROM lablup/common-py3-tensorflow-gpu:1.4 as tf-binary
+FROM lablup/common-tensorflow:1.4-py36-dense-gpu as tf-binary
 FROM lablup/common-cuda:cuda8.0-cudnn6.0 as cuda-libs
 
 

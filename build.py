@@ -72,22 +72,25 @@ build_kernel('r',       '3.3-alpine', latest=True)
 # TODO: (not implemented) build_kernel('mono',   'XX-alpine', latest=True)
 # TODO: (not implemented) build_kernel('mono',   'XX-alpine')
 
+
 build_common('bazel', '0.7-debian')
 build_common('cuda', 'cuda8.0-cudnn6.0')
 # unused - build_common('glibc', 'alpine')
 # unused - build_common('bazel', '0.7-alpine')
 
-# Our TensorFlow currently depends on CUDA 8 + cuDNN 6
-# (TODO: upgrade to CUDA 9 + cuDNN 7 for Volta GPUs)
-build_common('tensorflow', '1.4-py36')
-build_common('tensorflow', '1.4-py36-gpu')
-build_common('tensorflow', '1.3-py36')
-build_common('tensorflow', '1.3-py36-gpu')
 
-build_kernel('python-tensorflow', '1.4-py36')
-build_kernel('python-tensorflow', '1.4-py36-gpu', latest=True)
-build_kernel('python-tensorflow', '1.3-py36')
-build_kernel('python-tensorflow', '1.3-py36-gpu')
+## Our TensorFlow currently depends on CUDA 8 + cuDNN 6
+## (TODO: upgrade to CUDA 9 + cuDNN 7 for Volta GPUs)
+#build_common('tensorflow', '1.4-py36')
+#build_common('tensorflow', '1.4-py36-gpu')
+#build_common('tensorflow', '1.3-py36')
+#build_common('tensorflow', '1.3-py36-gpu')
+#
+#build_kernel('python-tensorflow', '1.4-py36')
+#build_kernel('python-tensorflow', '1.4-py36-gpu', latest=True)
+#build_kernel('python-tensorflow', '1.3-py36')
+#build_kernel('python-tensorflow', '1.3-py36-gpu')
+
 build_kernel('python-caffe',      '1.0-py36')
 # TODO: (GPU not implemented) build_kernel('python-caffe',      '1.0-py36-gpu', latest=True)
 # TODO: (not implemented) build_kernel('python-caffe2',     '0.8-py36')
@@ -96,3 +99,16 @@ build_kernel('python-torch',      '0.2-py36')
 build_kernel('python-torch',      '0.2-py36-gpu', latest=True)
 # TODO (not modernized): build_kernel('python-theano',     '0.2-py36')
 # TODO (not modernized): build_kernel('python-theano',     '0.2-py36-gpu', latest=True)
+
+
+# Dense builds are for sharing each server with multiple tenants
+# (with some patches that enforces resource restrictions)
+build_common('tensorflow', '1.4-py36-dense')
+build_common('tensorflow', '1.4-py36-dense-gpu')
+build_common('tensorflow', '1.3-py36-dense')
+build_common('tensorflow', '1.3-py36-dense-gpu')
+
+build_kernel('python-tensorflow', '1.4-py36-dense')
+build_kernel('python-tensorflow', '1.4-py36-dense-gpu', latest=True)
+build_kernel('python-tensorflow', '1.3-py36-dense')
+build_kernel('python-tensorflow', '1.3-py36-dense-gpu')
