@@ -1,7 +1,7 @@
 FROM lablup/common-bazel:0.7-debian as bazel-binary
 
 
-# Build target: lablup/common-py3-tensorflow-cpu:1.3-debian
+# Build target: lablup/common-tensorflow:1.4-py36-dense
 # ref: https://github.com/tatsushid/docker-alpine-py3-tensorflow-jupyter/blob/master/Dockerfile
 FROM lablup/kernel-python:3.6-debian
 
