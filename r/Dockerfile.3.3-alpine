@@ -11,7 +11,7 @@ RUN Rscript /home/sorna/install-packages.R
 LABEL io.sorna.features="query uid-match"
 
 # Install kernel-runner scripts package
-RUN apk add --no-cache git \
+RUN apk add --no-cache git freetype freetype-dev \
     && pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.0.2"
 
 CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
