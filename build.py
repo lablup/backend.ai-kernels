@@ -25,20 +25,29 @@ def print_header(s):
 
 def build_kernel(name, tag, extra_opts='', *, latest=False, squash=False):
     assert Path(name).is_dir()
+
     sq = '--squash' if squash else ''
+    latest_tag = 'latest-gpu' if 'gpu' in tag else 'latest'
+
     print_header(f'Building {name}' + ' (latest)' if latest else '')
-    run(f'docker build -t lablup/kernel-{name}:{tag} {extra_opts} -f {name}/Dockerfile.{tag} {sq} {name}')
+    run('docker build '
+        f'-t lablup/kernel-{name}:{tag} {extra_opts} '
+        f'-f {name}/Dockerfile.{tag} {sq} {name}')
     if latest:
-        run(f'docker tag lablup/kernel-{name}:{tag} lablup/kernel-{name}:latest')
+        run('docker tag '
+            f'lablup/kernel-{name}:{tag} '
+            f'lablup/kernel-{name}:{latest_tag}')
     if auto_push:
         run(f'docker push lablup/kernel-{name}:{tag}')
         if latest:
-            run(f'docker push lablup/kernel-{name}:latest')
+            run(f'docker push lablup/kernel-{name}:{latest_tag}')
 
 
 def build_common(name, tag, extra_opts=''):
     print_header(f'Building common.{name}:{tag}')
-    run(f'docker build -t lablup/common-{name}:{tag} {extra_opts} -f commons/Dockerfile.{name}.{tag} commons')
+    run('docker build '
+        f'-t lablup/common-{name}:{tag} {extra_opts} '
+        f'-f commons/Dockerfile.{name}.{tag} commons')
     if auto_push:
         run(f'docker push lablup/common-{name}:{tag}')
 
@@ -98,11 +107,11 @@ build_common('cuda', 'cuda8.0-cudnn6.0')
 #build_kernel('python-tensorflow', '1.3-py36', squash=True)
 #build_kernel('python-tensorflow', '1.3-py36-gpu', squash=True)
 
-build_kernel('python-caffe',      '1.0-py36', squash=True)
+build_kernel('python-caffe',      '1.0-py36', latest=True, squash=True)
 # TODO: (GPU not implemented) build_kernel('python-caffe',      '1.0-py36-gpu', squash=True, latest=True)
 # TODO: (not implemented) build_kernel('python-caffe2',     '0.8-py36', squash=True)
 # TODO: (not implemented) build_kernel('python-caffe2',     '0.8-py36-gpu', squash=True, latest=True)
-build_kernel('python-torch',      '0.2-py36', squash=True)
+build_kernel('python-torch',      '0.2-py36', latest=True, squash=True)
 build_kernel('python-torch',      '0.2-py36-gpu', latest=True, squash=True)
 # TODO (not modernized): build_kernel('python-theano',     '0.2-py36', squash=True)
 # TODO (not modernized): build_kernel('python-theano',     '0.2-py36-gpu', squash=True, latest=True)
@@ -115,7 +124,7 @@ build_common('tensorflow', '1.4-py36-dense-gpu')
 build_common('tensorflow', '1.3-py36-dense')
 build_common('tensorflow', '1.3-py36-dense-gpu')
 
-build_kernel('python-tensorflow', '1.4-py36-dense', squash=True)
-build_kernel('python-tensorflow', '1.4-py36-dense-gpu', squash=True)
+build_kernel('python-tensorflow', '1.4-py36-dense', latest=True, squash=True)
+build_kernel('python-tensorflow', '1.4-py36-dense-gpu', latest=True, squash=True)
 build_kernel('python-tensorflow', '1.3-py36-dense', squash=True)
 build_kernel('python-tensorflow', '1.3-py36-dense-gpu', squash=True)
