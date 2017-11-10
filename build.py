@@ -27,7 +27,11 @@ def build_kernel(name, tag, extra_opts='', *, latest=False, squash=False):
     assert Path(name).is_dir()
 
     sq = '--squash' if squash else ''
-    latest_tag = 'latest-gpu' if 'gpu' in tag else 'latest'
+    latest_tag = 'latest'
+    if 'dense' in tag:
+        latest_tag += '-dense'
+    if 'gpu' in tag:
+        latest_tag += '-gpu'
 
     print_header(f'Building {name}' + ' (latest)' if latest else '')
     run('docker build '
