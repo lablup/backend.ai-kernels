@@ -1,0 +1,56 @@
+FROM golang:1.8-jessie as jail-builder
+# Debian jessie ships libseccomp 2.1 but golang binding requires 2.2+
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
+    apt update && apt -t jessie-backports install -y libseccomp-dev && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    mkdir -p /go/src/github.com/lablup/sorna-jail
+WORKDIR /go/src/github.com/lablup/sorna-jail
+RUN git clone https://github.com/lablup/sorna-jail . && \
+    go get -u github.com/fatih/color && \
+    go get -u github.com/seccomp/libseccomp-golang && \
+    go get -u github.com/gobwas/glob && \
+    go get -u gopkg.in/yaml.v2
+RUN make inside-container
+
+
+# ------------
+FROM bitnami/minideb:jessie as hook-builder
+RUN install_packages gcc libc6-dev make git-core ca-certificates
+WORKDIR /root
+RUN git clone https://github.com/lablup/sorna-hook && \
+    cd sorna-hook && \
+    make inner
+
+
+# ------------
+FROM ubuntu:16.04
+MAINTAINER DevOps "devops@lablup.com"
+
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && apt-get install -y libseccomp2 gosu && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    ln -s /usr/sbin/gosu /usr/sbin/su-exec && \
+    mkdir /home/work && chmod 755 /home/work && \
+    mkdir /home/sorna && chmod 755 /home/sorna
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Install jail
+COPY --from=jail-builder /go/src/github.com/lablup/sorna-jail/sorna-jail /home/sorna/jail
+COPY --from=hook-builder /root/sorna-hook/patch-libs.so /home/sorna/patch-libs.so
+ENV LD_PRELOAD /home/sorna/patch-libs.so
+
+WORKDIR /home/work
+VOLUME ["/home/work"]
+EXPOSE 2000 2001 2002 2003
+
+LABEL io.sorna.timeout="30" \
+      io.sorna.maxmem="128m" \
+      io.sorna.maxcores="1" \
+      io.sorna.version="2" \
+      io.sorna.features="uid-match"
+
+CMD ["/home/sorna/jail", "/bin/bash"]
+
+# vim: ft=dockerfile

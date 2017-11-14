@@ -895,6 +895,15 @@ class RustImageTest(ImageTestBase, unittest.TestCase):
         yield _rust_loop_test, '1\n2\n3'
 
 
+class CNTKImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/python-cntk:2.2-py36'
+
+    def basic_success(self):
+        yield 'print("hello world")', "hello world"
+        yield 'import cntk; print(cntk.__version__)', '2.2'
+
+
 class JailTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/kernel-python3'

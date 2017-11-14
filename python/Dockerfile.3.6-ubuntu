@@ -1,0 +1,36 @@
+FROM lablup/kernel-base-python-minimal:3.6-ubuntu
+
+# As we mostly have "manylinux" glibc-compatible binary packaes,
+# we don't have to rebuild these!
+RUN apt-get update && apt-get install -y make cmake pkg-config gcc g++ git-core \
+    && pip install --no-cache-dir Cython numpy \
+    && pip install --no-cache-dir matplotlib bokeh \
+    && pip install --no-cache-dir ipython \
+    && pip install --no-cache-dir pandas \
+    && pip install --no-cache-dir seaborn \
+    && pip install --no-cache-dir pillow \
+    && pip install --no-cache-dir networkx cvxpy \
+    && pip install --no-cache-dir scipy \
+    && pip install --no-cache-dir scikit-learn scikit-image \
+    && pip install --no-cache-dir pygments
+
+COPY policy.yml /home/sorna/
+
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.0.4"
+
+# Matplotlib configuration and pre-heating
+ENV MPLCONFIGDIR /home/sorna/.matplotlib
+RUN mkdir /home/sorna/.matplotlib
+COPY matplotlibrc /home/sorna/.matplotlib/
+RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
+    && python /tmp/matplotlib-fontcache.py \
+    && rm /tmp/matplotlib-fontcache.py
+
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
+      io.sorna.features="batch query uid-match user-input"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
+
+# vim: ft=dockerfile
