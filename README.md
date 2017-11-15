@@ -11,7 +11,7 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 | Go            | 1.9  | O | O |   |   |                   | 
 | Haskell       | 8.2  | O | O |   |   |                   |
 | Java          | 8.0  | O | O |   |   |                   |
-| Linux Console | -    |   | O | O | O |                   |  
+| Linux Console | -    |   | O | O | O | Bash On Ubuntu    |  
 | Lua           | 5.1  |   | O |   |   |                   |
 | Lua           | 5.2  |   | O |   |   |                   |
 | Lua           | 5.3  |   | O |   |   |                   |
@@ -49,6 +49,7 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 | cpp-gcc6.3-alpine       |                              |                         |
 | java-8-alpine           |                              |                         |
 | rust-1.17-alpine        |                              |                         |
+| git-3.6-alpine          |                              |                         |
 | go-1.8-alpine           |                              |                         |
 | go-1.9-alpine           |                              |                         |
 |                         | haskell-ghc8.2-debian        |                         |
