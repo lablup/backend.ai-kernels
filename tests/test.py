@@ -895,6 +895,17 @@ class RustImageTest(ImageTestBase, unittest.TestCase):
         yield _rust_loop_test, '1\n2\n3'
 
 
+_cntk_numpy_test = """
+import cntk
+import numpy as np
+x = cntk.input_variable(2)
+y = cntk.input_variable(2)
+x0 = np.asarray([[2., 1.]], dtype=np.float32)
+y0 = np.asarray([[4., 6.]], dtype=np.float32)
+print(cntk.squared_error(x, y).eval({x:x0, y:y0}))
+"""
+
+
 class CNTKImageTest(ImageTestBase, unittest.TestCase):
 
     image_name = 'lablup/python-cntk:2.2-py36'
@@ -902,6 +913,9 @@ class CNTKImageTest(ImageTestBase, unittest.TestCase):
     def basic_success(self):
         yield 'print("hello world")', "hello world"
         yield 'import cntk; print(cntk.__version__)', '2.2'
+        yield 'import cntk; print(cntk.minus([1, 2, 3], [4, 5, 6]).eval())', \
+              '[-3. -3. -3.]'
+        yield _cntk_numpy_test, '[ 29.]'
 
 
 class JailTest(ImageTestBase, unittest.TestCase):
