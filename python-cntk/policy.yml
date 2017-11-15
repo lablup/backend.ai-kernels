@@ -13,6 +13,7 @@ preserved_env_keys: [
   "USER", "SHELL", "TERM",
   "LD_LIBRARY_PATH",
   "LD_PRELOAD",
+  "KERAS_BACKEND",
 ]
 
 diff_to_default: true

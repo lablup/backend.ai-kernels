@@ -60,11 +60,15 @@ ENV LD_LIBRARY_PATH /usr/lib/openmpi/lib:$LD_LIBRARY_PATH
 RUN pip install --no-cache-dir https://cntk.ai/PythonWheel/CPU-Only/cntk-2.2-cp36-cp36m-linux_x86_64.whl
 RUN python -c "import cntk; print(cntk.__version__)"
 
+# Keras (set backend to use cntk)
+RUN pip install --no-cache-dir keras
+ENV KERAS_BACKEND=cntk
+
 # Below scripts are already executed in python/Dockerfile.3.6-ubuntu
 # Install kernel-runner scripts package
 # RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.0.4"
 
-# COPY policy.yml /home/sorna/policy.yml
+COPY policy.yml /home/sorna/policy.yml
 
 # LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
 #       io.sorna.features="batch query uid-match user-input"

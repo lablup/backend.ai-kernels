@@ -509,7 +509,8 @@ class Python3CaffeImageTest(ImageTestBase, unittest.TestCase):
 
 class R3ImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'lablup/kernel-r3'
+    # image_name = 'lablup/kernel-r3'
+    image_name = 'lablup/kernel-r:mro-3.4.2-ubuntu'
 
     def basic_success(self):
         yield 'cat("hello world\n")', 'hello world'
@@ -916,6 +917,7 @@ class CNTKImageTest(ImageTestBase, unittest.TestCase):
         yield 'import cntk; print(cntk.minus([1, 2, 3], [4, 5, 6]).eval())', \
               '[-3. -3. -3.]'
         yield _cntk_numpy_test, '[ 29.]'
+        yield 'import keras; print(keras.__name__)', 'keras', 'Using CNTK backend'
 
 
 class JailTest(ImageTestBase, unittest.TestCase):
