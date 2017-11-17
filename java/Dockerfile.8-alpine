@@ -21,7 +21,7 @@ RUN set -x \
     && [ "$JAVA_HOME" = "$(docker-java-home)" ]
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[java]~=1.0.2"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[java]~=1.0.7"
 
 COPY policy.yml /home/sorna/policy.yml
 
