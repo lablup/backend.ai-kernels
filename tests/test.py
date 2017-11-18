@@ -509,13 +509,28 @@ class Python3CaffeImageTest(ImageTestBase, unittest.TestCase):
 
 class R3ImageTest(ImageTestBase, unittest.TestCase):
 
-    # image_name = 'lablup/kernel-r3'
-    image_name = 'lablup/kernel-r:mro-3.4.2-ubuntu'
+    image_name = 'lablup/kernel-r3'
 
     def basic_success(self):
         yield 'cat("hello world\n")', 'hello world'
         yield 'a = 1;b = 2;c = a + b;cat(c, "\n")', '3'
         yield 'library("ggplot2"); cat("success\n")', 'success'
+
+    def basic_failure(self):
+        yield 'stop("my error")', ('my error', None)
+        yield 'some_undefined_func()', ('could not find function', None)
+        # checks if environment is properly isolated.
+        yield 'print(ctx)', ("object 'ctx' not found", None)
+
+
+class MROImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-r:mro-3.4.2-ubuntu'
+
+    def basic_success(self):
+        yield 'cat("hello world\n")', 'hello world'
+        yield 'a = 1;b = 2;c = a + b;cat(c, "\n")', '3'
+        # yield 'library("ggplot2"); cat("success\n")', 'success'
 
     def basic_failure(self):
         yield 'stop("my error")', ('my error', None)
