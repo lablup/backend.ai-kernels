@@ -1,0 +1,45 @@
+language: python
+cache: pip
+
+# stage decl.
+stages:
+  - name: test
+  - name: deploy
+    if: tag IS present
+
+python:
+  - "3.6"
+os:
+  - linux
+
+# stage def.
+jobs:
+  include:
+
+    - stage: test
+      install:
+        - pip install -U pip setuptools
+        - pip install -U -r requirements-ci.txt
+      script:
+        - python -m flake8 ai/backend tests
+        - python -m pytest -s -m "not integration" --cov=ai.backend
+      after_success:
+        - codecov
+
+    - stage: deploy
+      python: "3.6"
+      install: skip
+      script: skip
+      deploy:
+        on:
+          tags: true
+        provider: pypi
+        distributions: sdist bdist_wheel
+        skip_upload_docs: true
+        user: lablup
+        password:
+          secure: "dWXpxYRrTgNexrimpkFUhdDb/n2Ogd4IlxBxMTix9wV9Qh0EjdVCdbYTyz0lkrtmy1MR8cyncLgZazz3+ONuYXHi/8A6BSSVfllJXZ5gxOMChjwD2prEO5wYy2sZH0QXxPZBWCf+qdwHn6ZmO3ft8b9y6PND4EExIP5tYwdtOQ7Vfqii09vnPuY9ioRffeCMUCqLFR7w5hiAJDfrPgl/lMUbg0aNYg4/ivhjF3V5UEGcE+Tb9+XDsRJAVQ4w58kJYYbOAVv7Mhhe2KFI8M+ddzWF3JKqedZj/BOUGz+Pqu88Mtw/UyZ0Gg54zGNCKPu1igUYWJuMMegOaycx2s+1SrE8r91m3OE1vQg6Gv3+YfG6fGBqasND4AOC6bG5xkyZTyXn51o/yMr5iCqEuBR0AIdKNgNkPWXPsKa9zlNHMRpHCN5UPNSZ82fau9qgWT64n2P7IeaBfqHuMOGqqBV2d8tl+v9MabzvqVLB2I4iX5QydMYGSFvGMD7yDn9el8GDy+7aHK/GzEVuqdB5E0UortNxtzuyVXxL4metP9VUm0SUJLMe9y0hJFOa6SKV3/o4Qo5PYUj5AW7oAoQPHloX4+GBCWKHOKDGMqkXdoICBWiTMmxvEM64KuVtT+TQ7Y/8G9/xtrgRh0Si/AFbuODSoNvJ7oogXxyq30H/M78+wtA="
+
+notifications:
+  webhooks:
+    - https://outlook.office.com/webhook/74ae2c4d-ec4d-4fdf-b2c2-f5041d1e8631@13c6a44d-9b52-4b9e-aa34-0513ee7131f2/TravisCI/f17430ff524f401e9e20dec933bf3bd1/f9fe633f-b557-4a72-9533-8a75ca534594

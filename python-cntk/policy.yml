@@ -1,0 +1,24 @@
+whitelist_paths:
+  OP_OPEN: ["*"]
+  OP_ACCESS: ["*"]
+  OP_EXEC: ["*"]
+  OP_STAT: ["*"]
+  OP_CHMOD: ["/home/work/*", "/tmp/*"]
+exec_allowance: -1
+fork_allowance: -1
+max_child_procs: 32
+extra_envs: []
+preserved_env_keys: [
+  "HOME", "PATH", "LANG",
+  "USER", "SHELL", "TERM",
+  "LD_LIBRARY_PATH",
+  "LD_PRELOAD",
+  "KERAS_BACKEND",
+]
+
+diff_to_default: true
+
+# Following syscalls are blindly allowed.
+# IMPORTANT: ptrace MUST NOT be included!
+allowed_syscalls:
+  - "umask"

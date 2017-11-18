@@ -59,11 +59,14 @@ def build_common(name, tag, extra_opts=''):
 
 build_kernel('base', 'debian', latest=True)
 build_kernel('base', 'alpine')
+build_kernel('base', 'ubuntu', latest=True)
 
 build_kernel('base-python-minimal', '3.6-debian', squash=True, latest=True)
 build_kernel('base-python-wheels',  '3.6-alpine')
 build_kernel('base-python-minimal', '3.6-alpine', squash=True)
+build_kernel('base-python-minimal', '3.6-ubuntu', squash=True, latest=True)
 build_kernel('python',              '3.6-debian', squash=True, latest=True)
+build_kernel('python',              '3.6-ubuntu', squash=True, latest=True)
 
 # TODO: (kernel-runner update required) build_kernel('base-python-minimal', '2.7-debian', squash=True, latest=True)
 # TODO: (kernel-runner update required) build_kernel('base-python-wheels',  '2.7-alpine')
@@ -120,6 +123,8 @@ build_kernel('python-torch',      '0.2-py36-gpu', latest=True, squash=True)
 # TODO (not modernized): build_kernel('python-theano',     '0.2-py36', squash=True)
 # TODO (not modernized): build_kernel('python-theano',     '0.2-py36-gpu', squash=True, latest=True)
 
+# CNTK image (currently draft version base on Ubuntu:16.04)
+build_kernel('python-cntk', '2.2-py36', latest=True, squash=True)
 
 # Dense builds are for sharing each server with multiple tenants
 # (with some patches that enforces resource restrictions)
