@@ -19,6 +19,7 @@ WORKDIR /root
 RUN pip wheel cython
 RUN NPY_NUM_BUILD_JOBS=4 pip wheel numpy
 RUN pip wheel --no-deps matplotlib bokeh
+RUN pip wheel --no-deps cartopy
 RUN pip wheel --no-deps ipython
 RUN pip wheel --no-deps pandas
 RUN pip wheel --no-deps seaborn

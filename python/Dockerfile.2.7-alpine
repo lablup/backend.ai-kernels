@@ -20,6 +20,8 @@ RUN pip install --no-cache-dir /tmp/Cython*.whl \
     && pip install --no-cache-dir /tmp/numpy*.whl \
     \
     && pip install --no-cache-dir /tmp/matplotlib*.whl \
+    && pip install --no-cache-dir /tmp/pyproj*.whl \
+    && pip install --no-cache-dir /tmp/Cartopy*.whl \
     && pip install --no-cache-dir /tmp/Pillow*.whl \
     && pip install --no-cache-dir /tmp/scipy*.whl \
     && pip install --no-cache-dir /tmp/pandas*.whl \
