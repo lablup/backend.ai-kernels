@@ -13,6 +13,7 @@ FROM lablup/kernel-base:alpine
 # Consult this on https://pkgs.alpinelinux.org/package/edge/main/x86_64/python3
 # NOTE: it should depend only on libressl but for somehow reason it actually requires openssl.
 RUN apk add --no-cache ca-certificates \
+        wget \
         expat gdbm libbz2 libffi openssl ncurses-libs readline sqlite-libs xz-libs zlib
 
 # Copy the whole Python from the docker library image

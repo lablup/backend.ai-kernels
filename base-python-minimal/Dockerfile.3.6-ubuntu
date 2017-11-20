@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && apt-get install -y \
         ca-certificates \
+        wget \
         libexpat1 libgdbm3 bzip2 libffi6 libsqlite3-0 liblzma5 zlib1g \
         libssl1.0.0. libmpdec2 \
         libncursesw5 libtinfo5 libreadline6 \
