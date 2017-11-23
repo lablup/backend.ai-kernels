@@ -37,7 +37,7 @@ RUN apk del .build-deps && \
 
 # Install kernel-runner scripts package
 # (python extras are required for git graph plotting)
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[git,python]~=1.0.5"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[git,python]~=1.0.9"
 
 # Matplotlib configuration and pre-heating
 ENV MPLCONFIGDIR /home/sorna/.matplotlib
