@@ -15,14 +15,14 @@ Here we list the latest versions of our supported kernel iamges.
 | Haskell       | `lablup/kernel-haskell` | 8.2     | O     | O     |   |   |                    |
 | Java          | `lablup/kernel-java`    | 8.0     | O     | O     |   |   |                    |
 | Linux Console | `lablup/kernel-git`     | -       | -     | -     | - | O | Bash on Alpine 3.6 |  
-| Lua           | `lablup/kernel-lua`     | 5.3     |       | O     |   |   |                    |
-| Node.js       | `lablup/kernel-nodejs`  | 6.11    |       | O     |   |   |                    |
-| Octave        | `lablup/kernel-octave`  | 4.2     |       | O     |   |   |                    |
+| Lua           | `lablup/kernel-lua`     | 5.3     | O     | O     |   |   |                    |
+| Node.js       | `lablup/kernel-nodejs`  | 6.11    | O     | O     |   |   |                    |
+| Octave        | `lablup/kernel-octave`  | 4.2     | O     | O     |   |   |                    |
 | ~Python~      | `lablup/kernel-python`  | 2.7     | O     | O     | O |   | temporarily unsupported |
 | Python        | `lablup/kernel-python`  | 3.6     | O     | O\*   | O |   |                    |
 | Rust          | `lablup/kernel-rust`    | 1.17    | O     | O     |   |   |                    |
-| PHP           | `lablup/kernel-php`     | 7.1     |       | O     |   |   |                    |
-| R             | `lablup/kernel-r`       | 3.3     |       | O     |   |   | CRAN R             |
+| PHP           | `lablup/kernel-php`     | 7.1     | O     | O     |   |   |                    |
+| R             | `lablup/kernel-r`       | 3.3     | O     | O     |   |   | CRAN R             |
 
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
