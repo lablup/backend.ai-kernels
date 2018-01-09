@@ -22,8 +22,8 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 | ~Python~      | `lablup/kernel-python`  | 2.7     | O     | O     | O |   | temporarily unsupported |
 | Python        | `lablup/kernel-python`  | 3.6     | O     | O\*   | O |   |                    |
 | Rust          | `lablup/kernel-rust`    | 1.17    | O     | O     |   |   |                    |
-| PHP           | `lablup/kernel-php`     | 7.0     |       | O     |   |   |                    |
-| R             | `lablup/kernel-r`       | 3.0     |       | O     |   |   | CRAN R             |
+| PHP           | `lablup/kernel-php`     | 7.1     |       | O     |   |   |                    |
+| R             | `lablup/kernel-r`       | 3.3     |       | O     |   |   | CRAN R             |
 
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
