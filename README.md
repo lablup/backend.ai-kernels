@@ -8,20 +8,20 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 
 | Language      | Image Name              | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |---------------|-------------------------|---------|-------|-------|---|---|--------------------|
-| C             | `lablup/kernel-c`       | 6.3     | O     | O     | O |   | GCC compiler       |
-| C++ (14)      | `lablup/kernel-cpp`     | 6.3     | O     | O     | O |   | GCC compiler       |
+| C             | `lablup/kernel-c`       | 6.3     | O     | O     | O |   | GCC on Alpine 3.6  |
+| C++ (14)      | `lablup/kernel-cpp`     | 6.3     | O     | O     |   |   | GCC on Alpine 3.6  |
 | Go            | `lablup/kernel-go`      | 1.9     | O     | O     |   |   |                    | 
 | Haskell       | `lablup/kernel-haskell` | 8.2     | O     | O     |   |   |                    |
 | Java          | `lablup/kernel-java`    | 8.0     | O     | O     |   |   |                    |
-| Linux Console | `lablup/kernel-git`     | -       | -     | -     | - | O | Bash On Alpine 3.6 |  
+| Linux Console | `lablup/kernel-git`     | -       | -     | -     | - | O | Bash on Alpine 3.6 |  
 | Lua           | `lablup/kernel-lua`     | 5.1     |       | O     |   |   |                    |
 | Lua           | `lablup/kernel-lua`     | 5.2     |       | O     |   |   |                    |
 | Lua           | `lablup/kernel-lua`     | 5.3     |       | O     |   |   |                    |
 | Node.js       | `lablup/kernel-nodejs`  | 6       |       | O     |   |   |                    |
 | Octave        | `lablup/kernel-octave`  | 4.2     |       | O     |   |   |                    |
 | ~Python~      | `lablup/kernel-python`  | 2.7     | O     | O     | O |   | temporarily unsupported |
-| Python        | `lablup/kernel-python`  | 3.6     | O     | O\*   | O |   |                    | 
-| Rust          | `lablup/kernel-rust`    | 1.17    | O     | O     |   |   |                    | 
+| Python        | `lablup/kernel-python`  | 3.6     | O     | O\*   | O |   |                    |
+| Rust          | `lablup/kernel-rust`    | 1.17    | O     | O     |   |   |                    |
 | PHP           | `lablup/kernel-php`     | 7.0     |       | O     |   |   |                    |
 | R             | `lablup/kernel-r`       | 3.0     |       | O     |   |   | CRAN R             |
 
