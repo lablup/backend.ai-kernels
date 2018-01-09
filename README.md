@@ -7,31 +7,32 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 ("\*" in the Query mode column means that it supports preservation of global contexts across different query runs.)
 
 | Language      | Version | Batch | Query | Input Hook | TTY | Runtime Implementation |
-|---------------|------|---|---|-----|---|-------------------|
-| C             | 6.3  | O | O | O   |   | GCC compiler      |
-| C++ (C++14)   | 6.3  | O | O | O   |   | GCC compiler      |
-| Go            | 1.9  | O | O |     |   |                   | 
-| Haskell       | 8.2  | O | O |     |   |                   |
-| Java          | 8.0  | O | O |     |   |                   |
-| Linux Console | -    |   |   | O   | O | Bash On Ubuntu    |  
-| Lua           | 5.1  |   | O |     |   |                   |
-| Lua           | 5.2  |   | O |     |   |                   |
-| Lua           | 5.3  |   | O |     |   |                   |
-| Node.js       | 6    |   | O |     |   |                   |
-| Octave        | 4.2  |   | O |     |   |                   |
-| ~Python~      | 2.7  | O | O | O   |   | temporarily unsupported |
-| Python        | 3.6  | O | O | O\* |   |                   | 
-| Rust          | 1.17 | O | O |     |   |                   | 
-| PHP           | 7.0  |   | O |     |   |                   |
-| R             | 3.0  |   | O |     |   | CRAN R            |
+|---------------|------|---|-----|---|---|--------------------|
+| C             | 6.3  | O | O   | O |   | GCC compiler       |
+| C++ (14)      | 6.3  | O | O   | O |   | GCC compiler       |
+| Go            | 1.9  | O | O   |   |   |                    | 
+| Haskell       | 8.2  | O | O   |   |   |                    |
+| Java          | 8.0  | O | O   |   |   |                    |
+| Linux Console | -    | - | -   | - | O | Bash On Alpine 3.6 |  
+| Lua           | 5.1  |   | O   |   |   |                    |
+| Lua           | 5.2  |   | O   |   |   |                    |
+| Lua           | 5.3  |   | O   |   |   |                    |
+| Node.js       | 6    |   | O   |   |   |                    |
+| Octave        | 4.2  |   | O   |   |   |                    |
+| ~Python~      | 2.7  | O | O   | O |   | temporarily unsupported |
+| Python        | 3.6  | O | O\* | O |   |                    | 
+| Rust          | 1.17 | O | O   |   |   |                    | 
+| PHP           | 7.0  |   | O   |   |   |                    |
+| R             | 3.0  |   | O   |   |   | CRAN R             |
 
 | Deep-Learning Framework | Version  | Batch | Query | Input Hook | TTY | Runtime Implementation |
 |---------------|------|---|---|-----|---|-------------------|
-| TensorFlow    | 1.4  | O | O | O\* |   | Bundled w/Keras 2 |
-| TensorFlow    | 1.3  | O | O | O\* |   | Bundled w/Keras 2 |
-| PyTorch       | 0.2  | O | O | O\* |   |                   |
-| Theano        | 0.9  | O | O | O\* |   | Bundled w/Keras 2 |
-| CNTK          |(WIP) | O | O | O\* |   | Bundled w/Keras 2 |
+| TensorFlow    | 1.4  | O | O\* | O |   | Bundled w/Keras 2 |
+| TensorFlow    | 1.3  | O | O\* | O |   | Bundled w/Keras 2 |
+| PyTorch       | 0.2  | O | O\* | O |   |                   |
+| Theano        | 0.9  | O | O\* | O |   | Bundled w/Keras 2 |
+| CNTK          |(WIP) | O | O\* | O |   | Bundled w/Keras 2 |
+
 
 ## Build chain
 
