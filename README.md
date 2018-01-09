@@ -4,7 +4,8 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 
 ## Supporting modes
 
-("\*" in the Query mode column means that it supports preservation of global contexts across different query runs.)
+Here we list the latest versions of our supported kernel iamges.  
+"\*" in the Query mode column means that it supports preservation of global contexts across different query runs.
 
 | Language      | Image Name              | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |---------------|-------------------------|---------|-------|-------|---|---|--------------------|
@@ -14,10 +15,8 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 | Haskell       | `lablup/kernel-haskell` | 8.2     | O     | O     |   |   |                    |
 | Java          | `lablup/kernel-java`    | 8.0     | O     | O     |   |   |                    |
 | Linux Console | `lablup/kernel-git`     | -       | -     | -     | - | O | Bash on Alpine 3.6 |  
-| Lua           | `lablup/kernel-lua`     | 5.1     |       | O     |   |   |                    |
-| Lua           | `lablup/kernel-lua`     | 5.2     |       | O     |   |   |                    |
 | Lua           | `lablup/kernel-lua`     | 5.3     |       | O     |   |   |                    |
-| Node.js       | `lablup/kernel-nodejs`  | 6       |       | O     |   |   |                    |
+| Node.js       | `lablup/kernel-nodejs`  | 6.11    |       | O     |   |   |                    |
 | Octave        | `lablup/kernel-octave`  | 4.2     |       | O     |   |   |                    |
 | ~Python~      | `lablup/kernel-python`  | 2.7     | O     | O     | O |   | temporarily unsupported |
 | Python        | `lablup/kernel-python`  | 3.6     | O     | O\*   | O |   |                    |
@@ -30,7 +29,7 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 | TensorFlow | `lablup/kernel-python-tensorflow` | 1.4     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | TensorFlow | `lablup/kernel-python-tensorflow` | 1.3     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | PyTorch    | `lablup/kernel-python-torch`      | 0.2     | O     | O\*   | O   |   |                   |
-| Theano     | `lablup/kernel-python-theano`     | 0.9     | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | CNTK       | `lablup/kernel-python-cntk`       | (WIP)   | O     | O\*   | O   |   | Bundled w/Keras 2 |
 
 ## Build chain
