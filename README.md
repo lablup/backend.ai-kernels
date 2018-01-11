@@ -4,7 +4,7 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 
 ## Supporting modes
 
-Here we list the latest versions of our supported kernel iamges.  
+Here we list the latest versions of our supported kernel images.  
 "\*" in the Query mode column means that it supports preservation of global contexts across different query runs.
 
 | Language      | Image Name              | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
