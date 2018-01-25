@@ -72,7 +72,7 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
 COPY package.json /home/sorna/package.json
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[nodejs]~=1.0.2"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[nodejs]~=1.1.0"
 
 LABEL io.sorna.features "query uid-match"
 

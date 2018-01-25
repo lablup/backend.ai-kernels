@@ -8,7 +8,7 @@ RUN apk add --no-cache --virtual .build-deps build-base pkgconf autoconf automak
     && apk del .build-deps
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[php]~=1.0.2"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[php]~=1.1.0"
 
 COPY policy.yml /home/sorna/policy.yml
 

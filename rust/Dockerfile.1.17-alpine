@@ -5,7 +5,7 @@ FROM lablup/kernel-base-python-minimal:3.6-alpine
 RUN apk add --no-cache build-base cargo rust
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[rust]~=1.0.7"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[rust]~=1.1.0"
 
 COPY policy.yml /home/sorna/policy.yml
 

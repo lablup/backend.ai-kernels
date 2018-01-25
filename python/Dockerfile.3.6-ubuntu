@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y make cmake pkg-config gcc g++ git-core 
 COPY policy.yml /home/sorna/
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.0.4"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.1.0"
 
 # Matplotlib configuration and pre-heating
 ENV MPLCONFIGDIR /home/sorna/.matplotlib
