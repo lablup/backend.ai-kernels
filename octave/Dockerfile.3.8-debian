@@ -1,0 +1,28 @@
+FROM lablup/kernel-base-python3-minimal:debian
+
+# Install Octave
+RUN install_packages octave
+
+# Install gnuplot as default graphics toolkit
+# TODO: how to support graphics output support? (xvfb-run?)
+RUN install_packages ghostscript epstool transfig pstoedit gnuplot
+
+# Install octave packages
+ADD packages.m /home/sorna/packages.m
+RUN octave-cli /home/sorna/packages.m
+
+RUN mkdir /home/sorna/jsonlab
+COPY jsonlab.tgz /home/sorna/jsonlab.tgz
+RUN tar xvzf /home/sorna/jsonlab.tgz -C /home/sorna/
+
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[octave]~=1.1.0"
+
+COPY policy.yml /home/sorna/policy.yml
+
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC"
+LABEL io.sorna.features "query uid-match"
+
+RUN touch /etc/ld.so.nohwcap
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel","octave"]

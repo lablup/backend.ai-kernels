@@ -621,9 +621,9 @@ class Lua5ImageTest(ImageTestBase, unittest.TestCase):
         yield 'error("test-error")', ('test-error', None)
 
 
-class Octave4ImageTest(ImageTestBase, unittest.TestCase):
+class OctaveImageTest(ImageTestBase, unittest.TestCase):
 
-    image_name = 'lablup/kernel-octave4'
+    image_name = 'lablup/kernel-octave:latest'
 
     def basic_success(self):
         yield 'printf("hello world")', 'hello world'
