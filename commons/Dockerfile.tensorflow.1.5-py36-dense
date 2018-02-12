@@ -1,0 +1,69 @@
+FROM lablup/common-bazel:0.7-debian as bazel-binary
+
+
+# Build target: lablup/common-tensorflow:1.5-py36-dense
+# ref: https://github.com/tatsushid/docker-alpine-py3-tensorflow-jupyter/blob/master/Dockerfile
+FROM lablup/kernel-python:3.6-debian
+
+COPY --from=bazel-binary /usr/local/bin/bazel /usr/local/bin/
+
+RUN install_packages libcups2 && \
+    echo "deb http://http.debian.net/debian jessie-backports main" | \
+        tee --append /etc/apt/sources.list.d/jessie-backports.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends -t jessie-backports openjdk-8-jdk-headless && \
+    install_packages \
+        imagemagick \
+        graphviz \
+        cmake \
+        curl \
+        build-essential \
+        perl \
+        rsync \
+        sed \
+        swig \
+        git-core \
+        unzip zip
+
+# Check Bazel is runnable.
+RUN bazel version
+
+# Prepare for building TensorFlwo wheel
+RUN pip3 install --no-cache-dir wheel
+
+# Limit the system resource used during compilation
+ENV LOCAL_RESOURCES 4096,8.0,1.0
+
+# The TensorFlow version
+ENV TF_VERSION 1.5
+
+RUN : build TensorFlow pip package \
+    && cd /tmp \
+    && curl -SL https://github.com/lablup/tensorflow/archive/r${TF_VERSION}-lablup.tar.gz \
+        | tar xzf -
+RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup \
+    # temporary fix for tensorflow/tensorflow#12979
+    && sed -i '\@https://github.com/google/protobuf/archive/0b059a3d8a8f8aa40dde7bea55edca4ec5dfea66.tar.gz@d' tensorflow/workspace.bzl \
+    && PYTHON_BIN_PATH=/usr/local/bin/python \
+        PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
+        GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
+        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
+        TF_NEED_MKL=0 \
+        TF_NEED_JEMALLOC=1 \
+        TF_NEED_GCP=0 \
+        TF_NEED_HDFS=0 \
+        TF_ENABLE_XLA=0 \
+        TF_NEED_VERBS=0 \
+        TF_NEED_OPENCL=0 \
+        TF_NEED_CUDA=0 \
+        TF_NEED_MPI=0 \
+        bash configure \
+    && bazel build \
+        --config=opt --local_resources ${LOCAL_RESOURCES} \
+        --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
+        //tensorflow/tools/pip_package:build_pip_package \
+    && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+
+RUN ls -l /tmp/tensorflow_pkg
+
+# vim: ft=dockerfile sts=4 sw=4 et tw=0

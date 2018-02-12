@@ -1,0 +1,22 @@
+FROM lablup/common-tensorflow:1.5-py36-dense as tf-binary
+
+
+FROM lablup/kernel-python:3.6-debian
+
+# Install TensorFlow and Keras
+COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
+RUN pip install --no-cache-dir /tmp/tensorflow-*.whl && \
+    pip install --no-cache-dir keras && \
+    pip install --no-cache-dir h5py
+RUN rm -f /tmp/*.whl
+
+COPY policy.yml /home/sorna/policy.yml
+
+LABEL io.sorna.timeout="0" \
+      io.sorna.maxmem="8g" \
+      io.sorna.maxcores="4" \
+      io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      io.sorna.features="batch query uid-match user-input"
+
+
+# vim: ft=dockerfile

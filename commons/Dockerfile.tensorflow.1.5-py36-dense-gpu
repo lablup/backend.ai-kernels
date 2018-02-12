@@ -1,0 +1,100 @@
+FROM lablup/common-bazel:0.7-debian as bazel-binary
+
+
+FROM lablup/common-cuda:cuda8.0-cudnn6.0 as cuda-binary
+
+
+# Build target: lablup/common-tensorflow:1.5-py36-dense-gpu
+# ref: https://github.com/tatsushid/docker-alpine-py3-tensorflow-jupyter/blob/master/Dockerfile
+FROM lablup/kernel-python:3.6-debian
+
+COPY --from=bazel-binary /usr/local/bin/bazel /usr/local/bin/
+
+RUN install_packages libcups2 && \
+    echo "deb http://http.debian.net/debian jessie-backports main" | \
+        tee --append /etc/apt/sources.list.d/jessie-backports.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends -t jessie-backports openjdk-8-jdk-headless && \
+    install_packages \
+        imagemagick \
+        graphviz \
+        cmake \
+        curl \
+        build-essential \
+        perl \
+        rsync \
+        sed \
+        swig \
+        git-core \
+        unzip zip
+
+# Check Bazel is runnable.
+RUN bazel version
+
+# Prepare for building TensorFlow wheel
+RUN pip3 install --no-cache-dir wheel
+
+# Copy-and-extract CUDA and cuDNN library
+COPY --from=cuda-binary /usr/local/cuda-8.0 /usr/local/cuda-8.0
+RUN ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
+    ln -s /usr/local/cuda/lib64/libcudnn.so /usr/local/cuda/lib64/libcudnn.so.6.0 && \
+    #sed -r -i'' "s:(#error -- unsupported GNU version)://\1:" /usr/local/cuda/include/host_config.h && \
+    #sed -r -i'' "s:(__cudart_builtin__) int (isnan|isinf)(\(double x\)) throw\(\):\1 constexpr bool \2\3:" /usr/local/cuda-8.0/include/math_functions.h && \
+    mkdir -p /etc/ld.so.conf.d && \
+    echo "/usr/local/cuda/lib64" > /etc/ld.so.conf.d/cuda.conf && \
+    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/cuda-stubs.conf && \
+    echo "/usr/local/nvidia/lib64" > /etc/ld.so.conf.d/nvidia.conf && \
+    ldconfig
+
+# The TensorFlow version
+ENV TF_VERSION 1.5
+
+# NOTE: python should be linked to python3
+RUN : build TensorFlow pip package \
+    && cd /tmp \
+    && curl -SL https://github.com/lablup/tensorflow/archive/r${TF_VERSION}-lablup.tar.gz \
+        | tar xzf -
+RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup \
+    && PYTHON_BIN_PATH=/usr/local/bin/python \
+        PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
+        GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
+        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
+        TF_NEED_MKL=0 \
+        TF_NEED_JEMALLOC=1 \
+        TF_NEED_GCP=0 \
+        TF_NEED_HDFS=0 \
+        TF_ENABLE_XLA=0 \
+        TF_NEED_VERBS=0 \
+        TF_NEED_OPENCL=0 \
+        TF_NEED_CUDA=1 \
+        TF_CUDA_CLANG=0 \
+        TF_NEED_MPI=0 \
+        TF_NEED_GDR=0 \
+        TF_NEED_S3=0 \
+        TF_CUDA_VERSION=8.0 \
+        TF_CUDNN_VERSION=6.0 \
+        TF_CUDA_COMPUTE_CAPABILITIES=3.5,3.7,5.2,6.1 \
+        CUDA_TOOLKIT_PATH=/usr/local/cuda \
+        CUDNN_INSTALL_PATH=/usr/local/cuda \
+        bash configure
+RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup ; \
+    sed -r -i'' "s@http://www.sqlite.org@https://www.sqlite.org@" tensorflow/workspace.bzl ; \
+    PYTHON_BIN_PATH=/usr/local/bin/python \
+    PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
+    bazel fetch //tensorflow/tools/pip_package:build_pip_package
+
+# Limit the system resource used during compilation
+ENV LOCAL_RESOURCES 32768,8.0,1.0
+
+RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup; \
+    PYTHON_BIN_PATH=/usr/local/bin/python \
+    PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
+    bazel build \
+        --config=opt --config=cuda --local_resources ${LOCAL_RESOURCES} \
+        --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
+        //tensorflow/tools/pip_package:build_pip_package \
+    && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+
+RUN ls -lh /tmp/tensorflow_pkg
+
+# vim: ft=dockerfile sts=4 sw=4 et tw=0
