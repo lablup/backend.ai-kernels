@@ -104,11 +104,15 @@ build_common('cuda', 'cuda8.0-cudnn6.0')
 
 ## Our TensorFlow currently depends on CUDA 8 + cuDNN 6
 ## (TODO: upgrade to CUDA 9 + cuDNN 7 for Volta GPUs)
+#build_common('tensorflow', '1.5-py36', squash=True)
+#build_common('tensorflow', '1.5-py36-gpu', squash=True)
 #build_common('tensorflow', '1.4-py36', squash=True)
 #build_common('tensorflow', '1.4-py36-gpu', squash=True)
 #build_common('tensorflow', '1.3-py36', squash=True)
 #build_common('tensorflow', '1.3-py36-gpu', squash=True)
 #
+#build_kernel('python-tensorflow', '1.5-py36', squash=True)
+#build_kernel('python-tensorflow', '1.5-py36-gpu', squash=True, latest=True)
 #build_kernel('python-tensorflow', '1.4-py36', squash=True)
 #build_kernel('python-tensorflow', '1.4-py36-gpu', squash=True, latest=True)
 #build_kernel('python-tensorflow', '1.3-py36', squash=True)
@@ -128,11 +132,15 @@ build_kernel('python-cntk', '2.2-py36', latest=True, squash=True)
 
 # Dense builds are for sharing each server with multiple tenants
 # (with some patches that enforces resource restrictions)
+build_common('tensorflow', '1.5-py36-dense')
+build_common('tensorflow', '1.5-py36-dense-gpu')
 build_common('tensorflow', '1.4-py36-dense')
 build_common('tensorflow', '1.4-py36-dense-gpu')
 build_common('tensorflow', '1.3-py36-dense')
 build_common('tensorflow', '1.3-py36-dense-gpu')
 
+build_kernel('python-tensorflow', '1.5-py36-dense', latest=True, squash=True)
+build_kernel('python-tensorflow', '1.5-py36-dense-gpu', latest=True, squash=True)
 build_kernel('python-tensorflow', '1.4-py36-dense', latest=True, squash=True)
 build_kernel('python-tensorflow', '1.4-py36-dense-gpu', latest=True, squash=True)
 build_kernel('python-tensorflow', '1.3-py36-dense', squash=True)
