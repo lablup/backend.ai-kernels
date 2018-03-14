@@ -4,6 +4,7 @@ ENV MAKEFLAGS -j
 ENV MAKEOPTS -j
 
 # Prepare build environment and libraries
+RUN apk update
 RUN apk add --no-cache \
     # runtime deps
         libstdc++ libgfortran libquadmath libjpeg libpng freetype openblas lapack \
@@ -14,10 +15,17 @@ RUN apk add --no-cache \
     # Hack for numpy
     && ln -s /usr/include/locale.h /usr/include/xlocale.h
 
+RUN apk add --no-cache --virtual .build-deps-testing \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+        geos-dev \
+        proj4-dev
+
+
 WORKDIR /root
 
-RUN pip wheel cython
-RUN NPY_NUM_BUILD_JOBS=4 pip wheel numpy
+RUN pip install -U pip setuptools
+RUN pip install --no-binary --no-cache-dir Cython
+RUN NPY_NUM_BUILD_JOBS=4 pip install --no-deps numpy
 RUN pip wheel --no-deps matplotlib bokeh
 RUN pip wheel --no-deps cartopy
 RUN pip wheel --no-deps ipython
