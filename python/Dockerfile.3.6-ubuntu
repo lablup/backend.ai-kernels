@@ -2,15 +2,19 @@ FROM lablup/kernel-base-python-minimal:3.6-ubuntu
 
 # As we mostly have "manylinux" glibc-compatible binary packaes,
 # we don't have to rebuild these!
-RUN apt-get update && apt-get install -y make cmake pkg-config gcc g++ git-core \
-    && pip install --no-cache-dir Cython numpy \
-    && pip install --no-cache-dir matplotlib bokeh 
-RUN pip install --no-cache-dir pyproj \
-    && pip install --no-cache-dir Cartopy 
-RUN pip install --no-cache-dir ipython 
+# RUN apt-get remove gcc-5-multilib
+#72 gcc g++ support
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test 
+RUN apt-get update -y && apt-get install -y make cmake pkg-config gcc g++ git-core
+RUN pip install --no-cache-dir Cython numpy \
+    && pip install --no-cache-dir matplotlib bokeh \
+    && pip install --no-cache-dir pyproj \
+    && pip install --no-cache-dir Cartopy \
+    && pip install --no-cache-dir ipython \
     && pip install --no-cache-dir pandas \
-    && pip install --no-cache-dir seaborn 
-RUN pip install --no-cache-dir pillow \
+    && pip install --no-cache-dir seaborn \
+    && pip install --no-cache-dir pillow \
     && pip install --no-cache-dir networkx cvxpy \
     && pip install --no-cache-dir scipy \
     && pip install --no-cache-dir scikit-learn scikit-image \
