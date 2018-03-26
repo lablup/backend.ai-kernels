@@ -26,7 +26,7 @@ Here we list the latest versions of our supported kernel images.
 
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.4     | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| TensorFlow | `lablup/kernel-python-tensorflow` | 1.5     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | TensorFlow | `lablup/kernel-python-tensorflow` | 1.3     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | PyTorch    | `lablup/kernel-python-torch`      | 0.2     | O     | O\*   | O   |   |                   |
 | Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
@@ -69,6 +69,8 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 |                         | python-torch-0.2-py36        |                         |
 |                         | python-torch-0.2-py36-gpu    |                         |
 |                         |                              | python-cntk-2.2-py36    |
+|                         | tensorflow-1.5-py36-dense    |                         |
+|                         | tensorflow-1.5-py36-dense-gpu|                         |
 |                         | tensorflow-1.4-py36-dense    |                         |
 |                         | tensorflow-1.4-py36-dense-gpu|                         |
 |                         | tensorflow-1.3-py36-dense    |                         |
