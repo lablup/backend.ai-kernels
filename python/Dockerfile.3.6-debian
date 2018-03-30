@@ -11,6 +11,7 @@ RUN install_packages libgeos++-dev \
     && pip install --no-cache-dir -U pip setuptools \
     && pip install --no-cache-dir Cython numpy \
     && pip install --no-cache-dir matplotlib bokeh \
+    && pip install --no-cache-dir pyproj \
     && pip install --no-cache-dir Cartopy \
     && pip install --no-cache-dir ipython \
     && pip install --no-cache-dir pandas \
