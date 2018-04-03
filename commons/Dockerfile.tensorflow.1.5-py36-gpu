@@ -54,7 +54,7 @@ RUN : build TensorFlow pip package \
     && cd /tmp \
     && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
         | tar xzf -
-RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup \
+RUN cd /tmp/tensorflow-r${TF_VERSION} \
     && PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
@@ -77,7 +77,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup \
         CUDA_TOOLKIT_PATH=/usr/local/cuda \
         CUDNN_INSTALL_PATH=/usr/local/cuda \
         bash configure
-RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup ; \
+RUN cd /tmp/tensorflow-r${TF_VERSION} ; \
     sed -r -i'' "s@http://www.sqlite.org@https://www.sqlite.org@" tensorflow/workspace.bzl ; \
     PYTHON_BIN_PATH=/usr/local/bin/python \
     PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
@@ -86,7 +86,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup ; \
 # Limit the system resource used during compilation
 ENV LOCAL_RESOURCES 32768,8.0,1.0
 
-RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup; \
+RUN cd /tmp/tensorflow-r${TF_VERSION}; \
     PYTHON_BIN_PATH=/usr/local/bin/python \
     PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
     bazel build \

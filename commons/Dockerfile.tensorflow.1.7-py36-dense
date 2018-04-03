@@ -1,4 +1,4 @@
-FROM lablup/common-bazel:0.7-debian as bazel-binary
+FROM lablup/common-bazel:0.11-debian as bazel-binary
 
 
 # Build target: lablup/common-tensorflow:1.5-py36-dense

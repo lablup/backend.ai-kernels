@@ -1,4 +1,4 @@
-FROM lablup/common-bazel:0.7-debian as bazel-binary
+FROM lablup/common-bazel:0.11-debian as bazel-binary
 
 
 FROM lablup/common-cuda:cuda8.0-cudnn6.0 as cuda-binary

@@ -1,4 +1,4 @@
-FROM lablup/common-bazel:0.7-debian as bazel-binary
+FROM lablup/common-bazel:0.11-debian as bazel-binary
 
 
 # Build target: lablup/common-tensorflow:1.5-py36-dense
@@ -41,7 +41,7 @@ RUN : build TensorFlow pip package \
     && cd /tmp \
     && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
         | tar xzf -
-RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup \
+RUN cd /tmp/tensorflow-r${TF_VERSION} \
     # temporary fix for tensorflow/tensorflow#12979
     && sed -i '\@https://github.com/google/protobuf/archive/0b059a3d8a8f8aa40dde7bea55edca4ec5dfea66.tar.gz@d' tensorflow/workspace.bzl \
     && PYTHON_BIN_PATH=/usr/local/bin/python \
