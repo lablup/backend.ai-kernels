@@ -162,3 +162,5 @@ build_kernel('python-tensorflow', '1.4-py36-dense', squash=True)
 build_kernel('python-tensorflow', '1.4-py36-dense-gpu', squash=True)
 build_kernel('python-tensorflow', '1.3-py36-dense', squash=True)
 build_kernel('python-tensorflow', '1.3-py36-dense-gpu', squash=True)
+
+build_kernel('vendor/aws_polly', 'debian')
