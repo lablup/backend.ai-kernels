@@ -38,6 +38,7 @@ RUN pip3 install --no-cache-dir wheel
 COPY --from=cuda-binary /usr/local/cuda-8.0 /usr/local/cuda-8.0
 RUN ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
     ln -s /usr/local/cuda/lib64/libcudnn.so /usr/local/cuda/lib64/libcudnn.so.6.0 && \
+    ln -s /usr/local/cuda-8.0/nvvm/libdevice/libdevice.compute_50.10.bc /usr/local/cuda-8.0/nvvm/libdevice/libdevice.10.bc && \
     mkdir -p /etc/ld.so.conf.d && \
     echo "/usr/local/cuda/lib64" > /etc/ld.so.conf.d/cuda.conf && \
     echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/cuda-stubs.conf && \
