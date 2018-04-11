@@ -1,0 +1,36 @@
+FROM lablup/kernel-base-python-minimal:3.6-conda
+
+# As we mostly have "manylinux" glibc-compatible binary packaes,
+# we don't have to rebuild these!
+RUN install_packages make cmake pkg-config gcc g++ git-core
+
+COPY install-libproj.sh /home/sorna
+RUN sh /home/sorna/install-libproj.sh && rm /home/sorna/install-libproj.sh
+
+RUN install_packages libgeos++-dev && \
+    conda install bokeh && \
+    conda install pyproj && \
+    conda install Cartopy && \
+    conda install seaborn && \
+    conda install pillow
+
+COPY policy.yml /home/sorna/
+
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.1.0"
+
+# Matplotlib configuration and pre-heating
+ENV MPLCONFIGDIR /home/sorna/.matplotlib
+RUN mkdir /home/sorna/.matplotlib
+COPY matplotlibrc /home/sorna/.matplotlib/
+RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
+    && python /tmp/matplotlib-fontcache.py \
+    && rm /tmp/matplotlib-fontcache.py
+
+LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
+      io.sorna.features="batch query uid-match user-input"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
+
+# vim: ft=dockerfile
