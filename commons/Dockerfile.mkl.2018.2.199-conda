@@ -82,7 +82,16 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
-        TF_NEED_MKL=0 \
+        ENV CI_BUILD_PYTHON=python \
+        LD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
+        PYTHON_BIN_PATH=/usr/bin/python \
+        PYTHON_LIB_PATH=/usr/local/lib/python3.6/dist-packages \
+        CC_OPT_FLAGS='-march=native' \
+        TF_NEED_JEMALLOC=1 \
+        TF_NEED_S3=0 \
+        TF_NEED_GDR=0 \
+        TF_NEED_VERBS=0 \
+        TF_NEED_MKL=1 \
         TF_NEED_JEMALLOC=1 \
         TF_NEED_GCP=0 \
         TF_NEED_HDFS=0 \
