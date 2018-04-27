@@ -1,0 +1,95 @@
+FROM golang:1.8-jessie as jail-builder
+# Debian jessie ships libseccomp 2.1 but golang binding requires 2.2+
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
+    apt update && apt -t jessie-backports install -y libseccomp-dev && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    mkdir -p /go/src/github.com/lablup/sorna-jail
+WORKDIR /go/src/github.com/lablup/sorna-jail
+RUN git clone https://github.com/lablup/sorna-jail . && \
+    go get -u github.com/fatih/color && \
+    go get -u github.com/seccomp/libseccomp-golang && \
+    go get -u github.com/gobwas/glob && \
+    go get -u gopkg.in/yaml.v2
+RUN make inside-container
+
+
+# ------------
+FROM bitnami/minideb:jessie as hook-builder
+RUN install_packages gcc libc6-dev make git-core ca-certificates
+WORKDIR /root
+RUN git clone https://github.com/lablup/sorna-hook && \
+    cd sorna-hook && \
+    make inner
+
+
+# ------------
+#FROM ubuntu:16.04
+FROM scratch
+MAINTAINER DevOps "devops@lablup.com"
+
+# The root file system are published at https://partner-images.canonical.com/core/ by Canonical
+ADD ubuntu-bionic-core-cloudimg-amd64-root.tar.gz /
+RUN set -xe && \
+    echo '#!/bin/sh' > /usr/sbin/policy-rc.d && \
+    echo 'exit 101' >> /usr/sbin/policy-rc.d && \
+    chmod +x /usr/sbin/policy-rc.d && \
+    \
+    dpkg-divert --local --rename --add /sbin/initctl && \
+    cp -a /usr/sbin/policy-rc.d /sbin/initctl && \
+    sed -i 's/^exit.*/exit 0/' /sbin/initctl && \
+    echo 'force-unsafe-io' > /etc/dpkg/dpkg.cfg.d/docker-apt-speedup
+
+RUN echo 'DPkg::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };' > /etc/apt/apt.conf.d/docker-clean && \
+	echo 'APT::Update::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };' >> /etc/apt/apt.conf.d/docker-clean && \
+	echo 'Dir::Cache::pkgcache ""; Dir::Cache::srcpkgcache "";' >> /etc/apt/apt.conf.d/docker-clean
+
+RUN echo 'DPkg::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };' > /etc/apt/apt.conf.d/docker-clean
+
+RUN echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/docker-no-languages
+
+RUN echo 'Acquire::GzipIndexes "true"; Acquire::CompressionTypes::Order:: "gz";' > /etc/apt/apt.conf.d/docker-gzip-indexes
+
+RUN echo 'Apt::AutoRemove::SuggestsImportant "false";' > /etc/apt/apt.conf.d/docker-autoremove-suggests
+
+
+RUN rm -fr /var/lib/apt/lists/*
+RUN sed -i 's/^#\s*\(deb.*universe\)$/\1/g' /etc/apt/sources.list
+RUN mkdir -p /run/systemd && \
+    echo 'docker' > /run/systemd/container
+
+RUN export DEBIAN_FRONTEND=noninteractive
+RUN sed -i.bak -e \
+ "s%http://archive.ubuntu.com/%http://ftp.daumkakao.com/%g" \
+  /etc/apt/sources.list
+RUN sed -i.bak -e \
+ "s%http://security.ubuntu.com/%http://ftp.daumkakao.com/%g" \
+  /etc/apt/sources.list
+RUN apt-get update
+
+RUN apt-get install -y libseccomp2 gosu && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    ln -s /usr/sbin/gosu /usr/sbin/su-exec && \
+    mkdir /home/work && chmod 755 /home/work && \
+    mkdir /home/sorna && chmod 755 /home/sorna
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Install jail
+COPY --from=jail-builder /go/src/github.com/lablup/sorna-jail/sorna-jail /home/sorna/jail
+COPY --from=hook-builder /root/sorna-hook/patch-libs.so /home/sorna/patch-libs.so
+ENV LD_PRELOAD /home/sorna/patch-libs.so
+
+WORKDIR /home/work
+VOLUME ["/home/work"]
+EXPOSE 2000 2001 2002 2003
+
+LABEL io.sorna.timeout="30" \
+      io.sorna.maxmem="128m" \
+      io.sorna.maxcores="1" \
+      io.sorna.version="2" \
+      io.sorna.features="uid-match"
+
+CMD ["/home/sorna/jail", "/bin/bash"]
+
+# vim: ft=dockerfile
