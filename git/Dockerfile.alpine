@@ -9,7 +9,7 @@ RUN apk add --no-cache --virtual .sorna-deps \
         libgit2 libffi wget curl bash git nano vim \
         libjpeg libpng freetype openblas lapack \
     && apk add --no-cache --virtual .build-deps \
-        build-base libffi-dev cmake \
+        build-base openssl-dev libffi-dev cmake \
     # Hack for numpy
     && ln -s /usr/include/locale.h /usr/include/xlocale.h \
     && mkdir -p /tmp/git-flow && cd /tmp/git-flow \
