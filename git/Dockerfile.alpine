@@ -1,7 +1,6 @@
 FROM lablup/kernel-base-python-wheels:3.6-alpine as wheel-builds
 RUN ls -lh /root
 
-
 # -------------------
 FROM lablup/kernel-base-python-minimal:3.6-alpine
 
@@ -18,15 +17,16 @@ RUN apk add --no-cache --virtual .sorna-deps \
     && bash gitflow-installer.sh install stable \
     && cd /tmp && rm -rf /tmp/git-flow \
     && mkdir -p /tmp/libgit-build && cd /tmp/libgit-build \
-    && wget https://github.com/libgit2/libgit2/archive/v0.26.0.tar.gz \
-    && tar xzf v0.26.0.tar.gz \
-    && cd libgit2-0.26.0/ \
+    && wget https://github.com/libgit2/libgit2/archive/v0.27.0.tar.gz \
+    && tar xzf v0.27.0.tar.gz \
+    && cd libgit2-0.27.0/ \
     && cmake . \
     && make -j8 \
     && make install \
     && cd /tmp && rm -rf /tmp/libgit-build
 
 COPY --from=wheel-builds /root/numpy*.whl /root/pandas*.whl /root/matplotlib*.whl /tmp/
+RUN pip install -U setuptools pip
 RUN pip install --no-cache-dir \
         pygit2 \
         /tmp/numpy*.whl \
