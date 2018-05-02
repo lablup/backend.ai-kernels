@@ -6,14 +6,15 @@ RUN apk add --no-cache --virtual .build-deps \
       pkgconf \
       autoconf \
       automake \
-      libedit \
-      libpcre \
-      libxml2 \
-      libXpm \
-      libfreetype \
-      libjpeg \
-      libpng16 \
-      libwebp && \
+      libedit-dev \
+      libxml2-dev \
+      readline-dev \
+      freetype-dev \
+      libjpeg-turbo-dev \
+      libpng-dev \
+      libwebp-dev \
+      pcre-dev \
+      libxpm-dev && \
     apk add --no-cache php7 \
       php7-dev \
       php7-xml \
