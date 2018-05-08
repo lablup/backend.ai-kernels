@@ -4,7 +4,7 @@ FROM lablup/common-bazel:0.11-debian as bazel-binary
 FROM lablup/common-cuda:cuda8.0-cudnn6.0 as cuda-binary
 
 
-# Build target: lablup/common-tensorflow:1.5-py36-dense-gpu
+# Build target: lablup/common-tensorflow:1.8-py36-dense-gpu
 # ref: https://github.com/tatsushid/docker-alpine-py3-tensorflow-jupyter/blob/master/Dockerfile
 FROM lablup/kernel-python:3.6-debian
 
