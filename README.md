@@ -4,29 +4,29 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 
 ## Supporting modes
 
-Here we list the latest versions of our supported kernel images.  
+Here we list the latest versions of our supported kernel images.
 "\*" in the Query mode column means that it supports preservation of global contexts across different query runs.
 
-| Language      | Image Name              | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
-|---------------|-------------------------|---------|-------|-------|---|---|--------------------|
-| C             | `lablup/kernel-c`       | 6.3     | O     | O     | O |   | GCC on Alpine 3.6  |
-| C++ (14)      | `lablup/kernel-cpp`     | 6.3     | O     | O     |   |   | GCC on Alpine 3.6  |
-| Go            | `lablup/kernel-go`      | 1.9     | O     | O     |   |   |                    | 
-| Haskell       | `lablup/kernel-haskell` | 8.2     | O     | O     |   |   |                    |
-| Java          | `lablup/kernel-java`    | 8.0     | O     | O     |   |   |                    |
-| Linux Console | `lablup/kernel-git`     | -       | -     | -     | - | O | Bash on Alpine 3.6 |  
-| Lua           | `lablup/kernel-lua`     | 5.3     | O     | O     |   |   |                    |
-| Node.js       | `lablup/kernel-nodejs`  | 6.11    | O     | O     |   |   |                    |
-| Octave        | `lablup/kernel-octave`  | 4.2     | O     | O     |   |   |                    |
-| ~Python~      | `lablup/kernel-python`  | 2.7     | O     | O     | O |   | temporarily unsupported |
-| Python        | `lablup/kernel-python`  | 3.6     | O     | O\*   | O |   |                    |
-| Rust          | `lablup/kernel-rust`    | 1.17    | O     | O     |   |   |                    |
-| PHP           | `lablup/kernel-php`     | 7.1     | O     | O     |   |   |                    |
-| R             | `lablup/kernel-r`       | 3.3     | O     | O     |   |   | CRAN R             |
+| Language      | Image Name              | Version         | Batch | Query | Input Hook | TTY | Runtime Impl. |
+|---------------|-------------------------|-----------------|-------|-------|---|---|--------------------|
+| C             | `lablup/kernel-c`       | 6.3             | O     | O     | O |   | GCC on Alpine 3.6  |
+| C++ (14)      | `lablup/kernel-cpp`     | 6.3             | O     | O     |   |   | GCC on Alpine 3.6  |
+| Go            | `lablup/kernel-go`      | 1.9             | O     | O     |   |   |                    |
+| Haskell       | `lablup/kernel-haskell` | 8.2             | O     | O     |   |   |                    |
+| Java          | `lablup/kernel-java`    | 8.0             | O     | O     |   |   |                    |
+| Linux Console | `lablup/kernel-git`     | -               | -     | -     | - | O | Bash on Alpine 3.6 |
+| Lua           | `lablup/kernel-lua`     | 5.3             | O     | O     |   |   |                    |
+| Node.js       | `lablup/kernel-nodejs`  | 6.14,8.11,9.11  | O     | O     |   |   |                    |
+| Octave        | `lablup/kernel-octave`  | 4.2             | O     | O     |   |   |                    |
+| ~Python~      | `lablup/kernel-python`  | 2.7             | O     | O     | O |   | temporarily unsupported |
+| Python        | `lablup/kernel-python`  | 3.6             | O     | O\*   | O |   |                    |
+| Rust          | `lablup/kernel-rust`    | 1.17            | O     | O     |   |   |                    |
+| PHP           | `lablup/kernel-php`     | 7.1             | O     | O     |   |   |                    |
+| R             | `lablup/kernel-r`       | 3.3             | O     | O     |   |   | CRAN R             |
 
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.5     | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| TensorFlow | `lablup/kernel-python-tensorflow` | 1.7     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | TensorFlow | `lablup/kernel-python-tensorflow` | 1.3     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | PyTorch    | `lablup/kernel-python-torch`      | 0.2     | O     | O\*   | O   |   |                   |
 | Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
@@ -40,7 +40,7 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
  * `base-debian` (easier to compile common frameworks with libraries)
  * `base-ubuntu` (heaviest but best compatibility)
 
-| base-alpine             | base-debian                  | base-ubuntu             | 
+| base-alpine             | base-debian                  | base-ubuntu             |
 |-------------------------|------------------------------|-------------------------|
 | base-python-minimal-2.7 |                              |                         |
 | base-python-minimal-3.6 | base-python-minimal-3.6      | base-python-minimal-3.6 |
