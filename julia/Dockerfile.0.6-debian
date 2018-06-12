@@ -50,7 +50,7 @@ RUN set -ex; \
     rm julia.tar.gz
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[julia]~=1.1.0"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[julia]~=1.3.0"
 
 # Matplotlib configuration and pre-heating
 ENV MPLCONFIGDIR /home/sorna/.matplotlib

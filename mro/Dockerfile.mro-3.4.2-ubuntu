@@ -59,7 +59,7 @@ ENV LANG en_US.UTF-8
 # LABEL org.label-schema.license="https://mran.microsoft.com/faq/#licensing" \
 #     org.label-schema.vendor="Microsoft Corporation, Dockerfile provided by Daniel Nüst" \
 #     org.label-schema.name="Microsoft R Open" \
-#     org.label-schema.description="Docker images of Microsoft R Open (MRO) with the Intel® Math Kernel Libraries (MKL)." \ 
+#     org.label-schema.description="Docker images of Microsoft R Open (MRO) with the Intel® Math Kernel Libraries (MKL)." \
 #     org.label-schema.vcs-url=$VCS_URL \
 #     org.label-schema.vcs-ref=$VCS_REF \
 #     org.label-schema.build-date=$BUILD_DATE \
@@ -69,10 +69,7 @@ ENV LANG en_US.UTF-8
 
 LABEL io.sorna.features="query uid-match"
 
-# RUN pip install --no-cache-dir "backend.ai-kernel-runner[r]~=1.0.4"
-RUN apt-get install -y git-core
-COPY backend.ai-kernel-runner /home/sorna/backend.ai-kernel-runner 
-RUN cd /home/sorna/backend.ai-kernel-runner && pip install -e .[r] 
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[r]~=1.3.0"
 
 ADD install-packages.R /home/sorna/install-packages.R
 RUN Rscript /home/sorna/install-packages.R
