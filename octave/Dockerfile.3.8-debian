@@ -16,7 +16,7 @@ COPY jsonlab.tgz /home/sorna/jsonlab.tgz
 RUN tar xvzf /home/sorna/jsonlab.tgz -C /home/sorna/
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[octave]~=1.1.0"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[octave]~=1.3.0"
 
 COPY policy.yml /home/sorna/policy.yml
 

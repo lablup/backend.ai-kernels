@@ -42,7 +42,6 @@ COPY --from=jail-builder /go/src/github.com/lablup/sorna-jail/sorna-jail /home/s
 COPY --from=hook-builder /root/sorna-hook/libbaihook.so /home/sorna/libbaihook.so
 ENV LD_PRELOAD /home/sorna/libbaihook.so
 
-
 WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
