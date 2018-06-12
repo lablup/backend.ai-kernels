@@ -25,7 +25,7 @@ CHILD_ENV = {
     'USER': 'work',
     'HOME': '/home/work',
     'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
-    'LD_PRELOAD': '/home/sorna/patch-libs.so',
+    'LD_PRELOAD': '/home/sorna/libbaihook.so',
 }
 
 
