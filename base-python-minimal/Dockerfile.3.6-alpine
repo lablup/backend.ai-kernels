@@ -35,4 +35,6 @@ RUN apk add --no-cache --virtual .sorna-deps zeromq libuv \
     && pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2" \
     && rm /tmp/*.whl
 
+COPY sitecustomize.py /usr/local/lib/python3.6/site-packages/
+
 # vim: ft=dockerfile
