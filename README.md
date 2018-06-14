@@ -62,6 +62,7 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 | php-7-alpine            |                              |                         |
 | nodejs-6-alpine         |                              |                         |
 | nodejs-8-alpine         |                              |                         |
+| nodejs-9-alpine         |                              |                         |
 |                         | julia-0.6-debian             |                         |
 | r-3.3-alpine            |                              |                         |
 |                         | bazel-0.7-debian             |                         |
