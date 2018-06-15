@@ -1,4 +1,4 @@
-FROM python:3.6-alpine3.6
+FROM python:3.6-alpine3.7
 
 ENV MAKEFLAGS -j
 ENV MAKEOPTS -j
@@ -25,8 +25,8 @@ WORKDIR /root
 
 RUN pip install -U pip setuptools
 RUN pip install --no-binary --no-cache-dir cython
-RUN NPY_NUM_BUILD_JOBS=4 pip wheel --no-deps numpy
-RUN NPY_NUM_BUILD_JOBS=4 pip install --no-deps numpy
+RUN NPY_NUM_BUILD_JOBS=4 pip install --no-deps numpy==1.14.3
+RUN NPY_NUM_BUILD_JOBS=4 pip wheel --no-deps numpy==1.14.3
 RUN pip wheel --no-deps matplotlib bokeh
 RUN pip wheel --no-deps cartopy
 RUN pip wheel --no-deps ipython

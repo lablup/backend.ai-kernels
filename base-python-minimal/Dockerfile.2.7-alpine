@@ -1,4 +1,4 @@
-FROM python:2.7-alpine3.6 as python-source
+FROM python:2.7-alpine3.7 as python-source
 # /usr/local in this image only has its own built Python.
 RUN cd /; tar czpf python.tar.gz /usr/local/
 

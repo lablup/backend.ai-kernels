@@ -1,4 +1,4 @@
-FROM python:3.6-alpine3.6 as python-binary
+FROM python:3.6-alpine3.7 as python-binary
 # /usr/local in this image only has its own built Python.
 RUN cd /; tar czpf python.tar.gz /usr/local/
 
