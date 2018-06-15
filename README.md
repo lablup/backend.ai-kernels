@@ -39,6 +39,7 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
  * `base-alpine` (smallest base image)
  * `base-debian` (easier to compile common frameworks with libraries)
  * `base-ubuntu` (heaviest but best compatibility)
+ * `base-conda`  (Python conda distributed kernel based on Intel's Machine Learning Kits)
 
 | base-alpine             | base-debian                  | base-ubuntu             |
 |-------------------------|------------------------------|-------------------------|
