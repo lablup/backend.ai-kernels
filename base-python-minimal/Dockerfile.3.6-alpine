@@ -24,16 +24,16 @@ COPY --from=wheel-builds /root/msgpack*.whl /tmp/
 COPY --from=wheel-builds /root/uvloop*.whl /tmp/
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz
 
-# Test if Python is working
-RUN python -c 'import sys; print(sys.version_info); import ssl'
-
 # Lablup extension: install Sorna's common Python packages
 RUN apk add --no-cache --virtual .sorna-deps zeromq libuv \
     && pip install --no-cache-dir /tmp/*.whl \
     && pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2" \
     && rm /tmp/*.whl
 
-RUN python version
+# RUN python version
 COPY sitecustomize.py /usr/local/lib/python3.6/site-packages/
+
+# Test if Python is working
+RUN python -c 'import sys; print(sys.version_info); import ssl'
 
 # vim: ft=dockerfile
