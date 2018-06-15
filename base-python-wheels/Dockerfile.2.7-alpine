@@ -40,7 +40,7 @@ RUN pip wheel --no-deps pygments
 # Sorna dependencies
 RUN apk add --no-cache libuv zeromq
 RUN pip wheel --no-deps pyzmq
-RUN pip wheel --no-deps simplejson
+RUN pip wheel --no-deps msgpack
 
 # python2-only dependencies
 RUN pip wheel --no-deps subprocess32

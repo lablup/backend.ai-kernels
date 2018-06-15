@@ -50,8 +50,7 @@ RUN pip wheel --no-deps pygments
 # Sorna dependencies
 RUN apk add --no-cache libuv zeromq
 RUN pip wheel --no-deps pyzmq
-RUN pip wheel --no-deps simplejson
-RUN pip wheel --no-deps msgpack-python
+RUN pip wheel --no-deps msgpack
 RUN pip wheel --no-deps uvloop
 
 # List up built wheel packages
