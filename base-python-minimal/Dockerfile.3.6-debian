@@ -27,9 +27,11 @@ RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 # Test if Python is working
 RUN python -c 'import sys; print(sys.version_info); import ssl'
 
-# As we mostly have "manylinux" glibc-compatible binary packaes,
+# As we mostly have "manylinux" glibc-compatible binary packages,
 # we don't have to rebuild these!
 RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2"
+
+COPY sitecustomize.py /usr/local/lib/python3.6/site-packages/
 
 # vim: ft=dockerfile

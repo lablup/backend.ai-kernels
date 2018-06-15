@@ -45,8 +45,8 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Install jail
 COPY --from=jail-builder /go/src/github.com/lablup/sorna-jail/sorna-jail /home/sorna/jail
-COPY --from=hook-builder /root/sorna-hook/patch-libs.so /home/sorna/patch-libs.so
-ENV LD_PRELOAD /home/sorna/patch-libs.so
+COPY --from=hook-builder /root/sorna-hook/libbaihook.so /home/sorna/libbaihook.so
+ENV LD_PRELOAD /home/sorna/libbaihook.so
 
 WORKDIR /home/work
 VOLUME ["/home/work"]

@@ -4,7 +4,7 @@ FROM lablup/kernel-base-python-minimal:3.6-alpine
 RUN apk add --no-cache build-base
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[c]~=1.1.0"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[c]~=1.3.0"
 
 COPY policy.yml /home/sorna/policy.yml
 

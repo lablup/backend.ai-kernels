@@ -5,7 +5,7 @@ FROM lablup/kernel-base-python-minimal:3.6-ubuntu
 # RUN apt-get remove gcc-5-multilib
 #72 gcc g++ support
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test 
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test
 RUN apt-get update -y && apt-get install -y make cmake pkg-config gcc g++ git-core
 RUN pip install --no-cache-dir Cython numpy \
     && pip install --no-cache-dir matplotlib bokeh \
