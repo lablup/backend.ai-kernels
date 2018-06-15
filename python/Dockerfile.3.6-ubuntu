@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir Cython numpy \
 COPY policy.yml /home/sorna/
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.1.0"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.4.0"
 
 # Matplotlib configuration and pre-heating
 ENV MPLCONFIGDIR /home/sorna/.matplotlib
