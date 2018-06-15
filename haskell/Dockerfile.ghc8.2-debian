@@ -23,7 +23,7 @@ ENV PATH /root/.cabal/bin:/root/.local/bin:/opt/cabal/2.2/bin:/opt/ghc/8.2.2/bin
 RUN cabal update && cabal install mtl --global
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[haskell]~=1.3.0"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[haskell]~=1.4.0"
 
 COPY policy.yml /home/sorna/policy.yml
 

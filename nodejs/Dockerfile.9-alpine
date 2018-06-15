@@ -81,7 +81,7 @@ RUN set -ex && \
 COPY package.json /home/sorna/package.json
 
 # Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[nodejs]~=1.3.0"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[nodejs]~=1.4.0"
 
 LABEL io.sorna.features "query uid-match"
 
