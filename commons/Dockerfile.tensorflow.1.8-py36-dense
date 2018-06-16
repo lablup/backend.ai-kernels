@@ -50,16 +50,22 @@ RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup \
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
         TF_NEED_MKL=1 \
         TF_NEED_JEMALLOC=1 \
-        TF_NEED_GCP=0 \
-        TF_NEED_HDFS=0 \
-        TF_ENABLE_XLA=0 \
+        TF_NEED_GCP=1 \
+        TF_NEED_HDFS=1 \
+        TF_ENABLE_XLA=1 \
         TF_NEED_VERBS=0 \
         TF_NEED_OPENCL=0 \
+        TF_NEED_OPENCL_SYCL=0 \
         TF_NEED_CUDA=0 \
+        TF_CUDA_CLANG=0 \
+        TF_DOWNLOAD_CLANG=0 \
         TF_NEED_MPI=0 \
+        TF_NEED_S3=1 \
+        TF_NEED_KAFKA=0 \
+        TF_SET_ANDROID_WORKSPACE=0 \
         bash configure \
     && bazel build \
-        --config=opt --local_resources ${LOCAL_RESOURCES} \
+        --config=opt --config=mkl --local_resources ${LOCAL_RESOURCES} \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package \
     && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
