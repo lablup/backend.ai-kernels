@@ -69,6 +69,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION}-lablup \
         TF_NEED_CUDA=1 \
         TF_CUDA_CLANG=0 \
         TF_DOWNLOAD_CLANG=0 \
+        TF_NEED_TENSORRT=1 \
         TF_NEED_MPI=0 \
         TF_NEED_GDR=0 \
         TF_NEED_S3=1 \
