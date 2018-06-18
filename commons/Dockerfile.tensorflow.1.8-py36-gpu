@@ -58,18 +58,23 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
-        TF_NEED_MKL=0 \
+        TF_NEED_MKL=1 \
         TF_NEED_JEMALLOC=1 \
-        TF_NEED_GCP=0 \
-        TF_NEED_HDFS=0 \
-        TF_ENABLE_XLA=0 \
+        TF_NEED_GCP=1 \
+        TF_NEED_HDFS=1 \
+        TF_ENABLE_XLA=1 \
         TF_NEED_VERBS=0 \
         TF_NEED_OPENCL=0 \
+        TF_NEED_OPENCL_SYCL=0 \
         TF_NEED_CUDA=1 \
         TF_CUDA_CLANG=0 \
+        TF_DOWNLOAD_CLANG=0 \
+        TF_NEED_TENSORRT=1 \
         TF_NEED_MPI=0 \
         TF_NEED_GDR=0 \
-        TF_NEED_S3=0 \
+        TF_NEED_S3=1 \
+        TF_NEED_KAFKA=0 \
+        TF_SET_ANDROID_WORKSPACE=0 \
         TF_CUDA_VERSION=8.0 \
         TF_CUDNN_VERSION=6.0 \
         TF_CUDA_COMPUTE_CAPABILITIES=3.5,3.7,5.2,6.1 \
@@ -89,7 +94,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION}; \
     PYTHON_BIN_PATH=/usr/local/bin/python \
     PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
     bazel build \
-        --config=opt --config=cuda --local_resources ${LOCAL_RESOURCES} \
+        --config=opt --config=mkl --config=cuda --local_resources ${LOCAL_RESOURCES} \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package \
     && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
