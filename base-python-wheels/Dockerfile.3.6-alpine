@@ -33,6 +33,7 @@ RUN pip wheel --no-deps ipython
 RUN pip wheel --no-deps --no-build-isolation pandas
 RUN pip wheel --no-deps seaborn
 RUN pip wheel --no-deps pillow
+RUN pip wheel --no-deps simplejson
 RUN pip wheel --no-deps networkx cvxpy
 
 # scipy's clean up script requires numpy to be installed...
