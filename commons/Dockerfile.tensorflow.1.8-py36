@@ -45,9 +45,6 @@ RUN : build TensorFlow pip package \
     && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
         | tar xzf -
 
-# Limit the system resource used during compilation
-ENV LOCAL_RESOURCES 65536,40.0,8.0
-
 RUN cd /tmp/tensorflow-r${TF_VERSION} \
     && PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
@@ -72,7 +69,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
         TF_SET_ANDROID_WORKSPACE=0 \
         bash configure \
     && bazel build \
-        --config=opt --config=mkl --local_resources ${LOCAL_RESOURCES} \
+        --config=opt --config=mkl \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package \
     && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
