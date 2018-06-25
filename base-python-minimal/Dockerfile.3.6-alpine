@@ -1,6 +1,11 @@
 FROM python:3.6.5-alpine3.7 as python-binary
 # /usr/local in this image only has its own built Python.
-RUN cd /; tar czpf python.tar.gz /usr/local/
+RUN cd /; \
+    tar czpf python.tar.gz \
+        /usr/local/bin \
+        /usr/local/lib/libpython* \
+        /usr/local/lib/python3.6* \
+        /usr/local/include
 
 # ------------------------
 FROM lablup/kernel-base-python-wheels:3.6-alpine as wheel-builds
