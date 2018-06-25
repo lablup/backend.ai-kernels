@@ -1,18 +1,24 @@
 FROM lablup/common-bazel:0.11-debian as bazel-binary
 
+FROM python:3.6.5-jessie as python-binary
+RUN cd /; \
+    tar czpf python.tar.gz \
+        /usr/local/bin \
+        /usr/local/lib/libpython* \
+        /usr/local/lib/python3.6* \
+        /usr/local/include
 
 # Build target: lablup/common-tensorflow:1.5-py36-dense
 # ref: https://github.com/tatsushid/docker-alpine-py3-tensorflow-jupyter/blob/master/Dockerfile
-FROM lablup/kernel-python:3.6-debian
+FROM lablup/kernel-base:ubuntu16.04-mkl2018.3
 
 COPY --from=bazel-binary /usr/local/bin/bazel /usr/local/bin/
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
-RUN install_packages libcups2 && \
-    echo "deb http://http.debian.net/debian jessie-backports main" | \
-        tee --append /etc/apt/sources.list.d/jessie-backports.list > /dev/null && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends -t jessie-backports openjdk-8-jdk-headless && \
-    install_packages \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openjdk-8-jdk-headless && \
+    apt-get install -y --no-install-recommends \
         imagemagick \
         graphviz \
         cmake \
@@ -25,14 +31,11 @@ RUN install_packages libcups2 && \
         git-core \
         unzip zip
 
-# Check Bazel is runnable.
-RUN bazel version
+# Check Bazel/Python is runnable.
+RUN bazel version; python3 -c "import sys; print(sys.prefix); print(sys.version_info)"
 
 # Prepare for building TensorFlwo wheel
-RUN pip3 install --no-cache-dir wheel
-
-# Limit the system resource used during compilation
-ENV LOCAL_RESOURCES 4096,8.0,1.0
+RUN pip3 install --no-cache-dir wheel intel-numpy
 
 # The TensorFlow version
 ENV TF_VERSION 1.8
@@ -41,14 +44,16 @@ RUN : build TensorFlow pip package \
     && cd /tmp \
     && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
         | tar xzf -
+
+# Limit the system resource used during compilation
+ENV LOCAL_RESOURCES 65536,40.0,8.0
+
 RUN cd /tmp/tensorflow-r${TF_VERSION} \
-    # temporary fix for tensorflow/tensorflow#12979
-    && sed -i '\@https://github.com/google/protobuf/archive/0b059a3d8a8f8aa40dde7bea55edca4ec5dfea66.tar.gz@d' tensorflow/workspace.bzl \
     && PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
-        TF_NEED_MKL=1 \
+        TF_MKL_ROOT=/usr \
         TF_NEED_JEMALLOC=1 \
         TF_NEED_GCP=1 \
         TF_NEED_HDFS=1 \
