@@ -67,7 +67,11 @@ RUN apt-get update && \
     echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list && \
     apt-get update && \
     apt-get install -y intel-mkl-2018.3-051 && \
-    rm -f intel-swprod.pub
+    echo "/opt/intel/mkl/lib/intel64" > /etc/ld.so.conf.d/mkl.conf && \
+    ldconfig && \
+    rm -f intel-swprod.pub && \
+    rm -rf /var/cache/apt/archives && \
+    rm -rf /var/lib/apt/lists
 
 CMD ["/home/sorna/jail", "/bin/bash"]
 

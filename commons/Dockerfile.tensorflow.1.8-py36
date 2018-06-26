@@ -8,14 +8,14 @@ RUN cd /; \
         /usr/local/lib/python3.6* \
         /usr/local/include
 
-# Build target: lablup/common-tensorflow:1.5-py36-dense
-# ref: https://github.com/tatsushid/docker-alpine-py3-tensorflow-jupyter/blob/master/Dockerfile
+FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
+
+
+# Build target: lablup/common-tensorflow:1.8-py36
 FROM lablup/kernel-base:ubuntu16.04-mkl2018.3
 
-COPY --from=bazel-binary /usr/local/bin/bazel /usr/local/bin/
-COPY --from=python-binary /python.tar.gz /
-RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
-
+# Install system package dependencies
+# NOTE: running bazel requires JDK, not JRE!
 RUN apt-get update && \
     apt-get install -y --no-install-recommends openjdk-8-jdk-headless && \
     apt-get install -y --no-install-recommends \
@@ -31,11 +31,20 @@ RUN apt-get update && \
         git-core \
         unzip zip
 
-# Check Bazel/Python is runnable.
-RUN bazel version; python3 -c "import sys; print(sys.prefix); print(sys.version_info)"
+COPY --from=bazel-binary /usr/local/bin/bazel /usr/local/bin/
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; \
+    tar xzpf python.tar.gz; ldconfig; \
+    rm -f python.tar.gz
+# Install TensorFlow build dependencies (ensure we have proper numpy)
+COPY --from=numpy-binary /tmp/numpy/dist/numpy-*.whl /tmp
+RUN pip3 install --no-cache-dir wheel /tmp/*.whl; \
+    rm -f /tmp/*.whl
 
-# Prepare for building TensorFlwo wheel
-RUN pip3 install --no-cache-dir wheel intel-numpy
+# Check Bazel/Python is runnable.
+RUN bazel version && \
+    python3 -c "import sys; print(sys.prefix); print(sys.version_info)" && \
+    python3 -c "import numpy; numpy.show_config()"
 
 # The TensorFlow version
 ENV TF_VERSION 1.8
@@ -50,7 +59,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
-        TF_MKL_ROOT=/usr \
+        TF_MKL_ROOT=/opt/intel/mkl \
         TF_NEED_JEMALLOC=1 \
         TF_NEED_GCP=1 \
         TF_NEED_HDFS=1 \
