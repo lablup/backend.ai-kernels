@@ -103,10 +103,6 @@ build_kernel('r',       '3.3-alpine', latest=True)
 
 build_common('bazel', '0.7-debian')
 build_common('bazel', '0.11-debian')
-build_common('cuda', 'cuda8.0-cudnn6.0')
-build_common('cuda', 'cuda9.0-cudnn6.1')
-# unused - build_common('glibc', 'alpine')
-# unused - build_common('bazel', '0.7-alpine')
 
 
 ## Our TensorFlow currently depends on CUDA 8 + cuDNN 6
@@ -133,7 +129,7 @@ build_kernel('python-tensorflow', '1.6-py36-gpu')
 build_kernel('python-tensorflow', '1.5-py36')
 build_kernel('python-tensorflow', '1.5-py36-gpu')
 #build_kernel('python-tensorflow', '1.4-py36')
-#build_kernel('python-tensorflow', '1.4-py36-gpu', latest=True)
+#build_kernel('python-tensorflow', '1.4-py36-gpu')
 #build_kernel('python-tensorflow', '1.3-py36')
 #build_kernel('python-tensorflow', '1.3-py36-gpu')
 
@@ -148,33 +144,5 @@ build_kernel('python-torch',      '0.2-py36-gpu', latest=True, squash=True)
 
 # CNTK image (currently draft version base on Ubuntu:16.04)
 build_kernel('python-cntk', '2.2-py36', latest=True, squash=True)
-
-# Dense builds are for sharing each server with multiple tenants
-# (with some patches that enforces resource restrictions)
-build_common('tensorflow', '1.8-py36-dense')
-build_common('tensorflow', '1.8-py36-dense-gpu')
-build_common('tensorflow', '1.7-py36-dense')
-build_common('tensorflow', '1.7-py36-dense-gpu')
-build_common('tensorflow', '1.6-py36-dense')
-build_common('tensorflow', '1.6-py36-dense-gpu')
-build_common('tensorflow', '1.5-py36-dense')
-build_common('tensorflow', '1.5-py36-dense-gpu')
-build_common('tensorflow', '1.4-py36-dense')
-build_common('tensorflow', '1.4-py36-dense-gpu')
-build_common('tensorflow', '1.3-py36-dense')
-build_common('tensorflow', '1.3-py36-dense-gpu')
-
-build_kernel('python-tensorflow', '1.8-py36-dense', latest=True, squash=True)
-build_kernel('python-tensorflow', '1.8-py36-dense-gpu', latest=True, squash=True)
-build_kernel('python-tensorflow', '1.7-py36-dense', latest=True, squash=True)
-build_kernel('python-tensorflow', '1.7-py36-dense-gpu', latest=True, squash=True)
-build_kernel('python-tensorflow', '1.6-py36-dense', squash=True)
-build_kernel('python-tensorflow', '1.6-py36-dense-gpu', squash=True)
-build_kernel('python-tensorflow', '1.5-py36-dense', squash=True)
-build_kernel('python-tensorflow', '1.5-py36-dense-gpu', squash=True)
-build_kernel('python-tensorflow', '1.4-py36-dense', squash=True)
-build_kernel('python-tensorflow', '1.4-py36-dense-gpu', squash=True)
-build_kernel('python-tensorflow', '1.3-py36-dense', squash=True)
-build_kernel('python-tensorflow', '1.3-py36-dense-gpu', squash=True)
 
 build_kernel('vendor/aws_polly', 'debian')
