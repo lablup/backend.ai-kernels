@@ -61,6 +61,7 @@ build_kernel('base', 'debian', latest=True)
 build_kernel('base', 'alpine')
 build_kernel('base', 'ubuntu', latest=True)
 build_kernel('base', 'conda', latest=True)
+build_kernel('base', 'ubuntu16.04-mkl2018.3')
 
 build_kernel('base-python-minimal', '3.6-debian', squash=True, latest=True)
 build_kernel('base-python-wheels',  '3.6-alpine')
@@ -70,7 +71,6 @@ build_kernel('base-python-minimal', '3.6-conda', squash=True, latest=True)
 build_kernel('python',              '3.6-debian', squash=True, latest=True)
 build_kernel('python',              '3.6-ubuntu', squash=True, latest=True)
 build_kernel('python',              '3.6-conda', squash=True, latest=True)
-
 # TODO: (kernel-runner update required) build_kernel('base-python-minimal', '2.7-debian', squash=True, latest=True)
 # TODO: (kernel-runner update required) build_kernel('base-python-wheels',  '2.7-alpine')
 # TODO: (kernel-runner update required) build_kernel('base-python-minimal', '2.7-alpine', squash=True)
@@ -104,12 +104,12 @@ build_kernel('r',       '3.3-alpine', latest=True)
 build_common('bazel', '0.11-debian')
 build_common('cuda', 'cuda8.0-cudnn6.0')
 build_common('cuda', 'cuda9.0-cudnn7.1')
+build_common('numpy', '1.14-py36-ubuntu16.04-mkl2018.3')
 # unused - build_common('glibc', 'alpine')
 # unused - build_common('bazel', '0.7-alpine')
 
 
-## Our TensorFlow currently depends on CUDA 8 + cuDNN 6
-## (TODO: upgrade to CUDA 9 + cuDNN 7 for Volta GPUs)
+## Our TensorFlow currently depends on CUDA 9.0 + cuDNN 7.1
 build_common('tensorflow', '1.8-py36')
 build_common('tensorflow', '1.8-py36-gpu')
 build_common('tensorflow', '1.7-py36')
