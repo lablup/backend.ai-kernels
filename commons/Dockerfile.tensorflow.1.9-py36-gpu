@@ -12,18 +12,10 @@ RUN cd /; \
 # Build target: lablup/common-tensorflow:1.8-py36-dense-gpu
 FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 
-RUN sed -i.bak -e \
-      "s%http://archive.ubuntu.com/%http://ftp.daumkakao.com/%g" \
-      /etc/apt/sources.list; \
-    sed -i.bak -e \
-      "s%http://security.ubuntu.com/%http://ftp.daumkakao.com/%g" \
-      /etc/apt/sources.list
-
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-8-jdk-headless && \
-    apt-get install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends openjdk-8-jdk-headless \
         imagemagick \
         graphviz \
         cmake \
@@ -44,6 +36,7 @@ RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
 # Check Bazel/Python is runnable.
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
+# !Todo install numpy from wheels
 RUN bazel version; python3 -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     pip3 install --no-cache-dir wheel numpy
 
@@ -53,28 +46,28 @@ ENV TF_VERSION 1.9
 # NOTE: python should be linked to python3
 RUN : build TensorFlow pip package \
     && cd /tmp \
-    && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
-        | tar xzf - \ 
-    && mkdir nccl && mkdir nccl/include && mkdir nccl/lib \
+    && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz | tar xzf - \ 
+    && mkdir -p /usr/lib/nccl && mkdir -p /usr/lib/nccl/include && mkdir -p /usr/lib/nccl/lib \
     && ln -s /usr/include/nccl.h /usr/lib/nccl/include/nccl.h \
     && ln -s /usr/lib/x86_64-linux-gnu/libnccl.so /usr/lib/nccl/lib/libnccl.so \
     && ln -s /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/lib/nccl/lib/libnccl.so.2 \
     && touch /usr/lib/nccl/NCCL-SLA.txt \
-    && cd /root && mkdir Android && mkdir .android && cd Android \
-    && touch .android/repositories.cfg \
+    && cd /root && mkdir -p /root/Android && mkdir -p /root/.android && cd /root/Android \
+    && touch /root/.android/repositories.cfg \
     && curl -o sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip \
-    && unzip sdk.zip && rm skd.zip \
+    && unzip sdk.zip && rm sdk.zip \
     && yes | ./tools/bin/sdkmanager --licenses \
     && wget https://services.gradle.org/distributions/gradle-4.9-all.zip \
-    && unzip gradle-4.9-all && mv gradle-4.9-all gradle \
+    && unzip gradle-4.9-all.zip && mv gradle-4.9 gradle \
     && rm gradle-4.9-all.zip \
     && export export PATH="/home/user/gradle/bin:/root/Android/tools:/root/Android/platform-tools:${PATH}" \
     && yes | ./tools/bin/sdkmanager "build-tools;27.0.3" "platforms;android-26" \
     && yes | ./tools/bin/sdkmanager "extras;android;m2repository" "extras;google;m2repository" "extras;google;google_play_services" \
     && ./tools/bin/sdkmanager "cmake;3.6.4111459" \
     && wget -q --output-document=android-ndk.zip https://dl.google.com/android/repository/android-ndk-r14-linux-x86_64.zip \
-    && unzip android-ndk.zip \
+    && unzip android-ndk.zip && rm android-ndk.zip \
     && mv android-ndk-r14/ android-ndk \
+    && export export PATH="/root/Android/android-ndk:${PATH}" \
     && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/nvidia-stubs.conf \
     && ldconfig
 RUN cd /tmp/tensorflow-r${TF_VERSION} \
@@ -91,7 +84,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
         TF_NEED_CUDA=1 \
         TF_CUDA_CLANG=0 \
         TF_NEED_TENSORRT=0 \
-        TF_NEED_MPI=1 \
+        TF_NEED_MPI=0 \
         TF_NEED_GDR=0 \
         TF_NEED_S3=1 \
         TF_NEED_KAFKA=0 \
@@ -102,11 +95,13 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
         TF_CUDA_COMPUTE_CAPABILITIES=3.5,3.7,5.2,6.0,6.1,7.0 \
         CUDA_TOOLKIT_PATH=/usr/local/cuda \
         CUDNN_INSTALL_PATH=/usr/local/cuda \
-        NCCL_INSTALL_PATH=/usr/lib/nccl/ \
-	OPENMPI_INSTALL_PATH=/usr/lib/openmpi \
-        bash configure
+        NCCL_INSTALL_PATH=/usr/lib/nccl \
+	MPI_HOME=/usr/lib/openmpi \
+	ANDROID_SDK_HOME=/root/Android \
+	ANDROID_NDK_HOME=/root/Android/android-ndk \
+        bash configure 
 RUN cd /tmp/tensorflow-r${TF_VERSION} ; \
-    sed -r -i'' "s@http://www.sqlite.org@https://www.sqlite.org@" tensorflow/workspace.bzl; \
+    sed -r -i'' "s@http://www.sqlite.org@https://www.sqlite.org@" tensorflow/workspace.bzl ; \
     PYTHON_BIN_PATH=/usr/local/bin/python \
     PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
     bazel fetch //tensorflow/tools/pip_package:build_pip_package
@@ -117,8 +112,8 @@ RUN cd /tmp/tensorflow-r${TF_VERSION}; \
     bazel build \
         --config=opt --config=cuda \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
-        //tensorflow/tools/pip_package:build_pip_package
-RUN ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+        //tensorflow/tools/pip_package:build_pip_package \
+    && ./tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
 
 RUN ls -lh /tmp/tensorflow_pkg
 
