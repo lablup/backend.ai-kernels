@@ -113,7 +113,8 @@ RUN cd /tmp/tensorflow-r${TF_VERSION}; \
         --config=opt --config=cuda \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package \
-    && ./tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+    && cd /tmp/tensorflow-r${TF_VERSION}/tensorflow/tools/pip_package/ \
+    && ./build_pip_package /tmp/tensorflow_pkg
 
 RUN ls -lh /tmp/tensorflow_pkg
 
