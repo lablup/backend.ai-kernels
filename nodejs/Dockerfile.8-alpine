@@ -4,7 +4,7 @@ LABEL io.sorna.envs.corecount="NPROC"
 
 # Ref: https://github.com/nodejs/docker-node/blob/master/6.11/alpine/Dockerfile
 ENV NODE_VERSION 8.11.2
-ENV YARN_VERSION 1.6.0
+ENV YARN_VERSION 1.7.0
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
