@@ -6,13 +6,24 @@ RUN apk add --no-cache build-base
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[c]~=1.4.0"
 
-# Install Google Test.
+# Install Google Test and Google Mock.
 RUN wget https://github.com/google/googletest/archive/master.zip && \
     unzip master.zip && cd googletest-master/googletest && \
     mkdir mybuild && cd mybuild && \
     g++ -isystem ../include -I.. -pthread -c ../src/gtest-all.cc && \
     ar -rv libgtest.a gtest-all.o && \
-    cp *.a /usr/local/lib && cp -r ../include/gtest /usr/local/include
+    cp *.a /usr/local/lib && cp -r ../include/gtest /usr/local/include && \
+    cd ../../googlemock && \
+    mkdir mybuild && cd mybuild && \
+    g++ -isystem ../include -I.. -pthread -c ../src/gmock-all.cc && \
+    ar -rv libgmock.a gmock-all.o && \
+    cp *.a /usr/local/lib && cp -r ../include/gmock /usr/local/include
+
+# # Install pycparser
+# RUN pip install --no-cache-dir "pycparser"
+# RUN wget https://github.com/eliben/pycparser/archive/master.zip && \
+#     unzip master.zip && mkdir -p /usr/local/lib/pycparser/fake_libc_include && \
+#     cp -r pycparser-master/utils/fake_libc_include /usr/local/lib/pycparser
 
 COPY policy.yml /home/sorna/policy.yml
 
