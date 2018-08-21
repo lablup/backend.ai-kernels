@@ -704,7 +704,7 @@ class HaskellImageTest(ImageTestBase, unittest.TestCase):
 
 _c_if_test = """
 #include <stdio.h>
-int main() 
+int main()
 {
     int a = 1;
     if (1 == a) { printf("true"); }
@@ -714,7 +714,7 @@ int main()
 
 _c_for_test = """
 #include <stdio.h>
-int main() 
+int main()
 {
     int i;
     for (i = 0; i < 3; i++) { printf("%d ", i*2); }
@@ -735,7 +735,7 @@ class CImageTest(ImageTestBase, unittest.TestCase):
 _cpp_if_test = """
 #include <iostream>
 using namespace std;
-int main() 
+int main()
 {
     int a = 1;
     if (1 == a) { cout << "true"; }
@@ -746,7 +746,7 @@ int main()
 _cpp_for_test = """
 #include <iostream>
 using namespace std;
-int main() 
+int main()
 {
     for (int i = 0; i < 3; i++) { cout << i*2; }
 }
@@ -920,6 +920,14 @@ x0 = np.asarray([[2., 1.]], dtype=np.float32)
 y0 = np.asarray([[4., 6.]], dtype=np.float32)
 print(cntk.squared_error(x, y).eval({x:x0, y:y0}))
 """
+
+
+class SchemeImageTest(ImageTestBase, unittest.TestCase):
+
+    image_name = 'lablup/kernel-scheme:latest'
+
+    def basic_success(self):
+        yield '(display (+ 5 7))', '12'
 
 
 class CNTKImageTest(ImageTestBase, unittest.TestCase):
