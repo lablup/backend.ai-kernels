@@ -20,8 +20,8 @@ RUN git clone https://github.com/lablup/sorna-hook && \
 
 
 # ------------
-FROM alpine:3.7
-MAINTAINER DevOps "devops@lablup.com"
+FROM alpine:3.8
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 RUN apk add --no-cache libseccomp shadow su-exec; \
     mkdir /home/work && chmod 755 /home/work; \
