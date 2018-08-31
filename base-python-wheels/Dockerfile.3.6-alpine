@@ -1,24 +1,32 @@
-FROM python:3.6-alpine3.7
+FROM python:3.6-alpine3.8
 
 ENV MAKEFLAGS -j
 ENV MAKEOPTS -j
 
 # Prepare build environment and libraries
-RUN apk update
-RUN apk add --no-cache \
+
+RUN apk add --no-cache --virtual .build-deps-testing \
+        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+	    geos-dev \
+            proj4-dev 
+#RUN apk add --no-cache --virtual .build-deps-testing \
+#        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing && \
+RUN apk update && \
+    apk add --no-cache \
     # runtime deps
         libstdc++ libgfortran libquadmath libjpeg libpng freetype openblas lapack \
         jpeg libpng tiff \
     # development deps
         gcc g++ gfortran make linux-headers libc-dev freetype-dev openblas-dev \
-        jpeg-dev libpng-dev tiff-dev \
+        jpeg-dev libpng-dev tiff-dev geos-dev proj4-dev\
     # Hack for numpy
     && ln -s /usr/include/locale.h /usr/include/xlocale.h
 
-RUN apk add --no-cache --virtual .build-deps-testing \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
-        geos-dev@testing \
-        proj4-dev@testing
+#RUN apk add --no-cache --virtual .build-deps-testing \
+#        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing
+#	\
+#        geos-dev@testing \
+#        proj4-dev@testing
 
 
 WORKDIR /root
