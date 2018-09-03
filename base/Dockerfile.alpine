@@ -26,10 +26,6 @@ LABEL io.backendai.timeout="30" \
       io.backendai.version="2" \
       io.backendai.features="uid-match"
 
-<<<<<<< HEAD
 CMD ["/home/backend.ai/jail", "/bin/ash"]
-=======
-CMD ["/home/backendai/jail", "/bin/ash"]
->>>>>>> 410ae91aabd1c8ea572dd2fd0cf913a6d6919a7d
 
 # vim: ft=dockerfile
