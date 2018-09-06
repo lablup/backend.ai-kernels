@@ -17,7 +17,7 @@ RUN install_packages \
         ca-certificates \
         wget \
         libexpat1 libgdbm3 bzip2 libffi6 libsqlite3-0 liblzma5 zlib1g \
-        libssl1.0.0. libmpdec2 \
+        libssl1.0.0 libmpdec2 \
         libncursesw5 libtinfo5 libreadline6 \
         mime-support \
         libzmq3 libuv0.10
