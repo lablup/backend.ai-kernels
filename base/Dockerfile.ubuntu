@@ -31,3 +31,5 @@ LABEL ai.backend.timeout="30" \
       ai.backend.features="uid-match"
 
 CMD ["/home/backend.ai/jail", "/bin/bash"]
+
+# vim: ft=dockerfile

@@ -7,7 +7,7 @@ MAINTAINER Mario Cho "m.cho@lablup.com"
 RUN echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/backports.list && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt update && apt -t stretch-backports install -y libseccomp2 gosu && \
-    apt clean && \    
+    apt clean && \
     rm -r /var/lib/apt/lists /var/cache/apt/archives && \
     ln -s /usr/sbin/gosu /usr/sbin/su-exec && \
     mkdir /home/work && chmod 755 /home/work && \
@@ -32,3 +32,5 @@ LABEL ai.backend.timeout="30" \
       ai.backend.features="uid-match"
 
 CMD ["/home/backend.ai/jail", "/bin/bash"]
+
+# vim: ft=dockerfile
