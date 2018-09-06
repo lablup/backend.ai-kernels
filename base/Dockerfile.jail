@@ -1,0 +1,13 @@
+FROM golang:1.8-jessie as jail-builder
+# Debian jessie ships libseccomp 2.1 but golang binding requires 2.2+
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
+    apt update && apt -t jessie-backports install -y libseccomp-dev && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    mkdir -p /go/src/github.com/lablup/sorna-jail
+WORKDIR /go/src/github.com/lablup/sorna-jail
+RUN git clone https://github.com/lablup/sorna-jail . && \
+    go get -u github.com/fatih/color && \
+    go get -u github.com/seccomp/libseccomp-golang && \
+    go get -u github.com/gobwas/glob && \
+    go get -u gopkg.in/yaml.v2
+RUN make inside-container
