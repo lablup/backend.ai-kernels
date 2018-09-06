@@ -56,6 +56,8 @@ def build_common(name, tag, extra_opts=''):
         run(f'docker push lablup/common-{name}:{tag}')
 
 
+build_kernel('base', 'jail')
+build_kernel('base', 'hook')
 
 build_kernel('base', 'debian', latest=True)
 build_kernel('base', 'alpine')

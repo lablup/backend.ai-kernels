@@ -1,6 +1,8 @@
 FROM bitnami/minideb:jessie as hook-builder
-RUN install_packages gcc libc6-dev make git-core ca-certificates
+RUN install_packages gcc g++ libc6-dev make git-core ca-certificates
 WORKDIR /root
-RUN git clone https://github.com/lablup/sorna-hook && \
-    cd sorna-hook && \
+RUN git clone https://github.com/lablup/backend.ai-hook && \
+    cd backend.ai-hook && \
     make inner
+
+# vim: ft=dockerfile
