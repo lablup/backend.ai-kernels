@@ -11,13 +11,13 @@ RUN cd /; \
 
 # Build target: lablup/common-tensorflow:1.8-py36-dense-gpu
 FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
-
-RUN sed -i.bak -e \
-      "s%http://archive.ubuntu.com/%http://ftp.daumkakao.com/%g" \
-      /etc/apt/sources.list; \
-    sed -i.bak -e \
-      "s%http://security.ubuntu.com/%http://ftp.daumkakao.com/%g" \
-      /etc/apt/sources.list
+#FROM cuda9
+#RUN sed -i.bak -e \
+#      "s%http://archive.ubuntu.com/%http://ftp.daumkakao.com/%g" \
+#      /etc/apt/sources.list; \
+#    sed -i.bak -e \
+#      "s%http://security.ubuntu.com/%http://ftp.daumkakao.com/%g" \
+#      /etc/apt/sources.list
 
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
@@ -90,14 +90,32 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} ; \
     PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
     bazel fetch //tensorflow/tools/pip_package:build_pip_package
 
-RUN cd /tmp/tensorflow-r${TF_VERSION}; \
+#RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+RUN cd /tmp/tensorflow-r${TF_VERSION} && \
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
+#    tensorflow/tools/ci_build/builds/configured GPU && \
     PYTHON_BIN_PATH=/usr/local/bin/python \
     PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
     bazel build \
         --config=opt --config=cuda \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
-        //tensorflow/tools/pip_package:build_pip_package \
-    && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+        //tensorflow/tools/pip_package:build_pip_package && \
+#    bazel build -c opt --copt=-mavx --config=cuda \
+#    	  --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
+#          tensorflow/tools/pip_package:build_pip_package && \
+    rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg 
+#    pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
+#    rm -rf /root/.cache
+
+#RUN cd /tmp/tensorflow-r${TF_VERSION}; \
+#    PYTHON_BIN_PATH=/usr/local/bin/python \
+#    PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
+ #    bazel build \
+#        --config=opt --config=cuda \
+#        --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
+#        //tensorflow/tools/pip_package:build_pip_package \
+#    && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
 
 RUN ls -lh /tmp/tensorflow_pkg
 

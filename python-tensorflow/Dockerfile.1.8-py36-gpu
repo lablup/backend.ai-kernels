@@ -1,14 +1,17 @@
 FROM lablup/common-tensorflow:1.8-py36-gpu as tf-binary
-FROM lablup/common-cuda:cuda9.0-cudnn7.1 as cuda-libs
 
+FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04 as cuda-libs
 
-FROM lablup/kernel-python:3.6-debian
+FROM lablup/kernel-python:3.6-ubuntu
 
 # Install CUDA
 COPY --from=cuda-libs /usr/local/cuda-9.0 /usr/local/cuda-9.0
+COPY --from=cuda-libs /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
-    ln -s /usr/local/cuda/lib64/libcudnn.so /usr/local/cuda/lib64/libcudnn.so.7.1
-ENV LD_LIBRARY_PATH="/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/local/cuda/lib64/stubs" \
+    ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/libcuda.so.1 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.2.1 /usr/local/cuda/lib64/libcudnn.so 
+
+ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/lib/x86_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # Install TensorFlow and Keras
@@ -19,7 +22,8 @@ RUN pip install --no-cache-dir /tmp/tensorflow-*.whl && \
 RUN rm -f /tmp/*.whl
 
 # Install additional TensorFlow dependencies
-RUN install_packages libgomp1
+
+RUN apt-get install libgomp1 && apt-get autoclean
 
 COPY policy.yml /home/sorna/policy.yml
 
