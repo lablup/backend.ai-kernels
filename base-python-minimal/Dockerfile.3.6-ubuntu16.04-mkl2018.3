@@ -17,11 +17,11 @@ RUN apt-get update && apt-get install -y \
         ca-certificates \
         wget \
         libexpat1 libgdbm3 bzip2 libffi6 libsqlite3-0 liblzma5 zlib1g \
-        libssl1.0.0. libmpdec2 \
+        libssl1.0.0 libmpdec2 \
         libncursesw5 libtinfo5 libreadline6 \
         libproj-dev libgeos-dev \
         mime-support \
-        libzmq3-dev libuv0.10
+        libzmq3-dev libuv1
 
 # Copy the whole Python from the docker library image
 COPY --from=python-binary /python.tar.gz /

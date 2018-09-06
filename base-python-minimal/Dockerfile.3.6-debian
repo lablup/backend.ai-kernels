@@ -20,10 +20,7 @@ RUN install_packages \
         libssl1.0.0 libmpdec2 \
         libncursesw5 libtinfo5 libreadline6 \
         mime-support \
-        libzmq3 libuv0.10
-
-# Future versions for Debian Stretch:
-# libreadline7 libzmq5 libuv1
+        libzmq5 libuv1
 
 # Copy the whole Python from the docker library image
 COPY --from=python-binary /python.tar.gz /
