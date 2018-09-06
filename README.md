@@ -23,10 +23,11 @@ Here we list the latest versions of our supported kernel images.
 | Rust          | `lablup/kernel-rust`    | 1.17            | O     | O     |   |   |                    |
 | PHP           | `lablup/kernel-php`     | 7.1             | O     | O     |   |   |                    |
 | R             | `lablup/kernel-r`       | 3.3             | O     | O     |   |   | CRAN R             |
+| Scala		| `lablup/kernel-scala`   | 2.12            | O     | O     |   |   |                    |
 
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.8     | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| TensorFlow | `lablup/kernel-python-tensorflow` | 1.9     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | TensorFlow | `lablup/kernel-python-tensorflow` | 1.3     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | PyTorch    | `lablup/kernel-python-torch`      | 0.2     | O     | O\*   | O   |   |                   |
 | Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
@@ -39,7 +40,7 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
  * `base-alpine` (smallest base image)
  * `base-debian` (easier to compile common frameworks with libraries)
  * `base-ubuntu` (heaviest but best compatibility)
- * `base-conda`  (Python conda distributed kernel based on Intel's Machine Learning Kits)
+ * `base-mkl`    (Python conda distributed kernel based on Intel's Machine Learning Kits)
 
 | base-alpine             | base-debian                  | base-ubuntu             |
 |-------------------------|------------------------------|-------------------------|
@@ -66,6 +67,7 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 | nodejs-9-alpine         |                              |                         |
 |                         | julia-0.6-debian             |                         |
 | r-3.3-alpine            |                              |                         |
+| scala-2.12-alpine       |                              |                         |
 |                         | bazel-0.7-debian             |                         |
 |                         | bazel-0.11-debian            |                         |
 |                         | cuda-9.2-cudnn-7.1-dev       |                         |
@@ -77,6 +79,8 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 |                         | python-torch-0.2-py36        |                         |
 |                         | python-torch-0.2-py36-gpu    |                         |
 |                         |                              | python-cntk-2.2-py36    |
+|                         | tensorflow-1.9-py36-dense    |                         |
+|                         | tensorflow-1.9-py36-dense-gpu|                         |
 |                         | tensorflow-1.8-py36-dense    |                         |
 |                         | tensorflow-1.8-py36-dense-gpu|                         |
 |                         | tensorflow-1.7-py36-dense    |                         |

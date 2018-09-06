@@ -1,0 +1,33 @@
+FROM lablup/kernel-base-python-minimal:3.6-alpine
+
+# Install Java compile environments
+# ref: https://github.com/docker-library/openjdk/blob/master/8-jdk/alpine/Dockerfile
+# You may need to check the Alpine package repository for latest OpenJDK package available.
+# ref: https://pkgs.alpinelinux.org/packages?name=openjdk8&branch=v3.6&repo=&arch=x86_64
+ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
+ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
+ENV JAVA_VERSION 8u171
+ENV JAVA_ALPINE_VERSION 8.171.11-r0
+RUN { \
+        echo '#!/bin/sh'; \
+        echo 'set -e'; \
+        echo; \
+        echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
+    } > /usr/local/bin/docker-java-home \
+    && chmod +x /usr/local/bin/docker-java-home
+RUN set -x \
+    && apk add --no-cache \
+        openjdk8="$JAVA_ALPINE_VERSION" \
+    && [ "$JAVA_HOME" = "$(docker-java-home)" ]
+
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[java]~=1.4.0"
+
+COPY policy.yml /home/sorna/policy.yml
+
+LABEL io.sorna.features "batch query uid-match"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "java"]
+
+# vim: ft=dockerfile

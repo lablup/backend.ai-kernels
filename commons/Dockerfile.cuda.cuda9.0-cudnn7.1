@@ -38,6 +38,17 @@ ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 ENV NVIDIA_REQUIRE_CUDA "cuda>=9.0"
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cuda-libraries-dev-$CUDA_PKG_VERSION \
+    cuda-nvml-dev-$CUDA_PKG_VERSION \
+    cuda-minimal-build-$CUDA_PKG_VERSION \
+    cuda-command-line-tools-$CUDA_PKG_VERSION \
+    cuda-core-9-0=9.0.176.3-1 \
+    cuda-cublas-dev-9-0=9.0.176.4-1 \
+    libnccl-dev=$NCCL_VERSION-1+cuda9.0 && \
+    rm -rf /var/lib/apt/lists/*
+ENV LIBRARY_PATH /usr/local/cuda/lib64/stubs:${LIBARARY_PATH}
+
 #libnccl2 (= 2.2.12-1+cuda9.0) but 2.2.13-1+cuda9.2 is to be installed
 # NCCL version
 ENV NCCL_VERSION 2.2.12
@@ -49,7 +60,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV LIBRARY_PATH /usr/local/cuda/lib64/stubs:${LIBRARY_PATH}
 
 # CUDNN version 
-ENV CUDNN_VERSION 7.1.4.18
+#ENV CUDNN_VERSION 7.1.4.18
+ENV CUDNN_VERSION 7.2.1.38
 LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
 
 # install CUDNN 7.x

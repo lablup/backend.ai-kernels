@@ -1,0 +1,28 @@
+FROM lablup/kernel-base-python-minimal:3.6-alpine
+
+ENV SCHEME_VERSION 9.2
+
+RUN apk --no-cache --virtual build-dependencies add build-base m4 \
+    && rm -f /var/cache/apk/* \
+    && wget http://ftp.gnu.org/gnu/mit-scheme/stable.pkg/${SCHEME_VERSION}/mit-scheme-${SCHEME_VERSION}-x86-64.tar.gz \
+    && tar zxvf mit-scheme-${SCHEME_VERSION}-x86-64.tar.gz \
+    && rm mit-scheme-${SCHEME_VERSION}-x86-64.tar.gz \
+    && cd mit-scheme-${SCHEME_VERSION}/src \
+    && ./configure \
+    && make compile-microcode \
+    && make install \
+    && cd /tmp \
+    && rm -rf cd mit-scheme-${SCHEME_VERSION} \
+    && apk del build-dependencies
+
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[scheme]~=1.4.0"
+
+COPY policy.yml /home/sorna/policy.yml
+
+LABEL io.sorna.features "batch query uid-match"
+
+CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "scheme"]
+
+# vim: ft=dockerfile

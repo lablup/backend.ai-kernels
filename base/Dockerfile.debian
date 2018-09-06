@@ -1,57 +1,34 @@
-FROM golang:1.8-jessie as jail-builder
-# Debian jessie ships libseccomp 2.1 but golang binding requires 2.2+
-RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
-    apt update && apt -t jessie-backports install -y libseccomp-dev && \
-    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
-    mkdir -p /go/src/github.com/lablup/sorna-jail
-WORKDIR /go/src/github.com/lablup/sorna-jail
-RUN git clone https://github.com/lablup/sorna-jail . && \
-    go get -u github.com/fatih/color && \
-    go get -u github.com/seccomp/libseccomp-golang && \
-    go get -u github.com/gobwas/glob && \
-    go get -u gopkg.in/yaml.v2
-RUN make inside-container
+FROM lablup/kernel-base:jail as jail-builder
+FROM lablup/kernel-base:hook as hook-builder
 
+FROM bitnami/minideb:stretch
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
-# ------------
-FROM bitnami/minideb:jessie as hook-builder
-RUN install_packages gcc libc6-dev make git-core ca-certificates
-WORKDIR /root
-RUN git clone https://github.com/lablup/sorna-hook && \
-    cd sorna-hook && \
-    make inner
-
-
-# ------------
-FROM bitnami/minideb:jessie
-MAINTAINER DevOps "devops@lablup.com"
-
-RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list && \
+RUN echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/backports.list && \
     export DEBIAN_FRONTEND=noninteractive && \
-    apt update && apt -t jessie-backports install -y libseccomp2 gosu && \
+    apt update && apt -t stretch-backports install -y libseccomp2 gosu && \
+    apt clean && \    
     rm -r /var/lib/apt/lists /var/cache/apt/archives && \
     ln -s /usr/sbin/gosu /usr/sbin/su-exec && \
     mkdir /home/work && chmod 755 /home/work && \
-    mkdir /home/sorna && chmod 755 /home/sorna
+    mkdir /home/backend.ai && chmod 755 /home/backend.ai
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Install jail
-COPY --from=jail-builder /go/src/github.com/lablup/sorna-jail/sorna-jail /home/sorna/jail
-COPY --from=hook-builder /root/sorna-hook/libbaihook.so /home/sorna/libbaihook.so
-ENV LD_PRELOAD /home/sorna/libbaihook.so
+COPY --from=jail-builder /go/src/github.com/lablup/backend.ai-jail/backend.ai-jail /home/backend.ai/jail
+COPY --from=hook-builder /root/backend.ai-hook/libbaihook.so /home/backend.ai/libbaihook.so
+ENV LD_PRELOAD /home/backend.ai/libbaihook.so
 
 WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
 
-LABEL io.sorna.timeout="30" \
-      io.sorna.maxmem="128m" \
-      io.sorna.maxcores="1" \
-      io.sorna.version="2" \
-      io.sorna.features="uid-match"
+LABEL ai.backend.timeout="30" \
+      ai.backend.maxmem="128m" \
+      ai.backend.maxcores="1" \
+      ai.backend.version="2" \
+      ai.backend.features="uid-match"
 
-CMD ["/home/sorna/jail", "/bin/bash"]
-
-# vim: ft=dockerfile
+CMD ["/home/backend.ai/jail", "/bin/bash"]
