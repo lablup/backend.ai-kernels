@@ -1,7 +1,7 @@
 FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
 # ------------
-FROM hephaex/ubuntu
+FROM ubuntu:16.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 RUN apt-get update -y && \
