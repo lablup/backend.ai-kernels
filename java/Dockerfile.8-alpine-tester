@@ -28,11 +28,11 @@ RUN wget http://repo1.maven.org/maven2/junit/junit/4.12/junit-4.12.jar -P /usr/l
     wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -P /usr/local/lib && \
     wget http://repo1.maven.org/maven2/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar -P /usr/local/lib
 
-COPY policy.yml /home/sorna/policy.yml
+COPY policy.yml /home/backend.ai/policy.yml
 
-LABEL io.sorna.features "batch query uid-match"
+LABEL ai.backend.features "batch query uid-match"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "java"]
 
 # vim: ft=dockerfile
