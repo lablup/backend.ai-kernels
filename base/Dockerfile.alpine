@@ -4,7 +4,7 @@ FROM lablup/kernel-base:hook-alpine as hook-builder
 FROM alpine:3.8
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
-RUN apk add --no-cache libseccomp shadow su-exec; \
+RUN apk add --no-cache libseccomp shadow su-exec libstdc++; \
     mkdir /home/work && chmod 755 /home/work; \
     mkdir /home/backend.ai && chmod 755 /home/backend.ai
 ADD entrypoint.sh /usr/local/bin/entrypoint.sh

@@ -1,11 +1,11 @@
-#FROM python:3.6.5-alpine3.7 as python-binary
+FROM python:3.6-alpine3.8 as python-binary
 # /usr/local in this image only has its own built Python.
-#RUN cd /; \
-#    tar czpf python.tar.gz \
-#        /usr/local/bin \
-#        /usr/local/lib/libpython* \
-#        /usr/local/lib/python3.6* \
-#        /usr/local/include
+RUN cd /; \
+    tar czpf python.tar.gz \
+        /usr/local/bin \
+        /usr/local/lib/libpython* \
+        /usr/local/lib/python3.6* \
+        /usr/local/include
 
 # ------------------------
 FROM lablup/kernel-base-python-wheels:3.6-alpine as wheel-builds
@@ -24,9 +24,9 @@ RUN apk add --no-cache ca-certificates \
 # Copy the whole Python from the docker library image
 COPY --from=python-binary /python.tar.gz /
 COPY --from=wheel-builds /root/pyzmq*.whl /tmp/
-COPY --from=wheel-builds /root/simplejson*.whl /tmp/
 COPY --from=wheel-builds /root/msgpack*.whl /tmp/
 COPY --from=wheel-builds /root/uvloop*.whl /tmp/
+COPY --from=wheel-builds /root/python_snappy*.whl /tmp/
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz
 
 # Lablup extension: install Sorna's common Python packages

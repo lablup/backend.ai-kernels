@@ -2,54 +2,17 @@ FROM python:3.6-alpine3.8
 
 ENV MAKEFLAGS -j
 ENV MAKEOPTS -j
-
-# Prepare build environment and libraries
-
-RUN apk add --no-cache --virtual .build-deps-testing \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
-RUN apk update && \
-    apk add --no-cache \
-    # runtime deps
-        libstdc++ libgfortran libquadmath libjpeg libpng freetype openblas lapack \
-        jpeg libpng tiff \
-    # development deps
-        gcc g++ gfortran make linux-headers libc-dev freetype-dev openblas-dev \
-        jpeg-dev libpng-dev tiff-dev geos-dev proj4-dev \
-    # Hack for numpy
-    && ln -s /usr/include/locale.h /usr/include/xlocale.h
+RUN apk update && apk add --no-cache build-base
 
 WORKDIR /root
 
 RUN pip install -U pip setuptools
-RUN pip install --no-binary --no-cache-dir cython
-RUN NPY_NUM_BUILD_JOBS=4 pip install --no-deps numpy==1.14.3
-RUN NPY_NUM_BUILD_JOBS=4 pip wheel --no-deps numpy==1.14.3
-RUN pip wheel --no-deps matplotlib bokeh
-RUN pip wheel --no-deps cartopy
-RUN pip wheel --no-deps ipython
-RUN pip wheel --no-deps --no-build-isolation pandas
-RUN pip wheel --no-deps seaborn
-RUN pip wheel --no-deps pillow
-RUN pip wheel --no-deps simplejson
-RUN pip wheel --no-deps networkx cvxpy
-
-# scipy's clean up script requires numpy to be installed...
-#RUN pip install /root/numpy*.whl \
-#    && pip wheel --no-deps --no-clean scipy
-RUN pip wheel --no-deps --no-clean scipy
-RUN pip install /root/scipy*.whl \
-    && pip wheel --no-deps scikit-learn scikit-image
-RUN pip wheel --no-deps PyWavelets
-RUN pip wheel --no-deps CVXcanon
-RUN pip wheel --no-deps fastcache
-RUN pip wheel --no-deps ecos
-RUN pip wheel --no-deps pygments
-
-# Sorna dependencies
-RUN apk add --no-cache libuv zeromq
+RUN pip install --no-binary --no-cache-dir Cython
+RUN apk add --no-cache libuv-dev zeromq-dev snappy-dev
 RUN pip wheel --no-deps pyzmq
 RUN pip wheel --no-deps msgpack
 RUN pip wheel --no-deps uvloop
+RUN pip wheel --no-deps python-snappy
 
 # List up built wheel packages
 RUN ls -lh /root

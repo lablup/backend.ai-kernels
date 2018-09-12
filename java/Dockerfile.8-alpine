@@ -3,7 +3,7 @@ FROM lablup/kernel-base-python-minimal:3.6-alpine
 # Install Java compile environments
 # ref: https://github.com/docker-library/openjdk/blob/master/8-jdk/alpine/Dockerfile
 # You may need to check the Alpine package repository for latest OpenJDK package available.
-# ref: https://pkgs.alpinelinux.org/packages?name=openjdk8&branch=v3.6&repo=&arch=x86_64
+# ref: https://pkgs.alpinelinux.org/packages?name=openjdk8&branch=v3.8&repo=&arch=x86_64
 ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 ENV JAVA_VERSION 8u171
