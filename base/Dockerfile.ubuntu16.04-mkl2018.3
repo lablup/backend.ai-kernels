@@ -1,6 +1,6 @@
 FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
-
+# ------------
 FROM hephaex/ubuntu
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
@@ -44,3 +44,5 @@ LABEL ai.backend.timeout="30" \
       ai.backend.features="uid-match"
 
 CMD ["/home/backend.ai/jail", "/bin/bash"]
+
+# vim: ft=dockerfile

@@ -58,6 +58,8 @@ def build_common(name, tag, extra_opts=''):
 
 build_kernel('base', 'jail')
 build_kernel('base', 'hook')
+build_kernel('base', 'jail-alpine')
+build_kernel('base', 'hook-alpine')
 
 build_kernel('base', 'debian', latest=True)
 build_kernel('base', 'alpine')

@@ -1,5 +1,5 @@
-FROM lablup/kernel-base:jail as jail-builder
-FROM lablup/kernel-base:hook as hook-builder
+FROM lablup/kernel-base:jail-alpine as jail-builder
+FROM lablup/kernel-base:hook-alpine as hook-builder
 # ------------
 FROM alpine:3.8
 MAINTAINER Mario Cho "m.cho@lablup.com"
@@ -20,10 +20,9 @@ WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
 
-LABEL ai.backend.timeout="30" \
-      ai.backend.maxmem="128m" \
-      ai.backend.maxcores="1" \
-      ai.backend.version="2" \
+LABEL ai.backend.version="2" \
       ai.backend.features="uid-match"
 
 CMD ["/home/backend.ai/jail", "/bin/ash"]
+
+# vim: ft=dockerfile

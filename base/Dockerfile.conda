@@ -6,7 +6,6 @@ MAINTAINER Mario Cho "m.cho@lablup.com"
 
 RUN echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/backports.list && \
     export DEBIAN_FRONTEND=noninteractive && \
-    export DEBIAN_FRONTEND=noninteractive && \
     apt update && apt -t stretch-backports install -y libseccomp2 gosu wget bzip2 && \
     apt clean && \
     rm -r /var/lib/apt/lists /var/cache/apt/archives && \
@@ -40,10 +39,9 @@ WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
 
-LABEL ai.backend.timeout="30" \
-      ai.backend.maxmem="128m" \
-      ai.backend.maxcores="1" \
-      ai.backend.version="2" \
+LABEL ai.backend.version="2" \
       ai.backend.features="uid-match"
 
 CMD ["/home/backend.ai/jail", "/bin/bash"]
+
+# vim: ft=dockerfile

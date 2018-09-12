@@ -1,4 +1,4 @@
-FROM bitnami/minideb:stretch as hook-builder
+FROM bitnami/minideb:stretch
 RUN install_packages gcc g++ libc6-dev make git-core ca-certificates
 WORKDIR /root
 RUN git clone https://github.com/lablup/backend.ai-hook && \

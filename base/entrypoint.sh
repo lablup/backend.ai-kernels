@@ -9,7 +9,7 @@ if [ -f /bin/ash ]; then  # for alpine
 else
   useradd -s /bin/bash -d "/home/$USER_NAME" -M -r -u $USER_ID -U -o -c "User" $USER_NAME
 fi
-chown -R work:work /home/backend.ai
+chown -R work:work /home/backend.ai >/dev/null 2>&1
 sync
 
 export HOME="/home/$USER_NAME"

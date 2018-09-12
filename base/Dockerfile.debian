@@ -25,10 +25,7 @@ WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
 
-LABEL ai.backend.timeout="30" \
-      ai.backend.maxmem="128m" \
-      ai.backend.maxcores="1" \
-      ai.backend.version="2" \
+LABEL ai.backend.version="2" \
       ai.backend.features="uid-match"
 
 CMD ["/home/backend.ai/jail", "/bin/bash"]
