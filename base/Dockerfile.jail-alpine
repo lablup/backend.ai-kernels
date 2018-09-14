@@ -1,4 +1,5 @@
 FROM golang:1.11-alpine
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 RUN apk add --no-cache build-base libseccomp-dev git linux-headers && \
     mkdir -p /go/src/github.com/lablup/backend.ai-jail
