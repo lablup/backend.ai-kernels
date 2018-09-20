@@ -1,13 +1,4 @@
-FROM python:3.6.5-jessie as python-binary
-# /usr/local in this image only has its own built Python.
-RUN cd /; \
-    tar czpf python.tar.gz \
-        /usr/local/bin \
-        /usr/local/lib/libpython* \
-        /usr/local/lib/python3.6* \
-        /usr/local/include
-
-
+FROM lablup/kernel-base:python3.6 as python-binary
 # ------------------------
 FROM lablup/kernel-base:debian
 ENV LANG=C.UTF-8
@@ -17,10 +8,10 @@ RUN install_packages \
         ca-certificates \
         wget \
         libexpat1 libgdbm3 bzip2 libffi6 libsqlite3-0 liblzma5 zlib1g \
-        libssl1.0.0 libmpdec2 \
+        libssl-dev libmpdec2 \
         libncursesw5 libtinfo5 libreadline6 \
         mime-support \
-        libzmq5 libuv1
+        libzmq3-dev libuv1
 
 # Copy the whole Python from the docker library image
 COPY --from=python-binary /python.tar.gz /
