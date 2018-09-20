@@ -1,18 +1,17 @@
 FROM lablup/kernel-base-python-wheels:3.6-alpine as wheel-builds
-RUN ls -lh /root
+# ------------
 
-
-# -------------------
 FROM lablup/kernel-base-python-minimal:3.6-alpine
 
 # Install system packages for wheels
 RUN apk add --no-cache \
         libstdc++ libgfortran libquadmath libjpeg libpng freetype openblas lapack \
-        jpeg libpng tiff
+        jpeg libpng tiff \
+	geos proj4
 
 # Copy pre-built wheels
 COPY --from=wheel-builds /root/*.whl /tmp/
-
+RUN ls -lh /root && ls -lh /tmp
 # Install pre-built wheels (the ordering matters!)
 RUN pip install --no-cache-dir /tmp/Cython*.whl \
     && pip install --no-cache-dir /tmp/numpy*.whl \
@@ -39,23 +38,23 @@ RUN pip install --no-cache-dir /tmp/Cython*.whl \
     \
     && rm -f /tmp/*.whl
 
-COPY policy.yml /home/sorna/
+COPY policy.yml /home/backend.ai/
 
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.4.0"
 
 # Matplotlib configuration and pre-heating
-ENV MPLCONFIGDIR /home/sorna/.matplotlib
-RUN mkdir /home/sorna/.matplotlib
-COPY matplotlibrc /home/sorna/.matplotlib/
+ENV MPLCONFIGDIR /home/backend.ai/.matplotlib
+RUN mkdir /home/backend.ai/.matplotlib
+COPY matplotlibrc /home/backend.ai/.matplotlib/
 RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
     && python /tmp/matplotlib-fontcache.py \
     && rm /tmp/matplotlib-fontcache.py
 
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
-      io.sorna.features="batch query uid-match user-input"
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
 
 # vim: ft=dockerfile

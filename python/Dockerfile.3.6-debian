@@ -4,8 +4,8 @@ FROM lablup/kernel-base-python-minimal:3.6-debian
 # we don't have to rebuild these!
 RUN install_packages make cmake pkg-config gcc g++ git-core
 
-COPY install-libproj.sh /home/sorna
-RUN sh /home/sorna/install-libproj.sh && rm /home/sorna/install-libproj.sh
+COPY install-libproj.sh /home/backend.ai
+RUN sh /home/backend.ai/install-libproj.sh && rm /home/backend.ai/install-libproj.sh
 
 RUN install_packages libgeos++-dev \
     && pip install --no-cache-dir -U pip setuptools \
@@ -22,23 +22,23 @@ RUN install_packages libgeos++-dev \
     && pip install --no-cache-dir scikit-learn scikit-image \
     && pip install --no-cache-dir pygments
 
-COPY policy.yml /home/sorna/
+COPY policy.yml /home/backend.ai/
 
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.4.0"
 
 # Matplotlib configuration and pre-heating
-ENV MPLCONFIGDIR /home/sorna/.matplotlib
-RUN mkdir /home/sorna/.matplotlib
-COPY matplotlibrc /home/sorna/.matplotlib/
+ENV MPLCONFIGDIR /home/backend.ai/.matplotlib
+RUN mkdir /home/backend.ai/.matplotlib
+COPY matplotlibrc /home/backend.ai/.matplotlib/
 RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
     && python /tmp/matplotlib-fontcache.py \
     && rm /tmp/matplotlib-fontcache.py
 
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
-      io.sorna.features="batch query uid-match user-input"
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
 
 # vim: ft=dockerfile
