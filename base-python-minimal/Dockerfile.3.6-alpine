@@ -1,15 +1,5 @@
-FROM python:3.6-alpine3.8 as python-binary
-# /usr/local in this image only has its own built Python.
-RUN cd /; \
-    tar czpf python.tar.gz \
-        /usr/local/bin \
-        /usr/local/lib/libpython* \
-        /usr/local/lib/python3.6* \
-        /usr/local/include
-
-# ------------------------
+FROM lablup/kernel-base:python3.6-alpine as python-binary
 FROM lablup/kernel-base-python-wheels:3.6-alpine as wheel-builds
-
 # ------------------------
 FROM lablup/kernel-base:alpine
 ENV LANG=C.UTF-8
@@ -29,7 +19,7 @@ COPY --from=wheel-builds /root/uvloop*.whl /tmp/
 COPY --from=wheel-builds /root/python_snappy*.whl /tmp/
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz
 
-# Lablup extension: install Sorna's common Python packages
+# Lablup extension: install Backend.ai's common Python packages
 RUN apk add --no-cache --virtual .sorna-deps zeromq libuv \
     && pip install --no-cache-dir /tmp/*.whl \
     && pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2" \
@@ -39,6 +29,6 @@ RUN apk add --no-cache --virtual .sorna-deps zeromq libuv \
 COPY sitecustomize.py /usr/local/lib/python3.6/site-packages/
 
 # Test if Python is working
-RUN python -c 'import sys; print(sys.version_info); import ssl'
+#RUN python -c 'import sys; print(sys.version_info); import ssl'
 
 # vim: ft=dockerfile
