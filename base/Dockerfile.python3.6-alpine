@@ -1,0 +1,8 @@
+FROM python:3.6.6-alpine as python-binary
+# /usr/local in this image only has its own built Python.
+RUN cd /; \
+    tar czpf python.tar.gz \
+        /usr/local/bin \
+        /usr/local/lib/libpython* \
+        /usr/local/lib/python3.6* \
+        /usr/local/include
