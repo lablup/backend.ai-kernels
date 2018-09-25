@@ -54,7 +54,9 @@ RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
 LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input"
 
-CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
-     "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
+CMD ["/home/backend.ai/jail", "-policy", \
+     "/home/backend.ai/policy.yml", \
+     "/usr/local/bin/python", "-m", \
+     "ai.backend.kernel", "python"]
 
 # vim: ft=dockerfile
