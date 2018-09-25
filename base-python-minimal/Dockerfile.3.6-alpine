@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apk add --no-cache ca-certificates \
         wget \
         expat gdbm libbz2 libffi openssl ncurses-libs readline sqlite-libs xz-libs zlib
+        
 
 # Copy the whole Python from the docker library image
 COPY --from=python-binary /python.tar.gz /
