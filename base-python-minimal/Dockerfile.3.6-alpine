@@ -29,6 +29,6 @@ RUN apk add --no-cache --virtual .sorna-deps zeromq libuv \
 COPY sitecustomize.py /usr/local/lib/python3.6/site-packages/
 
 # Test if Python is working
-#RUN python -c 'import sys; print(sys.version_info); import ssl'
+RUN python -c 'import sys; print(sys.version_info); import ssl'
 
 # vim: ft=dockerfile
