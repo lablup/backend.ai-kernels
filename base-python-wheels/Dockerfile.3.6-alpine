@@ -16,6 +16,7 @@ RUN apk add --no-cache libuv-dev zeromq-dev snappy-dev geos-dev proj4-dev \
 
 RUN pip wheel --no-deps Cython
 RUN pip wheel --no-deps numpy
+RUN pip wheel --no-deps matplotlib
 RUN pip wheel --no-deps pyproj
 RUN pip wheel --no-deps Cartopy
 RUN pip wheel --no-deps Pillow
