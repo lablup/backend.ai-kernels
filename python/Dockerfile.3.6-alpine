@@ -4,10 +4,11 @@ FROM lablup/kernel-base-python-wheels:3.6-alpine as wheel-builds
 FROM lablup/kernel-base-python-minimal:3.6-alpine
 
 # Install system packages for wheels
-RUN apk add --no-cache \
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+    apk update && apk add --no-cache build-base cmake \
         libstdc++ libgfortran libquadmath libjpeg libpng freetype openblas lapack \
         jpeg libpng tiff \
-	geos proj4
+        geos proj4
 
 # Copy pre-built wheels
 COPY --from=wheel-builds /root/*.whl /tmp/
