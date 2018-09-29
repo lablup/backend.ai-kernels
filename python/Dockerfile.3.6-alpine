@@ -1,43 +1,50 @@
+# Python kernel for Backend.AI
+
+# multi-layer build for python wheels
 FROM lablup/kernel-base-python-wheels:3.6-alpine as wheel-builds
 # ------------
 
+# base kernel image
 FROM lablup/kernel-base-python-minimal:3.6-alpine
 
 # Install system packages for wheels
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
-    apk update && apk add --no-cache build-base cmake \
-        libstdc++ libgfortran libquadmath libjpeg libpng freetype openblas lapack \
+    apk update && \
+    apk add --no-cache build-base cmake \
+        libstdc++ libgfortran libquadmath libjpeg libpng \
+	freetype openblas lapack \
         jpeg libpng tiff \
         geos proj4
 
 # Copy pre-built wheels
 COPY --from=wheel-builds /root/*.whl /tmp/
-RUN ls -lh /root && ls -lh /tmp
+RUN ls -lh /root && \
+    ls -lh /tmp
 # Install pre-built wheels (the ordering matters!)
-RUN pip install --no-cache-dir /tmp/Cython*.whl \
-    && pip install --no-cache-dir /tmp/numpy*.whl \
+RUN pip install --no-cache-dir /tmp/Cython*.whl && \
+    pip install --no-cache-dir /tmp/numpy*.whl && \
     \
-    && pip install --no-cache-dir /tmp/matplotlib*.whl \
-    && pip install --no-cache-dir /tmp/pyproj*.whl \
-    && pip install --no-cache-dir /tmp/Cartopy*.whl \
-    && pip install --no-cache-dir /tmp/Pillow*.whl \
-    && pip install --no-cache-dir /tmp/scipy*.whl \
-    && pip install --no-cache-dir /tmp/pandas*.whl \
-    && pip install --no-cache-dir /tmp/seaborn*.whl \
+    pip install --no-cache-dir /tmp/matplotlib*.whl && \
+    pip install --no-cache-dir /tmp/pyproj*.whl && \
+    pip install --no-cache-dir /tmp/Cartopy*.whl && \
+    pip install --no-cache-dir /tmp/Pillow*.whl && \
+    pip install --no-cache-dir /tmp/scipy*.whl && \
+    pip install --no-cache-dir /tmp/pandas*.whl && \
+    pip install --no-cache-dir /tmp/seaborn*.whl && \
     \
-    && pip install --no-cache-dir /tmp/Pygments*.whl \
-    && pip install --no-cache-dir /tmp/ipython*.whl \
+    pip install --no-cache-dir /tmp/Pygments*.whl && \
+    pip install --no-cache-dir /tmp/ipython*.whl && \
     \
-    && pip install --no-cache-dir /tmp/PyWavelets*.whl \
-    && pip install --no-cache-dir /tmp/networkx*.whl \
-    && pip install --no-cache-dir /tmp/CVXcanon*.whl \
-    && pip install --no-cache-dir /tmp/fastcache*.whl \
-    && pip install --no-cache-dir /tmp/ecos*.whl \
-    && pip install --no-cache-dir /tmp/cvxpy*.whl \
+    pip install --no-cache-dir /tmp/PyWavelets*.whl && \
+    pip install --no-cache-dir /tmp/networkx*.whl && \
+    pip install --no-cache-dir /tmp/CVXcanon*.whl && \
+    pip install --no-cache-dir /tmp/fastcache*.whl && \
+    pip install --no-cache-dir /tmp/ecos*.whl && \
+    pip install --no-cache-dir /tmp/cvxpy*.whl && \
     \
-    && pip install --no-cache-dir /tmp/scikit*.whl \
+    pip install --no-cache-dir /tmp/scikit*.whl && \
     \
-    && rm -f /tmp/*.whl
+    rm -f /tmp/*.whl
 
 COPY policy.yml /home/backend.ai/
 
@@ -48,9 +55,9 @@ RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.4.0"
 ENV MPLCONFIGDIR /home/backend.ai/.matplotlib
 RUN mkdir /home/backend.ai/.matplotlib
 COPY matplotlibrc /home/backend.ai/.matplotlib/
-RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
-    && python /tmp/matplotlib-fontcache.py \
-    && rm /tmp/matplotlib-fontcache.py
+RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py && \
+    python /tmp/matplotlib-fontcache.py && \
+    rm /tmp/matplotlib-fontcache.py
 
 LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input"
