@@ -2,12 +2,12 @@ FROM lablup/kernel-base-python-minimal:3.6-debian
 
 # As we mostly have "manylinux" glibc-compatible binary packaes,
 # we don't have to rebuild these!
-RUN install_packages make cmake pkg-config gcc g++ git-core
+RUN apt update -y && apt install -y make cmake pkg-config gcc g++ git-core
 
 COPY install-libproj.sh /home/backend.ai
 RUN sh /home/backend.ai/install-libproj.sh && rm /home/backend.ai/install-libproj.sh
 
-RUN install_packages libgeos++-dev \
+RUN apt install -y libgeos++-dev \
     && pip install --no-cache-dir -U pip setuptools \
     && pip install --no-cache-dir Cython numpy \
     && pip install --no-cache-dir matplotlib bokeh \

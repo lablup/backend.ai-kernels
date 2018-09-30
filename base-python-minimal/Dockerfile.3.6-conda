@@ -40,7 +40,5 @@ RUN conda update -n base conda && \
  # Test if Python is working
 RUN python -c 'import sys; print(sys.version_info); import ssl'
 
-COPY sitecustomize.py /usr/local/lib/python3.6/site-packages/
-
 CMD [ "/bin/bash" ]
 # vim: ft=dockerfile
