@@ -1,4 +1,5 @@
 FROM lablup/kernel-base-python-minimal:3.6-alpine
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 ENV LUA_VERSION 5.1
 ENV LUA_PACKAGE lua${LUA_VERSION}
@@ -9,7 +10,7 @@ RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs unzip \
     && cd /home/sorna \
     && curl -L http://luarocks.org/releases/luarocks-2.4.2.tar.gz -o luarocks-2.4.2.tar.gz \
     && tar zxpf luarocks-2.4.2.tar.gz \
-    && cd /home/sorna/luarocks-2.4.2 \
+    && cd /home/backend.ai/luarocks-2.4.2 \
     && ./configure; make bootstrap \
     && cd /home/sorna \
     && rm -rf luarocks-2.4.2 \
@@ -21,9 +22,9 @@ RUN pip install --no-cache-dir "backend.ai-kernel-runner[lua]~=1.4.0"
 
 RUN apk add --no-cache ${LUA_PACKAGE}
 
-LABEL io.sorna.features "query uid-match"
+LABEL ai.backend.features "query uid-match"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "lua"]
 
 # vim: ft=dockerfile
