@@ -12,7 +12,7 @@ RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs unzip \
     && tar zxpf luarocks-2.4.2.tar.gz \
     && cd /home/backend.ai/luarocks-2.4.2 \
     && ./configure; make bootstrap \
-    && cd /home/sorna \
+    && cd /home/backend.ai \
     && rm -rf luarocks-2.4.2 \
     && apk del .build-deps
 RUN ln -s /usr/bin/${LUA_PACKAGE} /usr/bin/lua
