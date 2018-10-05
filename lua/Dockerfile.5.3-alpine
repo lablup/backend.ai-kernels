@@ -7,7 +7,7 @@ ENV LUA_PACKAGE lua${LUA_VERSION}
 # Install Lua
 RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs unzip \
     && apk add --no-cache --virtual .build-deps build-base libc-dev curl ${LUA_PACKAGE}-dev \
-    && cd /home/sorna \
+    && cd /home/backend.ai \
     && curl -L http://luarocks.org/releases/luarocks-2.4.2.tar.gz -o luarocks-2.4.2.tar.gz \
     && tar zxpf luarocks-2.4.2.tar.gz \
     && cd /home/backend.ai/luarocks-2.4.2 \
