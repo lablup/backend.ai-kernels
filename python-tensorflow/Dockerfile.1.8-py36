@@ -1,18 +1,13 @@
 FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
-FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
 FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
 FROM lablup/common-tensorflow:1.8-py36 as tf-binary
 
-#FROM lablup/kernel-python-minimal:3.6-ubuntu
 FROM ubuntu:16.04
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
 MAINTAINER Mario Cho "m.cho@lablup.com"
-
-COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
-COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
-COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
 
 RUN apt update -y && \
     apt install -y \
@@ -28,6 +23,9 @@ RUN apt update -y && \
         libzmq3-dev libuv1
 
 # Copy the whole Python from the docker library image
+COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
+COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
+COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
@@ -40,11 +38,6 @@ RUN python -c 'import sys; print(sys.version_info); import ssl'
 RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2"
 
-<<<<<<< HEAD
-=======
-FROM lablup/kernel-python:3.6-ubuntu
->>>>>>> 4082d696005ac63a831da4f3de3faa8b0f5533d2
-
 # Install TensorFlow and Keras
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
 RUN pip install --no-cache-dir /tmp/tensorflow-*.whl && \
@@ -52,7 +45,6 @@ RUN pip install --no-cache-dir /tmp/tensorflow-*.whl && \
     pip install --no-cache-dir h5py
 RUN rm -f /tmp/*.whl
 
-<<<<<<< HEAD
 RUN apt-get install -y libseccomp2 gosu && \
     apt-get clean && \
     rm -r /var/lib/apt/lists /var/cache/apt/archives && \
@@ -72,8 +64,6 @@ WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
 
-=======
->>>>>>> 4082d696005ac63a831da4f3de3faa8b0f5533d2
 COPY policy.yml /home/backend.ai/policy.yml
 
 LABEL ai.backend.timeout="0" \
