@@ -1,7 +1,8 @@
 FROM lablup/common-bazel:0.11-debian as bazel-binary
 FROM lablup/kernel-base:python3.6 as python-binary
+#FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
 
-# Build target: lablup/common-tensorflow:1.8-py36-gpu
+# Build target: lablup/common-tensorflow:1.8-py36-dense-gpu
 FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 
 # Install system package dependencies
@@ -23,8 +24,15 @@ RUN apt-get update && \
         unzip \
 	zip && \
     rm -rf /var/lib/apt/lists/* 
+#    find /usr/local/cuda-9.0/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
+#    rm /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a && \
+#    ln -s /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/local/cuda/lib/libnccl.so.2 && \
+#    ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h
 	
 COPY --from=bazel-binary /usr/local/bin/bazel /usr/local/bin/
+#COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
+#COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
+#COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
@@ -34,7 +42,7 @@ RUN bazel version; python -c "import sys; print(sys.prefix); print(sys.version_i
     pip install --no-cache-dir wheel numpy scipy 
 
 # The TensorFlow version
-ENV TF_VERSION 1.8
+ENV TF_VERSION 1.10
 
 RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
@@ -91,7 +99,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} && \
         //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \    
-    pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
+#    pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
     rm -rf /root/.cache
 
 RUN ls -lh /tmp/tensorflow_pkg
