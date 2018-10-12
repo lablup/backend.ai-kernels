@@ -1,8 +1,9 @@
 FROM lablup/common-tensorflow:1.7-py36-gpu as tf-binary
-FROM lablup/common-cuda:cuda8.0-cudnn6.0 as cuda-libs
+#FROM lablup/common-cuda:cuda8.0-cudnn6.0 as cuda-libs
 
-
-FROM lablup/kernel-python:3.6-debian
+#FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
+FROM nvidia/cuda:8.0-cudnn6-runtime-ubuntu16.04
+#FROM lablup/kernel-python:3.6-debian
 
 # Install CUDA
 COPY --from=cuda-libs /usr/local/cuda-8.0 /usr/local/cuda-8.0
