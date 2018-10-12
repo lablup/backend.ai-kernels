@@ -1,6 +1,49 @@
-FROM lablup/common-tensorflow:1.7-py36 as tf-binary
+FROM lablup/kernel-base:jail as jail-builder
+FROM lablup/kernel-base:hook as hook-builder
+FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
+FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/common-tensorflow:1.8-py36 as tf-binary
 
+<<<<<<< HEAD
+#FROM lablup/kernel-python-minimal:3.6-ubuntu
+FROM ubuntu:16.04
+ENV LANG=C.UTF-8
+ENV PYTHONUNBUFFERED 1
+MAINTAINER Mario Cho "m.cho@lablup.com"
+
+COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
+COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
+COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
+
+RUN apt update -y && \
+    apt install -y \
+        ca-certificates \
+        wget \
+        libexpat1 libgdbm3 libbz2-dev libffi6 libsqlite3-0 liblzma5 zlib1g \
+	libmpdec2 \
+        libssl1.0.0 \
+	libssl-dev \
+        libncursesw5 libtinfo5 libreadline6 \
+        libproj-dev libgeos-dev \
+        mime-support \
+        libzmq3-dev libuv1
+
+# Copy the whole Python from the docker library image
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
+
+RUN export LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH
+# Test if Python is working
+RUN python -c 'import sys; print(sys.version_info); import ssl'
+
+# As we mostly have "manylinux" glibc-compatible binary packaes,
+# we don't have to rebuild these!
+RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
+    pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2"
+
+=======
 FROM lablup/kernel-base-python-minimal:3.6-ubuntu
+>>>>>>> 4082d696005ac63a831da4f3de3faa8b0f5533d2
 
 # Install TensorFlow and Keras
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
@@ -9,6 +52,26 @@ RUN pip install --no-cache-dir /tmp/tensorflow-*.whl && \
     pip install --no-cache-dir h5py
 RUN rm -f /tmp/*.whl
 
+<<<<<<< HEAD
+RUN apt-get install -y libseccomp2 gosu && \
+    apt-get clean && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    ln -s /usr/sbin/gosu /usr/sbin/su-exec && \
+    mkdir /home/work && chmod 755 /home/work; \
+    mkdir /home/backend.ai && chmod 755 /home/backend.ai
+ADD entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Install jail
+COPY --from=jail-builder /go/src/github.com/lablup/backend.ai-jail/backend.ai-jail /home/backend.ai/jail
+COPY --from=hook-builder /root/backend.ai-hook/libbaihook.so /home/backend.ai/libbaihook.so
+ENV LD_PRELOAD /home/backend.ai/libbaihook.so
+
+WORKDIR /home/work
+VOLUME ["/home/work"]
+EXPOSE 2000 2001 2002 2003
+
 COPY policy.yml /home/backend.ai/policy.yml
 
 LABEL ai.backend.timeout="0" \
@@ -16,5 +79,16 @@ LABEL ai.backend.timeout="0" \
       ai.backend.maxcores="4" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input"
+
+CMD ["/home/backend.ai/jail", "/bin/bash"]
+=======
+COPY policy.yml /home/backend.ai/policy.yml
+
+LABEL ai.backend.timeout="0" \
+      ai.backend.maxmem="8g" \
+      ai.backend.maxcores="4" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input"
+>>>>>>> 4082d696005ac63a831da4f3de3faa8b0f5533d2
 
 # vim: ft=dockerfile
