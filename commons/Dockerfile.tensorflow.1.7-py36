@@ -5,16 +5,6 @@ FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
 # Build target: lablup/common-tensorflow:1.7-py36
 FROM lablup/kernel-base-python-minimal:3.6-ubuntu
 
-COPY --from=bazel-binary /usr/local/bin/bazel /usr/local/bin/
-COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
-COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
-COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
-COPY --from=python-binary /python.tar.gz /
-RUN cd /; \
-    tar xzpf python.tar.gz; \
-    ldconfig; \
-    rm -f python.tar.gz
-
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
 RUN apt-get update -y && \
@@ -33,12 +23,22 @@ RUN apt-get update -y && \
         git-core \
         unzip zip
 
+COPY --from=bazel-binary /usr/local/bin/bazel /usr/local/bin/
+COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
+COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
+COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; \
+    tar xzpf python.tar.gz; \
+    ldconfig; \
+    rm -f python.tar.gz
+
 RUN echo "/opt/intel/mkl/lib/intel64" >> /etc/ld.so.conf.d/intel.conf && \
   ldconfig && \
   echo ". /opt/intel/bin/compilervars.sh intel64" >> /etc/bash.bashrc
 
 # Prepare for building TensorFlwo wheel
-RUN pip3 install --no-cache-dir wheel
+RUN pip install --no-cache-dir wheel
 # Install TensorFlow build dependencies (ensure we have proper numpy)
 COPY --from=numpy-binary /tmp/numpy/dist/numpy-*.whl /tmp
 RUN pip install --no-cache-dir wheel /tmp/*.whl; \
@@ -50,7 +50,7 @@ RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     python -c "import numpy; numpy.show_config()"
 
 # Limit the system resource used during compilation
-#ENV LOCAL_RESOURCES 4096,8.0,1.0
+ENV LOCAL_RESOURCES 4096,8.0,1.0
 
 # The TensorFlow version
 ENV TF_VERSION 1.7
@@ -59,10 +59,10 @@ RUN : build TensorFlow pip package \
     && cd /tmp \
     && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
         | tar xzf -
-RUN cd /tmp/tensorflow-r${TF_VERSION} \
+RUN cd /tmp/tensorflow-r${TF_VERSION} && \
     # temporary fix for tensorflow/tensorflow#12979
-    && sed -i '\@https://github.com/google/protobuf/archive/0b059a3d8a8f8aa40dde7bea55edca4ec5dfea66.tar.gz@d' tensorflow/workspace.bzl \
-    && PYTHON_BIN_PATH=/usr/local/bin/python \
+    sed -i '\@https://github.com/google/protobuf/archive/0b059a3d8a8f8aa40dde7bea55edca4ec5dfea66.tar.gz@d' tensorflow/workspace.bzl && \
+        PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
@@ -76,11 +76,10 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
         TF_NEED_OPENCL=0 \
         TF_NEED_CUDA=0 \
         TF_NEED_MPI=0  \
-    bash tensorflow/tools/ci_build/builds/configured CPU 
-RUN cd /tmp/tensorflow-r${TF_VERSION} && \
+    bash configure && \
     bazel build \
         --config=opt \
-#	--local_resources ${LOCAL_RESOURCES} \
+	--local_resources ${LOCAL_RESOURCES} \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
