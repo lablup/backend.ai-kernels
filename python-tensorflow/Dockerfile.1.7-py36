@@ -2,7 +2,7 @@ FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
 FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
 FROM lablup/kernel-base:python3.6 as python-binary
-FROM lablup/common-tensorflow:1.8-py36 as tf-binary
+FROM lablup/common-tensorflow:1.7-py36 as tf-binary
 
 FROM ubuntu:16.04
 ENV LANG=C.UTF-8
