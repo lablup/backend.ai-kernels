@@ -4,17 +4,11 @@ FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-tensorflow:1.7-py36-gpu as tf-binary
 #FROM lablup/common-cuda:cuda8.0-cudnn6.0 as cuda-libs
 
-<<<<<<< HEAD
-FROM nvidia/cuda:8.0-cudnn7-devel-ubuntu16.04
+FROM nvidia/cuda:8.0-cudnn7-runtime-ubuntu16.04
 
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
 MAINTAINER Mario Cho "m.cho@lablup.com"
-=======
-#FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
-FROM nvidia/cuda:8.0-cudnn6-runtime-ubuntu16.04
-#FROM lablup/kernel-python:3.6-debian
->>>>>>> 4082d696005ac63a831da4f3de3faa8b0f5533d2
 
 RUN apt update -y && \
     apt install -y \
