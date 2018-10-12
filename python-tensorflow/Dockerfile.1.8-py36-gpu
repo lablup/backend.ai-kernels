@@ -3,6 +3,7 @@ FROM lablup/kernel-base:hook as hook-builder
 FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-tensorflow:1.8-py36-gpu as tf-binary
 FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04 as cuda-libs
+<<<<<<< HEAD
 
 FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 
@@ -36,6 +37,9 @@ RUN python -c 'import sys; print(sys.version_info); import ssl'
 RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2"
 
+=======
+FROM lablup/kernel-python:3.6-ubuntu
+>>>>>>> 4082d696005ac63a831da4f3de3faa8b0f5533d2
 
 # Install CUDA-9.0 + cuDNN 7.2
 COPY --from=cuda-libs /usr/local/cuda-9.0 /usr/local/cuda-9.0
