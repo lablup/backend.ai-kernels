@@ -93,10 +93,8 @@ RUN cd /tmp/tensorflow-r${TF_VERSION}; \
         //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \        
-#    pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
-    rm -rf /root/.cache
-    
-RUN ls -lh /tmp/tensorflow_pkg
+    rm -rf /root/.cache && \
+    ls -lh /tmp/tensorflow_pkg
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0
 
