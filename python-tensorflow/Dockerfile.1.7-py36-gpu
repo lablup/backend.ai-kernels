@@ -2,7 +2,6 @@ FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
 FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-tensorflow:1.7-py36-gpu as tf-binary
-#FROM lablup/common-cuda:cuda8.0-cudnn6.0 as cuda-libs
 
 FROM nvidia/cuda:8.0-cudnn7-runtime-ubuntu16.04
 
