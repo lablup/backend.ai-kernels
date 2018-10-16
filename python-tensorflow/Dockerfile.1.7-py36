@@ -1,6 +1,6 @@
 FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
-FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
+FROM lablup/common-numpy:1.15-py36-ubuntu16.04-mkl2019.0 as numpy-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-tensorflow:1.7-py36 as tf-binary
 
@@ -66,16 +66,6 @@ RUN pip install --no-cache-dir wheel && \
     rm -f /tmp/*.whl
 
 
-# Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.4.0"
-
-# Matplotlib configuration and pre-heating
-ENV MPLCONFIGDIR /home/backend.ai/.matplotlib
-RUN mkdir /home/backend.ai/.matplotlib
-COPY matplotlibrc /home/backend.ai/.matplotlib/
-RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
-    && python /tmp/matplotlib-fontcache.py \
-    && rm /tmp/matplotlib-fontcache.py
 
 RUN apt-get install -y libseccomp2 gosu && \
     apt-get clean && \
@@ -87,16 +77,30 @@ ADD entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
+COPY policy.yml /home/backend.ai/policy.yml
+
 # Install jail
 COPY --from=jail-builder /go/src/github.com/lablup/backend.ai-jail/backend.ai-jail /home/backend.ai/jail
 COPY --from=hook-builder /root/backend.ai-hook/libbaihook.so /home/backend.ai/libbaihook.so
 ENV LD_PRELOAD /home/backend.ai/libbaihook.so
 
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.4.0"
+
+# Matplotlib configuration and pre-heating
+ENV MPLCONFIGDIR /home/backend.ai/.matplotlib
+RUN mkdir /home/backend.ai/.matplotlib
+COPY matplotlibrc /home/backend.ai/.matplotlib/
+RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
+    && python /tmp/matplotlib-fontcache.py \
+    && rm /tmp/matplotlib-fontcache.py
+
+
 WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
 
-COPY policy.yml /home/backend.ai/policy.yml
+
 
 LABEL ai.backend.timeout="0" \
       ai.backend.maxmem="8g" \
