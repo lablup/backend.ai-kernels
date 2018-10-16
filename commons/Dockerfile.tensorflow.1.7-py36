@@ -41,6 +41,7 @@ RUN echo "/opt/intel/mkl/lib/intel64" >> /etc/ld.so.conf.d/intel.conf && \
 RUN pip install --no-cache-dir wheel
 # Install TensorFlow build dependencies (ensure we have proper numpy)
 COPY --from=numpy-binary /tmp/numpy/dist/numpy-*.whl /tmp
+COPY --from=numpy-binary /tmp/scipy/dist/scipy*.whl /tmp
 RUN pip install --no-cache-dir wheel /tmp/*.whl; \
     rm -f /tmp/*.whl
 
@@ -64,7 +65,10 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
     && PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
+# AVX & AVX2 support under haswell core
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
+# AVX512 support over skylake core
+#        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mavx512f -mavx512pf -mavx512cd -mavx512er -mfpmath=both -msse4.1 -msse4.2" \
         TF_MKL_ROOT=/opt/intel/mkl \
         TF_NEED_JEMALLOC=1 \
         TF_NEED_GCP=1 \
