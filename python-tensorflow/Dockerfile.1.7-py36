@@ -4,7 +4,8 @@ FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-tensorflow:1.7-py36 as tf-binary
 
-FROM ubuntu:16.04
+#FROM ubuntu:16.04
+FROM lablup/kernel-base:ubuntu16.04-mkl2019
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
 MAINTAINER Mario Cho "m.cho@lablup.com"
@@ -26,9 +27,9 @@ RUN apt update -y && \
         libzmq3-dev libuv1
 
 # Copy the whole Python from the docker library image
-COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
-COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
-COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
+#COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
+#COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
+#COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
 
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
