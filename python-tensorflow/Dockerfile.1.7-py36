@@ -4,7 +4,6 @@ FROM lablup/common-numpy:1.15-py36-ubuntu16.04-mkl2019.0 as numpy-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-tensorflow:1.7-py36 as tf-binary
 
-#FROM ubuntu:16.04
 FROM lablup/kernel-base:ubuntu16.04-mkl2019
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
@@ -65,8 +64,6 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pygments && \
     rm -f /tmp/*.whl
 
-
-
 RUN apt-get install -y libseccomp2 gosu && \
     apt-get clean && \
     rm -r /var/lib/apt/lists /var/cache/apt/archives && \
@@ -95,12 +92,9 @@ RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
     && python /tmp/matplotlib-fontcache.py \
     && rm /tmp/matplotlib-fontcache.py
 
-
 WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
-
-
 
 LABEL ai.backend.timeout="0" \
       ai.backend.maxmem="8g" \

@@ -3,7 +3,6 @@ FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-numpy:1.15-py36-ubuntu16.04-mkl2019.0 as numpy-binary
 
 # Build target: lablup/common-tensorflow:1.7-py36
-#FROM lablup/kernel-base-python-minimal:3.6-ubuntu
 FROM lablup/kernel-base:ubuntu16.04-mkl2019
 
 # Install system package dependencies
