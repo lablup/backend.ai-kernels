@@ -1,9 +1,9 @@
 FROM lablup/common-bazel:0.15-ubuntu as bazel-binary
 FROM lablup/kernel-base:python3.6 as python-binary
-FROM lablup/common-numpy:1.14-py36-ubuntu16.04-mkl2018.3 as numpy-binary
+FROM lablup/common-numpy:1.15-py36-ubuntu16.04-mkl2019.0 as numpy-binary
 
-# Build target: lablup/common-tensorflow:1.11-py36
-FROM lablup/kernel-base-python-minimal:3.6-ubuntu
+# Build target: lablup/common-tensorflow:1.8-py36
+FROM lablup/kernel-base:ubuntu16.04-mkl2019
 
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
@@ -38,21 +38,21 @@ RUN echo "/opt/intel/mkl/lib/intel64" >> /etc/ld.so.conf.d/intel.conf && \
   echo ". /opt/intel/bin/compilervars.sh intel64" >> /etc/bash.bashrc
 
 # Prepare for building TensorFlwo wheel
-RUN pip3 install --no-cache-dir wheel
+RUN pip install --no-cache-dir wheel
 # Install TensorFlow build dependencies (ensure we have proper numpy)
 COPY --from=numpy-binary /tmp/numpy/dist/numpy-*.whl /tmp
+COPY --from=numpy-binary /tmp/scipy/dist/scipy*.whl /tmp
 RUN pip install --no-cache-dir wheel /tmp/*.whl; \
+    pip install --no-cache-dir keras_applications && \
+    pip install --no-cache-dir keras_preprocessing && \
     rm -f /tmp/*.whl
-RUN pip install --no-cache-dir install \
-        keras_applications \
-        keras_preprocessing 
-	
 
 # Check Bazel/Python is runnable.
 RUN bazel version
 RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     python -c "import numpy; numpy.show_config()"
 
+# Limit the system resource used during compilation
 ENV LOCAL_RESOURCES 4096,8.0,1.0
 
 # The TensorFlow version
@@ -67,7 +67,10 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
     && PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
+# AVX & AVX2 support under haswell core
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
+# AVX512 support over skylake core
+#        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mavx512f -mavx512pf -mavx512cd -mavx512er -mfpmath=both -msse4.1 -msse4.2" \
         TF_MKL_ROOT=/opt/intel/mkl \
         TF_NEED_JEMALLOC=1 \
         TF_NEED_GCP=1 \
@@ -85,12 +88,12 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
         TF_NEED_S3=1 \
         TF_NEED_KAFKA=0 \
         TF_SET_ANDROID_WORKSPACE=0 \
-        bash configure \
-    && bazel build \
+    bash configure && \
+    bazel build \
         --config=opt --config=mkl \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
-        //tensorflow/tools/pip_package:build_pip_package \
-    && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+        //tensorflow/tools/pip_package:build_pip_package && \
+    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
 
 RUN ls -l /tmp/tensorflow_pkg
 
