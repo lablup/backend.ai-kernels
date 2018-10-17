@@ -2,7 +2,7 @@ FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-bazel:0.11-ubuntu as bazel-binary
 
 # Build target: lablup/common-tensorflow:1.7-py36-gpu
-FROM nvidia/cuda:8.0-cudnn7-devel-ubuntu16.04
+FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
@@ -41,7 +41,10 @@ RUN : build TensorFlow pip package \
     && cd /tmp \
     && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
         | tar xzf -
-RUN echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/nvidia-stubs.conf && \
+RUN \
+#    ln -s /usr/local/cuda-8.0/nvvm/libdevice/libdevice.compute_50.10.bc /usr/local/cuda-8.0/nvvm/libdevice/libdevice.10.bc && \
+#    ln -s /usr/local/cuda-8.0/nvvm/libdevice/libdevice.compute_50.10.bc /usr/local/cuda-8.0/libdevice.10.bc && \
+    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/nvidia-stubs.conf && \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
     ldconfig
 
@@ -70,10 +73,10 @@ RUN : build TensorFlow pip package && \
         TF_NEED_S3=1 \
         TF_NEED_KAFKA=0 \
         TF_SET_ANDROID_WORKSPACE=0 \
-        TF_CUDA_VERSION=8.0 \
+        TF_CUDA_VERSION=9.0 \
         TF_CUDNN_VERSION=7 \
         TF_NCCL_VERSION=2 \
-        TF_CUDA_COMPUTE_CAPABILITIES=3.5,3.7,5.2,6.0,6.1,7.0 \
+        TF_CUDA_COMPUTE_CAPABILITIES=3.5,3.7,5.2,6.0,6.1 \
         CUDA_TOOLKIT_PATH=/usr/local/cuda \
         CUDNN_INSTALL_PATH=/usr/local/cuda \
         NCCL_INSTALL_PATH=/usr \

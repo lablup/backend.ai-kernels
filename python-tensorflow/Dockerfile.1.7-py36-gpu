@@ -3,7 +3,7 @@ FROM lablup/kernel-base:hook as hook-builder
 FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-tensorflow:1.7-py36-gpu as tf-binary
 
-FROM nvidia/cuda:8.0-cudnn7-runtime-ubuntu16.04
+FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
 
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
@@ -37,9 +37,9 @@ RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
 
 
 # Install CUDA-8.0 + cuDNN 7.2
-COPY --from=cuda-libs /usr/local/cuda-8.0 /usr/local/cuda-8.0
-COPY --from=cuda-libs /etc/ld.so.conf.d /etc/ld.so.conf.d
-COPY --from=cuda-libs /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+#COPY --from=cuda-libs /usr/local/cuda-8.0 /usr/local/cuda-9.0
+#COPY --from=cuda-libs /etc/ld.so.conf.d /etc/ld.so.conf.d
+#COPY --from=cuda-libs /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
 RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.2.1 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
@@ -78,7 +78,7 @@ EXPOSE 2000 2001 2002 2003
 COPY policy.yml /home/backend.ai/policy.yml
 
 LABEL ai.backend.nvidia.enabled="yes" \
-      com.nvidia.cuda.version="8.0.61" \
+      com.nvidia.cuda.version="9.0.176" \
       com.nvidia.volumes.needed="nvidia_driver" \
       ai.backend.timeout="0" \
       ai.backend.maxmem="8g" \
