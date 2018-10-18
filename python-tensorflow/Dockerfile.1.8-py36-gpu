@@ -36,9 +36,9 @@ RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2"
 
 # Install CUDA-9.0 + cuDNN 7.2
-COPY --from=cuda-libs /usr/local/cuda-9.0 /usr/local/cuda-9.0
-COPY --from=cuda-libs /etc/ld.so.conf.d /etc/ld.so.conf.d
-COPY --from=cuda-libs /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+#COPY --from=cuda-libs /usr/local/cuda-9.0 /usr/local/cuda-9.0
+#COPY --from=cuda-libs /etc/ld.so.conf.d /etc/ld.so.conf.d
+#COPY --from=cuda-libs /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
 RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.2.1 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
