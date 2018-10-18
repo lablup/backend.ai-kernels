@@ -1,4 +1,5 @@
 FROM lablup/kernel-base-python-minimal:3.6-alpine
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install minimal Rust compile environments
 # (TODO: this is hold back to 1.17... we need to build newer version!)
@@ -7,11 +8,11 @@ RUN apk add --no-cache build-base cargo rust
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[rust]~=1.4.0"
 
-COPY policy.yml /home/sorna/policy.yml
+COPY policy.yml /home/backend.ai/policy.yml
 
-LABEL io.sorna.features "batch query uid-match"
+LABEL ai.backend.features "batch query uid-match"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", "-debug", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", "-debug", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "rust"]
 
 # vim: ft=dockerfile

@@ -1,7 +1,7 @@
 FROM golang:1.8-alpine3.6 as go-binary
 
-
 FROM lablup/kernel-base-python-minimal:3.6-alpine
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install Go environments
 COPY --from=go-binary /usr/local/go /usr/local/
@@ -18,9 +18,9 @@ RUN pip install --no-cache-dir "backend.ai-kernel-runner[golang]~=1.4.0"
 
 COPY policy.yml /home/sorna/
 
-LABEL io.sorna.features "batch query uid-match user-input"
+LABEL ai.backend.features "batch query uid-match user-input"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "golang"]
 
 # vim: ft=dockerfile

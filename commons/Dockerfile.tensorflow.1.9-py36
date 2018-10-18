@@ -54,7 +54,7 @@ RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
 ENV LOCAL_RESOURCES 4096,8.0,1.0
 
 # The TensorFlow version
-ENV TF_VERSION 1.8
+ENV TF_VERSION 1.9
 
 RUN : build TensorFlow pip package \
     && cd /tmp \
