@@ -1,5 +1,5 @@
-FROM lablup/common-bazel:0.11-debian as bazel-binary
 FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/common-bazel:0.11-ubuntu as bazel-binary
 
 # Build target: lablup/common-tensorflow:1.8-py36-gpu
 FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
@@ -20,10 +20,10 @@ RUN apt-get update && \
         sed \
         swig \
         git-core \
-	unzip \
+        unzip \
 	zip && \
-    rm -rf /var/lib/apt/lists/* 
-	
+     rm -rf /var/lib/apt/lists/* 
+
 COPY --from=bazel-binary /usr/local/bin/bazel /usr/local/bin/
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
@@ -31,15 +31,15 @@ RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 # Check Bazel/Python is runnable.
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
 RUN bazel version; python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
-    pip install --no-cache-dir wheel numpy scipy 
+    pip install --no-cache-dir wheel numpy
 
 # The TensorFlow version
 ENV TF_VERSION 1.8
 
 # NOTE: python should be linked to python3
-RUN : build TensorFlow pip package && \
-    cd /tmp && \
-    curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
+RUN : build TensorFlow pip package \
+    && cd /tmp \
+    && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
         | tar xzf -
 RUN echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/nvidia-stubs.conf && \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
@@ -84,17 +84,18 @@ RUN : build TensorFlow pip package && \
     PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
     bazel fetch //tensorflow/tools/pip_package:build_pip_package
 
-RUN cd /tmp/tensorflow-r${TF_VERSION} && \
-        LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
-        PYTHON_BIN_PATH=/usr/local/bin/python \
-        PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
+RUN cd /tmp/tensorflow-r${TF_VERSION}; \
+    PYTHON_BIN_PATH=/usr/local/bin/python \
+    PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
     bazel build \
         --config=opt --config=cuda \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
-    rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \    
+    rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \        
     rm -rf /root/.cache && \
     ls -lh /tmp/tensorflow_pkg
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0
+
+
