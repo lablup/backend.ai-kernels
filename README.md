@@ -40,11 +40,10 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
  * `base-alpine` (smallest base image)
  * `base-debian` (easier to compile common frameworks with libraries)
  * `base-ubuntu` (heaviest but best compatibility)
- * `base-mkl`    (Python conda distributed kernel based on Intel's Machine Learning Kits)
 
-| base-alpine             | base-debian                  | base-ubuntu             |
+| base-alpine             | base-debian                  | base-ubuntu             | 
 |-------------------------|------------------------------|-------------------------|
-| base-python-minimal-2.7 |                              |                         |
+| base-python-minimal-2.7 |                              | base-python-minimal-2.7 |
 | base-python-minimal-3.6 | base-python-minimal-3.6      | base-python-minimal-3.6 |
 | base-python-wheels-2.7  |                              |                         |
 | base-python-wheels-3.6  |                              |                         |
@@ -56,7 +55,7 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 | go-1.8-alpine           |                              |                         |
 | go-1.9-alpine           |                              |                         |
 |                         | haskell-ghc8.2-debian        |                         |
-|                         | octave-4.2-debian            |                         |
+| octave-4.2-alipine      |                              |                         |
 | r-3.3-alpine            |                              |                         |
 | lua-5.1-alpine          |                              |                         |
 | lua-5.2-alpine          |                              |                         |
@@ -64,34 +63,30 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 | php-7-alpine            |                              |                         |
 | nodejs-6-alpine         |                              |                         |
 | nodejs-8-alpine         |                              |                         |
-| nodejs-9-alpine         |                              |                         |
-|                         | julia-0.6-debian             |                         |
+| nodejs-10-alpine        |                              |                         |
+|                         |                              | julia-0.6-ubuntu        |
 | r-3.3-alpine            |                              |                         |
 | scala-2.12-alpine       |                              |                         |
-|                         | bazel-0.7-debian             |                         |
-|                         | bazel-0.11-debian            |                         |
-|                         | cuda-9.2-cudnn-7.1-dev       |                         |
-|                         | cuda-9.1-cudnn-7.1           |                         |
-|                         | cuda-9.0-cudnn-7.1-dev       |                         |
-|                         | cuda-9.0-cudnn-7.1           |                         |
-|                         | cuda-8.0-cudnn-6.0           |                         |
-|                         | python-caffe-1.0-py36        |                         |
-|                         | python-torch-0.2-py36        |                         |
-|                         | python-torch-0.2-py36-gpu    |                         |
-|                         |                              | python-cntk-2.2-py36    |
-|                         | tensorflow-1.9-py36-dense    |                         |
-|                         | tensorflow-1.9-py36-dense-gpu|                         |
-|                         | tensorflow-1.8-py36-dense    |                         |
-|                         | tensorflow-1.8-py36-dense-gpu|                         |
-|                         | tensorflow-1.7-py36-dense    |                         |
-|                         | tensorflow-1.7-py36-dense-gpu|                         |
-|                         | tensorflow-1.6-py36-dense    |                         |
-|                         | tensorflow-1.6-py36-dense-gpu|                         |
-|                         | tensorflow-1.5-py36-dense    |                         |
-|                         | tensorflow-1.5-py36-dense-gpu|                         |
-|                         | tensorflow-1.4-py36-dense    |                         |
-|                         | tensorflow-1.4-py36-dense-gpu|                         |
-|                         | tensorflow-1.3-py36-dense    |                         |
-|                         | tensorflow-1.3-py36-dense-gpu|                         |
+
+## Deep learning based images
+ * `base-mkl`    (Intel' Machine Learning Kits (MKL) works on CPU only kernel) 
+ * `base-cuda`   (Nvidia' GPU & CUDA libarary compatibility, needed Nvidia-docker)
+ * `base-TPU`    (Google TPU comptibility, on Google' Cloud)
+ * `base-ROCm`   (AMD' GPU & OpenCL libarary compatibility, T.B.D.)
+
+| base-mkl                    | base-cuda                       | base-TPU (T.B.D)  | base-ROCm (T.B.D) |
+| tensorflow-1.12-py36 (edge) | tensorflow-1.12-py36-gpu (edge) |                   |                   |   
+| tensorflow-1.11-py36        | tensorflow-1.11-py36-gpu        |                   |                   |   
+| tensorflow-1.10-py36        | tensorflow-1.10-py36-gpu        |                   |                   |   
+| tensorflow-1.9-py36         | tensorflow-1.9-py36-gpu         |                   |                   |   
+| tensorflow-1.8-py36         | tensorflow-1.8-py36-gpu         |                   |                   |   
+| tensorflow-1.7-py36         | tensorflow-1.7-py36-gpu         |                   |                   |   
+| tensorflow-1.6-py36         | tensorflow-1.6-py36-gpu         |                   |                   |   
+| tensorflow-1.5-py36         | tensorflow-1.5-py36-gpu         |                   |                   |   
+|                             | python-caffe-1.0-py36           |                   |                   |   
+|                             | python-torch-0.2-py36           |                   |                   |   
+|                             | python-torch-0.2-py36-gpu       |                   |                   |   
+|                             | python-cntk-2.2-py36            |                   |                   |   
+|                             | python-cntk-2.2-py36            |                   |                   |   
 
 For the complete build chain, please refer `build.py` for more information.
