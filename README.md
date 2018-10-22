@@ -75,9 +75,9 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
  * `base-ROCm`   (AMD' GPU & OpenCL libarary compatibility, T.B.D.)
 
 | base-mkl                    | base-cuda                       | base-TPU (T.B.D)  | base-ROCm (T.B.D) |
-| tensorflow-1.12-py36 (edge) | tensorflow-1.12-py36-gpu (edge) |                   |                   |   
-| tensorflow-1.11-py36        | tensorflow-1.11-py36-gpu        |                   |                   |   
-| tensorflow-1.10-py36        | tensorflow-1.10-py36-gpu        |                   |                   |   
+| tensorflow-1.12-py36 (edge) |                                 |                   |                   |   
+| tensorflow-1.11-py36        |                                 |                   |                   |   
+| tensorflow-1.10-py36        |                                 |                   |                   |   
 | tensorflow-1.9-py36         | tensorflow-1.9-py36-gpu         |                   |                   |   
 | tensorflow-1.8-py36         | tensorflow-1.8-py36-gpu         |                   |                   |   
 | tensorflow-1.7-py36         | tensorflow-1.7-py36-gpu         |                   |                   |   
