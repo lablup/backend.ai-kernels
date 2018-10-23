@@ -1,4 +1,6 @@
 FROM ubuntu:16.04
+# base source from official repository at https://hub.docker.com/python/
+
 # /usr/local in this image only has its own built Python.
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -13,13 +15,15 @@ RUN apt-get update && \
 	ca-certificates \
 	wget \
 	tk-dev  \
-#	netbase  \
+	netbase  \
         && \
     rm -rf /var/lib/apt/lists/*
 
+# GPG_KEY & Python version
 ENV GPG_KEY 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
 ENV PYTHON_VERSION 3.6.6
 
+# Python build
 RUN set -ex && \
 	\
     savedAptMark="$(apt-mark showmanual)" && \
@@ -61,7 +65,7 @@ RUN set -ex && \
 	--enable-shared \
 	--with-system-expat \
 	--with-system-ffi \
-	--without-ensurepip \
+	--without-ensurepip && \
     make -j "$(nproc)" && \
     make install && \
     ldconfig && \
