@@ -17,7 +17,7 @@ RUN curl -SLO https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERS
     unzip -qd bazel-${BAZEL_VERSION} bazel-${BAZEL_VERSION}-dist.zip && \
     cd bazel-${BAZEL_VERSION} && \
     bash compile.sh && \
-    cp -p output/bazel /usr/local/bin/ && 
+    cp -p output/bazel /usr/local/bin/ && \
     ls -l /usr/local/bin/bazel*
 
 # vim: ft=dockerfile
