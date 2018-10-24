@@ -23,7 +23,7 @@ RUN apt-get update -y && \
         git-core \
         unzip zip
 
-COPY --from=bazel-binary /usr/local/lib/bazel/bin/bazel /usr/local/bin/
+COPY --from=bazel-binary /usr/local/lib/bazel/bin/ /usr/local/bin/
 COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
 COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
 COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
