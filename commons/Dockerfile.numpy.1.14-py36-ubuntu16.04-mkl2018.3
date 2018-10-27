@@ -1,16 +1,7 @@
-FROM python:3.6.5-jessie as python-binary
-RUN cd /; \
-    tar czpf python.tar.gz \
-        /usr/local/bin \
-        /usr/local/lib/libpython* \
-        /usr/local/lib/python3.6* \
-        /usr/local/include
-
-
+FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/kernel-base:ubuntu16.04-mkl2018.3
 
-RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update && \
+RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         cmake \
         cpio \
@@ -32,7 +23,7 @@ RUN echo "/opt/intel/mkl/lib/intel64" >> /etc/ld.so.conf.d/intel.conf && \
 RUN pip install Cython wheel
 
 RUN cd /tmp && \
-  git clone -q https://github.com/numpy/numpy -b "v1.14.5" numpy && \
+  git clone -q https://github.com/numpy/numpy -b "v1.15.2" numpy && \
   cd numpy && \
   echo "\n[mkl]" > site.cfg && \
   echo "include_dirs = /opt/intel/mkl/include/intel64/" >> site.cfg && \

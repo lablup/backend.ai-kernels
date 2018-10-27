@@ -1,6 +1,7 @@
 FROM lablup/kernel-base-python-minimal:3.6-alpine
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
-LABEL io.sorna.envs.corecount="NPROC"
+LABEL ai.backend.ai.envs.corecount="NPROC"
 
 # Ref: https://github.com/nodejs/docker-node/blob/master/6.11/alpine/Dockerfile
 ENV NODE_VERSION 10.7.0
@@ -68,14 +69,14 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
   && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
   && apk del .build-deps-yarn
 
-COPY package.json /home/sorna/package.json
+COPY package.json /home/backend.ai/package.json
 
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[nodejs]~=1.4.0"
 
-LABEL io.sorna.features "query uid-match"
+LABEL ai.backend.features "query uid-match"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "nodejs"]
 
 # vim: ft=dockerfile

@@ -3,27 +3,28 @@ RUN ls -lh /root
 
 # -------------------
 FROM lablup/kernel-base-python-minimal:3.6-alpine
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install Git extras and some Python packages
 RUN apk add --no-cache --virtual .sorna-deps \
         libgit2 libffi wget curl bash git nano vim \
-        libjpeg libpng freetype openblas lapack \
-    && apk add --no-cache --virtual .build-deps \
-        build-base openssl-dev libffi-dev cmake \
+        libjpeg libpng freetype openblas lapack && \
+    apk add --no-cache --virtual .build-deps \
+        build-base openssl-dev libffi-dev cmake && \
     # Hack for numpy
-    && ln -s /usr/include/locale.h /usr/include/xlocale.h \
-    && mkdir -p /tmp/git-flow && cd /tmp/git-flow \
-    && wget --no-check-certificate -q https://raw.githubusercontent.com/petervanderdoes/gitflow-avh/develop/contrib/gitflow-installer.sh \
-    && bash gitflow-installer.sh install stable \
-    && cd /tmp && rm -rf /tmp/git-flow \
-    && mkdir -p /tmp/libgit-build && cd /tmp/libgit-build \
-    && wget https://github.com/libgit2/libgit2/archive/v0.27.0.tar.gz \
-    && tar xzf v0.27.0.tar.gz \
-    && cd libgit2-0.27.0/ \
-    && cmake . \
-    && make -j8 \
-    && make install \
-    && cd /tmp && rm -rf /tmp/libgit-build
+    ln -s /usr/include/locale.h /usr/include/xlocale.h && \
+    mkdir -p /tmp/git-flow && cd /tmp/git-flow && \
+    wget --no-check-certificate -q https://raw.githubusercontent.com/petervanderdoes/gitflow-avh/develop/contrib/gitflow-installer.sh && \
+    bash gitflow-installer.sh install stable && \
+    cd /tmp && rm -rf /tmp/git-flow && \
+    mkdir -p /tmp/libgit-build && cd /tmp/libgit-build && \
+    wget https://github.com/libgit2/libgit2/archive/v0.27.0.tar.gz && \
+    tar xzf v0.27.0.tar.gz && \
+    cd libgit2-0.27.0/ && \
+    cmake . && \
+    make -j8 && \
+    make install && \
+    cd /tmp && rm -rf /tmp/libgit-build
 
 COPY --from=wheel-builds /root/numpy*.whl /root/pandas*.whl /root/matplotlib*.whl /tmp/
 RUN pip install -U setuptools pip
@@ -40,9 +41,9 @@ RUN apk del .build-deps && \
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[git,python]~=1.4.0"
 
 # Matplotlib configuration and pre-heating
-ENV MPLCONFIGDIR /home/sorna/.matplotlib
-RUN mkdir /home/sorna/.matplotlib
-COPY matplotlibrc /home/sorna/.matplotlib/
+ENV MPLCONFIGDIR /home/backend.ai/.matplotlib
+RUN mkdir /home/backend.ai/.matplotlib
+COPY matplotlibrc /home/backend.ai/.matplotlib/
 RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
     && python /tmp/matplotlib-fontcache.py \
     && rm /tmp/matplotlib-fontcache.py
@@ -57,11 +58,11 @@ RUN echo 'set convert-meta off' >> /etc/inputrc; \
     echo 'set enc=utf8 tenc=utf8' >> /etc/vim/vimrc.local; \
     rm -f /usr/bin/vi && ln -s /usr/bin/vim /usr/bin/vi
 
-COPY policy.yml /home/sorna/policy.yml
+COPY policy.yml /home/backend.ai/policy.yml
 
-LABEL io.sorna.features="query tty uid-match"
+LABEL ai.backend.features="query tty uid-match"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "git"]
 
 # vim: ft=dockerfile

@@ -1,4 +1,5 @@
 FROM lablup/kernel-base-python-minimal:3.6-alpine
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install dependencies for R package installation
 RUN apk update && \
@@ -7,15 +8,15 @@ RUN apk update && \
 # Install R and its packages
 RUN apk add --no-cache R R-dev
 
-ADD install-packages.R /home/sorna/install-packages.R
-RUN Rscript /home/sorna/install-packages.R
+ADD install-packages.R /home/backend.ai/install-packages.R
+RUN Rscript /home/backend.ai/install-packages.R
 
 # LABEL io.sorna.features="query uid-match"
 
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[r]~=1.4.0"
 
-LABEL io.sorna.features "query uid-match"
+LABEL ai.backend.features "query uid-match"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "r"]
