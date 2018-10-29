@@ -1,10 +1,11 @@
 FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
-FROM lablup/common-numpy:1.15-py36-ubuntu16.04-mkl2019.0 as numpy-binary
 FROM lablup/kernel-base:python3.6 as python-binary
+#FROM lablup/common-numpy:1.15-py36-ubuntu16.04-mkl2019.0 as numpy-binary
 FROM lablup/common-tensorflow:1.11-py36 as tf-binary
 
-FROM lablup/kernel-base:ubuntu16.04-mkl2019
+#FROM lablup/kernel-base:ubuntu16.04-mkl2019
+FROM ubuntu:16.04
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
 MAINTAINER Mario Cho "m.cho@lablup.com"
@@ -39,8 +40,8 @@ RUN python -c 'import sys; print(sys.version_info); import ssl'
 
 # As we mostly have "manylinux" glibc-compatible binary packaes,
 # we don't have to rebuild these!
-COPY --from=numpy-binary /tmp/numpy/dist/numpy-*.whl /tmp
-COPY --from=numpy-binary /tmp/scipy/dist/scipy*.whl /tmp
+#COPY --from=numpy-binary /tmp/numpy/dist/numpy-*.whl /tmp
+#COPY --from=numpy-binary /tmp/scipy/dist/scipy*.whl /tmp
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
 # Install TensorFlow build dependencies (ensure we have proper numpy)
 
@@ -61,6 +62,7 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pillow && \
     pip install --no-cache-dir networkx cvxpy && \
     pip install --no-cache-dir scikit-learn scikit-image && \
+    pip install --no-cache-dir scikit-image && \
     pip install --no-cache-dir pygments && \
     rm -f /tmp/*.whl
 
