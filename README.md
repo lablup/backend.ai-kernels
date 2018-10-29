@@ -19,7 +19,7 @@ Here we list the latest versions of our supported kernel images.
 | Node.js       | `lablup/kernel-nodejs`  | 6.14,8.11,9.11  | O     | O     |   |   |                    |
 | Octave        | `lablup/kernel-octave`  | 4.2             | O     | O     |   |   |                    |
 | ~Python~      | `lablup/kernel-python`  | 2.7             | O     | O     | O |   | temporarily unsupported |
-| Python        | `lablup/kernel-python`  | 3.6             | O     | O\*   | O |   |                    |
+| Python        | `lablup/kernel-python`  | 3.6.6           | O     | O\*   | O |   |                    |
 | Rust          | `lablup/kernel-rust`    | 1.17            | O     | O     |   |   |                    |
 | PHP           | `lablup/kernel-php`     | 7.1             | O     | O     |   |   |                    |
 | R             | `lablup/kernel-r`       | 3.3             | O     | O     |   |   | CRAN R             |
@@ -27,9 +27,9 @@ Here we list the latest versions of our supported kernel images.
 
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.9     | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| TensorFlow | `lablup/kernel-python-tensorflow` | 1.12rc  | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | TensorFlow | `lablup/kernel-python-tensorflow` | 1.3     | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| PyTorch    | `lablup/kernel-python-torch`      | 0.2     | O     | O\*   | O   |   |                   |
+| PyTorch    | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
 | Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | CNTK       | `lablup/kernel-python-cntk`       | (WIP)   | O     | O\*   | O   |   | Bundled w/Keras 2 |
 
@@ -54,7 +54,7 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 | git-3.6-alpine          |                              |                         |
 | go-1.8-alpine           |                              |                         |
 | go-1.9-alpine           |                              |                         |
-|                         | haskell-ghc8.2-debian        |                         |
+| haskell-ghc8.2-alpine   |                              |                         |
 | octave-4.2-alipine      |                              |                         |
 | r-3.3-alpine            |                              |                         |
 | lua-5.1-alpine          |                              |                         |
@@ -83,7 +83,11 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 | tensorflow-1.7-py36         | tensorflow-1.7-py36-gpu         |                   |                   |   
 | tensorflow-1.6-py36         | tensorflow-1.6-py36-gpu         |                   |                   |   
 | tensorflow-1.5-py36         | tensorflow-1.5-py36-gpu         |                   |                   |   
+| tensorflow-1.4-py36         | tensorflow-1.4-py36-gpu         |                   |                   |   
+| tensorflow-1.3-py36         | tensorflow-1.3-py36-gpu         |                   |                   |   
 |                             | python-caffe-1.0-py36           |                   |                   |   
+|                             | python-torch-1.0-py36           |                   |                   |   
+|                             | python-torch-1.-py36-gpu       |                   |                   |   
 |                             | python-torch-0.2-py36           |                   |                   |   
 |                             | python-torch-0.2-py36-gpu       |                   |                   |   
 |                             | python-cntk-2.2-py36            |                   |                   |   
