@@ -49,6 +49,7 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 | base-python-minimal-3.6 | base-python-minimal-3.6      | base-python-minimal-3.6 |
 | base-python-wheels-2.7  |                              |                         |
 | base-python-wheels-3.6  |                              |                         |
+|                         |                              | base-ubuntu16.04-mkl2019|
 | c-gcc6.3-alpine         |                              |                         |
 | cpp-gcc6.3-alpine       |                              |                         |
 | java-8-alpine           |                              |                         |
