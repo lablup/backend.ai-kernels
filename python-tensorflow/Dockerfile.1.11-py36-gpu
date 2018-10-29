@@ -73,11 +73,6 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pygments && \
     rm -f /tmp/*.whl
 
-#RUN pip install --no-cache-dir /tmp/tensorflow-*.whl && \
-#    pip install --no-cache-dir keras && \
-#    pip install --no-cache-dir h5py
-#RUN rm -f /tmp/*.whl
-
 # Install additional TensorFlow dependencies
 RUN apt-get install libgomp1 && apt-get autoclean
 
