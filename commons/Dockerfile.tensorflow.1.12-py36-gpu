@@ -21,20 +21,14 @@ ENV TF_NEED_CUDA 1
 ENV TF_CUDA_CLANG 0
 ENV TF_NEED_TENSORRT 1
 ENV TF_NEED_MPI 0
-#        TF_NEED_GDR=0 \
-#        TF_NEED_S3=1 \
-#        TF_NEED_KAFKA=0 \
-#        TF_SET_ANDROID_WORKSPACE=0 \
+ENV TF_NEED_S3=1
 ENV TF_CUDA_VERSION 9.0 
 ENV TF_CUDNN_VERSION 7
 ENV TF_NCCL_VERSION 2
 ENV TF_CUDA_COMPUTE_CAPABILITIES 3.5,3.7,5.2,6.0,6.1,7.0 
+ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
 ENV CUDNN_INSTALL_PATH /usr/local/cuda 
-ENV NCCL_INSTALL_PATH /usr/lib/nccl 
-#	MPI_HOME=/usr/lib/openmpi \
-#	ANDROID_SDK_HOME=/root/Android \
-#	ANDROID_NDK_HOME=/root/Android/android-ndk \
 
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
@@ -69,7 +63,6 @@ RUN apt-get update && \
 	gcc g++ \
         curl \
 	wget \
-	pkg-config \
         rsync \
         sed \
         swig \
@@ -113,7 +106,6 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
         LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
         tensorflow/tools/ci_build/builds/configured GPU \
-#        CI_BUILD_PYTHON=python \
     bazel build -c opt --copt=-mavx --config=cuda \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
