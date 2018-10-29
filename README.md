@@ -87,7 +87,9 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
 | tensorflow-1.3-py36         | tensorflow-1.3-py36-gpu         |                   |                   |   
 |                             | python-caffe-1.0-py36           |                   |                   |   
 |                             | python-torch-1.0-py36           |                   |                   |   
-|                             | python-torch-1.-py36-gpu       |                   |                   |   
+|                             | python-torch-1.0-py36-gpu       |                   |                   |   
+|                             | python-torch-0.3-py36           |                   |                   |   
+|                             | python-torch-0.3-py36-gpu       |                   |                   |   
 |                             | python-torch-0.2-py36           |                   |                   |   
 |                             | python-torch-0.2-py36-gpu       |                   |                   |   
 |                             | python-cntk-2.2-py36            |                   |                   |   
