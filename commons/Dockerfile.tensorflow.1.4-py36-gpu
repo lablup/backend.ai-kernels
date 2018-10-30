@@ -1,8 +1,7 @@
-FROM lablup/common-bazel:0.5-ubuntu as bazel-binary
 FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/common-bazel:0.5-ubuntu as bazel-binary
 
-
-# Build target: lablup/common-tensorflow:1.5-py36-gpu
+# Build target: lablup/common-tensorflow:1.4-py36-gpu
 FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
 
 # Install system package dependencies
@@ -38,8 +37,8 @@ RUN cd /; \
 # Check Bazel/Python is runnable.
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
 RUN bazel version; \
-    python -c "import sys; 
-    print(sys.prefix); 
+    python -c "import sys;  \
+    print(sys.prefix); \
     print(sys.version_info)" && \
     pip install --no-cache-dir wheel numpy scipy
 
@@ -61,7 +60,7 @@ RUN : build TensorFlow pip package && \
     curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
         | tar xzf - && \
     cd /tmp/tensorflow-r${TF_VERSION} && \
-    && PYTHON_BIN_PATH=/usr/local/bin/python \
+        PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
 # AVX & AVX2 support under haswell core
