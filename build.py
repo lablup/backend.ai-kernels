@@ -145,6 +145,8 @@ build_kernel('python-caffe',      '1.0-py36', squash=True)
 # TODO: (not implemented) build_kernel('python-caffe2',     '0.8-py36-gpu', squash=True)
 build_kernel('python-torch',      '0.2-py36', squash=True)
 build_kernel('python-torch',      '0.2-py36-gpu', squash=True)
+build_kernel('python-torch',      '0.3-py36-gpu', squash=True)
+build_kernel('python-torch',      '0.4-py36-gpu', squash=True)
 # TODO (not modernized): build_kernel('python-theano',     '0.2-py36', squash=True)
 # TODO (not modernized): build_kernel('python-theano',     '0.2-py36-gpu', squash=True)
 
