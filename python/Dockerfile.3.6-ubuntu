@@ -1,6 +1,6 @@
 FROM lablup/kernel-base-python-minimal:3.6-ubuntu
 
-# As we mostly have "manylinux" glibc-compatible binary packaes,
+# As we mostly have "manylinux" glibc-compatible binary packages,
 # we don't have to rebuild these!
 # RUN apt-get remove gcc-5-multilib
 #72 gcc g++ support
