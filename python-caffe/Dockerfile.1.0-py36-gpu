@@ -16,25 +16,25 @@ RUN install_packages \
         libopenblas-dev
 RUN install_packages git-core ca-certificates
 RUN install_packages build-essential
-RUN git clone https://github.com/BVLC/caffe /home/sorna/caffe-install
-RUN cd /home/sorna/caffe-install && \
+RUN git clone https://github.com/BVLC/caffe /home/backend.ai/caffe-install
+RUN cd /home/backend.ai/caffe-install && \
     pip install --no-cache-dir -r python/requirements.txt && \
     pip install --no-cache-dir -U "python-dateutil>=2" && \
     pip install --no-cache-dir -U "protobuf>=3.0"
-COPY Makefile.config /home/sorna/caffe-install/Makefile.config
+COPY Makefile.config /home/backend.ai/caffe-install/Makefile.config
 RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.so /usr/lib/x86_64-linux-gnu/libboost_python-py3.so && \
     ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.a  /usr/lib/x86_64-linux-gnu/libboost_python-py3.a  && \
     ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.so  /usr/lib/x86_64-linux-gnu/libboost_python3.so    && \
     ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.a   /usr/lib/x86_64-linux-gnu/libboost_python3.a     && \
     ldconfig
-RUN cd /home/sorna/caffe-install; make all -j8
-RUN cd /home/sorna/caffe-install; make pycaffe
+RUN cd /home/backend.ai/caffe-install; make all -j8
+RUN cd /home/backend.ai/caffe-install; make pycaffe
 RUN cd /root; pip wheel "leveldb>=0.191"
 
-ENV PYTHONPATH=/home/sorna/caffe-install/python:.
+ENV PYTHONPATH=/home/backend.ai/caffe-install/python:.
 
 
-FROM lablup/kernel-python:3.6-debian
+FROM lablup/kernel-python:3.6-ubuntu
 
 # Install Caffe dependencies
 RUN install_packages \
@@ -78,9 +78,9 @@ RUN install_packages \
         libopenblas-base
 
 # Install Caffe
-COPY --from=caffe-builder /home/sorna/caffe-install/python/requirements.txt /root/caffe-requirements.txt
-COPY --from=caffe-builder /home/sorna/caffe-install/python/caffe /usr/local/lib/python3.6/site-packages/caffe
-COPY --from=caffe-builder /home/sorna/caffe-install/build/lib /usr/local/lib/caffe
+COPY --from=caffe-builder /home/backend.ai/caffe-install/python/requirements.txt /root/caffe-requirements.txt
+COPY --from=caffe-builder /home/backend.ai/caffe-install/python/caffe /usr/local/lib/python3.6/site-packages/caffe
+COPY --from=caffe-builder /home/backend.ai/caffe-install/build/lib /usr/local/lib/caffe
 RUN echo '/usr/local/lib/caffe' > /etc/ld.so.conf.d/caffe.conf && \
     ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.so /usr/lib/x86_64-linux-gnu/libboost_python-py3.so && \
     ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.a  /usr/lib/x86_64-linux-gnu/libboost_python-py3.a  && \
@@ -96,13 +96,13 @@ RUN pip install --no-cache-dir /tmp/leveldb*.whl && \
 # Workaround for libdc1394 initialization error
 RUN ln /dev/null /dev/raw1394
 
-COPY policy.yml /home/sorna/policy.yml
+COPY policy.yml /home/backend.ai/policy.yml
 
-LABEL io.sorna.timeout="0" \
-      io.sorna.maxmem="8g" \
-      io.sorna.maxcores="4" \
-      io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      io.sorna.features="batch query uid-match user-input"
+LABEL ai.backend.timeout="0" \
+      ai.backend.maxmem="8g" \
+      ai.backend.maxcores="4" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input"
 
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0

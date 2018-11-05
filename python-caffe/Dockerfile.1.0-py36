@@ -1,4 +1,4 @@
-FROM lablup/kernel-python:3.6-debian as caffe-builder
+FROM lablup/kernel-python:3.6-ubuntu as caffe-builder
 
 # Build caffe
 RUN install_packages \
@@ -16,25 +16,25 @@ RUN install_packages \
         libopenblas-dev
 RUN install_packages git-core ca-certificates
 RUN install_packages build-essential
-RUN git clone https://github.com/BVLC/caffe /home/sorna/caffe-install
-RUN cd /home/sorna/caffe-install && \
+RUN git clone https://github.com/BVLC/caffe /home/backend.ai/caffe-install
+RUN cd /home/backend.ai/caffe-install && \
     pip install --no-cache-dir -r python/requirements.txt && \
     pip install --no-cache-dir -U "python-dateutil>=2" && \
     pip install --no-cache-dir -U "protobuf>=3.0"
-COPY Makefile.config /home/sorna/caffe-install/Makefile.config
+COPY Makefile.config /home/backend.ai/caffe-install/Makefile.config
 RUN ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.so /usr/lib/x86_64-linux-gnu/libboost_python-py3.so && \
     ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py34.a  /usr/lib/x86_64-linux-gnu/libboost_python-py3.a  && \
     ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.so  /usr/lib/x86_64-linux-gnu/libboost_python3.so    && \
     ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py3.a   /usr/lib/x86_64-linux-gnu/libboost_python3.a     && \
     ldconfig
-RUN cd /home/sorna/caffe-install; make all -j8
-RUN cd /home/sorna/caffe-install; make pycaffe
+RUN cd /home/backend.ai/caffe-install; make all -j8
+RUN cd /home/backend.ai/caffe-install; make pycaffe
 RUN cd /root; pip wheel "leveldb>=0.191"
 
-ENV PYTHONPATH=/home/sorna/caffe-install/python:.
+ENV PYTHONPATH=/home/backend.ai/caffe-install/python:.
 
 
-FROM lablup/kernel-python:3.6-debian
+FROM lablup/kernel-python:3.6-ubuntu
 
 # Install Caffe dependencies
 RUN install_packages \
