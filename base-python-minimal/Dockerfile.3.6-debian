@@ -1,4 +1,4 @@
-FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/kernel-base:python3.6-debian as python-binary
 # ------------------------
 FROM lablup/kernel-base:debian
 ENV LANG=C.UTF-8
