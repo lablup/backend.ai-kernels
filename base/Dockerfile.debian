@@ -1,7 +1,7 @@
 FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
 
-FROM debian:stretch
+FROM debian:stretch-slim
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 RUN echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/backports.list && \
