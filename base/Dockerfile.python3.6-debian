@@ -1,5 +1,5 @@
 # Python 3.6.x binary to build multi layer for debian based kernel
-FROM debian:stretch
+FROM debian:stretch-slim
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # base source from official repository at https://hub.docker.com/python/
