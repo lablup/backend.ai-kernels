@@ -1,12 +1,11 @@
 FROM lablup/kernel-base-python-wheels:3.6-alpine as wheel-builds
-RUN ls -lh /root
 
 # -------------------
 FROM lablup/kernel-base-python-minimal:3.6-alpine
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install Git extras and some Python packages
-RUN apk add --no-cache --virtual .sorna-deps \
+RUN apk add --no-cache --virtual .backend-ai-deps \
         libgit2 libffi wget curl bash git nano vim \
         libjpeg libpng freetype openblas lapack && \
     apk add --no-cache --virtual .build-deps \
