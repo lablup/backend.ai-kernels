@@ -2,16 +2,8 @@ FROM lablup/kernel-python:3.6-ubuntu
 
 # Install Torch
 RUN pip install --no-cache-dir \
-        http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-linux_x86_64.whl && \
-    rm -rf /root/.cache
-
-COPY policy.yml /home/backend.ai/policy.yml
-
-LABEL ai.backend.timeout="0" \
-      ai.backend.maxmem="8g" \
-      ai.backend.maxcores="4" \
-      ai.backend.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input"
-
+        http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-linux_x86_64.whl \
+	torchvision && \
+	rm -rf /root/.cache
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0
