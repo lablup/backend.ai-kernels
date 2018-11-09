@@ -61,10 +61,10 @@ class ImageTestBase(object):
                            if os.path.exists(_apparmor_profile_path) else []
 
         ret = self.docker.inspect_image(self.image_name)
-        mem_limit    = ret['ContainerConfig']['Labels'].get('io.sorna.maxmem', '128m')
-        exec_timeout = int(ret['ContainerConfig']['Labels'].get('io.sorna.timeout', '10'))
-        max_cores    = int(ret['ContainerConfig']['Labels'].get('io.sorna.maxcores', '1'))
-        envs_corecount = ret['ContainerConfig']['Labels'].get('io.sorna.envs.corecount', '')
+        mem_limit    = ret['ContainerConfig']['Labels'].get('ai.backend.maxmem', '128m')
+        exec_timeout = int(ret['ContainerConfig']['Labels'].get('ai.backend.timeout', '10'))
+        max_cores    = int(ret['ContainerConfig']['Labels'].get('ai.backend.maxcores', '1'))
+        envs_corecount = ret['ContainerConfig']['Labels'].get('ai.backend.envs.corecount', '')
         envs_corecount = envs_corecount.split(',') if envs_corecount else []
 
         num_cores = min(os.cpu_count(), max_cores)
@@ -74,7 +74,7 @@ class ImageTestBase(object):
         devices = []
         envs = {k: str(num_cores) for k in envs_corecount}
 
-        if 'yes' == ret['ContainerConfig']['Labels'].get('io.sorna.nvidia.enabled', 'no'):
+        if 'yes' == ret['ContainerConfig']['Labels'].get('ai.backend.nvidia.enabled', 'no'):
             extra_binds, extra_devices = self.prepare_nvidia()
             binds.update(extra_binds)
             devices.extend(extra_devices)
@@ -954,13 +954,13 @@ class JailTest(ImageTestBase, unittest.TestCase):
         yield 'import random; print(random.randint(0, 0))', '0', ''
 
     def basic_failure(self):
-        yield 'import os\nos.chmod("/home/sorna", 700)', ('PermissionError', None)
-        yield 'import os\nos.chmod("../sorna", 700)', ('PermissionError', None)
-        yield 'import os\nos.chmod("/home/work/../sorna", 700)', ('PermissionError', None)
-        yield 'import os\nos.chmod("/home/work/./../sorna", 700)', ('PermissionError', None)
-        yield 'import os\nos.chmod("/home/sorna/.", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/backend.ai", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("../backend.ai", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/work/../backend.ai", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/work/./../backend.ai", 700)', ('PermissionError', None)
+        yield 'import os\nos.chmod("/home/backend.ai/.", 700)', ('PermissionError', None)
         yield 'import os\nos.mkdir("/home/work/test")\n' + \
-              'os.chmod("/home/work/test/../../sorna/", 700)', ('PermissionError', None)
+              'os.chmod("/home/work/test/../../backend.ai/", 700)', ('PermissionError', None)
 
 
 if __name__ == '__main__':
