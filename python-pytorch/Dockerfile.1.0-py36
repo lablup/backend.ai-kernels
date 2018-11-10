@@ -1,9 +1,21 @@
 FROM lablup/kernel-python:3.6-ubuntu
 
+RUN apt-get update -y && apt-get install -y git cmake
 # Install Torch
+RUN git clone --recursive https://github.com/pytorch/pytorch && \
+    cd pytorch && \
+#    git clone wget -SL https://github.com/pytorch/pytorch/archive/v1.0rc1.tar.gz && \
+#    tar zxvf v1.0rc1.tar.gz && \
+#    cd pytorch-1.0rc1 && \
+    python setup.py bdist_wheel -d /tmp 
+RUN git clone --recursive https://github.com/pytorch/vision.git && \
+    cd vision && \
+    python setup.py bdist_wheel -d /tmp 
+
 RUN pip install --no-cache-dir \
-        torch \
-	torchvision && \
-	rm -rf /root/.cache
+        wheel && \
+    pip install --no-cache-dir \
+        wheel /tmp/*.whl && \
+    rm -rf /root/.cache
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0
