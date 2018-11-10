@@ -39,10 +39,11 @@ RUN  cd /tmp && \
      echo "include_dirs = /opt/intel/mkl/include/intel64/" >> site.cfg && \
      echo "library_dirs = /opt/intel/mkl/lib/intel64/" >> site.cfg && \
      echo "mkl_libs = mkl_rt" >> site.cfg && \
-     echo "lapack_libs =" >> site.cfg && \
+     echo "lapack_libs =" >> site.cfg && \ 
      echo "search_static_first = false" >> site.cfg && \
-#     echo "\n[install]" >> ~/.config/pip/pip.conf && \
-#     echo "no-binary = numpy,scipy" >> ~/.config/pip/pip.conf && \
+#     touch /tmp/numpy/.config/pip/pip.conf && \
+#     echo "\n[install]" >> /tmp/numpy/.config/pip/pip.conf && \
+#     echo "no-binary = numpy,scipy" >> /tmp/numpy/.config/pip/pip.conf && \
 #     pip install --no-binary :all: numpy && \
      python setup.py build --fcompiler=gnu95 && \
      python setup.py bdist_wheel && \
