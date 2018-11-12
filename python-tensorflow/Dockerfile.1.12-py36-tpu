@@ -22,7 +22,7 @@ RUN apt update -y && \
         libgeos-dev \
         mime-support \
 	gcc g++ \
-        libproj-dev libgeos-dev \	
+        libproj-dev libgeos-dev \
         libzmq3-dev libuv1
 
 # Copy the whole Python from the docker library image
@@ -91,6 +91,10 @@ COPY matplotlibrc /home/backend.ai/.matplotlib/
 RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
     && python /tmp/matplotlib-fontcache.py \
     && rm /tmp/matplotlib-fontcache.py
+
+# For utilizing TPU cluster resolver
+RUN pip install --no-cache-dir google-api-python-client && \
+    pip install --no-cache-dir oauth2client
 
 WORKDIR /home/work
 VOLUME ["/home/work"]
