@@ -1,13 +1,13 @@
 FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
-FROM lablup/common-numpy:1.15-py36-ubuntu16.04-mkl2019.0 as numpy-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-tensorflow:1.12-py36 as tf-binary
 
-FROM lablup/kernel-base:ubuntu16.04-mkl2019
+FROM ubuntu:16.04
+MAINTAINER Mario Cho "m.cho@lablup.com"
+
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
-MAINTAINER Mario Cho "m.cho@lablup.com"
 
 RUN apt update -y && \
     apt install -y \
@@ -26,21 +26,14 @@ RUN apt update -y && \
         libzmq3-dev libuv1
 
 # Copy the whole Python from the docker library image
-#COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
-#COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
-#COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
-
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
-
 RUN export LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH
 # Test if Python is working
 RUN python -c 'import sys; print(sys.version_info); import ssl'
 
 # As we mostly have "manylinux" glibc-compatible binary packaes,
 # we don't have to rebuild these!
-COPY --from=numpy-binary /tmp/numpy/dist/numpy-*.whl /tmp
-COPY --from=numpy-binary /tmp/scipy/dist/scipy*.whl /tmp
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
 # Install TensorFlow build dependencies (ensure we have proper numpy)
 
