@@ -128,37 +128,43 @@ build_common('tensorflow', '1.12-py36-gpu')
 
 #
 build_kernel('python-tensorflow', '1.5-py36', squash=True)
-build_kernel('python-tensorflow', '1.5-py36-gpu', squash=True)
+build_kernel('python-tensorflow', '1.5-py36-cuda9', squash=True)
 build_kernel('python-tensorflow', '1.6-py36', squash=True)
-build_kernel('python-tensorflow', '1.6-py36-gpu', squash=True)
+build_kernel('python-tensorflow', '1.6-py36-cuda9', squash=True)
 build_kernel('python-tensorflow', '1.7-py36', squash=True)
-build_kernel('python-tensorflow', '1.7-py36-gpu', squash=True)
+build_kernel('python-tensorflow', '1.7-py36-cuda9', squash=True)
 build_kernel('python-tensorflow', '1.8-py36', squash=True)
-build_kernel('python-tensorflow', '1.8-py36-gpu', squash=True)
+build_kernel('python-tensorflow', '1.8-py36-cuda9', squash=True)
 build_kernel('python-tensorflow', '1.9-py36', squash=True)
-build_kernel('python-tensorflow', '1.9-py36-gpu', squash=True)
+build_kernel('python-tensorflow', '1.9-py36-cuda9', squash=True)
 build_kernel('python-tensorflow', '1.10-py36', squash=True)
-build_kernel('python-tensorflow', '1.10-py36-gpu', squash=True)
+build_kernel('python-tensorflow', '1.10-py36-cuda9', squash=True)
 build_kernel('python-tensorflow', '1.11-py36', squash=True)
-build_kernel('python-tensorflow', '1.11-py36-gpu', squash=True)
+build_kernel('python-tensorflow', '1.11-py36-tpu', squash=True)
+build_kernel('python-tensorflow', '1.11-py36-cuda9', squash=True)
 build_kernel('python-tensorflow', '1.12-py36', squash=True)
-build_kernel('python-tensorflow', '1.12-py36-gpu', squash=True)
+build_kernel('python-tensorflow', '1.12-py36-tpu', squash=True)
+build_kernel('python-tensorflow', '1.12-py36-cuda9', squash=True)
 
+# Python Caffe
 build_kernel('python-caffe',      '1.0-py36', squash=True)
-# TODO: (GPU not implemented) build_kernel('python-caffe',      '1.0-py36-gpu', squash=True)
-# TODO: (not implemented) build_kernel('python-caffe2',     '0.8-py36', squash=True)
-# TODO: (not implemented) build_kernel('python-caffe2',     '0.8-py36-gpu', squash=True)
-build_kernel('python-torch',      '0.2-py36', squash=True)
-build_kernel('python-torch',      '0.2-py36-gpu', squash=True)
-build_kernel('python-torch',      '0.3-py36', squash=True)
-build_kernel('python-torch',      '0.3-py36-gpu', squash=True)
-build_kernel('python-torch',      '0.4-py36', squash=True)
-build_kernel('python-torch',      '0.4-py36-gpu', squash=True)
-# TODO (not modernized): build_kernel('python-theano',     '0.2-py36', squash=True)
-# TODO (not modernized): build_kernel('python-theano',     '0.2-py36-gpu', squash=True)
+
+# Python Pytorch
+build_kernel('python-pytorch',      '0.2-py36', squash=True)
+build_kernel('python-pytorch',      '0.2-py36-cuda8', squash=True)
+build_kernel('python-pytorch',      '0.3-py36', squash=True)
+build_kernel('python-pytorch',      '0.3-py36-cuda9', squash=True)
+build_kernel('python-pytorch',      '0.4-py36', squash=True)
+build_kernel('python-pytorch',      '0.4-py36-cuda9', squash=True)
+
+# Python Theano
+# TODO (not modernized):
+#build_kernel('python-theano',     '0.2-py36', squash=True)
+#build_kernel('python-theano',     '0.2-py36-gpu', squash=True)
 
 # CNTK image (currently draft version base on Ubuntu:16.04)
 build_kernel('python-cntk', '2.2-py36', squash=True)
 
+# AWS polly
 build_kernel('vendor/aws_polly', 'debian', squash=True)
 build_kernel('vendor/aws_polly', 'ubuntu', squash=True)
