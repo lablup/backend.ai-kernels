@@ -42,7 +42,6 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir matplotlib bokeh && \
     pip install --no-cache-dir pyproj && \
     pip install --no-cache-dir Cartopy && \
-    pip install --no-cache-dir keras && \
     pip install --no-cache-dir ipython && \
     pip install --no-cache-dir pandas && \
     pip install --no-cache-dir seaborn && \
