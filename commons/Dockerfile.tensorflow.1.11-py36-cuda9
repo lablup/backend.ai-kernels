@@ -1,7 +1,7 @@
 FROM lablup/kernel-base:python3.6 as python-binary
 FROM lablup/common-bazel:0.15-ubuntu as bazel-binary
 
-# Build target: lablup/common-tensorflow:1.11-py36-gpu
+# Build target: lablup/common-tensorflow:1.11-py36-cuda9
 FROM nvidia/cuda:9.0-base-ubuntu16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
