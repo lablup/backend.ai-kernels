@@ -27,14 +27,12 @@ RUN apt update -y && \
 
 # Copy the whole Python from the docker library image
 COPY --from=python-binary /python.tar.gz /
-
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 RUN export LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH
 # Test if Python is working
 RUN python -c 'import sys; print(sys.version_info); import ssl'
 
 # As we mostly have "manylinux" glibc-compatible binary packaes,
-# we don't have to rebuild these!
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
 # Install TensorFlow build dependencies (ensure we have proper numpy)
 
@@ -55,7 +53,6 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pillow && \
     pip install --no-cache-dir networkx cvxpy && \
     pip install --no-cache-dir scikit-learn scikit-image && \
-    pip install --no-cache-dir scikit-image && \
     pip install --no-cache-dir pygments && \
     rm -f /tmp/*.whl
 
