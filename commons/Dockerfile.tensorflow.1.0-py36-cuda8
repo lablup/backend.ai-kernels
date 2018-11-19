@@ -17,8 +17,6 @@ ENV TF_ENABLE_XLA 1
 ENV TF_NEED_VERBS 0
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_CLANG 0
-#ENV TF_NEED_TENSORRT 1
-#ENV TF_NEED_MPI 0
 ENV TF_NEED_S3=1 
 ENV TF_CUDA_VERSION 8.0 
 ENV TF_CUDNN_VERSION 6
@@ -54,24 +52,29 @@ RUN apt-get update && \
         sed \
         swig \
         git-core \
+	libcurl3-dev \
 	zip && \
     rm -rf /var/lib/apt/lists/*
 
-#RUN apt-get update && \
-#    apt-get install nvinfer-runtime-trt-repo-ubuntu1604-4.0.1-ga-cuda8.0 && \
-#    apt-get update && \
-#    apt-get install libnvinfer4=4.1.2-1+cuda8.0 && \
-#    apt-get install libnvinfer-dev=4.1.2-1+cuda8.0
 
 # Link NCCL libray and header where the build script expects them.
 RUN mkdir /usr/local/cuda-8.0/lib &&  \
     ln -s /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/local/cuda/lib/libnccl.so.2 && \
     ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h
-    
+
+# link CUDA-8.0 + cuDNN 6.0
+RUN ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
+    mkdir /usr/lib/x86_64-linux-gnu/include && \
+    ln -s  /usr/include/x86_64-linux-gnu/cudnn_v6.h /usr/lib/x86_64-linux-gnu/include/cudnn.h && \
+#    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.6.0.21 /usr/lib/x86_64-linux-gnu/libcudnn.so && \    
+    ldconfig
+ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
-ENV BAZEL_VERSION 0.5.4
+ENV BAZEL_VERSION 0.4.5
 RUN mkdir /bazel && \
     cd /bazel && \
     curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
