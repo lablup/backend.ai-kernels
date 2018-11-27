@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Torch
 RUN pip install --no-cache-dir \
-        http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-linux_x86_64.whl && \
+        http://download.pytorch.org/whl/cu90/torch-0.4.1-cp36-cp36m-linux_x86_64.whl && \
     rm -rf /root/.cache
 
 # Prepare for building TensorFlow wheel
