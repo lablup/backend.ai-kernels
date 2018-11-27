@@ -66,12 +66,12 @@ ENV KERAS_BACKEND=cntk
 
 # Below scripts are already executed in python/Dockerfile.3.6-ubuntu
 # Install kernel-runner scripts package
-# RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.0.4"
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[python]~=1.0.4"
 
-COPY policy.yml /home/sorna/policy.yml
+COPY policy.yml /home/backend.ai/policy.yml
 
-# LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
-#       io.sorna.features="batch query uid-match user-input"
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input"
 
-# CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
-#      "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]

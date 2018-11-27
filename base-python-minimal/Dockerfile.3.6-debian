@@ -1,4 +1,4 @@
-FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/kernel-base:python3.6-debian as python-binary
 # ------------------------
 FROM lablup/kernel-base:debian
 ENV LANG=C.UTF-8
@@ -15,10 +15,10 @@ RUN apt update -y && apt install -y \
 
 # Copy the whole Python from the docker library image
 COPY --from=python-binary /python.tar.gz /
-RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
-# Test if Python is working
-RUN python -c 'import sys; print(sys.version_info); import ssl'
+# Extract Python & Test if Python is working
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig ; \
+    python -c 'import sys; print(sys.version_info); import ssl'
 
 # As we mostly have "manylinux" glibc-compatible binary packages,
 # we don't have to rebuild these!

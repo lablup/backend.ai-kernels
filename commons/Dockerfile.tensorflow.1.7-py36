@@ -46,9 +46,10 @@ RUN pip install --no-cache-dir wheel /tmp/*.whl; \
     rm -f /tmp/*.whl
 
 # Check Bazel/Python is runnable.
-RUN bazel version
-RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
-    python -c "import numpy; numpy.show_config()"
+RUN bazel version && \
+    python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
+    python -c "import numpy; numpy.show_config()" && \
+    python -c "import scipy; scipy.show_config()"
 
 # Limit the system resource used during compilation
 ENV LOCAL_RESOURCES 4096,8.0,1.0
@@ -56,13 +57,13 @@ ENV LOCAL_RESOURCES 4096,8.0,1.0
 # The TensorFlow version
 ENV TF_VERSION 1.7
 
-RUN : build TensorFlow pip package \
-    && cd /tmp \
-    && curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
-        | tar xzf -
+RUN : build TensorFlow pip package && \
+    cd /tmp && \
+    curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz \
+        | tar xzf - 
 
-RUN cd /tmp/tensorflow-r${TF_VERSION} \
-    && PYTHON_BIN_PATH=/usr/local/bin/python \
+RUN cd /tmp/tensorflow-r${TF_VERSION} && \
+        PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         GCC_HOST_COMPILER_PATH=/usr/bin/gcc \
 # AVX & AVX2 support under haswell core
@@ -91,8 +92,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} \
         --config=opt --config=mkl \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package && \
-    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
-
-RUN ls -l /tmp/tensorflow_pkg
+    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
+    ls -l /tmp/tensorflow_pkg
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0

@@ -25,11 +25,6 @@ RUN apt update -y && \
         libproj-dev libgeos-dev \	
         libzmq3-dev libuv1
 
-# Copy the whole Python from the docker library image
-#COPY --from=numpy-binary /opt/intel/mkl /opt/intel/mkl
-#COPY --from=numpy-binary /opt/intel/mkl/lib/intel64 /opt/intel/mkl/lib/intel64
-#COPY --from=numpy-binary /opt/intel/mkl/include/intel64 /opt/intel/mkl/include/intel64
-
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 

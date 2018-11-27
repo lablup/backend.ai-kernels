@@ -8,7 +8,7 @@ MAINTAINER Mario Cho "m.cho@lablup.com"
 ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 ENV JAVA_VERSION 8u171
-ENV JAVA_ALPINE_VERSION 8.171.11-r0
+ENV JAVA_ALPINE_VERSION 8.181.13-r0
 RUN { \
         echo '#!/bin/sh'; \
         echo 'set -e'; \
@@ -26,7 +26,7 @@ RUN pip install --no-cache-dir "backend.ai-kernel-runner[java]~=1.4.0"
 
 COPY policy.yml /home/backend.ai/policy.yml
 
-LABEL ai.backend.features "batch query uid-match"
+LABEL ai.backend.features "batch query uid-match user-input"
 
 CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "java"]

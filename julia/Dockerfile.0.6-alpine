@@ -2,7 +2,7 @@ FROM lablup/kernel-base-python-minimal:3.6-debian
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install pre-build matplotlib
-RUN apt install gcc g++ \
+RUN apt install build-base \
     && pip install --no-cache-dir matplotlib bokeh \
     && pip install --no-cache-dir ipython \
     && pip install --no-cache-dir pandas \

@@ -1,0 +1,9 @@
+FROM lablup/kernel-python:3.6-ubuntu
+
+# Install Pytorch
+RUN pip install --no-cache-dir \
+        http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp36-cp36m-manylinux1_x86_64.whl \
+	torchvision && \
+    rm -rf /root/.cache
+
+# vim: ft=dockerfile sts=4 sw=4 et tw=0

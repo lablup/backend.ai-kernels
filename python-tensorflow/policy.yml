@@ -18,6 +18,7 @@ preserved_env_keys: [
   "NPROC",
   "LD_LIBRARY_PATH",
   "LD_PRELOAD",
+  "TPU_NAME",
 ]
 
 diff_to_default: true

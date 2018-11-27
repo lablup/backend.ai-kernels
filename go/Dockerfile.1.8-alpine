@@ -16,7 +16,7 @@ WORKDIR $GOPATH
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[golang]~=1.4.0"
 
-COPY policy.yml /home/sorna/
+COPY policy.yml /home/backend.ai/
 
 LABEL ai.backend.features "batch query uid-match user-input"
 

@@ -4,8 +4,8 @@ MAINTAINER Mario Cho "m.cho@lablup.com"
 LABEL ai.backend.ai.envs.corecount="NPROC"
 
 # Ref: https://github.com/nodejs/docker-node/blob/master/6.11/alpine/Dockerfile
-ENV NODE_VERSION 10.7.0
-ENV YARN_VERSION 1.7.0
+ENV NODE_VERSION 10.13.0
+ENV YARN_VERSION 1.10.1
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \

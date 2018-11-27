@@ -1,0 +1,13 @@
+FROM lablup/kernel-python:3.6-ubuntu
+RUN pip install --no-cache-dir jupyter 
+RUN pip install --no-cache-dir aiohttp 
+WORKDIR /home/work
+COPY pserver.py /home/backend.ai/pserver.py
+COPY jupyter_notebook_config.py /home/backend.ai/jupyter_notebook_config.py
+COPY run.sh /home/backend.ai/run.sh
+
+CMD "/home/backend.ai/run.sh"
+
+
+# vim: ft=dockerfile
+

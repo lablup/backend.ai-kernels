@@ -1,5 +1,5 @@
-FROM lablup/common-bazel:0.11-ubuntu as bazel-binary
 FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/common-bazel:0.11-ubuntu as bazel-binary
 FROM lablup/common-numpy:1.15-py36-ubuntu16.04-mkl2019.0 as numpy-binary
 
 # Build target: lablup/common-tensorflow:1.8-py36
@@ -46,9 +46,10 @@ RUN pip install --no-cache-dir wheel /tmp/*.whl; \
     rm -f /tmp/*.whl
 
 # Check Bazel/Python is runnable.
-RUN bazel version
-RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
-    python -c "import numpy; numpy.show_config()"
+RUN bazel version && \
+    python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
+    python -c "import numpy; numpy.show_config()" && \
+    python -c "import scipy; scipy.show_config()"
 
 # Limit the system resource used during compilation
 ENV LOCAL_RESOURCES 4096,8.0,1.0

@@ -2,15 +2,15 @@ FROM lablup/kernel-base-python-minimal:3.6-debian
 
 RUN pip install --no-cache-dir -U pip setuptools
 
-COPY policy.yml /home/sorna/
+COPY policy.yml /home/backend.ai/
 
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[vendor.aws_polly]~=1.4.0"
 
-LABEL io.sorna.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
-      io.sorna.features="query uid-match"
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,NPROC" \
+      ai.backend.features="query uid-match"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "vendor.aws_polly"]
 
 # vim: ft=dockerfile
