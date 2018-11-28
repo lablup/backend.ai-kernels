@@ -34,7 +34,7 @@ RUN python -c 'import sys; print(sys.version_info); import ssl'
 
 # As we mostly have "manylinux" glibc-compatible binary packaes,
 # we don't have to rebuild these!
-#COPY --from=tf-serving /usr/local/bin/tensorflow_model_server /usr/bin/tensorflow_model_server
+COPY --from=tf-serving /usr/local/bin/tensorflow_model_server /usr/bin/tensorflow_model_server
 COPY --from=tf-serving /tmp/pip/tensorflow_serving*.whl /tmp
 # Install TensorFlow build dependencies (ensure we have proper numpy)
 
