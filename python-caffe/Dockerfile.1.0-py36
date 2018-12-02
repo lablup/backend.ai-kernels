@@ -1,7 +1,7 @@
 FROM lablup/kernel-python:3.6-ubuntu as caffe-builder
 
 # Build caffe
-RUN install_packages \
+RUN apt-get install \
         libprotobuf-dev \
         libgflags-dev \
         libgoogle-glog-dev \
@@ -14,8 +14,8 @@ RUN install_packages \
         libboost-all-dev \
         libopenblas-base \
         libopenblas-dev
-RUN install_packages git-core ca-certificates
-RUN install_packages build-essential
+RUN apt-get install git-core ca-certificates
+RUN apt-get install build-essential
 RUN git clone https://github.com/BVLC/caffe /home/backend.ai/caffe-install
 RUN cd /home/backend.ai/caffe-install && \
     pip install --no-cache-dir -r python/requirements.txt && \
