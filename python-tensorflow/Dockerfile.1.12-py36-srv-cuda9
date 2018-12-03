@@ -107,6 +107,7 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir scikit-learn scikit-image && \
     pip install --no-cache-dir scikit-image && \
     pip install --no-cache-dir pygments && \
+    pip install --no-cache-dir requests && \
     rm -f /tmp/*.whl
 
 # Set where models should be stored in the container

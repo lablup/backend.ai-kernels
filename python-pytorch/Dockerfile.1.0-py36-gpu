@@ -12,6 +12,9 @@ ENV CUDNN_VERSION 7.3.1.20
 ENV NCCL_VERSION 2.3.5
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ENV CUDA_HOME /usr/local/cuda
+ENV CUDA_TOOLKIT_PATH /usr/local/cuda
+ENV CUDNN_INSTALL_PATH /usr/local/cuda
 
 RUN apt update -y && \
     apt install -y \
@@ -25,7 +28,9 @@ RUN apt update -y && \
 	proj-bin \
         libgeos-dev \
         mime-support \
+	git \
 	gcc g++ \
+	cmake \
         libproj-dev libgeos-dev \	
         libzmq3-dev libuv1
 
@@ -47,10 +52,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-mark hold libnccl2 && \
     rm -rf /var/lib/apt/lists/*
 
+RUN pip install --no-cache-dir \
+        pyyaml
+
+ENV USE_CUDA ᇂ1
+ENV USE_CUDNN 1
+ENV USE_NCCL 1
 
 # Install Torch
+RUN git clone --recursive https://github.com/pytorch/pytorch && \
+    cd pytorch && \
+    python setup.py bdist_wheel -d /tmp 
+RUN git clone --recursive https://github.com/pytorch/vision.git && \
+    cd vision && \
+    python setup.py bdist_wheel -d /tmp 
+
 RUN pip install --no-cache-dir \
-        torch && \
+        wheel && \
+    pip install --no-cache-dir \
+        wheel /tmp/*.whl && \
     rm -rf /root/.cache
 
 # Prepare for building TensorFlow wheel

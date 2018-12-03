@@ -2,7 +2,7 @@ FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
 FROM lablup/kernel-base:python3.6-debian as python-binary
 
-FROM debian:stretch
+FROM debian:stretch-slim
 MAINTAINER Mario Cho "m.cho@lablup.com"
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
