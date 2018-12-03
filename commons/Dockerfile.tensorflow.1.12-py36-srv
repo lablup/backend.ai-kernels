@@ -1,13 +1,7 @@
 FROM lablup/kernel-base:python3.6 as python-binary
 
 FROM ubuntu:16.04 as base_build
-
-ARG TF_SERVING_VERSION_GIT_BRANCH=master
-ARG TF_SERVING_VERSION_GIT_COMMIT=head
-
-LABEL maintainer=gvasudevan@google.com
-LABEL tensorflow_serving_github_branchtag=${TF_SERVING_VERSION_GIT_BRANCH}
-LABEL tensorflow_serving_github_commit=${TF_SERVING_VERSION_GIT_COMMIT}
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         automake \
@@ -42,9 +36,8 @@ RUN cd /; \
     rm -f python.tar.gz
 
 # Prepare for building TensorFlwo wheel
-RUN pip install --no-cache-dir wheel
-
-RUN pip install --no-cache-dir grpcio h5py ; \
+RUN pip install --no-cache-dir wheel ; \
+    pip install --no-cache-dir grpcio h5py ; \
     pip install --no-cache-dir keras_applications ; \
     pip install --no-cache-dir keras_preprocessing ; \
     pip install --no-cache-dir mock ; \
@@ -67,10 +60,9 @@ RUN mkdir /bazel && \
 
 # Download TF Serving sources (optionally at specific commit).
 WORKDIR /tensorflow-serving
-RUN git clone --branch=${TF_SERVING_VERSION_GIT_BRANCH} https://github.com/tensorflow/serving . && \
+RUN git clone --branch=master https://github.com/tensorflow/serving . && \
     git remote add upstream https://github.com/tensorflow/serving.git && \
-    if [ "${TF_SERVING_VERSION_GIT_COMMIT}" != "head" ]; then git checkout ${TF_SERVING_VERSION_GIT_COMMIT} ; fi
-
+    if [ head != "head" ]; then git checkout head; fi
 
 FROM base_build as binary_build
 # Build, and install TensorFlow Serving
@@ -79,27 +71,24 @@ RUN echo "Building with build options: ${TF_SERVING_BUILD_OPTIONS}"
 ARG TF_SERVING_BAZEL_OPTIONS=""
 RUN echo "Building with Bazel options: ${TF_SERVING_BAZEL_OPTIONS}"
 
-RUN         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
+RUN CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
     bazel build --color=yes --curses=yes \
-        ${TF_SERVING_BAZEL_OPTIONS} \
         --verbose_failures \
         --output_filter=DONT_MATCH_ANYTHING \
-        ${TF_SERVING_BUILD_OPTIONS} \
+        --config=nativeopt \
         tensorflow_serving/model_servers:tensorflow_model_server && \
     cp bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server \
         /usr/local/bin/
 
 # Build and install TensorFlow Serving API
 RUN bazel build --color=yes --curses=yes \
-        ${TF_SERVING_BAZEL_OPTIONS} \
         --verbose_failures \
         --output_filter=DONT_MATCH_ANYTHING \
-        ${TF_SERVING_BUILD_OPTIONS} \
+        --config=nativeopt \
         tensorflow_serving/tools/pip_package:build_pip_package && \
     bazel-bin/tensorflow_serving/tools/pip_package/build_pip_package \
         /tmp/pip && \
     pip --no-cache-dir install --upgrade /tmp/pip/tensorflow_serving*.whl 
-
 
 FROM binary_build as clean_build
 # Clean up Bazel cache when done.
