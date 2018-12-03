@@ -18,11 +18,11 @@ RUN apk --no-cache --virtual build-dependencies add build-base m4 \
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[scheme]~=1.4.0"
 
-COPY policy.yml /home/sorna/policy.yml
+COPY policy.yml /home/backend.ai/policy.yml
 
-LABEL io.sorna.features "batch query uid-match"
+LABEL ai.backend.features "batch query uid-match"
 
-CMD ["/home/sorna/jail", "-policy", "/home/sorna/policy.yml", \
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "scheme"]
 
 # vim: ft=dockerfile
