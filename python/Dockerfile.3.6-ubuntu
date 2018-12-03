@@ -3,9 +3,9 @@ FROM lablup/kernel-base:hook as hook-builder
 FROM lablup/kernel-base:python3.6 as python-binary
 
 FROM ubuntu:16.04
-ENV LANG=C.UTF-8
-ENV PYTHONUNBUFFERED 1
 MAINTAINER Mario Cho "m.cho@lablup.com"
+ENV PYTHONUNBUFFERED 1
+ENV LANG=C.UTF-8
 
 RUN apt update -y && \
     apt install -y \
@@ -22,18 +22,14 @@ RUN apt update -y && \
 	gcc g++ \
         libproj-dev libgeos-dev \	
         libzmq3-dev libuv1
-COPY --from=python-binary /python.tar.gz /
-RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
-RUN export LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH
 # Test if Python is working
-RUN python -c 'import sys; print(sys.version_info); import ssl'
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig && \
+    export LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH && \
+    python -c 'import sys; print(sys.version_info); import ssl'
 
-# As we mostly have "manylinux" glibc-compatible binary packaes,
-# we don't have to rebuild these!
-# Install TensorFlow build dependencies (ensure we have proper numpy)
-
-# Prepare for building TensorFlow wheel
+# Prepare for building wheel
 RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2" && \
