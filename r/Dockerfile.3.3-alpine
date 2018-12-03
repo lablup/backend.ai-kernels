@@ -11,8 +11,6 @@ RUN apk add --no-cache R R-dev
 ADD install-packages.R /home/backend.ai/install-packages.R
 RUN Rscript /home/backend.ai/install-packages.R
 
-# LABEL io.sorna.features="query uid-match"
-
 # Install kernel-runner scripts package
 RUN pip install --no-cache-dir "backend.ai-kernel-runner[r]~=1.4.0"
 
