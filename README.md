@@ -1,6 +1,6 @@
 # backend.ai-kernels
 
-Backend.AI agent kernels in various programming languages / toolkits and frameworks.
+ Backend.AI agent kernels in various programming languages / toolkits and frameworks.
 
 ## Supporting modes
 
@@ -23,12 +23,11 @@ Here we list the latest versions of our supported kernel images.
 | Rust          | `lablup/kernel-rust`    | 1.17            | O     | O     |   |   |                    |
 | PHP           | `lablup/kernel-php`     | 7.1             | O     | O     |   |   |                    |
 | R             | `lablup/kernel-r`       | 3.3             | O     | O     |   |   | CRAN R             |
-| Scala		    | `lablup/kernel-scala`   | 2.12            | O     | O     |   |   |                    |
+| Scala	        | `lablup/kernel-scala`   | 2.12            | O     | O     |   |   |                    |
 
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.12rc  | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.3     | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| TensorFlow | `lablup/kernel-python-tensorflow` | 1.12    | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | PyTorch    | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
 | cafee      | `lablup/kernel-python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
 | CNTK       | `lablup/kernel-python-cntk`       | (WIP)   | O     | O\*   | O   |   | Bundled w/Keras 2 |
@@ -77,25 +76,38 @@ Kernels have dependencies to reduce total amount of storage, especailly for fast
  * `base-TPU`    (Google TPU comptibility, on Google' Cloud)
  * `base-ROCm`   (AMD' GPU & OpenCL libarary compatibility, T.B.D.)
 
-| base-mkl                    | base-cuda                       | base-TPU (T.B.D)  | base-ROCm (T.B.D) |
-| tensorflow-1.12-py36 (edge) |                                 |                   |                   |   
-| tensorflow-1.11-py36        |                                 |                   |                   |   
-| tensorflow-1.10-py36        |                                 |                   |                   |   
-| tensorflow-1.9-py36         | tensorflow-1.9-py36-gpu         |                   |                   |   
-| tensorflow-1.8-py36         | tensorflow-1.8-py36-gpu         |                   |                   |   
-| tensorflow-1.7-py36         | tensorflow-1.7-py36-gpu         |                   |                   |   
-| tensorflow-1.6-py36         | tensorflow-1.6-py36-gpu         |                   |                   |   
-| tensorflow-1.5-py36         | tensorflow-1.5-py36-gpu         |                   |                   |   
-| tensorflow-1.4-py36         | tensorflow-1.4-py36-gpu         |                   |                   |   
-| tensorflow-1.3-py36         | tensorflow-1.3-py36-gpu         |                   |                   |   
-|                             | python-caffe-1.0-py36           |                   |                   |   
-|                             | python-torch-1.0-py36           |                   |                   |   
-|                             | python-torch-1.0-py36-gpu       |                   |                   |   
-|                             | python-torch-0.3-py36           |                   |                   |   
-|                             | python-torch-0.3-py36-gpu       |                   |                   |   
-|                             | python-torch-0.2-py36           |                   |                   |   
-|                             | python-torch-0.2-py36-gpu       |                   |                   |   
-|                             | python-cntk-2.2-py36            |                   |                   |   
-|                             | python-cntk-2.2-py36            |                   |                   |   
+| base-mkl                 | base-cuda                     | base-TPU                 | base-ROCm (T.B.D) |
+| tensorflow-1.12-py36     | tensorflow-1.12-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
+| tensorflow-1.11-py36     | tensorflow-1.11-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
+| tensorflow-1.10-py36     | tensorflow-1.10-py36-cuda9    |                          |                   |   
+| tensorflow-1.9-py36      | tensorflow-1.9-py36-cuda9     |                          |                   |   
+| tensorflow-1.8-py36      | tensorflow-1.8-py36-cuda9     |                          |                   |   
+| tensorflow-1.7-py36      | tensorflow-1.7-py36-cuda9     |                          |                   |   
+| tensorflow-1.6-py36      | tensorflow-1.6-py36-cuda9     |                          |                   |   
+| tensorflow-1.5-py36      | tensorflow-1.5-py36-cuda9     |                          |                   |   
+|                          | tensorflow-1.4-py36-cuda8     |                          |                   |   
+|                          | tensorflow-1.3-py36-cuda8     |                          |                   |
+|                          | tensorflow-1.2-py36-cuda8     |                          |                   |
+|                          | tensorflow-1.1-py36-cuda8     |                          |                   |
+|                          | tensorflow-1.0-py36-cuda8     |                          |                   |
+|                          | python-caffe-1.0-py36-cuda9   |                          |                   |   
+|                          | python-torch-1.0-py36-cuda9   |                          |                   |   
+|                          | python-torch-0.4-py36-cuda9   |                          |                   |   
+|                          | python-torch-0.3-py36-cuda9   |                          |                   |   
+|                          | python-torch-0.2-py36-cuda8   |                          |                   |   
+|                          | python-cntk-2.2-py36          |                          |                   |   
+|                          | python-cntk-2.2-py36          |                          |                   |   
+
+## Deep learning inference images
+
+ * `base`        (CPU only ) 
+ * `base-cuda`   (Nvidia' GPU & CUDA libarary compatibility, needed Nvidia-docker)
+ * `base-TPU`    (Google TPU comptibility, on Google' Cloud)
+ * `base-ROCm`   (AMD' GPU & OpenCL libarary compatibility, T.B.D.)
+
+| base                     |  base-cuda                     | base-TPU (T.B.D)         | base-ROCm (T.B.D) |
+| tensorflow-1.12-py36-srv | tensorflow-1.12-py36-srv-cuda9 |                          |                   |   
+| tensorflow-1.11-py36-srv | tensorflow-1.11-py36-srv-cuda9 |                          |                   |
 
 For the complete build chain, please refer `build.py` for more information.
+ 
