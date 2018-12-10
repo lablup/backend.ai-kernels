@@ -1,16 +1,20 @@
 FROM lablup/kernel-base:jail as jail-builder
 FROM lablup/kernel-base:hook as hook-builder
 FROM lablup/kernel-base:python3.6 as python-binary
-FROM lablup/common-pytorch:1.0-py36-cuda9 as torch-binary
 
 FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
-
 ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED 1
+ENV CUDA_VERSION 9.0.176
+ENV CUDA_PKG_VERSION 9-0=$CUDA_VERSION-1
+ENV CUDNN_VERSION 7.3.1.20
+ENV NCCL_VERSION 2.2.13
+ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends \
+RUN apt update -y && \
+    apt install -y \
         ca-certificates \
         wget \
         libexpat1 libgdbm3 libbz2-dev libffi6 libsqlite3-0 liblzma5 zlib1g \
@@ -18,46 +22,38 @@ RUN apt-get update -y && \
         libssl1.0.0 \
 	libssl-dev \
         libncursesw5 libtinfo5 libreadline6 \
-	libgomp1 \
 	proj-bin \
         libgeos-dev \
         mime-support \
 	gcc g++ \
-        libproj-dev libgeos-dev \
-	libseccomp2 gosu \
+        libproj-dev libgeos-dev \	
         libzmq3-dev libuv1
 
-# Install CUDA-9.0.176 + cuDNN 7.3.1.20
-RUN apt-get install -y --no-install-recommends \
-        cuda-libraries-$CUDA_PKG_VERSION \
-        cuda-cublas-9-0=9.0.176.4-1 \
-        libnccl2=$NCCL_VERSION-2+cuda9.0 && \
-    apt-mark hold libnccl2 && \
-    rm -rf /var/lib/apt/lists/* 
-
-# Install Pytorch and Pytorch-vision
-COPY --from=torch-binary /tmp/t*.whl /tmp/
-
-# Copy the whole Python from the docker library image
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
+
 RUN export LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH
 # Test if Python is working
 RUN python -c 'import sys; print(sys.version_info); import ssl'
 
-# As we mostly have "manylinux" glibc-compatible binary packaes,
-# we don't have to rebuild these!
-RUN pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
-    pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2"
-
-# Install CUDA-9.0 + cuDNN 7.2
+# Install CUDA-9.0.176 + cuDNN 7.3.1.20
 RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.2.1 /usr/local/cuda/lib64/libcudnn.so && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.3.1 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
-ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        cuda-libraries-$CUDA_PKG_VERSION \
+        cuda-cublas-9-0=9.0.176.4-1 \
+        libnccl2=2.3.7-1+cuda9.0 && \
+    apt-mark hold libnccl2 && \
+    rm -rf /var/lib/apt/lists/*
 
-# Prepare for building Pytorch wheel
+
+# Install Torch
+RUN pip install --no-cache-dir \
+        http://download.pytorch.org/whl/cu90/torch-1.0.0-cp36-cp36m-linux_x86_64.whl && \
+    rm -rf /root/.cache
+
+# Prepare for building TensorFlow wheel
 RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2" && \
@@ -66,10 +62,10 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir matplotlib bokeh && \
     pip install --no-cache-dir pyproj && \
     pip install --no-cache-dir Cartopy && \
+    pip install --no-cache-dir torchvision && \
+    pip install --no-cache-dir keras && \
     pip install --no-cache-dir ipython && \
     pip install --no-cache-dir pandas && \
-    pip install --no-cache-dir keras && \
-    pip install --no-cache-dir wheel /tmp/*.whl && \
     pip install --no-cache-dir seaborn && \
     pip install --no-cache-dir pillow && \
     pip install --no-cache-dir networkx cvxpy && \
@@ -78,9 +74,12 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pygments && \
     rm -f /tmp/*.whl
 
-RUN rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+RUN apt-get update && \
+    apt-get install -y libseccomp2 gosu && \
+    apt-get clean && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
     ln -s /usr/sbin/gosu /usr/sbin/su-exec && \
-    mkdir /home/work && chmod 755 /home/work && \
+    mkdir /home/work && chmod 755 /home/work; \
     mkdir /home/backend.ai && chmod 755 /home/backend.ai
 ADD entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
