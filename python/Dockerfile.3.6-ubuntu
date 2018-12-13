@@ -77,9 +77,6 @@ RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
     && python /tmp/matplotlib-fontcache.py \
     && rm /tmp/matplotlib-fontcache.py
 
-# Jupyter configuration
-COPY jupyter_notebook_config.py /home/backend.ai/jupyter_notebook_config.py
-
 WORKDIR /home/work
 VOLUME ["/home/work"]
 EXPOSE 2000 2001 2002 2003
