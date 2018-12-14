@@ -1,4 +1,4 @@
-FROM lablup/kernel-base-python-minimal:3.6-debian
+FROM lablup/kernel-base-python-minimal:3.6-alpine
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install pre-build matplotlib
