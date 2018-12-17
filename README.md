@@ -29,6 +29,7 @@ Here we list the latest versions of our supported kernel images.
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
 | TensorFlow | `lablup/kernel-python-tensorflow` | 1.12    | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | PyTorch    | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
+| caffe2     | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
 | cafee      | `lablup/kernel-python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
 | CNTK       | `lablup/kernel-python-cntk`       | (WIP)   | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | Chainer    | `lablup/kernel-python-chainer`    | (WIP)   | O     | O\*   | O   |   |                   |
