@@ -62,6 +62,7 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir networkx cvxpy && \
     pip install --no-cache-dir scikit-learn scikit-image && \
     pip install --no-cache-dir pygments && \
+    pip install --no-cache-dir jupyter && \    
     rm -f /tmp/*.whl
 
 RUN apt-get install -y libseccomp2 gosu && \
@@ -100,7 +101,8 @@ LABEL ai.backend.timeout="0" \
       ai.backend.maxmem="8g" \
       ai.backend.maxcores="4" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input"
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
 
 CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
