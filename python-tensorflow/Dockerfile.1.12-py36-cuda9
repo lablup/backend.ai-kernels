@@ -65,7 +65,7 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir networkx cvxpy && \
     pip install --no-cache-dir scikit-learn scikit-image && \
     pip install --no-cache-dir pygments && \
-    pip install --no-cahce-dir jupyter && \    
+    pip install --no-cache-dir jupyter && \    
     rm -f /tmp/*.whl
 
 # Install additional TensorFlow dependencies
