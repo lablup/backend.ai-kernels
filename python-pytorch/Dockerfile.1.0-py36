@@ -67,6 +67,7 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir scikit-learn scikit-image && \
     pip install --no-cache-dir scikit-image && \
     pip install --no-cache-dir pygments && \
+    pip install --no-cache-dir jupyter && \    
     rm -f /tmp/*.whl
 
 RUN apt-get install -y libseccomp2 gosu && \
