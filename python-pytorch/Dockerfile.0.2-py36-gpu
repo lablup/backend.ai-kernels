@@ -37,12 +37,7 @@ RUN ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-# Install Torch
-RUN pip install --no-cache-dir \
-        http://download.pytorch.org/whl/cu80/torch-0.3.0.post4-cp36-cp36m-linux_x86_64.whl && \
-    rm -rf /root/.cache
-
-# Prepare for building TensorFlow wheel
+# Prepare for building PyTorch wheel
 RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2" && \
@@ -61,7 +56,13 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir scikit-learn scikit-image && \
     pip install --no-cache-dir scikit-image && \
     pip install --no-cache-dir pygments && \
+    pip install --no-cache-dir jupyter && \
     rm -f /tmp/*.whl
+
+# Install PyTorch
+RUN pip install --no-cache-dir \
+        https://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp36-cp36m-manylinux1_x86_64.whl && \ 
+    rm -rf /root/.cache
 
 RUN apt-get install -y libseccomp2 gosu && \
     apt-get clean && \
@@ -102,7 +103,8 @@ LABEL ai.backend.nvidia.enabled="yes" \
       ai.backend.maxmem="8g" \
       ai.backend.maxcores="4" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input"
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"      
 
 CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
