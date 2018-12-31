@@ -170,6 +170,7 @@ build_kernel('python-caffe',      '1.0-py36', squash=True)
 build_kernel('python-caffe2',      '1.0-py36', squash=True)
 
 # Python Pytorch
+build_kernel('python-pytorch',      '0.1-py36-cuda8', squash=True)
 build_kernel('python-pytorch',      '0.2-py36', squash=True)
 build_kernel('python-pytorch',      '0.2-py36-cuda8', squash=True)
 build_kernel('python-pytorch',      '0.3-py36', squash=True)
