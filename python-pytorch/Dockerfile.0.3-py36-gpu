@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Torch
 RUN pip install --no-cache-dir \
-        http://download.pytorch.org/whl/cu90/torch-0.3.0.post4-cp36-cp36m-linux_x86_64.whl && \
+        http://download.pytorch.org/whl/cu90/torch-0.3.1.post4-cp36-cp36m-linux_x86_64.whl && \
     rm -rf /root/.cache
 
 # Prepare for building TensorFlow wheel
@@ -72,6 +72,7 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir scikit-learn scikit-image && \
     pip install --no-cache-dir scikit-image && \
     pip install --no-cache-dir pygments && \
+    pip install --no-cache-dir jupyter && \    
     rm -f /tmp/*.whl
 
 RUN apt-get install -y libseccomp2 gosu && \
@@ -113,7 +114,8 @@ LABEL ai.backend.nvidia.enabled="yes" \
       ai.backend.maxmem="8g" \
       ai.backend.maxcores="4" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input"
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"      
 
 CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
      "/usr/local/bin/python", "-m", "ai.backend.kernel", "python"]
