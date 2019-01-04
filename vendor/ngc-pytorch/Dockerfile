@@ -14,7 +14,6 @@ ENV PYTHONUNBUFFERED=1 \
     PATH=/opt/backend.ai/bin:/opt/conda/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
 WORKDIR /home/work
-VOLUME ["/home/work"]
 EXPOSE 2000 2001
 
 LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
