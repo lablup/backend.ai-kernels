@@ -6,8 +6,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-# Install ipython/jupyter
-RUN /opt/conda/bin/pip install --no-cache-dir ipython jupyter
+# ipython/jupyter is already installed in the Anaconda Python installed at /opt/conda.
 
 # Prepare runtime environment
 ENV PYTHONUNBUFFERED=1 \
