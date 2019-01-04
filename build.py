@@ -189,5 +189,7 @@ build_kernel('python-pytorch',      '1.0-py36-cuda9', squash=True)
 build_kernel('python-cntk', '2.2-py36', squash=True)
 
 # AWS polly
-build_kernel('vendor/aws_polly', 'debian', squash=True)
 build_kernel('vendor/aws_polly', 'ubuntu', squash=True)
+build_kernel('vendor/ngc-tensorflow', '18.12-py3', squash=True)
+build_kernel('vendor/ngc-pytorch', '18.12.1-py3', squash=True)
+build_kernel('vendor/ngc-digits', '18.12-tensorflow', squash=True)
