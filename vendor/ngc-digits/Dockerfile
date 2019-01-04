@@ -18,6 +18,7 @@ LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.service-ports="digits:http:8090"
 
+COPY policy.yml /opt/backend.ai/etc/jail/policy.yml
 ENTRYPOINT []
 CMD ["/opt/backend.ai/bin/entrypoint.sh", \
      "/opt/backend.ai/bin/jail", "-policy", "/opt/backend.ai/etc/jail/policy.yml", \
