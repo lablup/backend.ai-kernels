@@ -15,6 +15,7 @@ EXPOSE 2000 2001
 
 LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch uid-match" \
+      ai.backend.base-distro="ubuntu16.04" \
       ai.backend.service-ports="digits:http:8090"
 
 ENTRYPOINT []
