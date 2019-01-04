@@ -78,7 +78,7 @@ RUN echo 'import matplotlib.pyplot' > /tmp/matplotlib-fontcache.py \
 
 WORKDIR /home/work
 VOLUME ["/home/work"]
-EXPOSE 2000 2001 2002 2003
+EXPOSE 2000 2001
 
 LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
