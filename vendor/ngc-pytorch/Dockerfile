@@ -20,6 +20,7 @@ LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch uid-match" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
 
-ENTRYPOINT ["/opt/backend.ai/bin/entrypoint.sh"]
-CMD ["/opt/backend.ai/bin/jail", "-policy", "/opt/backend.ai/etc/jail/policy.yml", \
+ENTRYPOINT []
+CMD ["/opt/backend.ai/entrypoint.sh", \
+     "/opt/backend.ai/bin/jail", "-policy", "/opt/backend.ai/etc/jail/policy.yml", \
      "/opt/backend.ai/bin/python", "-m", "ai.backend.kernel", "ngc_pytorch"]
