@@ -2,10 +2,9 @@ FROM nvcr.io/nvidia/digits:18.12-tensorflow
 
 # Prepare for jail/hook minimal dependencies
 RUN apt-get update && \
-    apt-get install -y libseccomp2 gosu libstdc++5 && \
+    apt-get install -y libseccomp2 libstdc++5 && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/ && \
-    ln -s /usr/sbin/gosu /usr/sbin/su-exec
+    rm -rf /var/lib/apt/lists/
 
 # Prepare runtime environment
 ENV PYTHONUNBUFFERED=1 \
