@@ -29,11 +29,12 @@ def build_kernel(name, tag, extra_opts='', *, squash=False):
     sq = '--squash' if squash else ''
 
     print_header(f'Building {name}')
+    short_name = name[len('vendor/'):]
     run('docker build '
-        f'-t lablup/kernel-{name}:{tag} {extra_opts} '
+        f'-t lablup/kernel-{short_name}:{tag} {extra_opts} '
         f'-f {name}/Dockerfile.{tag} {sq} {name}')
     if auto_push:
-        run(f'docker push lablup/kernel-{name}:{tag}')
+        run(f'docker push lablup/kernel-{short_name}:{tag}')
 
 
 def build_common(name, tag, extra_opts=''):
