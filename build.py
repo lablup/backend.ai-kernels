@@ -29,7 +29,10 @@ def build_kernel(name, tag, extra_opts='', *, squash=False):
     sq = '--squash' if squash else ''
 
     print_header(f'Building {name}')
-    short_name = name[len('vendor/'):]
+    if name.startswith('vendor/'):
+        short_name = name[len('vendor/'):]
+    else:
+        short_name = name
     run('docker build '
         f'-t lablup/kernel-{short_name}:{tag} {extra_opts} '
         f'-f {name}/Dockerfile.{tag} {sq} {name}')
