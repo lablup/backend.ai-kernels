@@ -6,9 +6,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-# Install ipython/jupyter
-RUN /usr/bin/python3 -m pip install ipython jupyter
-
 # Prepare runtime environment
 ENV PYTHONUNBUFFERED=1 \
     PATH=/opt/backend.ai/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
@@ -26,5 +23,8 @@ ENTRYPOINT []
 CMD ["/opt/backend.ai/bin/entrypoint.sh", \
      "/opt/backend.ai/bin/jail", "-policy", "/etc/backend.ai/jail/policy.yml", \
      "/opt/backend.ai/bin/python", "-m", "ai.backend.kernel", "vendor.ngc_tensorflow"]
+
+# Install image-specific add-ons
+RUN /usr/bin/python3 -m pip install ipython jupyter
 
 # vim: ft=dockerfile
