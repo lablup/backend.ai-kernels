@@ -59,4 +59,9 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir ipython && \
     python3 -m pip install --no-cache-dir jupyter
 
+# Install ipython kernelspec
+RUN python3 -m ipykernel install --name backendai-python3.6 \
+        --display-name "Python 3.6 on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/backendai-python3.6/kernel.json
+
 # vim: ft=dockerfile
