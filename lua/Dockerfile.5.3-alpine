@@ -1,7 +1,7 @@
 FROM alpine:3.8
 
 # Prepare for jail/hook minimal dependencies
-RUN apk add --no-cache libseccomp libstdc++
+RUN apk add --no-cache libseccomp libgcc libstdc++
 
 LABEL ai.backend.features="batch query uid-match" \
       ai.backend.base-distro="alpine3.8" \
