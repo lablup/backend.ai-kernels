@@ -1,6 +1,0 @@
-backend : module://ai.backend.kernel.python.matplotlib.ingen
-svg.fonttype : none
-figure.facecolor : FFFFFF
-figure.edgecolor : FFFFFF
-savefig.facecolor : FFFFFF
-savefig.edgecolor : FFFFFF

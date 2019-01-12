@@ -1,5 +1,5 @@
-FROM ubuntu:18.04
-# Ubuntu 18.04 comes with Python 3.6!
+FROM continuumio/anaconda3:2018.12
+# This image bases on Debian.
 # jail/hook binaries from ubuntu 16.04 are still compatible.
 
 # Prepare for jail/hook minimal dependencies
@@ -10,7 +10,7 @@ RUN apt-get update && \
 
 # Prepare runtime environment
 ENV PYTHONUNBUFFERED=1 \
-    PATH=/opt/backend.ai/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    PATH=/opt/conda/bin:/opt/backend.ai/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
 WORKDIR /home/work
 EXPOSE 2000 2001
@@ -25,14 +25,12 @@ ENTRYPOINT []
 CMD ["/opt/backend.ai/bin/entrypoint.sh", \
      "/opt/backend.ai/bin/jail", "-policy", "/etc/backend.ai/jail/policy.yml", \
      "/opt/backend.ai/bin/python", "-m", "ai.backend.kernel", "python", \
-     "/usr/bin/python3"]
+     "/opt/conda/bin/python"]
 
-# Install image-specific add-ons
 RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
         wget curl git-core \
-        python3 python3-pip \
         libssl-dev \
         libmpdec2 \
         proj-bin libproj-dev \
@@ -42,21 +40,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-# Install commonly-used wheels
-RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools && \
-    python3 -m pip install --no-cache-dir h5py && \
-    python3 -m pip install --no-cache-dir Cython && \
-    python3 -m pip install --no-cache-dir matplotlib bokeh && \
-    python3 -m pip install --no-cache-dir pyproj && \
-    python3 -m pip install --no-cache-dir Cartopy && \
-    python3 -m pip install --no-cache-dir pandas && \
-    python3 -m pip install --no-cache-dir seaborn && \
-    python3 -m pip install --no-cache-dir pillow && \
-    python3 -m pip install --no-cache-dir networkx cvxpy && \
-    python3 -m pip install --no-cache-dir scikit-learn scikit-image && \
-    python3 -m pip install --no-cache-dir pygments && \
-    python3 -m pip install --no-cache-dir ipython && \
-    python3 -m pip install --no-cache-dir jupyter
+RUN conda install matplotlib bokeh && \
+    conda install pyproj Cartopy && \
+    conda install seaborn && \
+    conda install h5py && \
+    conda install pillow
 
 # vim: ft=dockerfile

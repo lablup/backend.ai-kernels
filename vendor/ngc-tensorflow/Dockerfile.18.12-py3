@@ -22,7 +22,8 @@ COPY policy.yml /etc/backend.ai/jail/policy.yml
 ENTRYPOINT []
 CMD ["/opt/backend.ai/bin/entrypoint.sh", \
      "/opt/backend.ai/bin/jail", "-policy", "/etc/backend.ai/jail/policy.yml", \
-     "/opt/backend.ai/bin/python", "-m", "ai.backend.kernel", "vendor.ngc_tensorflow"]
+     "/opt/backend.ai/bin/python", "-m", "ai.backend.kernel", "python", \
+     "/usr/bin/python3"]
 
 # Install image-specific add-ons
 RUN /usr/bin/python3 -m pip install ipython jupyter
