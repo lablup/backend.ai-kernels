@@ -1,30 +1,33 @@
-FROM lablup/kernel-base-python-minimal:3.6-alpine
-MAINTAINER Mario Cho "m.cho@lablup.com"
+FROM alpine:3.8
 
+# Prepare for jail/hook minimal dependencies
+RUN apk add --no-cache libseccomp libstdc++
+
+LABEL ai.backend.features="batch query uid-match" \
+      ai.backend.base-distro="alpine3.8" \
+      ai.backend.service-ports=""
+
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+ENTRYPOINT []
+CMD ["/opt/backend.ai/bin/entrypoint.sh", \
+     "/opt/backend.ai/bin/jail", "-policy", "/etc/backend.ai/jail/policy.yml", \
+     "/opt/backend.ai/bin/python", "-m", "ai.backend.kernel", "lua"]
+
+# Install image-specific add-ons
 ENV LUA_VERSION 5.3
 ENV LUA_PACKAGE lua${LUA_VERSION}
 
 # Install Lua
 RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs unzip \
     && apk add --no-cache --virtual .build-deps build-base libc-dev curl ${LUA_PACKAGE}-dev \
-    && cd /home/backend.ai \
+    && cd /tmp \
     && curl -L http://luarocks.org/releases/luarocks-2.4.2.tar.gz -o luarocks-2.4.2.tar.gz \
     && tar zxpf luarocks-2.4.2.tar.gz \
-    && cd /home/backend.ai/luarocks-2.4.2 \
+    && cd /tmp/luarocks-2.4.2 \
     && ./configure; make bootstrap \
-    && cd /home/backend.ai \
+    && cd /tmp \
     && rm -rf luarocks-2.4.2 \
     && apk del .build-deps
 RUN ln -s /usr/bin/${LUA_PACKAGE} /usr/bin/lua
-
-# Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[lua]~=1.4.0"
-
-RUN apk add --no-cache ${LUA_PACKAGE}
-
-LABEL ai.backend.features "query uid-match"
-
-CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
-     "/usr/local/bin/python", "-m", "ai.backend.kernel", "lua"]
 
 # vim: ft=dockerfile
