@@ -1,0 +1,120 @@
+FROM lablup/kernel-base:jail as jail-builder
+FROM lablup/kernel-base:hook as hook-builder
+FROM lablup/kernel-base:python3.6 as python-binary
+FROM ubuntu:18.04
+
+ENV LANG=C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt update -y && \
+    apt install -y \
+        ca-certificates \
+        wget \
+        libexpat1 libgdbm5 libbz2-dev libffi6 libsqlite3-0 liblzma5 zlib1g \
+	    libmpdec2 \
+        libssl1.0.0 \
+	    libssl-dev \
+        libncursesw5 libtinfo5 libreadline7 \
+	    proj-bin \
+        libgeos-dev \
+        mime-support \
+	    gcc g++ \
+        libproj-dev libgeos-dev \
+        libzmq3-dev libuv1
+
+# Test if Python is working
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig && \
+    export LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH && \
+    python -c 'import sys; print(sys.version_info); import ssl'
+
+RUN pip install --no-cache-dir jupyter
+
+# Install jupyter & Julia
+ARG JULIA_VERSION
+ENV JULIA_VERSION ${JULIA_VERSION:-1.0.3}
+ENV JULIA_PATH "/usr/local/julia"
+ENV PATH $JULIA_PATH:$JULIA_PATH/bin:$PATH
+RUN apt update -y && \
+    apt install -y --no-install-recommends ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/*
+    
+RUN dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        amd64) tarArch='x86_64'; dirArch='x64';; \
+        armhf) tarArch='arm'; dirArch='arm';; \
+        i386) tarArch='i686'; dirArch='x86';; \
+        *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding Julia binary release"; exit 1 ;; \
+    esac; \
+    \
+    curl -fL -o julia.tar.gz     "https://julialang-s3.julialang.org/bin/linux/${dirArch}/${JULIA_VERSION%[.-]*}/julia-${JULIA_VERSION}-linux-${tarArch}.tar.gz"; \
+    \
+    mkdir "$JULIA_PATH"; \
+    tar -xzf julia.tar.gz -C "$JULIA_PATH" --strip-components 1; \
+    rm julia.tar.gz
+
+# Install kernel-runner scripts package
+RUN pip install --no-cache-dir "backend.ai-kernel-runner[julia]~=1.4.0"
+
+RUN apt update -y && \
+    apt install -y libseccomp2 gosu && \
+    apt clean && \
+    rm -r /var/lib/apt/lists /var/cache/apt/archives && \
+    ln -s /usr/sbin/gosu /usr/sbin/su-exec && \
+    mkdir /home/work && chmod 755 /home/work; \
+    mkdir /home/backend.ai && chmod 755 /home/backend.ai
+ADD entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+#add IJulia package to make Julia kernel available in jupyter
+RUN julia -e 'ENV["JUPYTER"]="jupyter"' && \
+    julia -e 'ENV["PYTHON"]="python3"' && \
+    julia -e 'using Pkg; Pkg.add("IJulia");' && \
+    cp -r /root/.local/share/jupyter/kernels/julia-1.0 /usr/local/share/jupyter/kernels && \
+    rm -rf /root/.local/share/jupyter
+
+ENV JULIA_PKG_LOC /opt/julia
+ENV JULIA_LOAD_PATH :/opt/julia
+SHELL ["/bin/bash", "-c"]
+RUN mkdir ${JULIA_PKG_LOC} && \
+    mv /root/.julia/packages/* ${JULIA_PKG_LOC} && \
+    for d in ${JULIA_PKG_LOC}/*; \
+    do \
+    sub=$d/$(ls $d); \
+    shopt -s dotglob; \
+    mv $sub/* $d; \
+    rm -rf $sub; \
+    shopt -u dotglob; \
+    done && \
+    rm -rf /root/.julia/* && \
+    rm -rf /opt/julia/Conda/deps/deps.jl && \
+    echo 'const ROOTENV = "/tmp"' >>  /opt/julia/Conda/deps/deps.jl && \
+    echo 'const MINICONDA_VERSION = "3"' >> /opt/julia/Conda/deps/deps.jl && \
+    rm -rf /usr/local/share/jupyter/kernels/julia-1.0/kernel.json && \
+    julia -e 'using IJulia' && \
+    mv /root/.julia/compiled /opt/julia && \
+    chmod -R 755 /opt/julia/compiled
+SHELL ["/bin/sh", "-c"]
+COPY kernel.json /usr/local/share/jupyter/kernels/julia-1.0
+
+ADD startjupyter.sh /usr/local/bin/startjupyter.sh
+RUN chmod 755 /usr/local/bin/startjupyter.sh
+
+COPY policy.yml /home/backend.ai/policy.yml
+
+# Install jail
+COPY --from=jail-builder /go/src/github.com/lablup/backend.ai-jail/backend.ai-jail /home/backend.ai/jail
+COPY --from=hook-builder /root/backend.ai-hook/libbaihook.so /home/backend.ai/libbaihook.so
+ENV LD_PRELOAD /home/backend.ai/libbaihook.so
+
+WORKDIR /home/work
+VOLUME ["/home/work"]
+EXPOSE 2000 2001 2002 2003
+
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.service-ports="jupyter:http:8080"
+
+CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
+     "/usr/local/bin/python", "-m", "ai.backend.kernel", "julia"]
