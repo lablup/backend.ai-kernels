@@ -1,0 +1,13 @@
+{
+    "display_name": "Julia 1.0.3",
+    "argv": [
+      "/usr/local/julia/bin/julia",
+      "-i",
+      "--startup-file=yes",
+      "--color=yes",
+      "/opt/julia/IJulia/src/kernel.jl",
+      "{connection_file}"
+    ],
+    "language": "julia",
+    "env": {}
+  }
