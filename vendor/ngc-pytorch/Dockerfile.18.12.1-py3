@@ -26,3 +26,5 @@ CMD ["/opt/backend.ai/bin/entrypoint.sh", \
      "/opt/backend.ai/bin/jail", "-policy", "/etc/backend.ai/jail/policy.yml", \
      "/opt/backend.ai/bin/python", "-m", "ai.backend.kernel", "python", \
      "/opt/conda/bin/python"]
+
+# vim: ft=dockerfile
