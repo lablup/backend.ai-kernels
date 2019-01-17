@@ -1,18 +1,5 @@
 FROM alpine:3.8
 
-# Prepare for jail/hook minimal dependencies
-RUN apk add --no-cache libseccomp libgcc libstdc++
-
-LABEL ai.backend.features="batch query uid-match" \
-      ai.backend.base-distro="alpine3.8" \
-      ai.backend.service-ports=""
-
-COPY policy.yml /etc/backend.ai/jail/policy.yml
-ENTRYPOINT []
-CMD ["/opt/backend.ai/bin/entrypoint.sh", \
-     "/opt/backend.ai/bin/jail", "-policy", "/etc/backend.ai/jail/policy.yml", \
-     "/opt/backend.ai/bin/python", "-m", "ai.backend.kernel", "lua"]
-
 # Install image-specific add-ons
 ENV LUA_VERSION 5.3
 ENV LUA_PACKAGE lua${LUA_VERSION}
@@ -29,5 +16,16 @@ RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs unzip \
     && rm -rf luarocks-2.4.2 \
     && apk del .build-deps
 RUN ln -s /usr/bin/${LUA_PACKAGE} /usr/bin/lua
+
+# Backend.AI specifics
+ENV LD_LIBRARY_PATH=/opt/backend.ai/lib
+# TODO: remove the following line by statically building Python in krunner-env
+RUN apk add --no-cache libffi libzmq
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+LABEL ai.backend.features="batch query uid-match" \
+      ai.backend.base-distro="alpine3.8" \
+      ai.backend.runtime-type="lua" \
+      ai.backend.runtime-path="/usr/bin/lua" \
+      ai.backend.service-ports=""
 
 # vim: ft=dockerfile
