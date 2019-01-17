@@ -16,12 +16,9 @@ EXPOSE 2000 2001
 LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch uid-match" \
       ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
       ai.backend.service-ports="digits:http:8090"
 
 COPY policy.yml /etc/backend.ai/jail/policy.yml
-ENTRYPOINT []
-CMD ["/opt/backend.ai/bin/entrypoint.sh", \
-     "/opt/backend.ai/bin/jail", "-policy", "/etc/backend.ai/jail/policy.yml", \
-     "/opt/backend.ai/bin/python", "-m", "ai.backend.kernel", "vendor.ngc_digits"]
 
 # vim: ft=dockerfile
