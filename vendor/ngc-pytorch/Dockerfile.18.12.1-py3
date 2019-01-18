@@ -1,27 +1,23 @@
 FROM nvcr.io/nvidia/pytorch:18.12.1-py3
+# It comes with Python 3.6
 
-# Prepare for jail/hook minimal dependencies
-RUN apt-get update && \
-    apt-get install -y libseccomp2 libstdc++5 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/
-
+ENV PYTHONUNBUFFERED=1 \
+    PATH=/opt/conda/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LANG=C.UTF-8
 # ipython/jupyter is already installed in the Anaconda Python installed at /opt/conda.
 
-# Prepare runtime environment
-ENV PYTHONUNBUFFERED=1 \
-    PATH=/opt/backend.ai/bin:/opt/conda/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    LANG=C.UTF-8
-WORKDIR /home/work
-EXPOSE 2000 2001
+# Install ipython kernelspec
+RUN /opt/conda/bin/python -m ipykernel install --name backendai-python \
+        --display-name "Python 3.6 (NGC/PyTorch 18.12.1) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
 
+# Backend.AI specifics
+COPY policy.yml /etc/backend.ai/jail/policy.yml
 LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch uid-match" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
-
-COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 # vim: ft=dockerfile

@@ -52,7 +52,7 @@ def build_common(name, tag, extra_opts=''):
 build_kernel('base', 'ubuntu16.04-mkl2018.3')
 build_kernel('base', 'ubuntu16.04-mkl2019')
 
-build_kernel('python',  '3.6-ubuntu', squash=True)
+build_kernel('python',  '3.6-ubuntu18.04', squash=True)
 build_kernel('python',  '3.7-anaconda2018.12', squash=True)
 
 build_kernel('git',     'alpine', squash=True)

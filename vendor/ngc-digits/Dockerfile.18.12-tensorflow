@@ -1,24 +1,22 @@
 FROM nvcr.io/nvidia/digits:18.12-tensorflow
+# NVIDIA DIGITS runs on Python 2.7
 
-# Prepare for jail/hook minimal dependencies
-RUN apt-get update && \
-    apt-get install -y libseccomp2 libstdc++5 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/
-
-# Prepare runtime environment
 ENV PYTHONUNBUFFERED=1 \
-    PATH=/opt/backend.ai/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
-WORKDIR /home/work
-EXPOSE 2000 2001
+RUN python -m pip install ipython jupyter
 
-LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch uid-match" \
-      ai.backend.base-distro="ubuntu16.04" \
-      ai.backend.runtime-type="python" \
-      ai.backend.service-ports="digits:http:8090"
+# Install ipython kernelspec
+RUN python -m ipykernel install --name backendai-python \
+        --display-name "Python 2.7 (NGC/DIGITS 18.12-tensorflow) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
 
 COPY policy.yml /etc/backend.ai/jail/policy.yml
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="query batch uid-match" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python" \
+      ai.backend.service-ports="digits:http:5000,ipython:pty:3000,jupyter:http:8080"
 
 # vim: ft=dockerfile
