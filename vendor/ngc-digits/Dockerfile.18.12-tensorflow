@@ -17,6 +17,6 @@ LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
-      ai.backend.service-ports="digits:http:5000,ipython:pty:3000,jupyter:http:8080"
+      ai.backend.service-ports="digits:http:5000,tensorboard:http:6006,ipython:pty:3000,jupyter:http:8080"
 
 # vim: ft=dockerfile
