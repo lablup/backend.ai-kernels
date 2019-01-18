@@ -1,24 +1,6 @@
 FROM ubuntu:18.04
-# Ubuntu 18.04 comes with Python 3.6!
-# jail/hook binaries from ubuntu 16.04 are still compatible.
+# Ubuntu 18.04 comes with Python 3.6
 
-# Prepare runtime environment
-ENV PYTHONUNBUFFERED=1 \
-    PATH=/opt/backend.ai/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    LANG=C.UTF-8
-WORKDIR /home/work
-EXPOSE 2000 2001
-
-LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input" \
-      ai.backend.base-distro="ubuntu16.04" \
-      ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
-
-COPY policy.yml /etc/backend.ai/jail/policy.yml
-
-# Install image-specific add-ons
 RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
@@ -33,7 +15,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-# Install commonly-used wheels
+ENV PYTHONUNBUFFERED=1 \
+    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LANG=C.UTF-8
+
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools && \
     python3 -m pip install --no-cache-dir h5py && \
@@ -51,8 +36,17 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir jupyter
 
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --name backendai-python3.6 \
+RUN python -m ipykernel install --name backendai-python3.6 \
         --display-name "Python 3.6 on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/backendai-python3.6/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
+COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 # vim: ft=dockerfile
