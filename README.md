@@ -104,6 +104,11 @@ and preparation of the jail policy.
   number of available CPU cores to the container.  This is for legacy parallel
   computation libraries.
 
+Note that the implementation of query/batch modes, runtime-type and service-ports are
+the responsibility of the kernel runner in the agent codebase.
+For most computation kernels based Python (e.g., Anaconda, NVIDIA GPU Cloud, etc.)
+may simply reuse the implementation and labels from the standard "python" image.
+
 Currently we support two major base Linux distros, Ubuntu and Alpine.
 
 ### Example: An Ubuntu-based kernel
