@@ -1,0 +1,22 @@
+FROM nvcr.io/nvidia/tensorflow:18.12-py3
+
+ENV PYTHONUNBUFFERED=1 \
+    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LANG=C.UTF-8
+RUN /usr/bin/python3 -m pip install ipython jupyter
+
+# Install ipython kernelspec
+RUN /usr/bin/python3 -m ipykernel install --name backendai-python \
+        --display-name "Python 3.5 (NGC/TensorFlow 18.12) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
+
+# Backend.AI specifics
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch uid-match" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
+
+# vim: ft=dockerfile

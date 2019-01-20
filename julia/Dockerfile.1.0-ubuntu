@@ -97,7 +97,9 @@ RUN mkdir ${JULIA_PKG_LOC} && \
 SHELL ["/bin/sh", "-c"]
 COPY kernel.json /usr/local/share/jupyter/kernels/julia-1.0
 
+
 ADD movecompiled.sh /usr/local/bin/movecompiled.sh
 RUN chmod 755 /usr/local/bin/movecompiled.sh
 
 # vim: ft=dockerfile
+

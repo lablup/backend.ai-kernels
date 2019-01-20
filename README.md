@@ -1,8 +1,11 @@
-# backend.ai-kernels
+# Backend.AI Kernels Repository
 
- Backend.AI agent kernels in various programming languages / toolkits and frameworks.
+Backend.AI agent kernels in various programming languages / toolkits and frameworks.
 
-## Supporting modes
+
+## Officially Supported Images
+
+### Supporting modes
 
 Here we list the latest versions of our supported kernel images.
 "\*" in the Query mode column means that it supports preservation of global contexts across different query runs.
@@ -35,80 +38,115 @@ Here we list the latest versions of our supported kernel images.
 | Chainer    | `lablup/kernel-python-chainer`    | (WIP)   | O     | O\*   | O   |   |                   |
 | Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 
-## Build chain
-
-Kernels have dependencies to reduce total amount of storage, especailly for faster agent / instance setup and cost reduction. Default docker images are:
-
- * `base-alpine` (smallest base image)
- * `base-debian` (easier to compile common frameworks with libraries)
- * `base-ubuntu` (heaviest but best compatibility)
-
-| base-alpine             | base-debian                  | base-ubuntu             | 
-|-------------------------|------------------------------|-------------------------|
-| base-python-minimal-2.7 |                              | base-python-minimal-2.7 |
-| base-python-minimal-3.6 | base-python-minimal-3.6      | base-python-minimal-3.6 |
-| base-python-wheels-2.7  |                              |                         |
-| base-python-wheels-3.6  |                              |                         |
-|                         |                              | base-ubuntu16.04-mkl2019|
-| c-gcc6.3-alpine         |                              |                         |
-| cpp-gcc6.3-alpine       |                              |                         |
-| java-8-alpine           |                              |                         |
-| rust-1.17-alpine        |                              |                         |
-| git-3.6-alpine          |                              |                         |
-| go-1.8-alpine           |                              |                         |
-| go-1.9-alpine           |                              |                         |
-| haskell-ghc8.2-alpine   |                              |                         |
-| octave-4.2-alipine      |                              |                         |
-| r-3.3-alpine            |                              |                         |
-| lua-5.1-alpine          |                              |                         |
-| lua-5.2-alpine          |                              |                         |
-| lua-5.3-alpine          |                              |                         |
-| php-7-alpine            |                              |                         |
-| nodejs-6-alpine         |                              |                         |
-| nodejs-8-alpine         |                              |                         |
-| nodejs-10-alpine        |                              |                         |
-|                         |                              | julia-0.6-ubuntu        |
-| r-3.3-alpine            |                              |                         |
-| scala-2.12-alpine       |                              |                         |
-
-## Deep learning based images
- * `base-mkl`    (Intel' Machine Learning Kits (MKL) works on CPU only kernel) 
+### Deep learning based images
+ * `base-mkl`    (Intel' Machine Learning Kits (MKL) works on CPU only kernel)
  * `base-cuda`   (Nvidia' GPU & CUDA libarary compatibility, needed Nvidia-docker)
  * `base-TPU`    (Google TPU comptibility, on Google' Cloud)
  * `base-ROCm`   (AMD' GPU & OpenCL libarary compatibility, T.B.D.)
 
 | base-mkl                 | base-cuda                     | base-TPU                 | base-ROCm (T.B.D) |
+|--------------------------|-------------------------------|--------------------------|-------------------|
 | tensorflow-1.12-py36     | tensorflow-1.12-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
 | tensorflow-1.11-py36     | tensorflow-1.11-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
-| tensorflow-1.10-py36     | tensorflow-1.10-py36-cuda9    |                          |                   |   
-| tensorflow-1.9-py36      | tensorflow-1.9-py36-cuda9     |                          |                   |   
-| tensorflow-1.8-py36      | tensorflow-1.8-py36-cuda9     |                          |                   |   
-| tensorflow-1.7-py36      | tensorflow-1.7-py36-cuda9     |                          |                   |   
-| tensorflow-1.6-py36      | tensorflow-1.6-py36-cuda9     |                          |                   |   
-| tensorflow-1.5-py36      | tensorflow-1.5-py36-cuda9     |                          |                   |   
-|                          | tensorflow-1.4-py36-cuda8     |                          |                   |   
+| tensorflow-1.10-py36     | tensorflow-1.10-py36-cuda9    |                          |                   |
+| tensorflow-1.9-py36      | tensorflow-1.9-py36-cuda9     |                          |                   |
+| tensorflow-1.8-py36      | tensorflow-1.8-py36-cuda9     |                          |                   |
+| tensorflow-1.7-py36      | tensorflow-1.7-py36-cuda9     |                          |                   |
+| tensorflow-1.6-py36      | tensorflow-1.6-py36-cuda9     |                          |                   |
+| tensorflow-1.5-py36      | tensorflow-1.5-py36-cuda9     |                          |                   |
+|                          | tensorflow-1.4-py36-cuda8     |                          |                   |
 |                          | tensorflow-1.3-py36-cuda8     |                          |                   |
 |                          | tensorflow-1.2-py36-cuda8     |                          |                   |
 |                          | tensorflow-1.1-py36-cuda8     |                          |                   |
 |                          | tensorflow-1.0-py36-cuda8     |                          |                   |
-|                          | python-caffe-1.0-py36-cuda9   |                          |                   |   
-|                          | python-torch-1.0-py36-cuda9   |                          |                   |   
-|                          | python-torch-0.4-py36-cuda9   |                          |                   |   
-|                          | python-torch-0.3-py36-cuda9   |                          |                   |   
-|                          | python-torch-0.2-py36-cuda8   |                          |                   |   
-|                          | python-cntk-2.2-py36          |                          |                   |   
-|                          | python-cntk-2.2-py36          |                          |                   |   
+|                          | python-caffe-1.0-py36-cuda9   |                          |                   |
+|                          | python-torch-1.0-py36-cuda9   |                          |                   |
+|                          | python-torch-0.4-py36-cuda9   |                          |                   |
+|                          | python-torch-0.3-py36-cuda9   |                          |                   |
+|                          | python-torch-0.2-py36-cuda8   |                          |                   |
+|                          | python-cntk-2.2-py36          |                          |                   |
+|                          | python-cntk-2.2-py36          |                          |                   |
 
-## Deep learning inference images
-
- * `base`        (CPU only ) 
- * `base-cuda`   (Nvidia' GPU & CUDA libarary compatibility, needed Nvidia-docker)
- * `base-TPU`    (Google TPU comptibility, on Google' Cloud)
- * `base-ROCm`   (AMD' GPU & OpenCL libarary compatibility, T.B.D.)
+### Deep learning inference images
 
 | base                     |  base-cuda                     | base-TPU (T.B.D)         | base-ROCm (T.B.D) |
-| tensorflow-1.12-py36-srv | tensorflow-1.12-py36-srv-cuda9 |                          |                   |   
+|--------------------------|--------------------------------|--------------------------|-------------------|
+| tensorflow-1.12-py36-srv | tensorflow-1.12-py36-srv-cuda9 |                          |                   |
 | tensorflow-1.11-py36-srv | tensorflow-1.11-py36-srv-cuda9 |                          |                   |
 
-For the complete build chain, please refer `build.py` for more information.
- 
+
+## HOWTO: Adding a New Image
+
+Since Backend.AI v19.03, the kernel-runner component are completely separated from
+the kernel images as they are mounted at runtime by the agent.
+
+All you need to do for a new kernel is specifying a set of Backend.AI-specific labels
+and preparation of the jail policy.
+
+* `ai.backend.features`: A list of constant strings indicating which Backend.AI
+  kernel features are available for the kernel.
+  - **batch**: Can execute user programs passed as files.
+  - **query**: Can execute user programs passed as code snippets while keeping the
+    context across multiple executions.
+  - **uid-match**: As of 19.03, this must be specified always.
+  - **user-input**: The query/batch mode supports interactive user inputs.
+* `ai.backend.base-distro`: Either "ubuntu16.04" or "alpine3.8".  Note that Ubuntu
+  18.04-based kernels also need to use "ubuntu16.04" here.
+* `ai.backend.runtime-type`: The type of kernel runner to use. (One of the
+  directories in [the `ai.backend.kernel` namespace](https://github.com/lablup/backend.ai-agent/tree/master/src/ai/backend/kernel).)
+* `ai.backend.runtime-path`: The path to the language runtime executable.
+* `ai.backend.service-ports`: A list of 3-tuple strings specifying services available
+  via network tunneling. Each tuple consists of the service name, the service type
+  (one of **pty**, **http**, or **tcp**) and the container-side port number.
+  Backend.AI manages the host-side port mapping and network tunneling via the API
+  gateway automagically.
+* `ai.backend.envs.corecount`: The list of environment variables to be set as the
+  number of available CPU cores to the container.  This is for legacy parallel
+  computation libraries.
+
+Note that the implementation of query/batch modes, runtime-type and service-ports are
+the responsibility of the kernel runner in the agent codebase.
+For most computation kernels based Python (e.g., Anaconda, NVIDIA GPU Cloud, etc.)
+may simply reuse the implementation and labels from the standard "python" image.
+
+Currently we support two major base Linux distros, Ubuntu and Alpine.
+
+### Example: An Ubuntu-based kernel
+
+```dockerfile
+FROM ubuntu:16.04
+
+# Add commands for image customization
+RUN apt-get install ...
+
+# Backend.AI specifics
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/conda/bin/python" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
+```
+
+### Example: An Alpine-based kernel
+
+Alpine Linux requires two additional lines as it does not support the full-featured
+`ldconfig`.
+
+```dockerfile
+FROM alpine:3.8
+
+# Add commands for image customization
+RUN apk add ...
+
+# Backend.AI specifics
+ENV LD_LIBRARY_PATH=/opt/backend.ai/lib
+RUN apk add --no-cache libffi libzmq
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+LABEL ai.backend.features="batch query uid-match" \
+      ai.backend.base-distro="alpine3.8" \
+      ai.backend.runtime-type="lua" \
+      ai.backend.runtime-path="/usr/bin/lua" \
+      ai.backend.service-ports=""
+```

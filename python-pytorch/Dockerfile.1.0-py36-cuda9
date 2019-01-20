@@ -47,13 +47,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-mark hold libnccl2 && \
     rm -rf /var/lib/apt/lists/*
 
-
-# Install Torch
-RUN pip install --no-cache-dir \
-        http://download.pytorch.org/whl/cu90/torch-1.0.0-cp36-cp36m-linux_x86_64.whl && \
-    rm -rf /root/.cache
-
-# Prepare for building TensorFlow wheel
+# Prepare for building PyTorch wheel
 RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     pip install --no-cache-dir aiozmq dataclasses tabulate namedlist six "python-dateutil>=2" && \
@@ -72,7 +66,13 @@ RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir scikit-learn scikit-image && \
     pip install --no-cache-dir scikit-image && \
     pip install --no-cache-dir pygments && \
+    pip install --no-cache-dir jupyter && \
     rm -f /tmp/*.whl
+
+# Install Torch
+RUN pip install --no-cache-dir \
+        http://download.pytorch.org/whl/cu90/torch-1.0.0-cp36-cp36m-linux_x86_64.whl && \
+    rm -rf /root/.cache
 
 RUN apt-get update && \
     apt-get install -y libseccomp2 gosu && \

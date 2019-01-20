@@ -1,0 +1,25 @@
+FROM nvcr.io/nvidia/digits:18.12-tensorflow
+# NVIDIA DIGITS runs on Python 2.7
+
+ENV PYTHONUNBUFFERED=1 \
+    LANG=C.UTF-8
+RUN python -m pip install ipython jupyter
+
+# Install ipython kernelspec
+RUN python -m ipykernel install --name backendai-python \
+        --display-name "Python 2.7 (NGC/DIGITS 18.12-tensorflow) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
+
+# Change DIGITS to use /home/work
+ENV DIGITS_JOBS_DIR=/home/work/jobs \
+    DIGITS_LOGFILE_FILENAME=/home/work/jobs/digits.log
+
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="query batch uid-match" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python" \
+      ai.backend.service-ports="digits:http:5000,tensorboard:http:6006,ipython:pty:3000,jupyter:http:8080"
+
+# vim: ft=dockerfile

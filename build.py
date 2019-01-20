@@ -29,11 +29,15 @@ def build_kernel(name, tag, extra_opts='', *, squash=False):
     sq = '--squash' if squash else ''
 
     print_header(f'Building {name}')
+    if name.startswith('vendor/'):
+        short_name = name[len('vendor/'):]
+    else:
+        short_name = name
     run('docker build '
-        f'-t lablup/kernel-{name}:{tag} {extra_opts} '
+        f'-t lablup/kernel-{short_name}:{tag} {extra_opts} '
         f'-f {name}/Dockerfile.{tag} {sq} {name}')
     if auto_push:
-        run(f'docker push lablup/kernel-{name}:{tag}')
+        run(f'docker push lablup/kernel-{short_name}:{tag}')
 
 
 def build_common(name, tag, extra_opts=''):
@@ -45,33 +49,11 @@ def build_common(name, tag, extra_opts=''):
         run(f'docker push lablup/common-{name}:{tag}')
 
 
-build_kernel('base', 'jail')
-build_kernel('base', 'hook')
-build_kernel('base', 'jail-alpine')
-build_kernel('base', 'hook-alpine')
-
-build_kernel('base', 'debian')
-build_kernel('base', 'alpine')
-build_kernel('base', 'ubuntu')
-#build_kernel('base', 'conda')
 build_kernel('base', 'ubuntu16.04-mkl2018.3')
 build_kernel('base', 'ubuntu16.04-mkl2019')
-build_kernel('base', 'python3.6')
-#build_kernel('base', 'python3.6-debian')
 
-build_kernel('base-python-wheels',  '3.6-alpine', squash=True)
-build_kernel('base-python-minimal', '3.6-alpine', squash=True)
-#build_kernel('base-python-minimal', '3.6-debian', squash=True)
-build_kernel('base-python-minimal', '3.6-ubuntu', squash=True)
-#build_kernel('base-python-minimal', '3.6-conda', squash=True)
-build_kernel('python',              '3.6-alpine', squash=True)
-#build_kernel('python',              '3.6-debian', squash=True)
-build_kernel('python',              '3.6-ubuntu', squash=True)
-#build_kernel('python',              '3.6-conda', squash=True)
-# TODO: (kernel-runner update required) build_kernel('base-python-minimal', '2.7-debian', squash=True)
-# TODO: (kernel-runner update required) build_kernel('base-python-wheels',  '2.7-alpine')
-# TODO: (kernel-runner update required) build_kernel('base-python-minimal', '2.7-alpine', squash=True)
-# TODO: (kernel-runner update required) build_kernel('python',              '2.7-debian', squash=True)
+build_kernel('python',  '3.6-ubuntu18.04', squash=True)
+build_kernel('python',  '3.7-anaconda2018.12', squash=True)
 
 build_kernel('git',     'alpine', squash=True)
 build_kernel('c',       'gcc6.3-alpine', squash=True)
@@ -170,6 +152,7 @@ build_kernel('python-caffe',      '1.0-py36', squash=True)
 build_kernel('python-caffe2',      '1.0-py36', squash=True)
 
 # Python Pytorch
+build_kernel('python-pytorch',      '0.1-py36-cuda8', squash=True)
 build_kernel('python-pytorch',      '0.2-py36', squash=True)
 build_kernel('python-pytorch',      '0.2-py36-cuda8', squash=True)
 build_kernel('python-pytorch',      '0.3-py36', squash=True)
@@ -188,5 +171,7 @@ build_kernel('python-pytorch',      '1.0-py36-cuda9', squash=True)
 build_kernel('python-cntk', '2.2-py36', squash=True)
 
 # AWS polly
-build_kernel('vendor/aws_polly', 'debian', squash=True)
 build_kernel('vendor/aws_polly', 'ubuntu', squash=True)
+build_kernel('vendor/ngc-tensorflow', '18.12-py3', squash=True)
+build_kernel('vendor/ngc-pytorch', '18.12.1-py3', squash=True)
+build_kernel('vendor/ngc-digits', '18.12-tensorflow', squash=True)

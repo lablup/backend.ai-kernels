@@ -56,7 +56,3 @@ RUN Rscript -e "install.packages('IRkernel')" && \
     Rscript -e "IRkernel::installspec()" && \
     mv /root/.local/share/jupyter/kernels/ir /usr/local/share/jupyter/kernels && \
     rm -rf /root/.local/share/jupyter
-
-LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input" \
-      ai.backend.service-ports="jupyter:http:8080"
