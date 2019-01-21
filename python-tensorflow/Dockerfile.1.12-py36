@@ -1,4 +1,4 @@
-FROM lablup/common-tensorflow:1.12-py36 as tf-binary
+FROM lablup/common-tensorflow:1.12-py36-cuda9 as tf-binary
 
 FROM ubuntu:18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
@@ -50,7 +50,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --name backendai-python \
-        --display-name "TensorFlow 1.12 & Python 3.6 on Backend.AI" && \
+        --display-name "TensorFlow 1.12 cuda9 & Python 3.6 on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
 
 # Backend.AI specifics
