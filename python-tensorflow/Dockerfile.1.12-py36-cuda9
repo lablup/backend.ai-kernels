@@ -69,7 +69,7 @@ RUN pip install --no-cache-dir wheel && \
     rm -f /tmp/*.whl
 
 # Install additional TensorFlow dependencies
-RUN apt-get install libgomp1 && apt-get autoclean
+RUN apt-get update -y && apt-get install -y libgomp1 && apt-get autoclean
 
 RUN apt-get install -y libseccomp2 gosu && \
     apt-get clean && \
