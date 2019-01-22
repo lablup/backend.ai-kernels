@@ -121,12 +121,37 @@ RUN apt-get install ...
 
 # Backend.AI specifics
 COPY policy.yml /etc/backend.ai/jail/policy.yml
-LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+LABEL ai.backend.kernelspec=1 \
+      ai.backend.resource.min.cpu=1 \
+      ai.backend.resource.min.mem=256m \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
+```
+
+### Example: Kernels supporting accelerators
+
+CUDA-accelerated:
+```
+...
+LABEL ... \
+      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.smp=2 \
+      ai.backend.resource.min.cuda.mem=256m \
+      ...
+...
+```
+
+TPU-accelerated:
+```
+...
+LABEL ... \
+      ai.backend.resource.min.tpu.device=1 \
+      ...
+...
 ```
 
 ### Example: An Alpine-based kernel
@@ -144,7 +169,8 @@ RUN apk add ...
 ENV LD_LIBRARY_PATH=/opt/backend.ai/lib
 RUN apk add --no-cache libffi libzmq
 COPY policy.yml /etc/backend.ai/jail/policy.yml
-LABEL ai.backend.features="batch query uid-match" \
+LABEL ai.backend.kernelspec=1 \
+      ai.backend.features="batch query uid-match" \
       ai.backend.base-distro="alpine3.8" \
       ai.backend.runtime-type="lua" \
       ai.backend.runtime-path="/usr/bin/lua" \
