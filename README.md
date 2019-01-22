@@ -170,6 +170,8 @@ ENV LD_LIBRARY_PATH=/opt/backend.ai/lib
 RUN apk add --no-cache libffi libzmq
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 LABEL ai.backend.kernelspec=1 \
+      ai.backend.resource.min.cpu=1 \
+      ai.backend.resource.min.mem=256m \
       ai.backend.features="batch query uid-match" \
       ai.backend.base-distro="alpine3.8" \
       ai.backend.runtime-type="lua" \
