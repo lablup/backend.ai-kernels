@@ -83,6 +83,7 @@ the kernel images as they are mounted at runtime by the agent.
 All you need to do for a new kernel is specifying a set of Backend.AI-specific labels
 and preparation of the jail policy.
 
+* `ai.backend.kernelspec`: For now, it's set to "1".
 * `ai.backend.features`: A list of constant strings indicating which Backend.AI
   kernel features are available for the kernel.
   - **batch**: Can execute user programs passed as files.
@@ -90,6 +91,9 @@ and preparation of the jail policy.
     context across multiple executions.
   - **uid-match**: As of 19.03, this must be specified always.
   - **user-input**: The query/batch mode supports interactive user inputs.
+* `ai.backend.resource.min.*`: The minimum amount of resource to launch this kernel.
+  At least, you must define the CPU core (`cpu`) and the main memory (`mem`).
+  In the memory size values, you may use binary scale-suffixes such as `m` for `MiB`, `g` for `GiB`, etc.
 * `ai.backend.base-distro`: Either "ubuntu16.04" or "alpine3.8".  Note that Ubuntu
   18.04-based kernels also need to use "ubuntu16.04" here.
 * `ai.backend.runtime-type`: The type of kernel runner to use. (One of the
