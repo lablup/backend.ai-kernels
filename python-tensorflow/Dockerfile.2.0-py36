@@ -47,7 +47,7 @@ RUN python3 -m ipykernel install --name backendai-python \
 LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.base-distro="ubuntu16.04" \
-      ai.backend.runtime-type="python" \
+      ai.backend.runtime-type="python-tensorflow" \
       ai.backend.runtime-path="/usr/bin/python3" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
 COPY policy.yml /etc/backend.ai/jail/policy.yml
