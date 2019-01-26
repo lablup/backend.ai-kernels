@@ -36,9 +36,8 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python && \
     python -m pip install --no-cache-dir jupyter
 
 # Install ipython kernelspec
-RUN python -m ipykernel install --name backendai-python \
-        --display-name "Python 2.7 on Backend.AI" && \
-    cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
+RUN python -m ipykernel install --display-name "Python 2.7 on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python2/kernel.json
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
