@@ -31,9 +31,21 @@ def build_kernel(name, tag, extra_opts='', *, squash=False):
         short_name = name[len('vendor/'):]
     else:
         short_name = name
+    dockerfile = Path(name) / f'Dockerfile.{tag}'
+    if not dockerfile.is_file():
+        click.secho(f'No dockerfile: {dockerfile}', fg='yellow', err=True)
+        click.secho('Maybe you need to rename existing ones to follow '
+                    'the new tag naming scheme.', fg='yellow', err=True)
+        return
+    dockerfile_txt = dockerfile.read_text(encoding='utf-8')
+    if 'ai.backend.kernelspec' not in dockerfile_txt:
+        click.secho(f'Dockerfile {dockerfile} is not updated for '
+                    'the new kernelspec.',
+                    fg='yellow', err=True)
+        return
     run('docker build '
         f'-t lablup/{short_name}:{tag} {extra_opts} '
-        f'-f {name}/Dockerfile.{tag} {sq} {name}')
+        f'-f {dockerfile} {sq} {name}')
     if auto_push:
         run(f'docker push lablup/{short_name}:{tag}')
 
@@ -167,28 +179,28 @@ def main(build, list_builds):
         build_kernel('python-tensorflow', '1.11-py36-srv-cuda9', squash=True)
         build_kernel('python-tensorflow', '1.12-py36', squash=True)
         build_kernel('python-tensorflow', '1.12-py36-tpu', squash=True)
-        build_kernel('python-tensorflow', '1.12-py36-srv', squash=True)
         build_kernel('python-tensorflow', '1.12-py36-cuda9', squash=True)
+        build_kernel('python-tensorflow', '1.12-py36-srv', squash=True)
         build_kernel('python-tensorflow', '1.12-py36-srv-cuda9', squash=True)
 
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36', squash=True)
-        build_kernel('python-tensorflow', '2.0-py36-cuda9', squash=True)
+        build_kernel('python-tensorflow', '2.0-py36-cuda10', squash=True)
 
     if 'caffe' in build:
-        build_kernel('python-caffe',      '1.0-py36', squash=True)
-        build_kernel('python-caffe2',      '1.0-py36', squash=True)
+        build_kernel('python-caffe',  '1.0-py36', squash=True)
+        build_kernel('python-caffe2', '1.0-py36', squash=True)
 
     if 'pytorch' in build:
-        build_kernel('python-pytorch',      '0.1-py36-cuda8', squash=True)
-        build_kernel('python-pytorch',      '0.2-py36', squash=True)
-        build_kernel('python-pytorch',      '0.2-py36-cuda8', squash=True)
-        build_kernel('python-pytorch',      '0.3-py36', squash=True)
-        build_kernel('python-pytorch',      '0.3-py36-cuda9', squash=True)
-        build_kernel('python-pytorch',      '0.4-py36', squash=True)
-        build_kernel('python-pytorch',      '0.4-py36-cuda9', squash=True)
-        build_kernel('python-pytorch',      '1.0-py36', squash=True)
-        build_kernel('python-pytorch',      '1.0-py36-cuda9', squash=True)
+        build_kernel('python-pytorch', '0.1-py36-cuda8', squash=True)
+        build_kernel('python-pytorch', '0.2-py36', squash=True)
+        build_kernel('python-pytorch', '0.2-py36-cuda8', squash=True)
+        build_kernel('python-pytorch', '0.3-py36', squash=True)
+        build_kernel('python-pytorch', '0.3-py36-cuda9', squash=True)
+        build_kernel('python-pytorch', '0.4-py36', squash=True)
+        build_kernel('python-pytorch', '0.4-py36-cuda9', squash=True)
+        build_kernel('python-pytorch', '1.0-py36', squash=True)
+        build_kernel('python-pytorch', '1.0-py36-cuda9', squash=True)
 
     # Python Theano
     # TODO (not modernized):
