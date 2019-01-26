@@ -82,6 +82,7 @@ def main(build, list_builds):
         print(f"Unknown builds: {', '.join(unknown_builds)}", file=sys.stderr)
 
     if 'python' in build:
+        build_kernel('python',  '2.7-ubuntu18.04')
         build_kernel('python',  '3.6-ubuntu18.04')
         build_kernel('python',  '3.7-anaconda2018.12')
 
@@ -155,67 +156,67 @@ def main(build, list_builds):
         build_common('tensorflow', '2.0-py36-cuda9')
 
     if 'tf-old' in build:
-        build_kernel('python-tensorflow', '1.0-py36-cuda8', squash=True)
-        build_kernel('python-tensorflow', '1.1-py36-cuda8', squash=True)
-        build_kernel('python-tensorflow', '1.2-py36-cuda8', squash=True)
-        build_kernel('python-tensorflow', '1.3-py36-cuda8', squash=True)
-        build_kernel('python-tensorflow', '1.4-py36-cuda8', squash=True)
-        build_kernel('python-tensorflow', '1.5-py36', squash=True)
-        build_kernel('python-tensorflow', '1.5-py36-cuda9', squash=True)
-        build_kernel('python-tensorflow', '1.6-py36', squash=True)
-        build_kernel('python-tensorflow', '1.6-py36-cuda9', squash=True)
-        build_kernel('python-tensorflow', '1.7-py36', squash=True)
-        build_kernel('python-tensorflow', '1.7-py36-cuda9', squash=True)
+        build_kernel('python-tensorflow', '1.0-py36-cuda8')
+        build_kernel('python-tensorflow', '1.1-py36-cuda8')
+        build_kernel('python-tensorflow', '1.2-py36-cuda8')
+        build_kernel('python-tensorflow', '1.3-py36-cuda8')
+        build_kernel('python-tensorflow', '1.4-py36-cuda8')
+        build_kernel('python-tensorflow', '1.5-py36')
+        build_kernel('python-tensorflow', '1.5-py36-cuda9')
+        build_kernel('python-tensorflow', '1.6-py36')
+        build_kernel('python-tensorflow', '1.6-py36-cuda9')
+        build_kernel('python-tensorflow', '1.7-py36')
+        build_kernel('python-tensorflow', '1.7-py36-cuda9')
 
     if 'tf-current' in build:
-        build_kernel('python-tensorflow', '1.8-py36', squash=True)
-        build_kernel('python-tensorflow', '1.8-py36-cuda9', squash=True)
-        build_kernel('python-tensorflow', '1.9-py36', squash=True)
-        build_kernel('python-tensorflow', '1.9-py36-cuda9', squash=True)
-        build_kernel('python-tensorflow', '1.10-py36', squash=True)
-        build_kernel('python-tensorflow', '1.10-py36-cuda9', squash=True)
-        build_kernel('python-tensorflow', '1.11-py36', squash=True)
-        build_kernel('python-tensorflow', '1.11-py36-tpu', squash=True)
-        build_kernel('python-tensorflow', '1.11-py36-srv', squash=True)
-        build_kernel('python-tensorflow', '1.11-py36-cuda9', squash=True)
-        build_kernel('python-tensorflow', '1.11-py36-srv-cuda9', squash=True)
-        build_kernel('python-tensorflow', '1.12-py36', squash=True)
-        build_kernel('python-tensorflow', '1.12-py36-tpu', squash=True)
-        build_kernel('python-tensorflow', '1.12-py36-cuda9', squash=True)
-        build_kernel('python-tensorflow', '1.12-py36-srv', squash=True)
-        build_kernel('python-tensorflow', '1.12-py36-srv-cuda9', squash=True)
+        build_kernel('python-tensorflow', '1.8-py36')
+        build_kernel('python-tensorflow', '1.8-py36-cuda9')
+        build_kernel('python-tensorflow', '1.9-py36')
+        build_kernel('python-tensorflow', '1.9-py36-cuda9')
+        build_kernel('python-tensorflow', '1.10-py36')
+        build_kernel('python-tensorflow', '1.10-py36-cuda9')
+        build_kernel('python-tensorflow', '1.11-py36')
+        build_kernel('python-tensorflow', '1.11-py36-tpu')
+        build_kernel('python-tensorflow', '1.11-py36-srv')
+        build_kernel('python-tensorflow', '1.11-py36-cuda9')
+        build_kernel('python-tensorflow', '1.11-py36-srv-cuda9')
+        build_kernel('python-tensorflow', '1.12-py36')
+        build_kernel('python-tensorflow', '1.12-py36-tpu')
+        build_kernel('python-tensorflow', '1.12-py36-cuda9')
+        build_kernel('python-tensorflow', '1.12-py36-srv')
+        build_kernel('python-tensorflow', '1.12-py36-srv-cuda9')
 
     if 'tf-future' in build:
-        build_kernel('python-tensorflow', '2.0-py36', squash=True)
-        build_kernel('python-tensorflow', '2.0-py36-cuda10', squash=True)
+        build_kernel('python-tensorflow', '2.0-py36')
+        build_kernel('python-tensorflow', '2.0-py36-cuda10')
 
     if 'caffe' in build:
-        build_kernel('python-caffe',  '1.0-py36', squash=True)
-        build_kernel('python-caffe2', '1.0-py36', squash=True)
+        build_kernel('python-caffe',  '1.0-py36')
+        build_kernel('python-caffe2', '1.0-py36')
 
     if 'pytorch' in build:
-        build_kernel('python-pytorch', '0.1-py36-cuda8', squash=True)
-        build_kernel('python-pytorch', '0.2-py36', squash=True)
-        build_kernel('python-pytorch', '0.2-py36-cuda8', squash=True)
-        build_kernel('python-pytorch', '0.3-py36', squash=True)
-        build_kernel('python-pytorch', '0.3-py36-cuda9', squash=True)
-        build_kernel('python-pytorch', '0.4-py36', squash=True)
-        build_kernel('python-pytorch', '0.4-py36-cuda9', squash=True)
-        build_kernel('python-pytorch', '1.0-py36', squash=True)
-        build_kernel('python-pytorch', '1.0-py36-cuda9', squash=True)
+        build_kernel('python-pytorch', '0.1-py36-cuda8')
+        build_kernel('python-pytorch', '0.2-py36')
+        build_kernel('python-pytorch', '0.2-py36-cuda8')
+        build_kernel('python-pytorch', '0.3-py36')
+        build_kernel('python-pytorch', '0.3-py36-cuda9')
+        build_kernel('python-pytorch', '0.4-py36')
+        build_kernel('python-pytorch', '0.4-py36-cuda9')
+        build_kernel('python-pytorch', '1.0-py36')
+        build_kernel('python-pytorch', '1.0-py36-cuda9')
 
     # Python Theano
     # TODO (not modernized):
-    #build_kernel('python-theano',     '0.2-py36', squash=True)
-    #build_kernel('python-theano',     '0.2-py36-gpu', squash=True)
+    #build_kernel('python-theano',     '0.2-py36')
+    #build_kernel('python-theano',     '0.2-py36-gpu')
 
     # CNTK image (currently draft version base on Ubuntu:16.04)
     if 'cntk' in build:
-        build_kernel('python-cntk', '2.2-py36', squash=True)
+        build_kernel('python-cntk', '2.2-py36')
 
     # AWS polly
     if 'vendor-aws' in build:
-        build_kernel('vendor/aws_polly', '0.1-alpine3.8', squash=True)
+        build_kernel('vendor/aws_polly', '0.1-alpine3.8')
 
     if 'vendor-ngc' in build:
         build_kernel('vendor/ngc-tensorflow', '18.12-py3')
