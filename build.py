@@ -104,8 +104,8 @@ def main(build, list_builds):
         build_kernel('scheme',  '9.2-alpine3.8')
 
     if 'compute-base' in build:
-        build_kernel('julia',   '1.0-ubuntu16.04')
-        build_kernel('r',       '3.5-ubuntu16.04')
+        build_kernel('julia',   '1.0-ubuntu18.04')
+        build_kernel('r',       '3.5-ubuntu18.04')
 
     # TODO: (not modernized) build_kernel('octave',  '4.2-debian')
     # TODO: (not implemented) build_kernel('swift',  'XX-alpine')
@@ -114,10 +114,10 @@ def main(build, list_builds):
     # TODO: (not implemented) build_kernel('mono',   'XX-alpine')
 
     if 'tf-builder' in build:
-        build_common('bazel', '0.5-ubuntu')
-        build_common('bazel', '0.11-ubuntu')
-        build_common('bazel', '0.15-ubuntu')
-        build_common('bazel', '0.20-ubuntu')
+        build_common('bazel', '0.5-ubuntu16.04')
+        build_common('bazel', '0.11-ubuntu16.04')
+        build_common('bazel', '0.15-ubuntu16.04')
+        build_common('bazel', '0.20-ubuntu16.04')
         build_common('numpy', '1.15-py36-ubuntu16.04-mkl2019.0')
         build_kernel('base', 'ubuntu16.04-mkl2018.3')
         build_kernel('base', 'ubuntu16.04-mkl2019')
