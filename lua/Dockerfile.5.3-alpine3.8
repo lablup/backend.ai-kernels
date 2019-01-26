@@ -19,11 +19,13 @@ RUN ln -s /usr/bin/${LUA_PACKAGE} /usr/bin/lua
 
 # Backend.AI specifics
 ENV LD_LIBRARY_PATH=/opt/backend.ai/lib
-# TODO: remove the following line by statically building Python in krunner-env
 RUN apk add --no-cache libffi libzmq
 COPY policy.yml /etc/backend.ai/jail/policy.yml
-LABEL ai.backend.features="batch query uid-match" \
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.features="batch query uid-match" \
       ai.backend.base-distro="alpine3.8" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="64m" \
       ai.backend.runtime-type="lua" \
       ai.backend.runtime-path="/usr/bin/lua" \
       ai.backend.service-ports=""

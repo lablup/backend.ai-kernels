@@ -1,7 +1,7 @@
-FROM lablup/kernel-base-python-minimal:3.6-alpine
-MAINTAINER Mario Cho "m.cho@lablup.com"
+FROM alpine:3.8
 
-ENV LUA_VERSION 5.1
+# Install image-specific add-ons
+ENV LUA_VERSION 5.2
 ENV LUA_PACKAGE lua${LUA_VERSION}
 
 # Install Lua
@@ -17,14 +17,17 @@ RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs unzip \
     && apk del .build-deps
 RUN ln -s /usr/bin/${LUA_PACKAGE} /usr/bin/lua
 
-# Install kernel-runner scripts package
-RUN pip install --no-cache-dir "backend.ai-kernel-runner[lua]~=1.4.0"
-
-RUN apk add --no-cache ${LUA_PACKAGE}
-
-LABEL ai.backend.features "query uid-match"
-
-CMD ["/home/backend.ai/jail", "-policy", "/home/backend.ai/policy.yml", \
-     "/usr/local/bin/python", "-m", "ai.backend.kernel", "lua"]
+# Backend.AI specifics
+ENV LD_LIBRARY_PATH=/opt/backend.ai/lib
+RUN apk add --no-cache libffi libzmq
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.features="batch query uid-match" \
+      ai.backend.base-distro="alpine3.8" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="64m" \
+      ai.backend.runtime-type="lua" \
+      ai.backend.runtime-path="/usr/bin/lua" \
+      ai.backend.service-ports=""
 
 # vim: ft=dockerfile

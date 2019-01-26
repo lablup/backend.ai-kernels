@@ -213,12 +213,12 @@ def main(build, list_builds):
 
     # AWS polly
     if 'vendor-aws' in build:
-        build_kernel('vendor/aws_polly', 'ubuntu', squash=True)
+        build_kernel('vendor/aws_polly', '0.1-alpine3.8', squash=True)
 
     if 'vendor-ngc' in build:
-        build_kernel('vendor/ngc-tensorflow', '18.12-py3', squash=True)
-        build_kernel('vendor/ngc-pytorch', '18.12.1-py3', squash=True)
-        build_kernel('vendor/ngc-digits', '18.12-tensorflow', squash=True)
+        build_kernel('vendor/ngc-tensorflow', '18.12-py3')
+        build_kernel('vendor/ngc-pytorch', '18.12.1-py3')
+        build_kernel('vendor/ngc-digits', '18.12-tensorflow')
 
 
 if __name__ == '__main__':
