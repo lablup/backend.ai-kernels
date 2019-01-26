@@ -40,7 +40,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --name backendai-python \
-        --display-name "Python 3.6 on Backend.AI" && \
+        --display-name "TensorFlow 2.0 on Python 3.6 (CPU-only)" && \
     cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
 
 # Backend.AI specifics
