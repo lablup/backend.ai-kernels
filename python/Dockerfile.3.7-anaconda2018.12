@@ -30,8 +30,11 @@ RUN python -m ipykernel install --name backendai-python3.6 \
     cat /usr/local/share/jupyter/kernels/backendai-python3.6/kernel.json
 
 # Backend.AI specifics
-LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python" \
