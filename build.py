@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
 
+from contextvars import ContextVar
 import subprocess
 import sys
 from pathlib import Path
 
 import click
 
-auto_push = False
+auto_push = ContextVar('auto_push', default=False)
 
 
 def run(shellcmd):
@@ -46,7 +47,7 @@ def build_kernel(name, tag, extra_opts='', *, squash=False):
     run('docker build '
         f'-t lablup/{short_name}:{tag} {extra_opts} '
         f'-f {dockerfile} {sq} {name}')
-    if auto_push:
+    if auto_push.get():
         run(f'docker push lablup/{short_name}:{tag}')
 
 
@@ -55,31 +56,36 @@ def build_common(name, tag, extra_opts=''):
     run('docker build '
         f'-t lablup/common-{name}:{tag} {extra_opts} '
         f'-f commons/Dockerfile.{name}.{tag} commons')
-    if auto_push:
+    if auto_push.get():
         run(f'docker push lablup/common-{name}:{tag}')
 
 
+available_builds = [
+    'python',
+    'alpine-base', 'alpine-ext',
+    'compute-base',
+    'tf-builder',
+    'tf-pkg-old', 'tf-pkg-current', 'tf-pkg-future',
+    'tf-old', 'tf-current', 'tf-future',
+    'caffe', 'pytorch', 'cntk',
+    'vendor-aws', 'vendor-ngc',
+]
+
+
 @click.command()
-@click.option('-b', '--build', multiple=True)
-@click.option('--list-builds', is_flag=True)
-def main(build, list_builds):
-    available_builds = [
-        'python',
-        'alpine-base', 'alpine-ext',
-        'compute-base',
-        'tf-builder',
-        'tf-pkg-old', 'tf-pkg-current', 'tf-pkg-future',
-        'tf-old', 'tf-current', 'tf-future',
-        'caffe', 'pytorch', 'cntk',
-        'vendor-aws', 'vendor-ngc',
-    ]
+@click.option('-b', '--build', multiple=True, type=click.Choice(available_builds),
+              help='Build the given bundle.')
+@click.option('--list-builds', is_flag=True,
+              help='Display all available bundles.')
+@click.option('--auto-push', '_auto_push', is_flag=True,
+              help='Automatically push to the Docker Hub after successful builds.')
+def main(build, list_builds, _auto_push):
     if list_builds:
         for b in available_builds:
             print(b)
         return
-    unknown_builds = set(available_builds) - set(build)
-    if unknown_builds:
-        print(f"Unknown builds: {', '.join(unknown_builds)}", file=sys.stderr)
+
+    auto_push.set(_auto_push)
 
     if 'python' in build:
         build_kernel('python',  '2.7-ubuntu18.04')
