@@ -92,6 +92,8 @@ def main(build, list_builds):
         build_kernel('cpp',     'gcc6.3-alpine3.8')
         build_kernel('java',    '8-alpine3.8')
         build_kernel('nodejs',  '10-alpine3.8')
+        build_kernel('lua',     '5.1-alpine3.8')
+        build_kernel('lua',     '5.2-alpine3.8')
         build_kernel('lua',     '5.3-alpine3.8')
 
     if 'alpine-ext' in build:
