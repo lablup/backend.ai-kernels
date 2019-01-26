@@ -5,17 +5,17 @@ ENV LUA_VERSION 5.1
 ENV LUA_PACKAGE lua${LUA_VERSION}
 
 # Install Lua
-RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs unzip \
+RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs openssl unzip \
     && apk add --no-cache --virtual .build-deps build-base libc-dev curl ${LUA_PACKAGE}-dev \
     && cd /tmp \
-    && curl -L http://luarocks.org/releases/luarocks-2.4.2.tar.gz -o luarocks-2.4.2.tar.gz \
-    && tar zxpf luarocks-2.4.2.tar.gz \
-    && cd /tmp/luarocks-2.4.2 \
+    && curl -L http://luarocks.org/releases/luarocks-3.0.4.tar.gz -o luarocks-3.0.4.tar.gz \
+    && tar zxpf luarocks-3.0.4.tar.gz \
+    && cd /tmp/luarocks-3.0.4 \
     && ./configure; make bootstrap \
     && cd /tmp \
-    && rm -rf luarocks-2.4.2 \
+    && rm -rf luarocks-3.0.4 \
     && apk del .build-deps
-RUN ln -s /usr/bin/${LUA_PACKAGE} /usr/bin/lua
+RUN rm -f /usr/bin/lua && ln -s /usr/bin/${LUA_PACKAGE} /usr/bin/lua
 
 # Backend.AI specifics
 ENV LD_LIBRARY_PATH=/opt/backend.ai/lib
