@@ -1,27 +1,5 @@
 FROM ubuntu:18.04
 
-# Prepare for jail/hook minimal dependencies
-RUN apt-get update && \
-    apt-get install -y libseccomp2 libstdc++5 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/
-
-# Prepare runtime environment
-ENV PATH=/opt/backend.ai/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    LANG=C.UTF-8
-WORKDIR /home/work
-EXPOSE 2000 2001
-
-LABEL ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input" \
-      ai.backend.base-distro="ubuntu16.04" \
-      ai.backend.runtime-type="julia" \
-      ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="jupyter:http:8080"
-
-COPY policy.yml /etc/backend.ai/jail/policy.yml
-
-# Install image-specific add-ons
 RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
@@ -36,12 +14,15 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH=/opt/backend.ai/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LANG=C.UTF-8 \
+    DEBIAN_FRONTEND=noninteractive
 
 # Install commonly-used wheels
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir ipython && \
-    python3 -m pip install --no-cache-dir jupyter
+    python3 -m pip install --no-cache-dir jupyter && \
+    python3 -m pip install --no-cache-dir jupyterlab
 
 # Install jupyter & Julia
 ARG JULIA_VERSION
@@ -96,10 +77,19 @@ RUN mkdir ${JULIA_PKG_LOC} && \
     chmod -R 755 /opt/julia/compiled
 SHELL ["/bin/sh", "-c"]
 COPY kernel.json /usr/local/share/jupyter/kernels/julia-1.0
-
-
 ADD movecompiled.sh /usr/local/bin/movecompiled.sh
 RUN chmod 755 /usr/local/bin/movecompiled.sh
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="julia" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090"
+COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 # vim: ft=dockerfile
 
