@@ -7,7 +7,7 @@ RUN /usr/bin/python3 -m pip install ipython jupyter jupyterlab
 
 # Install ipython kernelspec
 RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.5 (NGC/TensorFlow 18.12) on Backend.AI" && \
-    cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
 COPY policy.yml /etc/backend.ai/jail/policy.yml
