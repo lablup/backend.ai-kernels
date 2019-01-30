@@ -24,8 +24,8 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir h5py && \
     python3 -m pip install --no-cache-dir Cython && \
     python3 -m pip install --no-cache-dir matplotlib bokeh && \
-    python3 -m pip install --no-cache-dir pyproj && \
-    # python3 -m pip install --no-cache-dir Cartopy && \
+    python3 -m pip install --no-cache-dir versioneer==0.17 && \
+    python3 -m pip install --no-cache-dir pyproj Cartopy==0.16 && \
     python3 -m pip install --no-cache-dir pandas && \
     python3 -m pip install --no-cache-dir seaborn && \
     python3 -m pip install --no-cache-dir pillow && \
@@ -34,7 +34,9 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir pygments && \
     python3 -m pip install --no-cache-dir ipython && \
     python3 -m pip install --no-cache-dir jupyter && \
-    python3 -m pip install --no-cache-dir jupyterlab
+    python3 -m pip install --no-cache-dir jupyterlab && \
+    rm -rf /root/.cache && \    
+    rm -f /tmp/*.whl
 
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "Python 3.6 on Backend.AI" && \
@@ -50,6 +52,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 # vim: ft=dockerfile
