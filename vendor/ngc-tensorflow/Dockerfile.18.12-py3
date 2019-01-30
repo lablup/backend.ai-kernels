@@ -3,11 +3,10 @@ FROM nvcr.io/nvidia/tensorflow:18.12-py3
 ENV PYTHONUNBUFFERED=1 \
     PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
-RUN /usr/bin/python3 -m pip install ipython jupyter
+RUN /usr/bin/python3 -m pip install ipython jupyter jupyterlab
 
 # Install ipython kernelspec
-RUN /usr/bin/python3 -m ipykernel install --name backendai-python \
-        --display-name "Python 3.5 (NGC/TensorFlow 18.12) on Backend.AI" && \
+RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.5 (NGC/TensorFlow 18.12) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
 
 # Backend.AI specifics
@@ -21,6 +20,6 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
 
 # vim: ft=dockerfile
