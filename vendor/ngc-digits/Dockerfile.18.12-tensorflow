@@ -9,6 +9,11 @@ RUN python -m pip install ipython jupyter jupyterlab
 RUN python -m ipykernel install --display-name "Python 2.7 (NGC/DIGITS 18.12-tensorflow) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python2/kernel.json
 
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY custom.css /home/work/.jupyter/custom/custom.css
+COPY logo.svg /home/work/.jupyter/custom/logo.svg
+
 # Change DIGITS to use /home/work
 ENV DIGITS_JOBS_DIR=/home/work/jobs \
     DIGITS_LOGFILE_FILENAME=/home/work/jobs/digits.log
