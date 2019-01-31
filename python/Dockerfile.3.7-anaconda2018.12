@@ -29,6 +29,11 @@ RUN python -m ipykernel install --name backendai-python3.6 \
         --display-name "Python 3.7 (Anaconda 2018.12) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/backendai-python3.6/kernel.json
 
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY custom.css /home/work/.jupyter/custom/custom.css
+COPY logo.svg /home/work/.jupyter/custom/logo.svg
+
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
