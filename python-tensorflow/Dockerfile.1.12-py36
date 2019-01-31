@@ -57,6 +57,11 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 RUN python3 -m ipykernel install --display-name "TensorFlow 1.12 on Python 3.6 (CPU-only)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY custom.css /home/work/.jupyter/custom/custom.css
+COPY logo.svg /home/work/.jupyter/custom/logo.svg
+
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
