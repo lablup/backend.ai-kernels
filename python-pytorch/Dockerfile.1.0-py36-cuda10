@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED 1
 ENV CUDA_VERSION 10.0.130
 ENV CUDA_PKG_VERSION 10-0=$CUDA_VERSION-1
 ENV CUDNN_VERSION 7.4.1.5
-ENV NCCL_VERSION 2.3.7
+ENV NCCL_VERSION 2.4.2
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -37,7 +37,7 @@ RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
 RUN apt-get update && apt-get install -y --no-install-recommends \
         cuda-libraries-$CUDA_PKG_VERSION \
         cuda-cublas-10-0 \
-        libnccl2=2.3.7-1+cuda10.0 && \
+        libnccl2=2.4.2-1+cuda10.0 && \
     apt-mark hold libnccl2 && \
     rm -rf /var/lib/apt/lists/*
 
@@ -70,6 +70,11 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "PyTorch 1.0 on Python 3.6 (CUDA 10.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY custom.css /home/work/.jupyter/custom/custom.css
+COPY logo.svg /home/work/.jupyter/custom/logo.svg
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
