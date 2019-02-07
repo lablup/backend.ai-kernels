@@ -5,10 +5,12 @@ ENV PYTHONUNBUFFERED=1 \
     PATH=/opt/conda/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
 # ipython/jupyter is already installed in the Anaconda Python installed at /opt/conda.
-RUN /opt/conda/bin/python -m pip install jupyterlab 
+RUN /opt/conda/bin/python -m pip install jupyterlab
 
 # Install ipython kernelspec
-RUN /opt/conda/bin/python -m ipykernel install --prefix=/opt/conda/ --display-name "Python 3.6 (NGC/PyTorch 18.12.1) on Backend.AI" && \
+RUN /opt/conda/bin/python -m ipykernel install \
+        --prefix=/opt/conda/ \
+        --display-name "Python 3.6 (NGC/PyTorch 18.12.1) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Install Jupyter notebook logo

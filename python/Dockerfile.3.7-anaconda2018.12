@@ -28,10 +28,9 @@ RUN conda install matplotlib bokeh && \
 # Install ipython kernelspec
 RUN /opt/conda/bin/python -m ipykernel install \
         --prefix=/opt/conda/ \
-        --name backendai-python3.6 \
         --display-name "Python 3.7 (Anaconda 2018.12) on Backend.AI" && \
-    cat /opt/conda/share/jupyter/kernels/backendai-python3.6/kernel.json
-     
+    cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+
 # Install Jupyter notebook logo
 RUN mkdir -p /home/work/.jupyter/custom
 COPY custom.css /home/work/.jupyter/custom/custom.css
