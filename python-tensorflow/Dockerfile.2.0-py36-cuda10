@@ -5,6 +5,7 @@ RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
         wget curl git-core \
+        vim unzip \
         libssl-dev \
         libmpdec2 \
         proj-bin libproj-dev \
@@ -61,7 +62,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir ipython && \
     python3 -m pip install --no-cache-dir jupyter && \
     python3 -m pip install --no-cache-dir jupyterlab && \
-    rm -rf /root/.cache && \    
+    rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
 # Install ipython kernelspec

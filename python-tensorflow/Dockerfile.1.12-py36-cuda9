@@ -6,6 +6,7 @@ RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
         wget curl git-core \
+        vim unzip \
         libssl-dev \
         libmpdec2 \
         proj-bin libproj-dev \

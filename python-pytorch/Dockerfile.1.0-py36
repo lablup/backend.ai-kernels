@@ -7,6 +7,7 @@ RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
         wget curl git-core \
+        vim unzip \
         python3 python3-pip \
         libssl-dev \
         libmpdec2 \
@@ -26,10 +27,10 @@ RUN python3 -m pip install --no-cache-dir pyyaml
 # Install Torch
 #RUN git clone --recursive https://github.com/pytorch/pytorch && \
 #    cd pytorch && \
-#    python3 setup.py bdist_wheel -d /tmp 
+#    python3 setup.py bdist_wheel -d /tmp
 #RUN git clone --recursive https://github.com/pytorch/vision.git && \
 #    cd vision && \
-#    python3 setup.py bdist_wheel -d /tmp 
+#    python3 setup.py bdist_wheel -d /tmp
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools && \
@@ -53,8 +54,8 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir torchvision && \
     python3 -m pip install --no-cache-dir ipython && \
     python3 -m pip install --no-cache-dir jupyter && \
-    python3 -m pip install --no-cache-dir jupyterlab && \    
-    rm -rf /root/.cache && \    
+    python3 -m pip install --no-cache-dir jupyterlab && \
+    rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
 # Install ipython kernelspec

@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         # Protobuf
         ca-certificates \
         curl \
+        vim \
         unzip \
         # # For Kaldi
         # python-dev \

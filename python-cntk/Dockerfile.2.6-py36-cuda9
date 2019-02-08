@@ -30,7 +30,7 @@ RUN apt-get update -y && \
         libgeos-dev \
         mime-support \
 	gcc g++ \
-        libproj-dev libgeos-dev \	
+        libproj-dev libgeos-dev \
         libzmq3-dev libuv1
 
 RUN apt-get update && apt-get install -y wget bzip2
@@ -55,6 +55,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zlib1g-dev \
         # Protobuf
         curl \
+        vim \
         unzip \
         # # For Kaldi
         # python-dev \
@@ -105,7 +106,7 @@ RUN CNTK_VERSION_DASHED=$(echo $CNTK_VERSION | tr . -) && \
     tar -xzf CNTK-${CNTK_VERSION_DASHED}-Linux-64bit-GPU.tar.gz && \
     rm -f CNTK-${CNTK_VERSION_DASHED}-Linux-64bit-GPU.tar.gz && \
     /bin/bash /cntk/Scripts/install/linux/install-cntk.sh --py-version 35 --docker
-			    
+
 # python package install
 RUN pip install --no-cache-dir wheel && \
     pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
