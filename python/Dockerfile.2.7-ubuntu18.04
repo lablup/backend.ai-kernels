@@ -4,6 +4,7 @@ RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
         wget curl git-core \
+        vim unzip \
         python python-pip \
         libssl-dev \
         libmpdec2 \
