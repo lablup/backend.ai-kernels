@@ -21,7 +21,7 @@ RUN apt-get update -y && \
         sed \
         swig \
         git-core \
-        unzip \
+        zip unzip \
 	zip && \
    rm -fr /var/lib/apt/lists/*
 

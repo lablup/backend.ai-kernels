@@ -25,7 +25,7 @@ RUN install_packages \
         # Protobuf
         ca-certificates \
         curl \
-        unzip \
+        zip unzip \
         # For Kaldi
         # python-dev \
         automake \

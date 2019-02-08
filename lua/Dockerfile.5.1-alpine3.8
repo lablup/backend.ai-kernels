@@ -5,7 +5,7 @@ ENV LUA_VERSION 5.1
 ENV LUA_PACKAGE lua${LUA_VERSION}
 
 # Install Lua
-RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs openssl unzip \
+RUN apk add --no-cache ${LUA_PACKAGE} ${LUA_PACKAGE}-libs openssl zip unzip \
     && apk add --no-cache --virtual .build-deps build-base libc-dev curl ${LUA_PACKAGE}-dev \
     && cd /tmp \
     && curl -L http://luarocks.org/releases/luarocks-3.0.4.tar.gz -o luarocks-3.0.4.tar.gz \

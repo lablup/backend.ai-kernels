@@ -13,7 +13,7 @@ RUN apt-get update -y && \
         pkg-config \
         rsync \
         software-properties-common \
-        unzip \
+        zip unzip \
         zip \
         zlib1g-dev \	
         unzip zip && \

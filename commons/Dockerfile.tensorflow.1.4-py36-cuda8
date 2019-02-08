@@ -43,7 +43,7 @@ RUN apt-get update && \
         pkg-config \
         rsync \
         software-properties-common \
-        unzip \
+        zip unzip \
         zlib1g-dev \
         wget \
         imagemagick \

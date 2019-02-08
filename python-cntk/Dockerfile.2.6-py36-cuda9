@@ -55,8 +55,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         zlib1g-dev \
         # Protobuf
         curl \
-        vim \
-        unzip \
+        vim-tiny \
+        zip unzip \
         # # For Kaldi
         # python-dev \
         # automake \

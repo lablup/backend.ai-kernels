@@ -6,7 +6,7 @@ MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install Git extras and some Python packages
 RUN apk add --no-cache --virtual .backend-ai-deps \
-        libgit2 libffi wget curl bash git nano vim \
+        libgit2 libffi wget curl bash git nano vim-tiny \
         libjpeg libpng freetype openblas lapack && \
     apk add --no-cache --virtual .build-deps \
         build-base openssl-dev libffi-dev cmake && \

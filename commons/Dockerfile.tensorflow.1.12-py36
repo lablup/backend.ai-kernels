@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         graphviz \
         rsync \
         sed \
-        zip unzip \
+        zip zip unzip \
         zlib1g-dev \
         openjdk-8-jdk \
         openjdk-8-jre-headless && \
