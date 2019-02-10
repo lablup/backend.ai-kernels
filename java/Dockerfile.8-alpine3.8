@@ -26,14 +26,12 @@ ENV LD_LIBRARY_PATH=/opt/backend.ai/lib
 RUN apk add --no-cache libffi libzmq
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 LABEL ai.backend.kernelspec="1" \
-      ai.backend.features="batch query uid-match" \
+      ai.backend.features="batch query uid-match user-input" \
       ai.backend.base-distro="alpine3.8" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="256m" \
       ai.backend.runtime-type="java" \
       ai.backend.runtime-path="/usr/lib/jvm/java-1.8-openjdk/bin/java" \
       ai.backend.service-ports=""
-
-LABEL ai.backend.features "batch query uid-match user-input"
 
 # vim: ft=dockerfile
