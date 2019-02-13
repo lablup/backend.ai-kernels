@@ -8,6 +8,7 @@ FROM lablup/common-cntk:2.6-py36 as cntk-binary
 FROM ubuntu:18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
+# Install CNTK as the default backend for Keras
 ENV KERAS_BACKEND=cntk
 
 RUN apt-get update && \
