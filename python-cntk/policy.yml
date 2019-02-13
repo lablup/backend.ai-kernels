@@ -13,7 +13,11 @@ preserved_env_keys: [
   "USER", "SHELL", "TERM",
   "LD_LIBRARY_PATH",
   "LD_PRELOAD",
-  "KERAS_BACKEND",
+  # Python-specific
+  "PYTHONPATH",
+  "PYTHONUNBUFFERED",
+  "MPLCONFIGDIR",
+  "OPENBLAS_NUM_THREADS",
 ]
 
 diff_to_default: true
@@ -21,4 +25,3 @@ diff_to_default: true
 # Following syscalls are blindly allowed.
 # IMPORTANT: ptrace MUST NOT be included!
 allowed_syscalls:
-  - "umask"
