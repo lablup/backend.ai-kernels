@@ -1,8 +1,12 @@
-# CNTK 2.6 (CPU) kernel image for Backend.ai
-FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
-MAINTAINER Mario Cho "m.cho@lablup.com"
+# Microsoft CNTK 2.6 (CUDA9) & Python 3.6
+# ref: https://docs.microsoft.com/en-us/cognitive-toolkit/Setup-Linux-Python
 
-ENV CNTK_VERSION="2.6"
+# mount from pre-builded common-cntk:2.6-py36-cuda9 as wheel binary.
+FROM lablup/common-cntk:2.6-py36-cuda9 as cntk-binary
+
+# base image
+FROM nvidia/cuda:9.2-cudnn7-runtime-ubuntu18.04
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install CNTK as the default backend for Keras
 ENV KERAS_BACKEND=cntk
@@ -12,46 +16,30 @@ RUN apt-get update && \
         ca-certificates \
         wget curl git-core \
         vim-tiny zip unzip \
+        python3 python3-pip \
+	openmpi-bin \
+	libopenmpi2 \
         libssl-dev \
         libmpdec2 \
         proj-bin libproj-dev \
         libgeos-dev libgeos++-dev \
-        mime-support \
-        gcc g++ make \
-        xz-utils \
-        libsqlite3-dev && \
+        mime-support && \
+    ln -s /usr/lib/x86_64-linux-gnu/libmpi_cxx.so.20 /usr/lib/x86_64-linux-gnu/libmpi_cxx.so.1 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libmpi.so.20.10.1 /usr/lib/x86_64-linux-gnu/libmpi.so.12 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-#install Python 3
-#RUN curl https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tar.xz -o /opt/python.tar.xz && \
-#      cd /opt && tar xvf python.tar.xz && \
-#      cd /opt/*/ && ./configure && \
-#      make && make install && \
-#      ln -s -f /usr/local/bin/python3.6 /usr/bin/python
-
-#RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
-#    python get-pip.py && \
-#    rm get-pip.py
-
 ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/openmpi/lib \
     LANG=C.UTF-8
 
 # Install CUDA-9.0 + cuDNN 7.4
-RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
+RUN ln -s /usr/local/cuda-9.2 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.4.1 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
-RUN CNTK_VERSION_DASHED=$(echo $CNTK_VERSION | tr . -) && \
-    ([ "$CNTK_VERSION" != "2.4" ] || VERIFY_SHA256="true") && \
-    CNTK_SHA256="f9bd019fcb1f54da7ae17246224747d155693c64b7ac9858c58122b32663d96c" && \
-    wget -q https://cntk.ai/BinaryDrop/CNTK-${CNTK_VERSION_DASHED}-Linux-64bit-GPU.tar.gz && \
-    ([ "$VERIFY_SHA256" != "true" ] || (echo "$CNTK_SHA256 CNTK-${CNTK_VERSION_DASHED}-Linux-64bit-GPU.tar.gz" | sha256sum --check --strict -)) && \
-    tar -xzf CNTK-${CNTK_VERSION_DASHED}-Linux-64bit-GPU.tar.gz
-RUN rm -f CNTK-${CNTK_VERSION_DASHED}-Linux-64bit-GPU.tar.gz && \
-    /bin/bash /cntk/Scripts/install/linux/install-cntk.sh --py-version 35 --docker
+COPY --from=cntk-binary /tmp/*.whl /tmp
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools && \
@@ -71,6 +59,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir networkx cvxpy && \
     python3 -m pip install --no-cache-dir scikit-learn scikit-image && \
     python3 -m pip install --no-cache-dir pygments && \
+    python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \ 
     python3 -m pip install --no-cache-dir keras && \
     python3 -m pip install --no-cache-dir keras_applications && \
     python3 -m pip install --no-cache-dir keras_preprocessing && \
@@ -80,8 +69,11 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
+# verification CNTK
+#RUN python3 -c "import cntk; print(cntk.__version__)"
+
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "CNTK 2.6 on Python 3.5 (CUDA 9.0)" && \
+RUN python3 -m ipykernel install --display-name "CNTK 2.6 on Python 3.6 (CUDA 9.2)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Install Jupyter notebook logo
