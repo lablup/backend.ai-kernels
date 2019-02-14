@@ -67,7 +67,8 @@ available_builds = [
     'tf-builder',
     'tf-pkg-old', 'tf-pkg-current', 'tf-pkg-future',
     'tf-old', 'tf-current', 'tf-future',
-    'caffe', 'pytorch', 'cntk',
+    'caffe', 'pytorch',
+    'cntk-builder,','cntk',
     'vendor-aws', 'vendor-ngc',
 ]
 
