@@ -217,9 +217,13 @@ def main(build, list_builds, _auto_push):
     #build_kernel('python-theano',     '0.2-py36-gpu')
 
     # CNTK image (currently draft version base on Ubuntu:16.04)
-    if 'cntk' in build:
+    if 'cntk-builder' in build:
+        build_common('cntk','2.5-py36')
+        build_common('cntk','2.5-py36-cuda9')        
         build_common('cntk','2.6-py36')
         build_common('cntk','2.6-py36-cuda9')        
+    
+    if 'cntk' in build:
         build_kernel('python-cntk', '2.6-py36')
         build_kernel('python-cntk', '2.6-py36-cuda9')        
 
