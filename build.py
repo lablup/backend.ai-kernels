@@ -224,6 +224,8 @@ def main(build, list_builds, _auto_push):
         build_common('cntk','2.6-py36-cuda9')        
     
     if 'cntk' in build:
+        build_kernel('python-cntk', '2.5-py36')
+        build_kernel('python-cntk', '2.5-py36-cuda9')        
         build_kernel('python-cntk', '2.6-py36')
         build_kernel('python-cntk', '2.6-py36-cuda9')        
 
