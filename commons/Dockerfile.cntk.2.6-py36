@@ -2,7 +2,6 @@
 FROM ubuntu:18.04
 
 # Install system package dependencies
-# NOTE: running bazel requires JDK, not JRE!
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     	ca-certificates \
