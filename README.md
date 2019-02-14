@@ -21,7 +21,7 @@ Here we list the latest versions of our supported kernel images.
 | Lua           | `lablup/kernel-lua`     | 5.3             | O     | O     |   |   |                    |
 | Node.js       | `lablup/kernel-nodejs`  | 6.14,8.11,10.11 | O     | O     |   |   |                    |
 | Octave        | `lablup/kernel-octave`  | 4.2             | O     | O     |   |   |                    |
-| ~Python~      | `lablup/kernel-python`  | 2.7             | O     | O     | O |   | temporarily unsupported |
+| Python        | `lablup/kernel-python`  | 2.7             | O     | O     | O |   | beta               |
 | Python        | `lablup/kernel-python`  | 3.6.6           | O     | O\*   | O |   |                    |
 | Rust          | `lablup/kernel-rust`    | 1.17            | O     | O     |   |   |                    |
 | PHP           | `lablup/kernel-php`     | 7.1             | O     | O     |   |   |                    |
@@ -34,7 +34,7 @@ Here we list the latest versions of our supported kernel images.
 | PyTorch    | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
 | caffe2     | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
 | cafee      | `lablup/kernel-python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
-| CNTK       | `lablup/kernel-python-cntk`       | (WIP)   | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| CNTK       | `lablup/kernel-python-cntk`       | 2.6     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | Chainer    | `lablup/kernel-python-chainer`    | (WIP)   | O     | O\*   | O   |   |                   |
 | Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 
@@ -46,6 +46,8 @@ Here we list the latest versions of our supported kernel images.
 
 | base-mkl                 | base-cuda                     | base-TPU                 | base-ROCm (T.B.D) |
 |--------------------------|-------------------------------|--------------------------|-------------------|
+| tensorflow-2.0-py36      | tensorflow-2.0-py36-cuda10    |                          |                   |
+| tensorflow-1.13-py36     | tensorflow-1.13-py36-cuda9    | tensorflow-1.13-py36-tpu |                   |
 | tensorflow-1.12-py36     | tensorflow-1.12-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
 | tensorflow-1.11-py36     | tensorflow-1.11-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
 | tensorflow-1.10-py36     | tensorflow-1.10-py36-cuda9    |                          |                   |
@@ -60,12 +62,17 @@ Here we list the latest versions of our supported kernel images.
 |                          | tensorflow-1.1-py36-cuda8     |                          |                   |
 |                          | tensorflow-1.0-py36-cuda8     |                          |                   |
 |                          | python-caffe-1.0-py36-cuda9   |                          |                   |
-|                          | python-torch-1.0-py36-cuda9   |                          |                   |
-|                          | python-torch-0.4-py36-cuda9   |                          |                   |
-|                          | python-torch-0.3-py36-cuda9   |                          |                   |
-|                          | python-torch-0.2-py36-cuda8   |                          |                   |
-|                          | python-cntk-2.2-py36          |                          |                   |
-|                          | python-cntk-2.2-py36          |                          |                   |
+| python-torch-1.0-py36    | python-torch-1.0-py36-cuda9   |                          |                   |
+| python-torch-0.4-py36    | python-torch-0.4-py36-cuda9   |                          |                   |
+| python-torch-0.3-py36    | python-torch-0.3-py36-cuda9   |                          |                   |
+| python-torch-0.2-py36    | python-torch-0.2-py36-cuda8   |                          |                   |
+| python-cntk-2.0-py36     | python-cntk-2.0-py36-cuda9    |                          |                   |
+| python-cntk-2.1-py36     | python-cntk-2.1-py36-cuda9    |                          |                   |
+| python-cntk-2.2-py36     | python-cntk-2.2-py36-cuda9    |                          |                   |
+| python-cntk-2.3-py36     | python-cntk-2.3-py36-cuda9    |                          |                   |
+| python-cntk-2.4-py36     | python-cntk-2.4-py36-cuda9    |                          |                   |
+| python-cntk-2.5-py36     | python-cntk-2.5-py36-cuda9    |                          |                   |
+| python-cntk-2.6-py36     | python-cntk-2.6-py36-cuda9    |                          |                   |
 
 ### Deep learning inference images
 
