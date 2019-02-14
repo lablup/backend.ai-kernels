@@ -218,7 +218,10 @@ def main(build, list_builds, _auto_push):
 
     # CNTK image (currently draft version base on Ubuntu:16.04)
     if 'cntk' in build:
-        build_kernel('python-cntk', '2.2-py36')
+        build_common('cntk','2.6-py36')
+        build_common('cntk','2.6-py36-cuda9')        
+        build_kernel('python-cntk', '2.6-py36')
+        build_kernel('python-cntk', '2.6-py36-cuda9')        
 
     # AWS polly
     if 'vendor-aws' in build:
