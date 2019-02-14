@@ -71,7 +71,6 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir jupyterlab && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 # Install ipython kernelspec
 RUN python -m ipykernel install --display-name "TensorFlow 1.12 on Python 3.6 (CUDA 9.0)" && \
