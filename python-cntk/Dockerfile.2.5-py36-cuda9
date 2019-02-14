@@ -1,8 +1,8 @@
-# Microsoft CNTK 2.6 (CUDA9) & Python 3.6
+# Microsoft CNTK 2.5.1 (CUDA9) & Python 3.6
 # ref: https://docs.microsoft.com/en-us/cognitive-toolkit/Setup-Linux-Python
 
-# mount from pre-builded common-cntk:2.6-py36-cuda9 as wheel binary.
-FROM lablup/common-cntk:2.6-py36-cuda9 as cntk-binary
+# mount from pre-builded common-cntk:2.5-py36-cuda9 as wheel binary.
+FROM lablup/common-cntk:2.5-py36-cuda9 as cntk-binary
 
 # base image
 FROM nvidia/cuda:9.2-cudnn7-runtime-ubuntu18.04
@@ -73,7 +73,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 #RUN python3 -c "import cntk; print(cntk.__version__)"
 
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "CNTK 2.6 on Python 3.6 (CUDA 9.2)" && \
+RUN python3 -m ipykernel install --display-name "CNTK 2.5.1 on Python 3.6 (CUDA 9.2)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Install Jupyter notebook logo
