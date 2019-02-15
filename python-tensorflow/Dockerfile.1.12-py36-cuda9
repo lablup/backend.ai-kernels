@@ -73,7 +73,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     rm -f /tmp/*.whl
 
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "TensorFlow 1.12 on Python 3.6 (CUDA 9.0)" && \
+RUN python -m ipykernel install --display-name "TensorFlow 1.12 on Python 3.6 (CUDA 9.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Install Jupyter notebook logo
