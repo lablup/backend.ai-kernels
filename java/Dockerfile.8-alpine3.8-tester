@@ -1,8 +1,9 @@
 FROM alpine:3.8
 
-RUN apk add --no-cache python3
-RUN python3 -m pip install -U pip setuptools && \
-    python3 -m pip install --no-cache-dir tabulate dataclasses
+RUN apk add --no-cache python3 && \
+    ln -s /usr/bin/python3 /usr/bin/python
+RUN python -m pip install -U pip setuptools && \
+    python -m pip install --no-cache-dir tabulate dataclasses
 
 # Install Java compile environments
 # ref: https://github.com/docker-library/openjdk/blob/master/8-jdk/alpine/Dockerfile
