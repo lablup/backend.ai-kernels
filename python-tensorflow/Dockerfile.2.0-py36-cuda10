@@ -10,7 +10,7 @@ RUN apt-get update && \
         libmpdec2 \
         proj-bin libproj-dev \
         libgeos-dev libgeos++-dev \
-        mime-support pillow h5py \
+        mime-support \
         gcc g++ make \
         xz-utils && \
     apt-get clean && \

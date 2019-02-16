@@ -10,7 +10,7 @@ RUN apt update -y && apt install -y \
         libexpat1 libgdbm3 bzip2 libffi6 libsqlite3-0 liblzma5 zlib1g \
         libssl-dev libmpdec2 \
         libncursesw5 libtinfo5 libreadline6-dev \
-        mime-support pillow h5py \
+        mime-support \
         libzmq3-dev libuv1
 
 # Copy the whole Python from the docker library image

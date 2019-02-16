@@ -11,7 +11,7 @@ RUN install_packages \
         libexpat1 libgdbm3 bzip2 libffi6 libsqlite3-0 liblzma5 zlib1g \
         libssl1.0.0 libmpdec2 \
         libncursesw5 libtinfo5 libreadline6 \
-        mime-support pillow h5py \
+        mime-support \
         libzmq3 libuv0.10
 
 RUN conda config --add channels intel && \

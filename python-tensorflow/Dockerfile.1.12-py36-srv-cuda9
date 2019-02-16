@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libncursesw5 libtinfo5 libreadline6 \
 	proj-bin \
         libgeos-dev \
-        mime-support pillow h5py \
+        mime-support \
 	gcc g++ \
         libproj-dev libgeos-dev \	
         libzmq3-dev libuv1 \
