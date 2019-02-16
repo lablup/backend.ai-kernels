@@ -18,7 +18,7 @@ RUN apt update -y && \
         libncursesw5 libtinfo5 libreadline6 \
 	proj-bin \
         libgeos-dev \
-        mime-support \
+        mime-support pillow h5py \
 	gcc g++ \
         libproj-dev libgeos-dev \	
         libzmq3-dev libuv1

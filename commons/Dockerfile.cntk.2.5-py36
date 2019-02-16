@@ -9,7 +9,7 @@ RUN apt-get update && \
 	libssh-dev \
 	proj-bin libproj-dev \
 	libgeos-dev libgeos++-dev \
-	mime-support \
+	mime-support pillow h5py \
         libcurl3-dev \
         libfreetype6-dev \
         libhdf5-serial-dev \
