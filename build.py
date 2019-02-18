@@ -219,6 +219,11 @@ def main(build, list_builds, _auto_push):
 
     # CNTK image (currently draft version base on Ubuntu:16.04)
     if 'cntk-builder' in build:
+        build_common('cntk','2.0-py36')
+        build_common('cntk','2.1-py36')
+        build_common('cntk','2.2-py36')
+        build_common('cntk','2.3-py36')
+        build_common('cntk','2.4-py36')
         build_common('cntk','2.5-py36')
         build_common('cntk','2.5-py36-cuda9')        
         build_common('cntk','2.6-py36')
