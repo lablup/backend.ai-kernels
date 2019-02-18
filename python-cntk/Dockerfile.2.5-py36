@@ -34,7 +34,7 @@ ENV PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/openmpi/lib \
     LANG=C.UTF-8
 
-COPY --from=cntk-binary /tmp/cntk-2.5*.whl /tmp
+COPY --from=cntk-binary /tmp/cntk*.whl /tmp
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools && \
@@ -69,7 +69,7 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 #RUN python -c "import cntk; print(cntk.__version__)"
 
 # Install ipython kernelspec
-RUN python -m ipykernel install --display-name "CNTK 2.5.1 on Python 3.6 (CPU-only)" && \
+RUN python -m ipykernel install --display-name "CNTK 2.5 on Python 3.6 (CPU-only)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Install Jupyter notebook logo
