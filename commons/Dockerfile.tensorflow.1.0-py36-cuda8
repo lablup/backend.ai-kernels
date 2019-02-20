@@ -32,6 +32,8 @@ ENV NCCL_INSTALL_PATH /usr/local/cuda/lib
 RUN apt-get update && \
     apt-get install -y --no-install-recommends openjdk-8-jdk-headless && \
     apt-get install -y --no-install-recommends \
+    	gcc g++ make \
+	libssl-dev \
         libfreetype6-dev \
         libhdf5-serial-dev \
         libpng12-dev \
@@ -45,14 +47,15 @@ RUN apt-get update && \
         imagemagick \
         graphviz \
         cmake \
-	gcc g++ \
         curl \
 	wget \
         rsync \
         sed \
         swig \
         git-core \
-	zip && \
+	libcurl3-dev \
+	zip \
+	&& \
     rm -rf /var/lib/apt/lists/*
 
 # Link NCCL libray and header where the build script expects them.
