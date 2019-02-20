@@ -91,7 +91,7 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} && \
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
 # AVX512 support over skylake core
 #        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mavx512f -mavx512pf -mavx512cd -mavx512er -mfpmath=both -msse4.1 -msse4.2" \
-    bash configure && \
+    tensorflow/tools/ci_build/builds/configured CPU \
     bazel build \
         --config=opt --config=mkl \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
