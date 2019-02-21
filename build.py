@@ -134,10 +134,15 @@ def main(build, list_builds, _auto_push):
 
     ## Our TensorFlow currently depends on CUDA 9.0 + cuDNN 7.1
     if 'tf-pkg-old' in build:
+        build_common('tensorflow', '1.0-py36')
         build_common('tensorflow', '1.0-py36-cuda8')
+        build_common('tensorflow', '1.1-py36')
         build_common('tensorflow', '1.1-py36-cuda8')
+        build_common('tensorflow', '1.2-py36')
         build_common('tensorflow', '1.2-py36-cuda8')
+        build_common('tensorflow', '1.3-py36')
         build_common('tensorflow', '1.3-py36-cuda8')
+        build_common('tensorflow', '1.4-py36')
         build_common('tensorflow', '1.4-py36-cuda8')
         build_common('tensorflow', '1.5-py36')
         build_common('tensorflow', '1.5-py36-cuda9')
@@ -163,10 +168,15 @@ def main(build, list_builds, _auto_push):
         build_common('tensorflow', '2.0-py36-cuda9')
 
     if 'tf-old' in build:
+        build_kernel('python-tensorflow', '1.0-py36')
         build_kernel('python-tensorflow', '1.0-py36-cuda8')
+        build_kernel('python-tensorflow', '1.1-py36')        
         build_kernel('python-tensorflow', '1.1-py36-cuda8')
+        build_kernel('python-tensorflow', '1.2-py36')                
         build_kernel('python-tensorflow', '1.2-py36-cuda8')
+        build_kernel('python-tensorflow', '1.3-py36')                        
         build_kernel('python-tensorflow', '1.3-py36-cuda8')
+        build_kernel('python-tensorflow', '1.4-py36')                                
         build_kernel('python-tensorflow', '1.4-py36-cuda8')
         build_kernel('python-tensorflow', '1.5-py36')
         build_kernel('python-tensorflow', '1.5-py36-cuda9')
@@ -231,15 +241,10 @@ def main(build, list_builds, _auto_push):
     
     if 'cntk' in build:
         build_kernel('python-cntk', '2.0-py36')
-#       build_kernel('python-cntk', '2.0-py36-cuda9')        
         build_kernel('python-cntk', '2.1-py36')
-#        build_kernel('python-cntk', '2.1-py36-cuda9')                
         build_kernel('python-cntk', '2.2-py36')
-#        build_kernel('python-cntk', '2.2-py36-cuda9')
         build_kernel('python-cntk', '2.3-py36')
-#        build_kernel('python-cntk', '2.4-py36-cuda9')
         build_kernel('python-cntk', '2.4-py36')
-#        build_kernel('python-cntk', '2.4-py36-cuda9')
         build_kernel('python-cntk', '2.5-py36')
         build_kernel('python-cntk', '2.5-py36-cuda9')        
         build_kernel('python-cntk', '2.6-py36')
