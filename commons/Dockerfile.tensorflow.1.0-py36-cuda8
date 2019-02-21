@@ -63,9 +63,14 @@ RUN mkdir /usr/local/cuda-8.0/lib &&  \
     ln -s /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/local/cuda/lib/libnccl.so.2 && \
     ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h
 
+/usr/local/cuda/lib64/libcudnn.so.5.1.10
+/usr/local/cuda/libcudnn.so.5.1.10
+/usr/local/cuda-8.0/targets/x86_64-linux/lib/libcudnn.so
+
+
 # link CUDA-8.0 + cuDNN 5.1
 RUN ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
-#    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.5.1.10 /usr/local/cuda/lib64/libcudnn.so && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.5.1.10 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
