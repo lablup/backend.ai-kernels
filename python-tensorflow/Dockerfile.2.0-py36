@@ -50,6 +50,8 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --name backendai-python \
         --display-name "TensorFlow 2.0 on Python 3.6 (CPU-only)" && \
