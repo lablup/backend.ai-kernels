@@ -67,6 +67,20 @@ RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
     python get-pip.py && \
     rm get-pip.py
 
+# Prepare for building TensorFlwo wheel
+RUN python -m pip install -U setuptools pip && \
+    python -m pip install --no-cache-dir \
+    	wheel \
+    	numpy \
+	scipy \
+        sklearn \
+        pandas \
+        keras_applications \
+        keras_preprocessing \
+        matplotlib \
+        && \
+    rm -f /tmp/*.whl
+
 RUN mkdir /bazel && \
     cd /bazel && \
     curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
@@ -86,10 +100,10 @@ RUN pip install --no-cache-dir wheel nUmpy Scipy && \
 RUN : build TensorFlow pip package && \
     cd /tmp && \
 #    curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz | tar xzf - && \
-    git clone --branch=r${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-r${TF_VERSION} && \
+    git clone --branch=${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
     ldconfig
 
-RUN cd /tmp/tensorflow-r${TF_VERSION} && \
+RUN cd /tmp/tensorflow-${TF_VERSION} && \
 # AVX & AVX2 support under haswell core
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
 # AVX512 support over skylake core
