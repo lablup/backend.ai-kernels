@@ -55,6 +55,9 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
 # Install ipython kernelspec
 RUN python -m ipykernel install --display-name "TensorFlow 2.0 on Python 3.6 (CUDA 10.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
