@@ -1,3 +1,7 @@
+# Google Tensorflow 2.0 (CUDA10) & Python 3.6
+# ref: https://tensorflow.org
+
+FROM lablup/common-tensorflow:2.0-py36-cuda9 as tensorflow-binary
 FROM nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
@@ -27,6 +31,8 @@ RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.4.1 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
+COPY --from=tensorflow-binary /tmp/*.whl /tmp
+
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools && \
     python3 -m pip install --no-cache-dir wheel && \
@@ -45,7 +51,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir networkx cvxpy && \
     python3 -m pip install --no-cache-dir scikit-learn scikit-image && \
     python3 -m pip install --no-cache-dir pygments && \
-    python3 -m pip install --no-cache-dir tf-nightly-gpu-2.0-preview && \
+    python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
     python3 -m pip install --no-cache-dir keras && \
     python3 -m pip install --no-cache-dir keras_applications && \
     python3 -m pip install --no-cache-dir keras_preprocessing && \
