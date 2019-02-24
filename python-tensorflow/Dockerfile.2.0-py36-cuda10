@@ -1,7 +1,7 @@
 # Google Tensorflow 2.0 (CUDA10) & Python 3.6
 # ref: https://tensorflow.org
 
-FROM lablup/common-tensorflow:2.0-py36-cuda9 as tensorflow-binary
+FROM lablup/common-tensorflow:2.0-py36-cuda10 as tensorflow-binary
 FROM nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
