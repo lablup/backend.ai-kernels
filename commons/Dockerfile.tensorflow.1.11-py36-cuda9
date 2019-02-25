@@ -1,9 +1,12 @@
-# Build target: lablup/common-tensorflow:1.12-py36-cuda9
+# Google Tensorflow 1.11 (CUDA9) & Python 3.6
+# ref: https://tensorflow.org
+
+# Build target: lablup/common-tensorflow:1.11-py36-cuda9
 FROM nvidia/cuda:9.0-base-ubuntu16.04
  LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
-ENV TF_VERSION 1.11
+ENV TF_VERSION 1.10
 ENV GCC_HOST_COMPILER_PATH /usr/bin/gcc 
 ENV CC_OPT_FLAGS "-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" 
 ENV TF_NEED_JEMALLOC 1
@@ -73,6 +76,12 @@ RUN apt-get update && \
     find /usr/local/cuda-9.0/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
     rm /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a
 
+RUN apt-get update && \
+    apt-get install nvinfer-runtime-trt-repo-ubuntu1604-4.0.1-ga-cuda9.0 && \
+    apt-get update && \
+    apt-get install libnvinfer4=4.1.2-1+cuda9.0 && \
+    apt-get install libnvinfer-dev=4.1.2-1+cuda9.0
+
 # Link NCCL libray and header where the build script expects them.
 RUN mkdir /usr/local/cuda-9.0/lib &&  \
     ln -s /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/local/cuda/lib/libnccl.so.2 && \
@@ -133,9 +142,6 @@ RUN bazel version && \
     python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     python -c "import numpy; numpy.show_config()" && \
     python -c "import scipy; scipy.show_config()" 
-    
-# The TensorFlow version
-ENV TF_VERSION 1.11
 
 RUN : build TensorFlow pip package && \
     cd /tmp && \
@@ -146,7 +152,10 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
         LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
         tensorflow/tools/ci_build/builds/configured GPU \
-    bazel build -c opt --copt=-mavx --config=cuda \
+    bazel build \
+        -c opt \
+	--copt=-mavx \
+	--config=cuda \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
