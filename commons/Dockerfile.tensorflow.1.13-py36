@@ -80,6 +80,8 @@ RUN mkdir /bazel && \
 RUN bazel version; python -c "import sys; print(sys.prefix); print(sys.version_info)"
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
 RUN pip install --no-cache-dir wheel numpy scipy && \
+    pip install --no-cache-dir keras_applications && \
+    pip install --no-cache-dir keras_preprocessing && \
     rm -f /tmp/*.whl
 
 # NOTE: python should be linked to python3
