@@ -6,7 +6,7 @@ FROM nvidia/cuda:9.0-base-ubuntu16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # setup the Bazel 
-ENV BAZEL_VERSION 0.11.0
+ENV BAZEL_VERSION 0.15.0
 
 # The TensorFlow version
 ENV TF_VERSION 1.10
