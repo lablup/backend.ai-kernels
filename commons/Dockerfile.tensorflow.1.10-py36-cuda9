@@ -1,4 +1,4 @@
-# Google Tensorflow 1.10 (CUDA9) & Python 3.6
+# Google Tensorflow 1.9 (CUDA9) & Python 3.6
 # ref: https://tensorflow.org
 
 # Build target: lablup/common-tensorflow:1.10-py36-cuda9
@@ -6,10 +6,10 @@ FROM nvidia/cuda:9.0-base-ubuntu16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # setup the Bazel 
-ENV BAZEL_VERSION 0.15.0
+ENV BAZEL_VERSION 0.11.0
 
 # The TensorFlow version
-ENV TF_VERSION 1.10
+ENV TF_VERSION 1.9
 ENV GCC_HOST_COMPILER_PATH /usr/bin/gcc 
 ENV CC_OPT_FLAGS "-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" 
 ENV TF_NEED_JEMALLOC 1
@@ -21,7 +21,7 @@ ENV TF_NEED_OPENCL_SYCL 0
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_CLANG 0
 ENV TF_NEED_TENSORRT 1
-ENV TF_NEED_MPI 0
+ENV TF_NEED_MPI 1
 ENV TF_NEED_S3 1
 ENV TF_CUDA_VERSION 9.0 
 ENV TF_CUDNN_VERSION 7
