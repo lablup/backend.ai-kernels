@@ -61,18 +61,18 @@ Here we list the latest versions of our supported kernel images.
 | tensorflow-1.2-py36      | tensorflow-1.2-py36-cuda8     |                          |                   |
 | tensorflow-1.1-py36      | tensorflow-1.1-py36-cuda8     |                          |                   |
 | tensorflow-1.0-py36      | tensorflow-1.0-py36-cuda8     |                          |                   |
-|                          | python-caffe-1.0-py36-cuda9   |                          |                   |
+|                          | python-caffe2-1.0-py36-cuda9  |                          |                   |
 | python-torch-1.0-py36    | python-torch-1.0-py36-cuda9   |                          |                   |
 | python-torch-0.4-py36    | python-torch-0.4-py36-cuda9   |                          |                   |
 | python-torch-0.3-py36    | python-torch-0.3-py36-cuda9   |                          |                   |
 | python-torch-0.2-py36    | python-torch-0.2-py36-cuda8   |                          |                   |
-| python-cntk-2.0-py36     | python-cntk-2.0-py36-cuda9    |                          |                   |
-| python-cntk-2.1-py36     | python-cntk-2.1-py36-cuda9    |                          |                   |
-| python-cntk-2.2-py36     | python-cntk-2.2-py36-cuda9    |                          |                   |
-| python-cntk-2.3-py36     | python-cntk-2.3-py36-cuda9    |                          |                   |
-| python-cntk-2.4-py36     | python-cntk-2.4-py36-cuda9    |                          |                   |
-| python-cntk-2.5-py36     | python-cntk-2.5-py36-cuda9    |                          |                   |
 | python-cntk-2.6-py36     | python-cntk-2.6-py36-cuda9    |                          |                   |
+| python-cntk-2.5-py36     | python-cntk-2.5-py36-cuda9    |                          |                   |
+| python-cntk-2.4-py36     | python-cntk-2.4-py36-cuda9    |                          |                   |
+| python-cntk-2.3-py36     | python-cntk-2.3-py36-cuda9    |                          |                   |
+| python-cntk-2.2-py36     | python-cntk-2.2-py36-cuda9    |                          |                   |
+| python-cntk-2.1-py36     | python-cntk-2.1-py36-cuda9    |                          |                   |
+| python-cntk-2.0-py36     | python-cntk-2.0-py36-cuda9    |                          |                   |
 
 ### Deep learning inference images
 
