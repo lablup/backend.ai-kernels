@@ -30,9 +30,9 @@ Here we list the latest versions of our supported kernel images.
 
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.12    | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| PyTorch    | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
-| caffe2     | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
+| TensorFlow | `lablup/kernel-python-tensorflow` | 1.13    | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| PyTorch    | `lablup/kernel-python-torch`      | 1.0     | O     | O\*   | O   |   |                   |
+| caffe2     | `lablup/kernel-python-torch`      | 1.0     | O     | O\*   | O   |   |                   |
 | cafee      | `lablup/kernel-python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
 | CNTK       | `lablup/kernel-python-cntk`       | 2.6     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | Chainer    | `lablup/kernel-python-chainer`    | (WIP)   | O     | O\*   | O   |   |                   |
@@ -49,18 +49,18 @@ Here we list the latest versions of our supported kernel images.
 | tensorflow-2.0-py36      | tensorflow-2.0-py36-cuda10    |                          |                   |
 | tensorflow-1.13-py36     | tensorflow-1.13-py36-cuda9    | tensorflow-1.13-py36-tpu |                   |
 | tensorflow-1.12-py36     | tensorflow-1.12-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
-| tensorflow-1.11-py36     | tensorflow-1.11-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
+| tensorflow-1.11-py36     | tensorflow-1.11-py36-cuda9    | tensorflow-1.11-py36-tpu |                   |
 | tensorflow-1.10-py36     | tensorflow-1.10-py36-cuda9    |                          |                   |
 | tensorflow-1.9-py36      | tensorflow-1.9-py36-cuda9     |                          |                   |
 | tensorflow-1.8-py36      | tensorflow-1.8-py36-cuda9     |                          |                   |
 | tensorflow-1.7-py36      | tensorflow-1.7-py36-cuda9     |                          |                   |
 | tensorflow-1.6-py36      | tensorflow-1.6-py36-cuda9     |                          |                   |
 | tensorflow-1.5-py36      | tensorflow-1.5-py36-cuda9     |                          |                   |
-|                          | tensorflow-1.4-py36-cuda8     |                          |                   |
-|                          | tensorflow-1.3-py36-cuda8     |                          |                   |
-|                          | tensorflow-1.2-py36-cuda8     |                          |                   |
-|                          | tensorflow-1.1-py36-cuda8     |                          |                   |
-|                          | tensorflow-1.0-py36-cuda8     |                          |                   |
+| tensorflow-1.4-py36      | tensorflow-1.4-py36-cuda8     |                          |                   |
+| tensorflow-1.3-py36      | tensorflow-1.3-py36-cuda8     |                          |                   | 
+| tensorflow-1.2-py36      | tensorflow-1.2-py36-cuda8     |                          |                   |
+| tensorflow-1.1-py36      | tensorflow-1.1-py36-cuda8     |                          |                   |
+| tensorflow-1.0-py36      | tensorflow-1.0-py36-cuda8     |                          |                   |
 |                          | python-caffe-1.0-py36-cuda9   |                          |                   |
 | python-torch-1.0-py36    | python-torch-1.0-py36-cuda9   |                          |                   |
 | python-torch-0.4-py36    | python-torch-0.4-py36-cuda9   |                          |                   |
