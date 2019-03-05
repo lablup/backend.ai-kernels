@@ -162,10 +162,12 @@ def main(build, list_builds, _auto_push):
         build_common('tensorflow', '1.11-py36-cuda9')
         build_common('tensorflow', '1.12-py36')
         build_common('tensorflow', '1.12-py36-cuda9')
+        build_common('tensorflow', '1.13-py36')
+        build_common('tensorflow', '1.13-py36-cuda9')
 
     if 'tf-pkg-future' in build:
         build_common('tensorflow', '2.0-py36')
-        build_common('tensorflow', '2.0-py36-cuda9')
+        build_common('tensorflow', '2.0-py36-cuda10')
 
     if 'tf-old' in build:
         build_kernel('python-tensorflow', '1.0-py36')
