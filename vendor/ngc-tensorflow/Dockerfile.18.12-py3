@@ -1,4 +1,5 @@
 FROM nvcr.io/nvidia/tensorflow:18.12-py3
+# NVIDIA DIGITS runs on Python 3.5
 
 ENV PYTHONUNBUFFERED=1 \
     PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
@@ -35,6 +36,6 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+      ai.backend.service-ports="ipython:pty:3000,tensorboard:http:6006,jupyter:http:8080,jupyterlab:http:8090"
 
 # vim: ft=dockerfile
