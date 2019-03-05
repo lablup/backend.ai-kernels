@@ -9,7 +9,7 @@ LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 ENV BAZEL_VERSION 0.11.0
 
 # The TensorFlow version
-ENV TF_VERSION 1.9
+ENV TF_VERSION 1.10
 ENV GCC_HOST_COMPILER_PATH /usr/bin/gcc 
 ENV CC_OPT_FLAGS "-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" 
 ENV TF_NEED_JEMALLOC 1
