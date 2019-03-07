@@ -260,6 +260,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-tensorflow', '18.12-py3')
         build_kernel('vendor/ngc-tensorflow', '19.01-py3')
         build_kernel('vendor/ngc-pytorch', '18.12.1-py3')
+        build_kernel('vendor/ngc-pytorch', '19.01-py3')        
         build_kernel('vendor/ngc-digits', '18.12-tensorflow')
 
 
