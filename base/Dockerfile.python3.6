@@ -1,7 +1,11 @@
-# Python 3.6.6 base kernel based ubuntu 16.04
+# Python 3.6.8 base kernel based ubuntu 16.04
 # base source from official repository at https://hub.docker.com/python/
 FROM ubuntu:16.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
+
+# GPG_KEY & Python version
+ENV GPG_KEY 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
+ENV PYTHON_VERSION 3.6.8
 
 # /usr/local in this image only has its own built Python.
 # ensure local python is preferred over distribution python
@@ -20,10 +24,6 @@ RUN apt-get update && \
 	netbase  \
         && \
     rm -rf /var/lib/apt/lists/*
-
-# GPG_KEY & Python version
-ENV GPG_KEY 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
-ENV PYTHON_VERSION 3.6.6
 
 # Python build
 RUN set -ex && \
