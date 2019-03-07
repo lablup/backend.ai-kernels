@@ -35,7 +35,6 @@ RUN apt-get update && \
 	libssl-dev \
         libfreetype6-dev \
         libhdf5-serial-dev \
-        libpng12-dev \
         libzmq3-dev \
         pkg-config \
         rsync \
