@@ -102,15 +102,17 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
         LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
         tensorflow/tools/ci_build/builds/configured GPU \
-    bazel build -c opt --config=cuda \
+    bazel build \
+    	-c opt \
+	--copt=mavx \
+	--config=cuda \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
 	tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
-    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
+    rm -fr /root/*.cache
 
-# Clean up pip wheel and Bazel cache when done.
-RUN rm -rf /root/.cache	&& \
-    ls -lh /tmp/tensorflow_pkg
+RUN ls -lh /tmp/tensorflow_pkg
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0
 
