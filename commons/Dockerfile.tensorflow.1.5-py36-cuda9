@@ -92,32 +92,6 @@ RUN mkdir /usr/local/cuda-9.0/lib &&  \
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
-#install Python 3
-#RUN curl https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tar.xz -o /opt/python.tar.xz && \
-#      cd /opt && tar xvf python.tar.xz && \
-#      cd /opt/*/ && ./configure && \
-#      make && make install && \
-#      ln -s -f /usr/local/bin/python3.6 /usr/bin/python
-
-#RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
-#    python get-pip.py && \
-#    rm get-pip.py
-
-# Prepare for building TensorFlow wheel
-#RUN python -m pip install -U setuptools pip && \
-#    python -m pip install --no-cache-dir \
-#    	wheel \
-#    	numpy \
-#	scipy \
-#        sklearn \
-#        pandas \
-#        keras_applications \
-#        keras_preprocessing \
-#        matplotlib \
-#        && \
-#    rm -f /tmp/*.whl
-
-
 # Check Bazel/Python is runnable.
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
 RUN bazel version; python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
