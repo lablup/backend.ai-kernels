@@ -50,8 +50,8 @@ RUN apt-get update && \
         libcudnn7-dev=7.2.1.38-1+cuda9.0 \
 	libnvinfer4=4.1.2-1+cuda9.0 \
 	libnvinfer-dev=4.1.2-1+cuda9.0 \
-        libnccl2=2.2.13-1+cuda9.0 \
-        libnccl-dev=2.2.13-1+cuda9.0 \
+        libnccl2=2.4.2-1+cuda9.0 \
+        libnccl-dev=2.4.2-1+cuda9.0 \
 	libssh-dev \
 	proj-bin libproj-dev \
 	libgeos-dev libgeos++-dev \
@@ -60,7 +60,7 @@ RUN apt-get update && \
         libhdf5-serial-dev \
         libpng12-dev \
         libzmq3-dev \
-        zlib1g-dev \
+	libffi-dev \
         pkg-config \
         rsync \
         software-properties-common \
