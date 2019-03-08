@@ -134,7 +134,7 @@ RUN : build TensorFlow pip package && \
     git clone --branch=${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
     ldconfig
     
-RUN cd /tmp/tensorflow-r${TF_VERSION} && \
+RUN cd /tmp/tensorflow-${TF_VERSION} && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
         LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
         tensorflow/tools/ci_build/builds/configured GPU \
