@@ -14,7 +14,8 @@ RUN apt-get update && \
         mime-support \
         gcc g++ make \
         xz-utils \
-        libsqlite3-dev && \
+        libsqlite3-dev \
+	&& \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
