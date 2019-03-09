@@ -28,15 +28,15 @@ Here we list the latest versions of our supported kernel images.
 | R             | `lablup/kernel-r`       | 3.3             | O     | O     |   |   | CRAN R             |
 | Scala	        | `lablup/kernel-scala`   | 2.12            | O     | O     |   |   |                    |
 
-| Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
-|------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.12    | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| PyTorch    | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
-| caffe2     | `lablup/kernel-python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
-| cafee      | `lablup/kernel-python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
-| CNTK       | `lablup/kernel-python-cntk`       | 2.6     | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| Chainer    | `lablup/kernel-python-chainer`    | (WIP)   | O     | O\*   | O   |   |                   |
-| Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| Deep-Learning Framework | Image Name    | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
+|------------|----------------------------|---------|-------|-------|-----|---|-------------------|
+| TensorFlow | `lablup/python-tensorflow` | 1.12    | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| PyTorch    | `lablup/python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
+| caffe2     | `lablup/python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
+| cafee      | `lablup/python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
+| CNTK       | `lablup/python-cntk`       | 2.6     | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| Chainer    | `lablup/python-chainer`    | 4.0     | O     | O\*   | O   |   |                   |
+| Theano     | `lablup/python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 
 ### Deep learning based images
  * `base-mkl`    (Intel' Machine Learning Kits (MKL) works on CPU only kernel)
