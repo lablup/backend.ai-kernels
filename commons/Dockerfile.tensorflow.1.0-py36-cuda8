@@ -36,6 +36,7 @@ RUN apt-get update && \
         libhdf5-serial-dev \
         libpng12-dev \
         libzmq3-dev \
+	libcurl3-dev \
         pkg-config \
         rsync \
         software-properties-common \
@@ -52,7 +53,6 @@ RUN apt-get update && \
         sed \
         swig \
         git-core \
-	libcurl3-dev \
 	zip && \
     rm -rf /var/lib/apt/lists/*
 
@@ -64,9 +64,8 @@ RUN mkdir /usr/local/cuda-8.0/lib &&  \
 
 # link CUDA-8.0 + cuDNN 6.0
 RUN ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
-    mkdir /usr/lib/x86_64-linux-gnu/include && \
-    ln -s  /usr/include/x86_64-linux-gnu/cudnn_v6.h /usr/lib/x86_64-linux-gnu/include/cudnn.h && \
-#    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.6.0.21 /usr/lib/x86_64-linux-gnu/libcudnn.so && \    
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.6.0.21 /usr/local/cuda/lib64/libcudnn.so.6 && \
+    ln -s /usr/include/x86_64-linux-gnu/cudnn_v6.h /usr/local/cuda/include/cudnn.h && \
     ldconfig
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"

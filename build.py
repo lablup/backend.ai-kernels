@@ -134,10 +134,15 @@ def main(build, list_builds, _auto_push):
 
     ## Our TensorFlow currently depends on CUDA 9.0 + cuDNN 7.1
     if 'tf-pkg-old' in build:
+        build_common('tensorflow', '1.0-py36')
         build_common('tensorflow', '1.0-py36-cuda8')
+        build_common('tensorflow', '1.1-py36')
         build_common('tensorflow', '1.1-py36-cuda8')
+        build_common('tensorflow', '1.2-py36')
         build_common('tensorflow', '1.2-py36-cuda8')
+        build_common('tensorflow', '1.3-py36')
         build_common('tensorflow', '1.3-py36-cuda8')
+        build_common('tensorflow', '1.4-py36')
         build_common('tensorflow', '1.4-py36-cuda8')
         build_common('tensorflow', '1.5-py36')
         build_common('tensorflow', '1.5-py36-cuda9')
@@ -157,16 +162,23 @@ def main(build, list_builds, _auto_push):
         build_common('tensorflow', '1.11-py36-cuda9')
         build_common('tensorflow', '1.12-py36')
         build_common('tensorflow', '1.12-py36-cuda9')
+        build_common('tensorflow', '1.13-py36')
+        build_common('tensorflow', '1.13-py36-cuda9')
 
     if 'tf-pkg-future' in build:
         build_common('tensorflow', '2.0-py36')
-        build_common('tensorflow', '2.0-py36-cuda9')
+        build_common('tensorflow', '2.0-py36-cuda10')
 
     if 'tf-old' in build:
+        build_kernel('python-tensorflow', '1.0-py36')
         build_kernel('python-tensorflow', '1.0-py36-cuda8')
+        build_kernel('python-tensorflow', '1.1-py36')        
         build_kernel('python-tensorflow', '1.1-py36-cuda8')
+        build_kernel('python-tensorflow', '1.2-py36')                
         build_kernel('python-tensorflow', '1.2-py36-cuda8')
+        build_kernel('python-tensorflow', '1.3-py36')                        
         build_kernel('python-tensorflow', '1.3-py36-cuda8')
+        build_kernel('python-tensorflow', '1.4-py36')                                
         build_kernel('python-tensorflow', '1.4-py36-cuda8')
         build_kernel('python-tensorflow', '1.5-py36')
         build_kernel('python-tensorflow', '1.5-py36-cuda9')
@@ -219,12 +231,22 @@ def main(build, list_builds, _auto_push):
 
     # CNTK image (currently draft version base on Ubuntu:16.04)
     if 'cntk-builder' in build:
+        build_common('cntk','2.0-py36')
+        build_common('cntk','2.1-py36')
+        build_common('cntk','2.2-py36')
+        build_common('cntk','2.3-py36')
+        build_common('cntk','2.4-py36')
         build_common('cntk','2.5-py36')
         build_common('cntk','2.5-py36-cuda9')        
         build_common('cntk','2.6-py36')
         build_common('cntk','2.6-py36-cuda9')        
     
     if 'cntk' in build:
+        build_kernel('python-cntk', '2.0-py36')
+        build_kernel('python-cntk', '2.1-py36')
+        build_kernel('python-cntk', '2.2-py36')
+        build_kernel('python-cntk', '2.3-py36')
+        build_kernel('python-cntk', '2.4-py36')
         build_kernel('python-cntk', '2.5-py36')
         build_kernel('python-cntk', '2.5-py36-cuda9')        
         build_kernel('python-cntk', '2.6-py36')
@@ -236,9 +258,13 @@ def main(build, list_builds, _auto_push):
 
     if 'vendor-ngc' in build:
         build_kernel('vendor/ngc-tensorflow', '18.12-py3')
-        build_kernel('vendor/ngc-pytorch', '18.12.1-py3')
-        build_kernel('vendor/ngc-digits', '18.12-tensorflow')
-
+        build_kernel('vendor/ngc-tensorflow', '19.01-py3')
+        build_kernel('vendor/ngc-tensorflow', '19.02-py3')        
+        build_kernel('vendor/ngc-pytorch',  '18.12.1-py3')
+        build_kernel('vendor/ngc-pytorch',  '19.01-py3')
+        build_kernel('vendor/ngc-pytorch',  '19.02-py3')                
+        build_kernel('vendor/ngc-digits',  '18.12-tensorflow')
+        build_kernel('vendor/ngc-chainer', '4.0-py3')
 
 if __name__ == '__main__':
     main()

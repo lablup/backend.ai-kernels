@@ -1,4 +1,9 @@
-# Ubuntu 18.04 comes with Python 3.6
+# Google Tensorflow 2.0 (CPU) & Python 3.6
+# ref: https://tensorflow.org
+
+# mount from pre-builded common-tensorfloe:2.0-py36 as wheel binary.
+FROM lablup/common-tensorflow:2.0-py36 as tf-binary
+
 FROM ubuntu:18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
@@ -21,6 +26,8 @@ ENV PYTHONUNBUFFERED=1 \
     PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
 
+COPY --from=tensorflow-binary /tmp/*.whl /tmp
+
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools && \
     python3 -m pip install --no-cache-dir wheel && \
@@ -39,8 +46,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir networkx cvxpy && \
     python3 -m pip install --no-cache-dir scikit-learn scikit-image && \
     python3 -m pip install --no-cache-dir pygments && \
-    python3 -m pip install --no-cache-dir tf-nightly-2.0-preview && \
-#   python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
+    python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
     python3 -m pip install --no-cache-dir keras && \
     python3 -m pip install --no-cache-dir keras_applications && \
     python3 -m pip install --no-cache-dir keras_preprocessing && \
@@ -50,10 +56,11 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --name backendai-python \
-        --display-name "TensorFlow 2.0 on Python 3.6 (CPU-only)" && \
-    cat /usr/local/share/jupyter/kernels/backendai-python/kernel.json
+RUN python -m ipykernel install --display-name "TensorFlow 2.0 on Python 3.6 (CPU-only)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Install Jupyter notebook logo
 RUN mkdir -p /home/work/.jupyter/custom

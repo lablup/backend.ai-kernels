@@ -69,7 +69,13 @@ RUN apt-get update && \
 RUN mkdir /usr/local/cuda-8.0/lib &&  \
     ln -s /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/local/cuda/lib/libnccl.so.2 && \
     ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h
-    
+
+# link CUDA-8.0 + cuDNN 7.0
+RUN ln -s /usr/local/cuda-8.0 /usr/local/cuda && \
+    ldconfig
+ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
@@ -102,15 +108,17 @@ RUN cd /tmp/tensorflow-r${TF_VERSION} && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
         LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
         tensorflow/tools/ci_build/builds/configured GPU \
-    bazel build -c opt --config=cuda \
+    bazel build \
+    	-c opt \
+	--copt=-mavx \
+	--config=cuda \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
 	tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
-    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
+    rm -fr /root/*.cache
 
-# Clean up pip wheel and Bazel cache when done.
-RUN rm -rf /root/.cache	&& \
-    ls -lh /tmp/tensorflow_pkg
+RUN ls -lh /tmp/tensorflow_pkg
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0
 
