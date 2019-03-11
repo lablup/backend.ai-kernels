@@ -65,7 +65,7 @@ RUN apt-get update && \
         libhdf5-serial-dev \
         libpng12-dev \
         libzmq3-dev \
-        zlib1g-dev \
+        libffi-dev \
         pkg-config \
         rsync \
         software-properties-common \
