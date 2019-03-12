@@ -4,8 +4,8 @@
 # import python-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 
-# Build target: lablup/common-tensorflow:2.0-py36-cuda10
-FROM nvidia/cuda:10.0-base-ubuntu16.04
+# Build target: lablup/common-tensorflow:2.0-py36-cuda9
+FROM nvidia/cuda:10.0-base-ubuntu18.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
@@ -37,6 +37,7 @@ ENV TF_CUDA_COMPUTE_CAPABILITIES 3.5,3.7,5.2,6.0,6.1,7.0
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
 ENV CUDNN_INSTALL_PATH /usr/local/cuda 
+ENV CI_BUILD_PYTHON python
 
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
@@ -67,6 +68,7 @@ RUN apt-get update && \
         libhdf5-serial-dev \
         libpng12-dev \
         libzmq3-dev \
+        libffi-dev \
         pkg-config \
         rsync \
         software-properties-common \
@@ -96,7 +98,6 @@ RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 # Check Bazel/Python is runnable.
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
 RUN bazel version; python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
-    pip install -U setuptools pip && \
     pip install --no-cache-dir wheel numpy scipy && \
     pip install --no-cache-dir keras_applications && \
     pip install --no-cache-dir keras_preprocessing && \
@@ -116,22 +117,16 @@ RUN mkdir /bazel && \
     chmod +x bazel-*.sh && \
     ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
     cd / && \
-    rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
-
-ENV CI_BUILD_PYTHON python
-
-RUN echo "/opt/intel/mkl/lib/intel64" >> /etc/ld.so.conf.d/intel.conf && \
-    ldconfig && \
-    echo ". /opt/intel/bin/compilervars.sh intel64" >> /etc/bash.bashrc
-
-RUN bazel version && \
+    rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    bazel version && \
     python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     python -c "import numpy; numpy.show_config()" && \
     python -c "import scipy; scipy.show_config()" 
 
 RUN : build TensorFlow pip package && \
     cd /tmp && \
-    git clone --branch=${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
+    git clone --branch=r${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
+#    curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz | tar xzf - && \
     ldconfig
     
 RUN cd /tmp/tensorflow-${TF_VERSION} && \
@@ -143,6 +138,7 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
 	--copt=-mavx \
 	--copt=-mavx2 \
 	--config=cuda \
+	--config=tensorrt \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
