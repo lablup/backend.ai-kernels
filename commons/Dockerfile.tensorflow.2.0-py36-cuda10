@@ -142,8 +142,6 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
         -c opt \
 	--copt=-mavx \
 	--copt=-mavx2 \
-	--copt=-avx512f \
-	--copt=-fma \
 	--config=cuda \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
