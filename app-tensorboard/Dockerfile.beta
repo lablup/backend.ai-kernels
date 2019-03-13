@@ -1,4 +1,4 @@
-FROM lablup/kernel-python-tensorflow:1.11-py36
+FROM lablup/kernel-python-tensorflow:1.13-py36
 RUN pip install --no-cache-dir tensorboard
 RUN pip install --no-cache-dir aiohttp
 COPY run.sh /home/backend.ai/run.sh
