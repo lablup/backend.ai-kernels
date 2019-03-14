@@ -66,7 +66,7 @@ RUN apt-get update && \
         libcurl3-dev \
         libfreetype6-dev \
         libhdf5-serial-dev \
-        libpng12-dev \
+        libpng-dev \
         libzmq3-dev \
         libffi-dev \
         pkg-config \
