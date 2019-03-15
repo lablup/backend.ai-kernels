@@ -89,6 +89,8 @@ def main(build, list_builds, _auto_push):
     auto_push.set(_auto_push)
 
     if 'python' in build:
+        build_kernel('base',    '3.6')
+        build_kernel('base',    '3.6-ubuntu18.04')
         build_kernel('python',  '2.7-ubuntu18.04')
         build_kernel('python',  '3.6-ubuntu18.04')
         build_kernel('python',  '3.7-anaconda2018.12')
