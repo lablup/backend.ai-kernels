@@ -1,7 +1,8 @@
 FROM nvcr.io/nvidia/tensorflow:19.02-py3
 # NVIDIA DIGITS runs on Python 3.5
 
-RUN apr-get update ; apt-get install libsm6 libxext6 libxrender-dev
+RUN apt-get update && \
+    apt-get install -y libsm6 libxext6 libxrender-dev
 ENV PYTHONUNBUFFERED=1 \
     PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
