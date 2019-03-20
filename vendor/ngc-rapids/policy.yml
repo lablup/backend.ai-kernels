@@ -1,0 +1,64 @@
+whitelist_paths:
+  OP_OPEN: ["*"]
+  OP_ACCESS: ["*"]
+  OP_EXEC: ["*"]
+  OP_STAT: ["*"]
+  OP_CHMOD: ["/home/work/*", "/tmp/*"]
+exec_allowance: -1
+fork_allowance: -1
+max_child_procs: 256
+extra_envs: []
+preserved_env_keys: [
+  "HOME", "PATH", "LANG",
+  "PYENV_ROOT", "PYTHONPATH",
+  "PYTHONUNBUFFERED",
+  "MPLCONFIGDIR",
+  "OPENBLAS_NUM_THREADS",
+  "OMP_NUM_THREADS",
+  "NPROC",
+  "LD_LIBRARY_PATH",
+  "LD_PRELOAD",
+  # DIGITS-specific
+  "CUDA_VERSION",
+  "CUDA_DRIVER_VERSION",
+  "CUDA_CACHE_DISABLE",
+  "_CUDA_COMPAT_PATH",
+  "CUBLAS_VERSION",
+  "CUDNN_VERSION",
+  "NVIDIA_REQUIRE_CUDA",
+  "NVIDIA_VISIBLE_DEVICES",
+  "NVIDIA_DRIVER_CAPABILITIES",
+  "NCCL_VERSION",
+  "OPENMPI_VERSION",
+  "MOFED_VERSION",
+  "OMPI_MCA_btl_vader_single_copy_mechanism",
+  "TRT_VERSION",
+  "TENSORFLOW_VERSION",
+  "NVIDIA_TENSORFLOW_VERSION",
+  "CUDA_TOOLKIT_PATH",
+  "CUDNN_INSTALL_PATH",
+  "NCCL_INSTALL_PATH",
+  "NCCL_HDR_PATH",
+  "TF_ADJUST_HUE_FUSED",
+  "TF_ADJUST_SATURATION_FUSED",
+  "TF_ENABLE_WINOGRAD_NONFUSED",
+  "TF_AUTOTUNE_THRESHOLD",
+  "HOROVOD_GPU_ALLREDUCE",
+  "HOROVOD_NCCL_INCLUDE",
+  "HOROVOD_NCCL_LIB",
+  "HOROVOD_NCCL_LINK",
+  "HOROVOD_WITHOUT_PYTORCH",
+  "NVIDIA_BUILD_ID",
+  "NVIDIA_DIGITS_VERSION",
+  "DIGITS_VERSION",
+  "DIGITS_FRAMEWORK",
+  "DIGITS_JOBS_DIR",
+  "DIGITS_LOGFILE_FILENAME",
+  "MPLBACKEND",
+]
+
+diff_to_default: true
+
+# Following syscalls are blindly allowed.
+# IMPORTANT: ptrace MUST NOT be included!
+allowed_syscalls:
