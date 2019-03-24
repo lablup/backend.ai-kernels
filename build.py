@@ -133,6 +133,7 @@ def main(build, list_builds, _auto_push):
         build_common('numpy', '1.15-py36-ubuntu16.04-mkl2019.0')
         build_kernel('base', 'ubuntu16.04-mkl2018.3')
         build_kernel('base', 'ubuntu16.04-mkl2019')
+        build_kernel('base', 'ubuntu16.04-mkl2019.1')        
 
     ## Our TensorFlow currently depends on CUDA 9.0 + cuDNN 7.1
     if 'tf-pkg-old' in build:
@@ -206,6 +207,11 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-tensorflow', '1.12-py36-cuda9')
         build_kernel('python-tensorflow', '1.12-py36-srv')
         build_kernel('python-tensorflow', '1.12-py36-srv-cuda9')
+        build_kernel('python-tensorflow', '1.13-py36')
+        build_kernel('python-tensorflow', '1.13-py36-tpu')
+        build_kernel('python-tensorflow', '1.13-py36-cuda9')
+        build_kernel('python-tensorflow', '1.13-py36-srv')
+        build_kernel('python-tensorflow', '1.13-py36-srv-cuda9')        
 
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36')
@@ -269,7 +275,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-digits',  '19.01-tensorflow')
         build_kernel('vendor/ngc-digits',  '19.02-tensorflow')        
         build_kernel('vendor/ngc-rapids',  '0.5-rapids-py3')
-#        build_kernel('vendor/ngc-chainer', '4.0-py3')
+        build_kernel('vendor/ngc-chainer', '4.0-py3')
 
 if __name__ == '__main__':
     main()
