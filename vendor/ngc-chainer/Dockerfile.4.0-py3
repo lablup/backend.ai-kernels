@@ -1,4 +1,4 @@
-FROM nvcr.io/partners/chainer:4.0.0b1
+FROM nvcr.io/chainer:4.0.0b1
 # NVIDIA DIGITS runs on Python 3.5
 
 ENV PYTHONUNBUFFERED=1 \
