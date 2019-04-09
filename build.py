@@ -127,6 +127,7 @@ def main(build, list_builds, _auto_push):
     # TODO: (not implemented) build_kernel('mono',   'XX-alpine')
 
     if 'chainer' in build:
+        build_kernel('python-chainer',   '1.0-py36')
         build_kernel('python-chainer',   '2.0-py36')
         build_kernel('python-chainer',   '3.0-py36')
         build_kernel('python-chainer',   '4.0-py36')
