@@ -64,6 +64,7 @@ available_builds = [
     'python',
     'alpine-base', 'alpine-ext',
     'compute-base',
+    'chainer',
     'tf-builder',
     'tf-pkg-old', 'tf-pkg-current', 'tf-pkg-future',
     'tf-old', 'tf-current', 'tf-future',
@@ -125,6 +126,9 @@ def main(build, list_builds, _auto_push):
     # TODO: (not implemented) build_kernel('mono',   'XX-alpine')
     # TODO: (not implemented) build_kernel('mono',   'XX-alpine')
 
+    if 'chainer' in build:
+        build_kernel('python-chainer',   '4.0-py3')
+    
     if 'tf-builder' in build:
         build_common('bazel', '0.5-ubuntu16.04')
         build_common('bazel', '0.11-ubuntu16.04')
