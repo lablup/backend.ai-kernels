@@ -1,4 +1,4 @@
-# Chainer 1.0 (CPU) & Python 3.6
+# Chainer 1.24 (CPU) & Python 3.6
 # ref: https://github.com/chainer/chainer
 
 # base image
@@ -61,7 +61,7 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 #RUN python -c "import chainer; print(chainer.__version__)"
 
 # Install ipython kernelspec
-RUN python -m ipykernel install --display-name "Chainer 1.0 on Python 3.6 (CPU-only)" && \
+RUN python -m ipykernel install --display-name "Chainer v1 on Python 3.6 (CPU-only)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Install Jupyter notebook logo
