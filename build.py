@@ -274,10 +274,13 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/aws_polly', '0.1-alpine3.8')
 
     if 'vendor-ngc' in build:
+        build_kernel('vendor/ngc-caffe2', '18.08-py3')
+
         build_kernel('vendor/ngc-tensorflow', '18.12-py3')
         build_kernel('vendor/ngc-tensorflow', '19.01-py3')
         build_kernel('vendor/ngc-tensorflow', '19.02-py3')        
         build_kernel('vendor/ngc-tensorflow', '19.03-py3')        
+
         build_kernel('vendor/ngc-pytorch',  '18.12.1-py3')
         build_kernel('vendor/ngc-pytorch',  '19.01-py3')
         build_kernel('vendor/ngc-pytorch',  '19.02-py3')
@@ -290,7 +293,8 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-digits',  '18.12-caffe')
         build_kernel('vendor/ngc-digits',  '19.01-caffe')
         build_kernel('vendor/ngc-digits',  '19.02-caffe')
-        build_kernel('vendor/ngc-digits',  '19.03-caffe')                 
+        build_kernel('vendor/ngc-digits',  '19.03-caffe')
+                 
         build_kernel('vendor/ngc-rapids',  '0.5-rapids-py3')
         build_kernel('vendor/ngc-chainer', '4.0-py3')
 
