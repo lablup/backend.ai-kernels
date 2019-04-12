@@ -274,6 +274,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/aws_polly', '0.1-alpine3.8')
 
     if 'vendor-ngc' in build:
+        build_kernel('vendor/ngc-caffe2', '18.08-py2')
         build_kernel('vendor/ngc-caffe2', '18.08-py3')
 
         build_kernel('vendor/ngc-tensorflow', '18.12-py3')
