@@ -8,13 +8,13 @@ ENV BAZEL_VERSION 0.20.0
 ENV PYTHON_BIN_PATH /usr/bin/python
 ENV PYTHON_LIB_PATH /usr/local/lib/python3.6/site-packages 
 ENV GCC_HOST_COMPILER_PATH /usr/bin/gcc 
-ENV CC_OPT_FLAGS "-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" 
+ENV CC_OPT_FLAGS "-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -k -msse4.1 -msse4.2" 
 ENV TF_NEED_JEMALLOC 1
 ENV TF_NEED_GCP 1
 ENV TF_NEED_HDFS 1
 ENV TF_ENABLE_XLA 1
 ENV TF_NEED_VERBS 0
-ENV TF_NEED_MPI 0
+ENV TF_NEED_MPI 1
 ENV TF_NEED_GDR 0
 ENV TF_NEED_S3 1 
 ENV TF_NEED_KAFKA 0 
@@ -104,9 +104,9 @@ RUN : build TensorFlow pip package && \
 
 RUN cd /tmp/tensorflow-${TF_VERSION} && \
 # AVX & AVX2 support under haswell core
-        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
+#        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -k -msse4.1 -msse4.2" \
 # AVX512 support over skylake core
-#        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mavx512f -mavx512pf -mavx512cd -mavx512er -mfpmath=both -msse4.1 -msse4.2" \
+        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mavx512f -mavx512pf -mavx512cd -mavx512er -mfpmath=both -msse4.1 -msse4.2" \
     tensorflow/tools/ci_build/builds/configured CPU \
     bazel build \
         --config=opt --config=mkl \
