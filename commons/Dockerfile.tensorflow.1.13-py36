@@ -80,6 +80,28 @@ RUN python -m pip install -U setuptools pip && \
         && \
     rm -f /tmp/*.whl
 
+# Install Open MPI
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    wget https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz && \
+    tar zxf openmpi-3.0.0.tar.gz && \
+    cd openmpi-3.0.0 && \
+    ./configure --enable-orterun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    rm -rf /tmp/openmpi
+
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
+
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+
+
 RUN mkdir /bazel && \
     cd /bazel && \
     curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
@@ -113,6 +135,18 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+
+# Install Horovod
+RUN python -m pip install --no-cache-dir horovod
+
+# Install OpenSSH for MPI to communicate between containers
+RUN mkdir -p /var/run/sshd
+
+# Allow OpenSSH to talk to containers without asking for confirmation
+RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
+    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
+    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
+    
 
 RUN ls -l /tmp/tensorflow_pkg
 
