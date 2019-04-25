@@ -142,7 +142,8 @@ def main(build, list_builds, _auto_push):
         build_common('numpy', '1.15-py36-ubuntu16.04-mkl2019.0')
         build_kernel('base', 'ubuntu16.04-mkl2018.3')
         build_kernel('base', 'ubuntu16.04-mkl2019')
-        build_kernel('base', 'ubuntu16.04-mkl2019.1')        
+        build_kernel('base', 'ubuntu16.04-mkl2019.1')       
+        build_kernel('base', 'ubuntu16.04-mkl2019.2')        
 
     ## Our TensorFlow currently depends on CUDA 9.0 + cuDNN 7.1
     if 'tf-pkg-old' in build:
@@ -275,7 +276,7 @@ def main(build, list_builds, _auto_push):
 
     if 'vendor-ngc' in build:
         build_kernel('vendor/ngc-caffe2', '18.08-py2')
-        build_kernel('vendor/ngc-caffe2', '18.08-py3')
+        build_kernel('vendor/ngc-caffe3', '18.08-py3')
 
         build_kernel('vendor/ngc-tensorflow', '18.12-py3')
         build_kernel('vendor/ngc-tensorflow', '19.01-py3')
