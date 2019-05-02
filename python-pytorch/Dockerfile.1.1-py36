@@ -50,7 +50,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir networkx cvxpy && \
     python3 -m pip install --no-cache-dir scikit-learn scikit-image && \
     python3 -m pip install --no-cache-dir pygments && \
-    python3 -m pip install --no-cache-dir https://download.pytorch.org/whl/cpu/torch-1.0.0-cp36-cp36m-linux_x86_64.whl && \
+    python3 -m pip install --no-cache-dir https://download.pytorch.org/whl/cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl && \ 
     python3 -m pip install --no-cache-dir torchvision && \
     python3 -m pip install --no-cache-dir ipython && \
     python3 -m pip install --no-cache-dir jupyter && \
