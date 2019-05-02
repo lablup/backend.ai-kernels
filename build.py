@@ -245,7 +245,9 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-pytorch', '0.4-py36')
         build_kernel('python-pytorch', '0.4-py36-cuda9')
         build_kernel('python-pytorch', '1.0-py36')
-        build_kernel('python-pytorch', '1.0-py36-cuda9')
+        build_kernel('python-pytorch', '1.0-py36-cuda10')
+        build_kernel('python-pytorch', '1.1-py36')
+        build_kernel('python-pytorch', '1.1-py36-cuda10')
 
     # Python Theano
     # TODO (not modernized):
