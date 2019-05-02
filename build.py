@@ -103,6 +103,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('cpp',     'gcc6.3-alpine3.8')
         build_kernel('java',    '8-alpine3.8')
         build_kernel('nodejs',  '10-alpine3.8')
+        build_kernel('nodejs',  '12-alpine3.8')        
         build_kernel('lua',     '5.1-alpine3.8')
         build_kernel('lua',     '5.2-alpine3.8')
         build_kernel('lua',     '5.3-alpine3.8')
@@ -286,21 +287,25 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-tensorflow', '19.01-py3')
         build_kernel('vendor/ngc-tensorflow', '19.02-py3')        
         build_kernel('vendor/ngc-tensorflow', '19.03-py3')        
+        build_kernel('vendor/ngc-tensorflow', '19.04-py3')        
 
         build_kernel('vendor/ngc-pytorch',  '18.12.1-py3')
         build_kernel('vendor/ngc-pytorch',  '19.01-py3')
         build_kernel('vendor/ngc-pytorch',  '19.02-py3')
-        build_kernel('vendor/ngc-pytorch',  '19.03-py3')                        
+        build_kernel('vendor/ngc-pytorch',  '19.03-py3')
+        build_kernel('vendor/ngc-pytorch',  '19.04-py3')                         
         build_kernel('vendor/ngc-digits',  '18.12-tensorflow')
         build_kernel('vendor/ngc-digits',  '19.01-tensorflow')
         build_kernel('vendor/ngc-digits',  '19.02-tensorflow')
         build_kernel('vendor/ngc-digits',  '19.03-tensorflow')
-
+        build_kernel('vendor/ngc-digits',  '19.04-tensorflow')
+        
         build_kernel('vendor/ngc-digits',  '18.12-caffe')
         build_kernel('vendor/ngc-digits',  '19.01-caffe')
         build_kernel('vendor/ngc-digits',  '19.02-caffe')
         build_kernel('vendor/ngc-digits',  '19.03-caffe')
-                 
+        build_kernel('vendor/ngc-digits',  '19.04-caffe')
+        
         build_kernel('vendor/ngc-rapids',  '0.5-rapids-py3')
         build_kernel('vendor/ngc-chainer', '4.0-py3')
 
