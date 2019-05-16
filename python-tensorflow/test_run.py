@@ -80,8 +80,9 @@ if __name__ == '__main__':
     s()
 ''',
     'tensorflow': '''
-import tensorflow
-print('TensorFlow version:', tensorflow.__version__)
+import tensorflow as tf
+print('TensorFlow version:', tf.__version__)
+print(tf.test.is_gpu_available())
 print('ok')'''
 }
 
