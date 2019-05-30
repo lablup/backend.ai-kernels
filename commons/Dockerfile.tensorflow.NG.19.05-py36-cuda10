@@ -1,11 +1,12 @@
-# Google Tensorflow Next Generation 19.05 (CUDA10) & Python 3.6
+# Lablup Next Generation tensorflow 19.05 (CUDA10) & Python 3.6
 # ref: https://tensorflow.org
 
 # import python-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 
 # Build target: lablup/common-tensorflow:NG.19.05-py36-cuda10
-FROM nvidia/cuda:10.1-base-ubuntu18.04
+#FROM nvidia/cuda:10.1-base-ubuntu18.04
+FROM ubuntu:18.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
@@ -38,6 +39,7 @@ ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
 ENV CUDNN_INSTALL_PATH /usr/local/cuda 
 ENV CI_BUILD_PYTHON python
+
 
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
