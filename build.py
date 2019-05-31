@@ -65,6 +65,7 @@ available_builds = [
     'alpine-base', 'alpine-ext',
     'compute-base',
     'chainer',
+    'ng',
     'tf-builder',
     'tf-pkg-old', 'tf-pkg-current', 'tf-pkg-future',
     'tf-old', 'tf-current', 'tf-future',
@@ -228,6 +229,9 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-tensorflow', '1.14-py36')
         build_kernel('python-tensorflow', '1.14-py36-cuda9')
 
+    if 'ng' in build:
+        build_common('tensorflow', 'NG.19.05-py36-cuda9')        
+        build_kernel('python-tensorflow', 'NG.19.05-py36-cuda9')
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36')
         build_kernel('python-tensorflow', '2.0-py36-cuda10')
