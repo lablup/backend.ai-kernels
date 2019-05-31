@@ -103,6 +103,7 @@ RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     pip install --no-cache-dir wheel numpy scipy && \
     pip install --no-cache-dir keras_applications && \
     pip install --no-cache-dir keras_preprocessing && \
+    pip install --no-cache-dir future && \
     rm -f /tmp/*.whl
 
 # Running bazel inside a `docker build` command causes trouble, cf:
