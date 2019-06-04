@@ -1,4 +1,4 @@
-FROM lablup/common-tensorflow:NextG.19.05-py36-cuda9 as tf-binary
+FROM lablup/common-tensorflow:NextG.19.06-py36-cuda9 as tf-binary
 FROM nvidia/cuda:9.2-cudnn7-runtime-ubuntu18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
