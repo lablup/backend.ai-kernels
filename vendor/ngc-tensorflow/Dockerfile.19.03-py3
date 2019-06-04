@@ -21,6 +21,11 @@ RUN /usr/bin/python3 -m pip install -U pip setuptools && \
 RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.5 (NGC/TensorFlow 19.03) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
+# for apt-get installation using /tmp
+RUN mkdir /tmp && \
+    chown root:root /tmp && \
+    chmod 1777 /tmp
+
 # Install Jupyter notebook logo
 RUN mkdir -p /home/work/.jupyter/custom
 COPY custom.css /home/work/.jupyter/custom/custom.css
