@@ -1,5 +1,5 @@
-FROM nvcr.io/nvidia/tensorflow:19.04-py3
-# NVIDIA DIGITS runs on Python 3.5
+FROM nvcr.io/nvidia/tensorflow:19.05-py3
+# NVIDIA Tensorflow runs on Python 3.5
 
 RUN apt-get update && \
     apt-get install -y libsm6 libxext6 libxrender-dev
@@ -18,8 +18,13 @@ RUN /usr/bin/python3 -m pip install -U pip setuptools && \
     /usr/bin/python3 -m pip install --no-cache-dir jupyterlab
 
 # Install ipython kernelspec
-RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.5 (NGC/TensorFlow 19.04) on Backend.AI" && \
+RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.5 (NGC/TensorFlow 19.05) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# for apt-get installation using /tmp
+RUN mkdir /tmp && \
+    chown root:root /tmp && \
+    chmod 1777 /tmp
 
 # Install Jupyter notebook logo
 RUN mkdir -p /home/work/.jupyter/custom
