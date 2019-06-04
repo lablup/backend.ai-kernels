@@ -230,11 +230,11 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-tensorflow', '1.14-py36-cuda9')
 
     if 'past' in build:
-        build_common('tensorflow', 'NG.19.05-py36-cuda9')        
-        build_kernel('python-tensorflow', 'NG.19.05-py36-cuda9')
+        build_common('tensorflow', 'NextG.19.05-py36-cuda9')        
+        build_kernel('python-tensorflow', 'NextG.19.05-py36-cuda9')
     if 'nextg' in build:
-        build_common('tensorflow', 'NG.19.06-py36-cuda9')        
-        build_kernel('python-tensorflow', 'NG.19.06-py36-cuda9')
+        build_common('tensorflow', 'NextG.19.06-py36-cuda9')        
+        build_kernel('python-tensorflow', 'NextG.19.06-py36-cuda9')
 
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36')
