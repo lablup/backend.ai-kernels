@@ -297,7 +297,8 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-tensorflow', '19.01-py3')
         build_kernel('vendor/ngc-tensorflow', '19.02-py3')        
         build_kernel('vendor/ngc-tensorflow', '19.03-py3')        
-        build_kernel('vendor/ngc-tensorflow', '19.04-py3')        
+        build_kernel('vendor/ngc-tensorflow', '19.04-py3')
+        build_kernel('vendor/ngc-tensorflow', '19.05-py3')                
 
         build_kernel('vendor/ngc-pytorch',  '18.12.1-py3')
         build_kernel('vendor/ngc-pytorch',  '19.01-py3')
