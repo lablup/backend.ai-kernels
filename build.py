@@ -310,7 +310,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-digits',  '18.12-tensorflow')
         build_kernel('vendor/ngc-digits',  '19.01-tensorflow')
         build_kernel('vendor/ngc-digits',  '19.02-tensorflow')
-        Build_kernel('vendor/ngc-digits',  '19.03-tensorflow')
+        build_kernel('vendor/ngc-digits',  '19.03-tensorflow')
         build_kernel('vendor/ngc-digits',  '19.04-tensorflow')
         build_kernel('vendor/ngc-digits',  '19.05-tensorflow')        
         
@@ -328,7 +328,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-NVCaffe', '19.05-NVCaffe')        
         
         build_kernel('vendor/ngc-rapids',  '0.5-rapids-py3')
-        build_kernel('vendor/ngc-chainer', '4.0-py3')
+#        build_kernel('vendor/ngc-chainer', '4.0-py3')
 
 if __name__ == '__main__':
     main()
