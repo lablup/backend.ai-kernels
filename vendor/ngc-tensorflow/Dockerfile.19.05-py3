@@ -22,7 +22,7 @@ RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.5 (NGC/Tensor
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # for apt-get installation using /tmp
-RUN mkdir /tmp && \
+RUN mkdir -p /tmp && \
     chown root:root /tmp && \
     chmod 1777 /tmp
 
