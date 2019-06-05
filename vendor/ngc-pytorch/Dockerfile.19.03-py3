@@ -17,6 +17,11 @@ RUN /opt/conda/bin/python -m ipykernel install \
         --display-name "Python 3.6 CONDA (NGC/PyTorch 19.03) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
+# for apt-get installation using /tmp
+RUN mkdir -p /tmp && \
+    chown root:root /tmp && \
+    chmod 1777 /tmp
+
 # Install Jupyter notebook logo
 RUN mkdir -p /home/work/.jupyter/custom
 COPY custom.css /home/work/.jupyter/custom/custom.css
