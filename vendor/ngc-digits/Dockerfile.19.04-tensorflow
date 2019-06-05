@@ -17,6 +17,11 @@ RUN python -m pip install --no-cache-dir -U pip setuptools && \
 RUN python -m ipykernel install --display-name "Python 2.7 (NGC/DIGITS 19.04-tensorflow) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python2/kernel.json
 
+# for apt-get installation using /tmp
+RUN mkdir -p /tmp && \
+    chown root:root /tmp && \
+    chmod 1777 /tmp
+
 # Install Jupyter notebook logo
 RUN mkdir -p /home/work/.jupyter/custom
 COPY custom.css /home/work/.jupyter/custom/custom.css
