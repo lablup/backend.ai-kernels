@@ -1,21 +1,26 @@
 FROM nvcr.io/nvidia/caffe2:18.08-py2
-# NVIDIA Caffe2 with Python 2.7 (CONDA)
+# NVIDIA Caffe2 with Python 2.7
 
 ENV PYTHONUNBUFFERED=1 \
-    PATH=/opt/conda/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    PATH=/usr/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
 
 # ipython/jupyter is already installed in the Anaconda Python installed at /opt/conda.
-RUN /opt/conda/bin/python -m pip install ipython && \
-    /opt/conda/bin/python -m pip install jupyter && \
-    /opt/conda/bin/python -m pip install jupyterlab && \
-    /opt/conda/bin/python -m pip install opencv-python 
+RUN python -m pip install --no-cache-dir ipython && \
+    python -m pip install --no-cache-dir jupyter && \
+    python -m pip install --no-cache-dir jupyterlab && \
+    python -m pip install --no-cache-dir opencv-python 
 
 # Install ipython kernelspec
-RUN /opt/conda/bin/python -m ipykernel install \
-        --prefix=/opt/conda/ \
-        --display-name "Python 2.7 CONDA (NGC/Caffe2 18.08) on Backend.AI" && \
-    cat /opt/conda/share/jupyter/kernels/python/kernel.json
+RUN python -m ipykernel install \
+        --prefix=/usr/bin/ \
+        --display-name "Python 2.7 (NGC/Caffe2 18.08) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python2/kernel.json
+
+# for apt-get installation using /tmp
+RUN mkdir -p /tmp && \
+    chown root:root /tmp && \
+    chmod 1777 /tmp
 
 # Install Jupyter notebook logo
 RUN mkdir -p /home/work/.jupyter/custom
@@ -34,7 +39,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/opt/conda/bin/python" \
+      ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
 
 # vim: ft=dockerfile
