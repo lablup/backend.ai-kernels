@@ -319,6 +319,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-digits',  '19.02-caffe')
         build_kernel('vendor/ngc-digits',  '19.03-caffe')
         build_kernel('vendor/ngc-digits',  '19.04-caffe')
+        build_kernel('vendor/ngc-digits',  '19.05-caffe')        
         
         build_kernel('vendor/ngc-mxnet',  '19.04-mnxet')
 
