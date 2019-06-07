@@ -28,12 +28,11 @@ Here we list the latest versions of our supported kernel images.
 | R             | `lablup/kernel-r`       | 3.3             | O     | O     |   |   | CRAN R             |
 | Scala	        | `lablup/kernel-scala`   | 2.12            | O     | O     |   |   |                    |
 
-<<<<<<< HEAD
 | Deep-Learning Framework | Image Name    | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|----------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/python-tensorflow` | 1.12    | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| PyTorch    | `lablup/python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
-| caffe2     | `lablup/python-torch`      | 1.0rc   | O     | O\*   | O   |   |                   |
+| TensorFlow | `lablup/python-tensorflow` | 1.14    | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| PyTorch    | `lablup/python-torch`      | 1.1     | O     | O\*   | O   |   |                   |
+| caffe2     | `lablup/python-torch`      | 1.0     | O     | O\*   | O   |   |                   |
 | cafee      | `lablup/python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
 | CNTK       | `lablup/python-cntk`       | 2.6     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | Chainer    | `lablup/python-chainer`    | 4.0     | O     | O\*   | O   |   |                   |
@@ -41,14 +40,14 @@ Here we list the latest versions of our supported kernel images.
 =======
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.13    | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| PyTorch    | `lablup/kernel-python-torch`      | 1.0     | O     | O\*   | O   |   |                   |
+| TensorFlow | `lablup/kernel-python-tensorflow` | 1.14    | O     | O\*   | O   |   | Bundled w/Keras 2 |
+| PyTorch    | `lablup/kernel-python-torch`      | 1.1     | O     | O\*   | O   |   |                   |
 | caffe2     | `lablup/kernel-python-torch`      | 1.0     | O     | O\*   | O   |   |                   |
 | cafee      | `lablup/kernel-python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
 | CNTK       | `lablup/kernel-python-cntk`       | 2.6     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | Chainer    | `lablup/kernel-python-chainer`    | (WIP)   | O     | O\*   | O   |   |                   |
 | Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
->>>>>>> 2cc4b34980e435826527c31b830094c4ab9e3819
+
 
 ### Deep learning based images
  * `base-mkl`    (Intel' Machine Learning Kits (MKL) works on CPU only kernel)
@@ -59,6 +58,7 @@ Here we list the latest versions of our supported kernel images.
 | base-mkl                 | base-cuda                     | base-TPU                 | base-ROCm (T.B.D) |
 |--------------------------|-------------------------------|--------------------------|-------------------|
 | tensorflow-2.0-py36      | tensorflow-2.0-py36-cuda10    |                          |                   |
+| tensorflow-1.14-py36     | tensorflow-1.14-py36-cuda9    | tensorflow-1.14-py36-tpu |                   |
 | tensorflow-1.13-py36     | tensorflow-1.13-py36-cuda9    | tensorflow-1.13-py36-tpu |                   |
 | tensorflow-1.12-py36     | tensorflow-1.12-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
 | tensorflow-1.11-py36     | tensorflow-1.11-py36-cuda9    | tensorflow-1.11-py36-tpu |                   |
@@ -90,6 +90,8 @@ Here we list the latest versions of our supported kernel images.
 
 | base                     |  base-cuda                     | base-TPU (T.B.D)         | base-ROCm (T.B.D) |
 |--------------------------|--------------------------------|--------------------------|-------------------|
+| tensorflow-1.14-py36-srv | tensorflow-1.14-py36-srv-cuda9 |                          |                   |
+| tensorflow-1.13-py36-srv | tensorflow-1.13-py36-srv-cuda9 |                          |                   |
 | tensorflow-1.12-py36-srv | tensorflow-1.12-py36-srv-cuda9 |                          |                   |
 | tensorflow-1.11-py36-srv | tensorflow-1.11-py36-srv-cuda9 |                          |                   |
 
