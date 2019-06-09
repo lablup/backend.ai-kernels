@@ -129,8 +129,8 @@ RUN mkdir /bazel && \
 
 RUN : build TensorFlow pip package && \
     cd /tmp && \
-    git clone --branch=v${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
-#    curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz | tar xzf - && \
+#    git clone --branch=v${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
+    curl -SL https://github.com/tensorflow/tensorflow/archive/v2.0.0-beta0.tar.gz | tar xzf - && \
     ldconfig
     
 RUN cd /tmp/tensorflow-${TF_VERSION} && \
