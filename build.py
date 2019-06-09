@@ -195,8 +195,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-tensorflow', '1.2-py36-cuda8')
         build_kernel('python-tensorflow', '1.3-py36')                        
         build_kernel('python-tensorflow', '1.3-py36-cuda8')
-        build_kernel('python-tensorflow', '1.4-py36')                                
-        build_kernel('python-tensorflow', '1.4-py36-cuda8')
+        build_kernel('python-tensorflow', '1.4-py36')                                  build_kernel('python-tensorflow', '1.4-py36-cuda8')
         build_kernel('python-tensorflow', '1.5-py36')
         build_kernel('python-tensorflow', '1.5-py36-cuda9')
         build_kernel('python-tensorflow', '1.6-py36')
@@ -284,6 +283,8 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-cntk', '2.5-py36-cuda9')        
         build_kernel('python-cntk', '2.6-py36')
         build_kernel('python-cntk', '2.6-py36-cuda9')        
+        build_kernel('python-cntk', '2.7-py36')
+        build_kernel('python-cntk', '2.7-py36-cuda9')        
 
     # AWS polly
     if 'vendor-aws' in build:
