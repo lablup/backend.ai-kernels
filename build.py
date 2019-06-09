@@ -184,8 +184,8 @@ def main(build, list_builds, _auto_push):
 
     if 'tf-pkg-future' in build:
         build_common('tensorflow', '2.0-py36')
-        build_common('tensorflow', '2.0-py36-cuda10')
-
+        build_common('tensorflow', '2.0-py36-cuda9')
+        
     if 'tf-old' in build:
         build_kernel('python-tensorflow', '1.0-py36')
         build_kernel('python-tensorflow', '1.0-py36-cuda8')
@@ -238,7 +238,7 @@ def main(build, list_builds, _auto_push):
 
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36')
-        build_kernel('python-tensorflow', '2.0-py36-cuda10')
+        build_kernel('python-tensorflow', '2.0-py36-cuda9')
 
     if 'caffe' in build:
         build_kernel('python-caffe',  '1.0-py36')
