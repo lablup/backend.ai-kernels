@@ -29,8 +29,9 @@ RUN ln -s /usr/local/cuda-9.2 /usr/local/cuda && \
     ldconfig
 
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
-RUN curl -O https://download.pytorch.org/whl/cu90/torch-1.1.0-cp36-cp36m-linux_x86_64.whl /tmp
-RUN mkdir -p /home/work/.jupyter/nbextension && \
+WORKDIR /tmp
+RUN curl -O https://download.pytorch.org/whl/cu90/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
+RUN mkdir -p /home/work/.jupyter/nbextension
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools && \
@@ -58,9 +59,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir ipython && \
     python3 -m pip install --no-cache-dir jupyter && \
     python3 -m pip install --no-cache-dir jupyterlab && \
-    python3 -m pip install --no-cache-dir https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tarball/master \
-    	    jupyter_nbextensions_configurator pillow opencv-python && \
-    jupyter contrib nbextension install --user && jupyter nbextensions_configurator enable --user jupyter_contrib_nbextensions && \
+    python3 -m pip install --no-cache-dir tf2onnx && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
