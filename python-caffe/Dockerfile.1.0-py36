@@ -14,6 +14,11 @@ RUN python -m pip install --no-cache-dir numpy scipy
 RUN python -m ipykernel install --display-name "Caffe 1.0 on Python 3.6 (CPU-only)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY custom.css /home/work/.jupyter/custom/custom.css
+COPY logo.svg /home/work/.jupyter/custom/logo.svg
+
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
@@ -24,6 +29,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0

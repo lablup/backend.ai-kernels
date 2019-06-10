@@ -32,6 +32,7 @@ ENV PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     LANG=C.UTF-8
+    
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools && \
     python3 -m pip install --no-cache-dir h5py && \
@@ -50,19 +51,23 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir ipython && \
     python3 -m pip install --no-cache-dir jupyter && \
     python3 -m pip install --no-cache-dir jupyterlab && \
-    rm -rf /root/.cache && \
-    rm -f /tmp/*.whl
-RUN python3 -m pip install --no-cache-dir -U jupyter-console==5.2.0 && \
+    python3 -m pip install --no-cache-dir -U jupyter-console==5.2.0 && \
     python3 -m pip install --no-cache-dir -U prompt-toolkit==1.0.15 && \
     python3 -m pip install --no-cache-dir -U scikit-image
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
+
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
-# # Workaround for libdc1394 initialization error
-# RUN ln /dev/null /dev/raw1394
 
 # Install ipython kernelspec
 RUN python -m ipykernel install --display-name "Caffe 1.0 on Python 3.6 (CUDA 9.2)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY custom.css /home/work/.jupyter/custom/custom.css
+COPY logo.svg /home/work/.jupyter/custom/logo.svg
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
@@ -76,6 +81,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 # # vim: ft=dockerfile sts=4 sw=4 et tw=0
