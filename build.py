@@ -65,7 +65,7 @@ available_builds = [
     'alpine-base', 'alpine-ext',
     'compute-base',
     'chainer',
-    'past','nextg',
+    'past','ff',
     'tf-builder',
     'tf-pkg-old', 'tf-pkg-current', 'tf-pkg-future',
     'tf-old', 'tf-current', 'tf-future',
@@ -230,11 +230,12 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-tensorflow', '1.14-py36-cuda9')
 
     if 'past' in build:
-        build_common('tensorflow', 'NextG.19.05-py36-cuda9')        
-        build_kernel('python-tensorflow', 'NextG.19.05-py36-cuda9')
-    if 'nextg' in build:
-        build_common('tensorflow', 'NextG.19.06-py36-cuda9')        
-        build_kernel('python-tensorflow', 'NextG.19.06-py36-cuda9')
+        build_common('tensorflow', 'ff.19.05-py36-cuda9')
+        build_kernel('python-ff', 'ff.19.05-py36-cuda9')
+        
+    if 'ff' in build:
+        build_common('tensorflow', 'ff.19.06-py36-cuda9')
+        build_kernel('python-ff', 'ff.19.06-py36-cuda9')
 
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36')
