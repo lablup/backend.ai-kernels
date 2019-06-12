@@ -14,16 +14,26 @@ RUN apt-get update && \
         libgeos-dev libgeos++-dev \
         mime-support \
         gcc g++ make \
+	gfortran \
 	cmake \
 	yasm \
 	pkg-config \
         xz-utils \
+	libatlas-base-dev \
         libswscale-dev \
         libtbb2 \
         libtbb-dev \
         libjpeg-dev \
+	libjpeg8-dev \
         libpng-dev \
         libtiff-dev \
+	libtiff5-dev \
+	libjasper-dev \
+	libgtk2.0-dev \
+	libavcodec-dev \
+	libswscale-dev \
+	libv4l-dev \
+	
         libavformat-dev \
         libpq-dev \
     && \	
@@ -69,6 +79,9 @@ RUN mkdir opencv-${OPENCV_VERSION}/cmake_binary && \
     cmake -DBUILD_TIFF=ON \
       -DBUILD_opencv_java=OFF \
       -DWITH_CUDA=ON \
+      -DENABLE_FAST_MATH=1 \
+      -DCUDA_FAST_MATH=1 \
+      -DWITH_CUBLAS=1 \
       -DWITH_OPENGL=ON \
       -DWITH_OPENCL=ON \
       -DWITH_IPP=ON \
@@ -82,8 +95,8 @@ RUN mkdir opencv-${OPENCV_VERSION}/cmake_binary && \
       -DPYTHON_EXECUTABLE=$(which python3) \
       -DPYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
       -DPYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
-      ..
-RUN make -j4 && \
+      .. && \
+    make -j4 && \
     make install 
 RUN rm ${OPENCV_VERSION}.zip && \
     rm -r /opencv-${OPENCV_VERSION}
