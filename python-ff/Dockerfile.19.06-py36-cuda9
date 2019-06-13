@@ -10,6 +10,7 @@ RUN apt-get update -y && \
         ca-certificates \
         gcc g++ make \
 	gfortran \
+	vim \
 	cmake \
 	yasm \
 	pkg-config \
