@@ -75,7 +75,8 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     apt-get purge -y curl && \
     apt-get -y autoremove && \
     rm -rf /root/.cache && \
-    rm -f /tmp/*.whl
+    rm -f /tmp/*.whl && \
+    swift --version
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
