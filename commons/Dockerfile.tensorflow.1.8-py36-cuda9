@@ -27,7 +27,7 @@ ENV TF_NEED_VERBS 0
 ENV TF_NEED_OPENCL_SYCL 0
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_CLANG 0
-ENV TF_NEED_TENSORRT 1
+ENV TF_NEED_TENSORRT 0
 ENV TF_NEED_MPI 0
 ENV TF_NEED_S3 1
 ENV TF_CUDA_VERSION 9.0 
@@ -90,7 +90,8 @@ RUN apt-get update && \
 # Link NCCL libray and header where the build script expects them.
 RUN mkdir /usr/local/cuda-9.0/lib &&  \
     ln -s /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/local/cuda/lib/libnccl.so.2 && \
-    ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h
+    ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h && \
+    ln -s /usr/share/doc/libnccl2/NCCL-SLA.txt /usr/local/cuda/nccl  
     
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
@@ -126,7 +127,7 @@ RUN mkdir /bazel && \
 RUN : build TensorFlow pip package && \
     cd /tmp && \
     git clone --branch=r${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
-#    curl -SL https://github.com/tensorflow/tensorflow/archive/r${TF_VERSION}.tar.gz | tar xzf - && \
+    cp /tmp/tensorflow-${TF_VERSION}/third_party/nccl/LICENSE /tmp/tensorflow-${TF_VERSION}/third_party/nccl/NCCL-SLA.txt && \
     ldconfig
     
 RUN cd /tmp/tensorflow-${TF_VERSION} && \
