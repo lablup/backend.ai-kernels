@@ -27,7 +27,7 @@ ENV TF_NEED_VERBS 0
 ENV TF_NEED_OPENCL_SYCL 0
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_CLANG 0
-ENV TF_NEED_TENSORRT 0
+ENV TF_NEED_TENSORRT 1
 ENV TF_NEED_MPI 0
 ENV TF_NEED_S3 1
 ENV TF_CUDA_VERSION 9.0 
@@ -97,7 +97,7 @@ RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
 # Check Bazel/Python is runnable.
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
-RUN bazel version; python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
+RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     pip install --no-cache-dir wheel numpy scipy && \
     pip install --no-cache-dir keras_applications && \
     pip install --no-cache-dir keras_preprocessing && \
@@ -135,10 +135,11 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
         tensorflow/tools/ci_build/builds/configured GPU \
     bazel build \
         -c opt \
+        --config=mkl \
+	--config=monolithic \
 	--copt=-mavx \
 	--copt=-mavx2 \
 	--config=cuda \
-	--config=tensorrt \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
