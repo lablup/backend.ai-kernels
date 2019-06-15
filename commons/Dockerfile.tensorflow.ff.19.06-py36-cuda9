@@ -28,7 +28,7 @@ ENV TF_NEED_VERBS 0
 ENV TF_NEED_OPENCL_SYCL 0
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_CLANG 0
-ENV TF_NEED_TENSORRT 0
+ENV TF_NEED_TENSORRT 1
 ENV TF_NEED_MPI 0
 ENV TF_NEED_S3 1
 ENV TF_CUDA_VERSION 9.0 
@@ -140,6 +140,11 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
 	--copt=-mavx \
 	--copt=-mavx2 \
 	--config=cuda \
+	--config=mkl \
+	--config=monolithic \
+#	--config=gdr \
+#	--config=verbs \
+#	--config=ngraph \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
