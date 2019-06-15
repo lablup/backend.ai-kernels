@@ -36,7 +36,7 @@ ENV TF_NCCL_VERSION 2
 ENV TF_CUDA_COMPUTE_CAPABILITIES 3.5,3.7,5.2,6.0,6.1,7.0 
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
-ENV CUDNN_INSTALL_PATH /usr/local/cuda 
+#ENV CUDNN_INSTALL_PATH /usr/local/cuda 
 ENV CI_BUILD_PYTHON python
 
 # Install system package dependencies
