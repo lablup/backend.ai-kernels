@@ -153,10 +153,10 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 RUN mkdir -p /home/work/.jupyter/nbextension
 WORKDIR /home/work/.jupyter/nbextension
 
-# vim binding extension
-RUN git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-    jupyter nbextension enable vim_binding/vim_binding
-
+RUN python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+    jupyter contrib nbextension install && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
 
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "Lablup Full Feature 19.06 on Python 3.6 (CUDA 9.2)" && \
