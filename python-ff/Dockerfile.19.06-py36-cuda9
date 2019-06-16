@@ -1,5 +1,8 @@
 FROM lablup/common-tensorflow:ff.19.06-py36-cuda9 as tf-binary
-FROM nvidia/cuda:9.2-cudnn7-runtime-ubuntu18.04
+# import python-binary
+FROM lablup/kernel-base:python3.6 as python-binary
+
+FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 RUN apt-get update -y && \
@@ -17,7 +20,6 @@ RUN apt-get update -y && \
         xz-utils \
         wget curl git-core \
         vim-tiny zip unzip \
-        python3 python3-pip \
         libssl-dev \
         libmpdec2 \
         proj-bin libproj-dev \
@@ -33,6 +35,10 @@ RUN apt-get update -y && \
 	libswscale-dev \
 	libxine2-dev \
 	libv4l-dev
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs 
 
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
@@ -67,16 +73,20 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     LANG=C.UTF-8
 
-# Install CUDA-9.2 + cuDNN 7.4
-RUN ln -s /usr/local/cuda-9.2 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.4.1 /usr/local/cuda/lib64/libcudnn.so && \
+# Install CUDA-9.0 + cuDNN 7.6.0
+RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
+
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools && \
     python3 -m pip install --no-cache-dir wheel && \
     python3 -m pip install --no-cache-dir h5py && \
     python3 -m pip install --no-cache-dir Cython && \
+    python3 -m pip install --no-cache-dir requests && \
     python3 -m pip install --no-cache-dir numpy scipy && \
     python3 -m pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     python3 -m pip install --no-cache-dir aiozmq dataclasses tabulate && \
@@ -126,22 +136,32 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
       .. 2>&1 | tee cmake_messages.txt && \
     make -j${nproc} && \
-    make install 
-RUN cd /tmp && \
+    make install && \
+    cd /tmp && \
     rm -fr opencv* 
 
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
 RUN curl -O https://download.pytorch.org/whl/cu90/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
-    
+
+# Jupyter notebook extension 
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
 RUN python3 -m pip install --no-cache-dir opencv-python && \
     python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
+    python3 -m pip install --no-cache-dir jupyter && \
     python3 -m pip install --no-cache-dir torchvision && \    
     python3 -m pip install --no-cache-dir keras && \
     python3 -m pip install --no-cache-dir keras_applications && \
     python3 -m pip install --no-cache-dir keras_preprocessing && \
     python3 -m pip install --no-cache-dir ipython && \
-    python3 -m pip install --no-cache-dir jupyter && \
+    python3 -m pip install --no-cache-dir ipywidgets && \
+    python3 -m pip install --no-cache-dir ipyparallel && \
     python3 -m pip install --no-cache-dir jupyterlab && \
+    python3 -m pip install --no-cache-dir jupyterthemes && \    
+    python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
+    python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+    python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
     python3 -m pip install --no-cache-dir tf2onnx && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
@@ -149,17 +169,17 @@ RUN python3 -m pip install --no-cache-dir opencv-python && \
 # python alternative support
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
-# Jupyter notebook extension 
-RUN mkdir -p /home/work/.jupyter/nbextension
-WORKDIR /home/work/.jupyter/nbextension
-
-RUN python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
     git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
     jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
 
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "Lablup Full Feature 19.06 on Python 3.6 (CUDA 9.2)" && \
+RUN python3 -m ipykernel install --display-name "Lablup Full Feature 19.06 on Python 3.6 (CUDA 9.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # for apt-get installation using /tmp
