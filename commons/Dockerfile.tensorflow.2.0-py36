@@ -4,7 +4,7 @@ LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
 ENV TF_VERSION master
-ENV BAZEL_VERSION 0.20.0
+ENV BAZEL_VERSION 0.24.1
 ENV PYTHON_BIN_PATH /usr/bin/python
 ENV PYTHON_LIB_PATH /usr/local/lib/python3.6/site-packages 
 ENV GCC_HOST_COMPILER_PATH /usr/bin/gcc 
@@ -15,7 +15,7 @@ ENV TF_NEED_HDFS 1
 ENV TF_ENABLE_XLA 1
 ENV TF_NEED_VERBS 0
 ENV TF_NEED_MPI 0
-ENV TF_NEED_GDR 0
+ENV TF_NEED_GDR 1
 ENV TF_NEED_S3 1 
 ENV TF_NEED_KAFKA 0 
 ENV TF_NEED_OPENCL 0
@@ -109,7 +109,14 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
 #        CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mavx512f -mavx512pf -mavx512cd -mavx512er -mfpmath=both -msse4.1 -msse4.2" \
     tensorflow/tools/ci_build/builds/configured CPU \
     bazel build \
-        --config=opt --config=mkl \
+    	-c opt \
+	--copt=-mavx \
+	--copt=-mavx2 \
+	--config=mkl \
+	--config=monolithic \
+#	--config=gdr \
+#	--config=verbs \
+#	--config=ngraph \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
