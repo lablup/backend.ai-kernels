@@ -3,13 +3,13 @@
 # import python-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 
-FROM ubuntu:18.04
+FROM ubuntu:16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
 ENV TF_VERSION 1.14
 ENV BAZEL_VERSION 0.24.1
-ENV PYTHON_BIN_PATH /usr/bin/python
+ENV PYTHON_BIN_PATH /usr/local/bin/python
 ENV PYTHON_LIB_PATH /usr/local/lib/python3.6/site-packages 
 ENV GCC_HOST_COMPILER_PATH /usr/bin/gcc 
 ENV CC_OPT_FLAGS "-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" 
@@ -57,8 +57,8 @@ RUN apt-get update && \
         git-core \
 	libcurl3-dev \
 	zip && \
-    apt-get clean && \
-    
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
@@ -79,7 +79,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     rm -f /tmp/*.whl
 
 # Check Python is runnable.
-RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
+RUN python3 -c "import sys; print(sys.prefix); print(sys.version_info)"
 
 # Running bazel inside a `docker build` command causes trouble, cf:
 #   https://github.com/bazelbuild/bazel/issues/134
@@ -97,15 +97,15 @@ RUN mkdir /bazel && \
     cd / && \
     rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
     bazel version && \
-    python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
-    python -c "import numpy; numpy.show_config()" && \
-    python -c "import scipy; scipy.show_config()" 
-
+    python3 -c "import sys; print(sys.prefix); print(sys.version_info)" && \
+    python3 -c "import numpy; numpy.show_config()" && \
+    python3 -c "import scipy; scipy.show_config()" 
+    
 RUN : build TensorFlow pip package && \
     cd /tmp && \
     git clone --branch=r${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
     ldconfig
-    
+
 RUN cd /tmp/tensorflow-${TF_VERSION} && \
 # AVX & AVX2 support under haswell core
         CC_OPT_FLAGS="-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" \
@@ -125,7 +125,7 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
         //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
     rm -fr /root/.cache
-
-RUN ls -lh /tmp/tensorflow_pkg
+    
+RUN ls -l /tmp/tensorflow_pkg
 
 # vim: ft=dockerfile sts=4 sw=4 et tw=0
