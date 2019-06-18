@@ -91,7 +91,6 @@ RUN apt-get update && \
 RUN mkdir /usr/local/cuda-9.0/lib &&  \
     ln -s /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/local/cuda/lib/libnccl.so.2 && \
     ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h && \
-    ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h && \
     ln -s /usr/include/cuda-9.0/lib64/cudnn.h /etc/alternatives/cudnn.h 
 
 COPY --from=python-binary /python.tar.gz /
