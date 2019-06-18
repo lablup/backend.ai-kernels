@@ -12,7 +12,7 @@ LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 ENV TF_VERSION 1.9
 ENV BAZEL_VERSION 0.11.0
 ENV CUDA_VERSION 9.0.176
-ENV CUDNN_VERSION 7.4.2.24
+ENV CUDNN_VERSION 7.6.0.64
 ENV NCCL_VERSION 2.4.7
 ENV TENSORT_VERSION 5.0.2
 ENV PYTHON_BIN_PATH /usr/local/bin/python
@@ -27,7 +27,7 @@ ENV TF_NEED_VERBS 0
 ENV TF_NEED_OPENCL_SYCL 0
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_CLANG 0
-ENV TF_NEED_TENSORRT 0
+ENV TF_NEED_TENSORRT 1
 ENV TF_NEED_MPI 0
 ENV TF_NEED_S3 1
 ENV TF_CUDA_VERSION 9.0 
@@ -90,7 +90,8 @@ RUN apt-get update -y && \
 # Link NCCL libray and header where the build script expects them.
 RUN mkdir /usr/local/cuda-9.0/lib &&  \
     ln -s /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/local/cuda/lib/libnccl.so.2 && \
-    ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h
+    ln -s /usr/include/nccl.h /usr/local/cuda/include/nccl.h && \
+    ln -s /usr/include/cuda-9.0/lib64/cudnn.h /etc/alternatives/cudnn.h 
     
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
@@ -123,6 +124,7 @@ RUN mkdir /bazel && \
     python -c "import numpy; numpy.show_config()" && \
     python -c "import scipy; scipy.show_config()" 
 
+WORKDIR /tmp
 RUN : build TensorFlow pip package && \
     cd /tmp && \
     git clone --branch=r${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
@@ -139,6 +141,11 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
 	--copt=-mavx \
 	--copt=-mavx2 \
 	--config=cuda \
+	--config=mkl \
+	--config=monolithic \
+#	--config=gdr \
+#	--config=verbs \
+#	--config=ngraph \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
