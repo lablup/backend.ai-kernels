@@ -36,6 +36,10 @@ RUN apt-get update -y && \
 	libxine2-dev \
 	libv4l-dev
 
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs 
+
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
 	libgstreamer1.0-dev \
@@ -69,7 +73,7 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     LANG=C.UTF-8
 
-# Install CUDA-9.0 + cuDNN 7.6
+# Install CUDA-9.0 + cuDNN 7.6.0
 RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
@@ -82,6 +86,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir wheel && \
     python3 -m pip install --no-cache-dir h5py && \
     python3 -m pip install --no-cache-dir Cython && \
+    python3 -m pip install --no-cache-dir requests && \
     python3 -m pip install --no-cache-dir numpy scipy && \
     python3 -m pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     python3 -m pip install --no-cache-dir aiozmq dataclasses tabulate && \
@@ -138,14 +143,25 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
 
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
 
+
+# Jupyter notebook extension 
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
 RUN python3 -m pip install --no-cache-dir opencv-python && \
     python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
+    python3 -m pip install --no-cache-dir jupyter && \
     python3 -m pip install --no-cache-dir keras && \
     python3 -m pip install --no-cache-dir keras_applications && \
     python3 -m pip install --no-cache-dir keras_preprocessing && \
     python3 -m pip install --no-cache-dir ipython && \
-    python3 -m pip install --no-cache-dir jupyter && \
+    python3 -m pip install --no-cache-dir ipywidgets && \
+    python3 -m pip install --no-cache-dir ipyparallel && \
     python3 -m pip install --no-cache-dir jupyterlab && \
+    python3 -m pip install --no-cache-dir jupyterthemes && \    
+    python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
+    python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+    python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
     python3 -m pip install --no-cache-dir tf2onnx && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
@@ -153,12 +169,12 @@ RUN python3 -m pip install --no-cache-dir opencv-python && \
 # python alternative support
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
-# Jupyter notebook extension 
-RUN mkdir -p /home/work/.jupyter/nbextension
-WORKDIR /home/work/.jupyter/nbextension
-
-RUN python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
     git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
     jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
 
@@ -187,7 +203,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.device=1 \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/usr/bin/python" \
+      ai.backend.runtime-path="/usr/local/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
 
 COPY policy.yml /etc/backend.ai/jail/policy.yml
