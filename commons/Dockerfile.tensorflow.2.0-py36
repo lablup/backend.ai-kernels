@@ -3,13 +3,13 @@
 # import python-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 
-FROM ubuntu:18.04
+FROM ubuntu:16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
 ENV TF_VERSION 2.0
 ENV BAZEL_VERSION 0.24.1
-ENV PYTHON_BIN_PATH /usr/bin/python
+ENV PYTHON_BIN_PATH /usr/local/bin/python
 ENV PYTHON_LIB_PATH /usr/local/lib/python3.6/site-packages 
 ENV GCC_HOST_COMPILER_PATH /usr/bin/gcc 
 ENV CC_OPT_FLAGS "-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" 
@@ -79,7 +79,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     rm -f /tmp/*.whl
 
 # Check Python is runnable.
-RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
+RUN python3 -c "import sys; print(sys.prefix); print(sys.version_info)"
 
 # Running bazel inside a `docker build` command causes trouble, cf:
 #   https://github.com/bazelbuild/bazel/issues/134
@@ -97,9 +97,9 @@ RUN mkdir /bazel && \
     cd / && \
     rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
     bazel version && \
-    python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
-    python -c "import numpy; numpy.show_config()" && \
-    python -c "import scipy; scipy.show_config()" 
+    python3 -c "import sys; print(sys.prefix); print(sys.version_info)" && \
+    python3 -c "import numpy; numpy.show_config()" && \
+    python3 -c "import scipy; scipy.show_config()" 
     
 RUN : build TensorFlow pip package && \
     cd /tmp && \
