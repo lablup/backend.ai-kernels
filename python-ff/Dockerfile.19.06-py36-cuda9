@@ -202,7 +202,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.device=1 \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/usr/bin/python" \
+      ai.backend.runtime-path="/usr/local/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
 
 COPY policy.yml /etc/backend.ai/jail/policy.yml
