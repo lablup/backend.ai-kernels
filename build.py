@@ -236,10 +236,10 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-ff', '19.06-py36-cuda9')
         
     if 'ff' in build:
-        build_common('tensorflow', 'ff.19.07-py369')
-        build_common('tensorflow', 'ff.19.07-py36-cuda9')
-        build_kernel('python-ff', '19.07-py36')
-        build_kernel('python-ff', '19.07-py36-cuda9')        
+        build_common('tensorflow', 'ff.19.06-py36')
+        build_common('tensorflow', 'ff.19.06-py36-cuda9')
+        build_kernel('python-ff', '19.06-py36')
+        build_kernel('python-ff', '19.06-py36-cuda9')        
 
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36')
