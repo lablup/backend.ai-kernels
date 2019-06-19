@@ -6,18 +6,20 @@ whitelist_paths:
   OP_CHMOD: ["/home/work/*", "/tmp/*"]
 exec_allowance: -1
 fork_allowance: -1
-max_child_procs: 32
+max_child_procs: 256
 extra_envs: []
 preserved_env_keys: [
   "HOME", "PATH", "LANG",
   "USER", "SHELL", "TERM",
   "LD_LIBRARY_PATH",
   "LD_PRELOAD",
+  "OPENBLAS_NUM_THREADS",
+  "OMP_NUM_THREADS",
+  "NPROC",
   # Python-specific
-  "PYTHONPATH",
+  "PYENV_ROOT", "PYTHONPATH",  
   "PYTHONUNBUFFERED",
   "MPLCONFIGDIR",
-  "OPENBLAS_NUM_THREADS",
 ]
 
 diff_to_default: true
