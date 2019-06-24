@@ -131,8 +131,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     rm -fr opencv* 
 
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
-RUN curl -O https://download.pytorch.org/whl/cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl && \
-    curl -O https://download.pytorch.org/whl/cpu/torchvision-0.3.0-cp36-cp36m-linux_x86_64.whl
+RUN curl -O https://download.pytorch.org/whl/cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
     
 # Jupyter notebook extension 
 RUN mkdir -p /home/work/.jupyter/nbextension
@@ -160,7 +159,6 @@ RUN python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
     python3 -m pip install --no-cache-dir tf2onnx && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
-
 
 # python alternative support
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
@@ -192,7 +190,7 @@ COPY logo.svg /home/work/.jupyter/custom/logo.svg
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
-      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.base-distro="ubuntu18.04" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
       ai.backend.resource.min.cuda.device=1 \
