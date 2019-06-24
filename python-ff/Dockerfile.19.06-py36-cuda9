@@ -18,7 +18,7 @@ RUN apt-get update -y && \
 	pkg-config \
         xz-utils \
         wget curl git-core \
-        vim-tiny zip unzip \
+        vim-tiny bzip2 zip unzip \
         libssl-dev \
         libmpdec2 \
         proj-bin libproj-dev \
@@ -114,7 +114,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D BUILD_opencv_java=OFF \
       -D WITH_CUDA=ON \
       -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-9.2 \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-9.0 \
       -D ENABLE_FAST_MATH=1 \
       -D CUDA_FAST_MATH=1 \
       -D WITH_CUBLAS=1 \
@@ -139,18 +139,19 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     rm -fr opencv* 
 
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
-RUN curl -O https://download.pytorch.org/whl/cu90/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
+RUN curl -O https://download.pytorch.org/whl/cu90/torch-1.1.0-cp36-cp36m-linux_x86_64.whl 
+#    curl -O https://download.pytorch.org/whl/cu90/torchvision-0.3.0-cp36-cp36m-linux_x86_64.whl
 
 # Jupyter notebook extension 
 RUN mkdir -p /home/work/.jupyter/nbextension
 WORKDIR /home/work/.jupyter/nbextension
 
-RUN python3 -m pip install --no-cache-dir opencv-python && \
-    python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
+RUN python3 -m pip install --no-cache-dir opencv-python
+RUN python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
     python3 -m pip install --no-cache-dir pystan && \
     python3 -m pip install --no-cache-dir fbprophet && \
+    python3 -m pip install --no-cache-dir torchvision && \
     python3 -m pip install --no-cache-dir jupyter && \
-    python3 -m pip install --no-cache-dir torchvision && \    
     python3 -m pip install --no-cache-dir keras && \
     python3 -m pip install --no-cache-dir keras_applications && \
     python3 -m pip install --no-cache-dir keras_preprocessing && \
