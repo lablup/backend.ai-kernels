@@ -1,4 +1,4 @@
-# Build target: lablup/common-tensorflow:1.14-py36
+# Build target lablup/commom-tensorflow:ff-19.06-py36
 
 # import python-binary
 FROM lablup/kernel-base:python3.6 as python-binary
@@ -116,11 +116,7 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
     	-c opt \
 	--copt=-mavx \
 	--copt=-mavx2 \
-	--config=mkl \
 	--config=monolithic \
-#	--config=gdr \
-#	--config=verbs \
-#	--config=ngraph \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
