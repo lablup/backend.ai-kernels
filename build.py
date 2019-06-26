@@ -165,12 +165,12 @@ def main(build, list_builds, _auto_push):
         build_common('tensorflow', '1.6-py36-cuda9')
         build_common('tensorflow', '1.7-py36')
         build_common('tensorflow', '1.7-py36-cuda9')
-
-    if 'tf-pkg-current' in build:
         build_common('tensorflow', '1.8-py36')
         build_common('tensorflow', '1.8-py36-cuda9')
         build_common('tensorflow', '1.9-py36')
         build_common('tensorflow', '1.9-py36-cuda9')
+
+    if 'tf-pkg-current' in build:
         build_common('tensorflow', '1.10-py36')
         build_common('tensorflow', '1.10-py36-cuda9')
         build_common('tensorflow', '1.11-py36')
@@ -201,10 +201,12 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-tensorflow', '1.5-py36-cuda9')
         build_kernel('python-tensorflow', '1.6-py36')
         build_kernel('python-tensorflow', '1.6-py36-cuda9')
-        build_kernel('python-tensorflow', '1.7-py36')
-        build_kernel('python-tensorflow', '1.7-py36-cuda9')
 
     if 'tf-current' in build:
+        build_common('base', '19.06-py36')
+        build_common('base', '19.06-py36-cuda9')
+        build_kernel('python-tensorflow', '1.7-py36')
+        build_kernel('python-tensorflow', '1.7-py36-cuda9')
         build_kernel('python-tensorflow', '1.8-py36')
         build_kernel('python-tensorflow', '1.8-py36-cuda9')
         build_kernel('python-tensorflow', '1.9-py36')
@@ -218,7 +220,7 @@ def main(build, list_builds, _auto_push):
 #        build_kernel('python-tensorflow', '1.11-py36-srv-cuda9')
         build_kernel('python-tensorflow', '1.12-py36')
 #        build_kernel('python-tensorflow', '1.12-py36-tpu')
-#        build_kernel('python-tensorflow', '1.12-py36-cuda9')
+        build_kernel('python-tensorflow', '1.12-py36-cuda9')
 #        build_kernel('python-tensorflow', '1.12-py36-srv')
 #        build_kernel('python-tensorflow', '1.12-py36-srv-cuda9')
         build_kernel('python-tensorflow', '1.13-py36')
@@ -238,10 +240,12 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-ff', '19.06-py36-cuda9')
         
     if 'ff' in build:
-        build_common('tensorflow', 'ff.19.07-py36')
-        build_common('tensorflow', 'ff.19.07-py36-cuda10')
-        build_kernel('python-ff', '19.07-py36')
-        build_kernel('python-ff', '19.07-py36-cuda10')        
+        build_common('tensorflow', 'ff.19.06-py36')
+        build_common('tensorflow', 'ff.19.06-py36-cuda9')        
+#        build_common('tensorflow', 'ff.19.06-py36-cuda10')
+        build_kernel('python-ff', '19.06-py36')
+        build_kernel('python-ff', '19.06-py36-cuda9')                
+#        build_kernel('python-ff', '19.06-py36-cuda10')        
 
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36')
@@ -332,11 +336,11 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-digits',  '19.04-caffe')
         build_kernel('vendor/ngc-digits',  '19.05-caffe')        
         
-        build_kernel('vendor/ngc-mxnet',  '19.04-mnxet')
-        build_kernel('vendor/ngc-mxnet',  '19.05-mnxet')        
+        build_kernel('vendor/ngc-mxnet',  '19.04-py3')
+        build_kernel('vendor/ngc-mxnet',  '19.05-py3')        
 
-        build_kernel('vendor/ngc-NVCaffe', '19.04-NVCaffe')
-        build_kernel('vendor/ngc-NVCaffe', '19.05-NVCaffe')        
+        build_kernel('vendor/ngc-nvcaffe', '19.04-py2')
+        build_kernel('vendor/ngc-nvcaffe', '19.05-py2')        
         
         build_kernel('vendor/ngc-rapids',  '0.5-rapids-py3')
 #        build_kernel('vendor/ngc-chainer', '4.0-py3')
