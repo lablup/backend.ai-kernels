@@ -1,10 +1,8 @@
-# Google Tensorflow 1.10 (CUDA9) & Python 3.6
-# ref: https://tensorflow.org
+# Build target: lablup/common-tensorflow:1.10-py36-cuda9
 
 # import python-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 
-# Build target: lablup/common-tensorflow:1.10-py36-cuda9
 FROM nvidia/cuda:9.0-base-ubuntu16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
@@ -36,14 +34,13 @@ ENV TF_NCCL_VERSION 2
 ENV TF_CUDA_COMPUTE_CAPABILITIES 3.5,3.7,5.2,6.0,6.1,7.0 
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
-ENV CUDNN_INSTALL_PATH /usr/local/cuda 
 ENV CI_BUILD_PYTHON python
 
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
-RUN apt-get update -y && \
+RUN apt-get update && \
     apt-get install nvinfer-runtime-trt-repo-ubuntu1604-$TENSORT_VERSION-ga-cuda9.0 && \
-    apt-get update -y && \     
+    apt-get update && \     
     apt-get install -y --no-install-recommends openjdk-8-jdk-headless && \
     apt-get install -y --no-install-recommends \
         curl gcc g++ make cmake git \
@@ -96,12 +93,13 @@ RUN mkdir /usr/local/cuda-9.0/lib &&  \
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
-# Check Python is runnable.
+# Check Bazel/Python is runnable.
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
 RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     pip install --no-cache-dir wheel numpy scipy && \
     pip install --no-cache-dir keras_applications && \
     pip install --no-cache-dir keras_preprocessing && \
+    pip install --no-cache-dir future && \
     rm -f /tmp/*.whl
 
 # Running bazel inside a `docker build` command causes trouble, cf:
@@ -127,8 +125,6 @@ RUN mkdir /bazel && \
 RUN : build TensorFlow pip package && \
     cd /tmp && \
     git clone --branch=r${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
-    sed -i '/local_config_nccl/d' /tmp/tensorflow-${TF_VERSION}/tensorflow/tools/pip_package/BUILD | cat - && \
-    sed -i '/NCCL-SLA/d' /tmp/tensorflow-${TF_VERSION}/third_party/nccl/nccl_configure.bzl && \
     ldconfig
     
 RUN cd /tmp/tensorflow-${TF_VERSION} && \
@@ -140,11 +136,7 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
 	--copt=-mavx \
 	--copt=-mavx2 \
 	--config=cuda \
-	--config=mkl \
 	--config=monolithic \
-#	--config=gdr \
-#	--config=verbs \
-#	--config=ngraph \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
