@@ -1,6 +1,15 @@
+# Labup/Python-xxx Base kernel 19.06
+
+## base Ubuntu 18.04
+## Support TF-hub 0.5.0
+## Support OpenCV 4.1.0
+## Support Jupyter notebook extension
+
+# base python 3.6
 FROM lablup/kernel-base:python3.6 as python-binary
-FROM ubuntu:18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
+
+FROM ubuntu:18.04
 
 RUN apt-get update -y && \
     apt-get install -y software-properties-common && \
@@ -73,7 +82,7 @@ COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools && \
+    python3 -m pip install --no-cache-dir -U setuptools pip && \
     python3 -m pip install --no-cache-dir wheel && \
     python3 -m pip install --no-cache-dir h5py && \
     python3 -m pip install --no-cache-dir Cython && \
@@ -128,3 +137,44 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     cd /tmp && \
     rm -fr opencv* 
 
+
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY custom.css /home/work/.jupyter/custom/custom.css
+COPY logo.svg /home/work/.jupyter/custom/logo.svg
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
+RUN python3 -m pip install --no-cache-dir opencv-python
+
+RUN python3 -m pip install --no-cache-dir pystan && \
+    python3 -m pip install --no-cache-dir fbprophet && \
+    python3 -m pip install --no-cache-dir jupyter && \
+    python3 -m pip install --no-cache-dir ipython && \
+    python3 -m pip install --no-cache-dir ipywidgets && \
+    python3 -m pip install --no-cache-dir ipyparallel && \
+    python3 -m pip install --no-cache-dir jupyterlab && \
+    python3 -m pip install --no-cache-dir jupyterthemes && \    
+    python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
+    python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+    python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
+    python3 -m pip install --no-cache-dir matplotlib bokeh && \
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
+
+# python alternative support
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
+
+WORKDIR /home/work
