@@ -8,7 +8,7 @@ LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
 ENV TF_VERSION 1.10
-ENV BAZEL_VERSION 0.11.0
+ENV BAZEL_VERSION 0.15.0
 ENV PYTHON_BIN_PATH /usr/local/bin/python
 ENV PYTHON_LIB_PATH /usr/local/lib/python3.6/site-packages 
 ENV GCC_HOST_COMPILER_PATH /usr/bin/gcc 
@@ -19,7 +19,7 @@ ENV TF_NEED_HDFS 1
 ENV TF_ENABLE_XLA 1
 ENV TF_NEED_VERBS 0
 ENV TF_NEED_MPI 0
-ENV TF_NEED_GDR 1
+ENV TF_NEED_GDR 0
 ENV TF_NEED_S3 1 
 ENV TF_NEED_KAFKA 0 
 ENV TF_NEED_OPENCL 0
