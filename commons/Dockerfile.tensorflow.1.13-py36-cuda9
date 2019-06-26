@@ -1,10 +1,8 @@
-# Google Tensorflow 1.13 (CUDA9) & Python 3.6
-# ref: https://tensorflow.org
+# Build target: lablup/common-tensorflow:1.13-py36-cuda9
 
 # import python-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 
-# Build target: lablup/common-tensorflow:1.13-py36-cuda9
 FROM nvidia/cuda:9.0-base-ubuntu16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
@@ -36,7 +34,6 @@ ENV TF_NCCL_VERSION 2
 ENV TF_CUDA_COMPUTE_CAPABILITIES 3.5,3.7,5.2,6.0,6.1,7.0 
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
-#ENV CUDNN_INSTALL_PATH /usr/local/cuda 
 ENV CI_BUILD_PYTHON python
 
 # Install system package dependencies
@@ -102,6 +99,7 @@ RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     pip install --no-cache-dir wheel numpy scipy && \
     pip install --no-cache-dir keras_applications && \
     pip install --no-cache-dir keras_preprocessing && \
+    pip install --no-cache-dir future && \
     rm -f /tmp/*.whl
 
 # Running bazel inside a `docker build` command causes trouble, cf:
@@ -138,11 +136,7 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
 	--copt=-mavx \
 	--copt=-mavx2 \
 	--config=cuda \
-	--config=mkl \
 	--config=monolithic \
-#	--config=gdr \
-#	--config=verbs \
-#	--config=ngraph \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
