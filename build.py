@@ -65,6 +65,7 @@ available_builds = [
     'alpine-base', 'alpine-ext',
     'compute-base',
     'chainer',
+    'intel',
     'past','ff',
     'tf-builder',
     'tf-pkg-old', 'tf-pkg-current', 'tf-pkg-future',
@@ -136,6 +137,9 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-chainer',   '5.0-py36')
         build_kernel('python-chainer',   '6.0-py36')
     
+    if 'intel' in build:
+        build_common('mkl', '19.06-py36')
+
     if 'tf-builder' in build:
         build_common('bazel', '0.5-ubuntu16.04')
         build_common('bazel', '0.11-ubuntu16.04')
@@ -238,14 +242,12 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-ff', '19.05-py36-cuda9')
         build_kernel('python-ff', '19.06-py36')
         build_kernel('python-ff', '19.06-py36-cuda9')
-        
+
     if 'ff' in build:
-        build_common('tensorflow', 'ff.19.06-py36')
-        build_common('tensorflow', 'ff.19.06-py36-cuda9')        
-#        build_common('tensorflow', 'ff.19.06-py36-cuda10')
-        build_kernel('python-ff', '19.06-py36')
-        build_kernel('python-ff', '19.06-py36-cuda9')                
-#        build_kernel('python-ff', '19.06-py36-cuda10')        
+        build_common('tensorflow', 'ff.19.06-py36-cuda10')
+#        build_common('base', '19.07-py36-cuda9')
+#        build_kernel('python-ff', '19.07-py36-cuda9')                
+        build_kernel('python-ff', '19.06-py36-cuda10')        
 
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36')
