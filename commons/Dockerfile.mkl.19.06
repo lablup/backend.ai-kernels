@@ -53,7 +53,7 @@ RUN cd /tmp && \
   echo "library_dirs = /opt/intel/mkl/lib/intel64/" >> site.cfg && \
   echo "mkl_libs = mkl_rt" >> site.cfg && \
   echo "lapack_libs =" >> site.cfg && \
-  python setup.py build --fcompiler=gnu95 && \
+  python setup.py build  && \
   python setup.py install
 
 # Install scipy
