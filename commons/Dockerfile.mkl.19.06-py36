@@ -75,6 +75,12 @@ RUN cd /tmp && \
   git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
   cd scipy && \
   git checkout -b v${SCIPY_VERSION} && \  
+  cp site.cfg.example site.cfg && \
+  echo "\n[mkl]" >> site.cfg && \
+  echo "include_dirs = /opt/intel/mkl/include/intel64/" >> site.cfg && \
+  echo "library_dirs = /opt/intel/mkl/lib/intel64/" >> site.cfg && \
+  echo "mkl_libs = mkl_rt" >> site.cfg && \
+  echo "lapack_libs =" >> site.cfg && \
   python3 setup.py build && \
   python3 setup.py install
 
@@ -95,4 +101,6 @@ RUN cd /tmp && \
 	\( -type d -a \( -name test -o -name tests \) \) \
 	-o \
 	\( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
-	\) -exec rm -rf '{}' + && \
+	\) -exec rm -rf '{}' + ; \
+    rm -f get-pip.py
+	
