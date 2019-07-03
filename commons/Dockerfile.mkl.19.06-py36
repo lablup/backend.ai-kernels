@@ -5,7 +5,8 @@ FROM ubuntu:18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 ENV MKL_VERSION 2019.4.243
-ENV NUMPY_VERSION 1.14.5
+ENV NUMPY_VERSION 1.16.4
+ENV SCIPY_VERSION 1.2.2
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
@@ -54,7 +55,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir Cython
     
 RUN cd /tmp && \
-  git clone --branch=${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
+  git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
   cd numpy && \
   cp site.cfg.example site.cfg && \
   echo "\n[mkl]" >> site.cfg && \
@@ -68,7 +69,7 @@ RUN cd /tmp && \
 
 # Install scipy
 RUN cd /tmp && \
-  git clone --depth=1 https://github.com/scipy/scipy.git scipy && \
+  git clone --branch=v{$SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
   cd scipy && \
   python3 setup.py build && \
   python3 setup.py install
