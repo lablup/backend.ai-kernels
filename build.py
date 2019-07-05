@@ -139,7 +139,8 @@ def main(build, list_builds, _auto_push):
     
     if 'intel' in build:
         build_common('mkl', '19.06-py36')
-
+        build_kernel('python-intel' , '19.04-py36')
+        
     if 'tf-builder' in build:
         build_common('bazel', '0.5-ubuntu16.04')
         build_common('bazel', '0.11-ubuntu16.04')
