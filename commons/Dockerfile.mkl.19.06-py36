@@ -79,6 +79,7 @@ RUN cd /tmp && \
     echo "library_dirs = /opt/intel/mkl/lib/intel64/" >> site.cfg && \
     echo "mkl_libs = mkl_rt" >> site.cfg && \
     echo "lapack_libs =" >> site.cfg && \
+    python3 -m pip install -U /tmp/numpy-1.16.4-cp36-cp36m-linux_x86_64.whl && \
     python3 setup.py bdist_wheel -d /tmp
 
 RUN apt-mark auto '.*' > /dev/null && \
