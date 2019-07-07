@@ -133,13 +133,13 @@ RUN cd /tmp && \
     echo "library_dirs = /opt/intel/mkl/lib/intel64/" >> site.cfg && \
     echo "mkl_libs = mkl_rt" >> site.cfg && \
     echo "lapack_libs =" >> site.cfg && \
+    python3 -m pip install -U --no-cache-dir /tmp/numpy-1.16.4-cp36-cp36m-linux_x86_64.whl && \
     python3 setup.py bdist_wheel -d /tmp
 
 # Prepare for building TensorFlow wheel
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip && \
     python3 -m pip install --no-cache-dir \
-    	wheel \
         sklearn \
         pandas \
         keras_applications \
@@ -147,7 +147,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
         matplotlib \
 	future \
 	&& \
-    python3 -m pip install --no-cache-dir /tmp/*.whl 
+    python3 -m pip install -U --no-cache-dir /tmp/*.whl 
 
 RUN echo "startup --batch" >>/etc/bazel.bazelrc
 RUN echo "build --spawn_strategy=standalone --genrule_strategy=standalone" >>/etc/bazel.bazelrc
@@ -188,11 +188,9 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
 #	--config=ngraph \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         //tensorflow/tools/pip_package:build_pip_package && \
-    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg && \
+    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp && \
     rm -fr /root/.cache
     
-RUN ls -l /tmp/tensorflow_pkg
-
 RUN apt-mark auto '.*' > /dev/null && \
     find /usr/local -type f -executable -not \( -name '*tkinter*' \) -exec ldd '{}' ';' \
 		| awk '/=>/ { print $(NF-1) }' \
@@ -211,5 +209,7 @@ RUN cd /tmp && \
 	-o \
 	\( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
 	\) -exec rm -rf '{}' + ; \
-    rm -f get-pip.py
+    rm -f get-pip.py && \
+    rm -fr numpy scipy tensorflow-2.0 hsperfdata_root
 	
+RUN ls -l /tmp
