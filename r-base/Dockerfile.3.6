@@ -59,9 +59,10 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 RUN Rscript -e "install.packages('IRkernel')" && \
     Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 On Backend.AI' , user = FALSE)" && \
-#    mv /root/.local/share/jupyter/kernels/ir /usr/local/share/jupyter/kernels && \
-    rm -rf /root/.local/share/jupyter
-
+    rm -rf /root/.local/share/jupyter && \
+    jupyter kernelspec list && \
+    cat /usr/local/share/jupyter/kernels/ir/kernel.json 
+    
 # Install Jupyter notebook logo
 RUN mkdir -p /home/work/.jupyter/custom
 COPY policy.yml /etc/backend.ai/jail/policy.yml
@@ -78,10 +79,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
     git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
     jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
-
-RUN jupyter kernelspec list && \
-#    sed "3s/R/R-base 3.6 on Backend.AI/" /usr/local/share/jupyter/kernels/ir/kernel.json && \
-    cat /usr/local/share/jupyter/kernels/ir/kernel.json 
 
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
