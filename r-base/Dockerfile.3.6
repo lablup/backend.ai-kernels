@@ -40,6 +40,11 @@ RUN apt update && \
     apt update && \
     apt install -y r-base
 
+# for apt-get installation using /tmp
+RUN mkdir -p /tmp && \
+    chown root:root /tmp && \
+    chmod 1777 /tmp
+
 # Install commonly-used wheels
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir ipython && \
@@ -58,7 +63,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 RUN Rscript -e "install.packages('IRkernel')" && \
-    Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 On Backend.AI' , user = FALSE)" && \
+    Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 on Backend.AI' , user = FALSE)" && \
     rm -rf /root/.local/share/jupyter && \
     jupyter kernelspec list && \
     cat /usr/local/share/jupyter/kernels/ir/kernel.json 
