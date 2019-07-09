@@ -1,0 +1,96 @@
+FROM ubuntu:18.04
+# Ubuntu 18.04 comes with Python 3.6
+
+ENV R_VERSION 3.6.1
+
+RUN apt-get update && \
+    apt-get install -y \
+        ca-certificates \
+        wget curl git-core \
+        python3 python3-pip \
+        libssl-dev \
+        libmpdec2 \
+        proj-bin libproj-dev \
+        libgeos-dev libgeos++-dev \
+        mime-support \
+	locales \
+	fonts-texgyre \
+	vim-tiny \
+        gcc g++ && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs 
+
+ENV PATH=/opt/backend.ai/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    DEBIAN_FRONTEND=noninteractive
+
+RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+	&& locale-gen en_US.utf8 \
+	&& /usr/sbin/update-locale LANG=en_US.UTF-8
+
+RUN apt update && \
+    apt install -y software-properties-common && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 && \
+    add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/' && \
+    apt update && \
+    apt install -y r-base
+
+# Install commonly-used wheels
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
+    python3 -m pip install --no-cache-dir ipython && \
+    python3 -m pip install --no-cache-dir jupyter && \
+    python3 -m pip install --no-cache-dir ipywidgets && \
+    python3 -m pip install --no-cache-dir ipyparallel && \
+    python3 -m pip install --no-cache-dir jupyterlab && \
+    python3 -m pip install --no-cache-dir jupyterthemes && \    
+    python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
+    python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+    python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
+
+# python alternative support
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
+RUN Rscript -e "install.packages('IRkernel')" && \
+    Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 On Backend.AI' , user = FALSE)" && \
+#    mv /root/.local/share/jupyter/kernels/ir /usr/local/share/jupyter/kernels && \
+    rm -rf /root/.local/share/jupyter
+
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
+
+RUN jupyter kernelspec list && \
+#    sed "3s/R/R-base 3.6 on Backend.AI/" /usr/local/share/jupyter/kernels/ir/kernel.json && \
+    cat /usr/local/share/jupyter/kernels/ir/kernel.json 
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="r" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+
+WORKDIR /home/work
