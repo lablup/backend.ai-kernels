@@ -66,9 +66,8 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 RUN \
 #   Rscript -e "chooseCRANmirror(45)" && \
     Rscript -e "install.packages(c('rzmq','repr','IRkernel','IRdisplay'),type = 'source')" && \
+    Rscript -e "install.packages(c('slidify','ggplot2','devtools')) && \    
     Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 On Backend.AI' , user = FALSE)" && \
-#RUN Rscript -e "install.packages('IRkernel')" && \
-#    Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 on Backend.AI' , user = FALSE)" && \
     rm -rf /root/.local/share/jupyter && \
     jupyter kernelspec list && \
     cat /usr/local/share/jupyter/kernels/ir/kernel.json 
