@@ -16,6 +16,7 @@ RUN apt-get update && \
 	locales \
 	fonts-texgyre \
 	vim-tiny \
+	liblapack3 \
         gcc g++ && \
     apt-get autoclean && \
     rm -rf /var/lib/apt/lists/
@@ -62,8 +63,12 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 # python alternative support
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
-RUN Rscript -e "install.packages('IRkernel')" && \
-    Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 on Backend.AI' , user = FALSE)" && \
+RUN \
+#   Rscript -e "chooseCRANmirror(45)" && \
+    Rscript -e "install.packages(c('rzmq','repr','IRkernel','IRdisplay'),type = 'source')" && \
+    Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 On Backend.AI' , user = FALSE)" && \
+#RUN Rscript -e "install.packages('IRkernel')" && \
+#    Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 on Backend.AI' , user = FALSE)" && \
     rm -rf /root/.local/share/jupyter && \
     jupyter kernelspec list && \
     cat /usr/local/share/jupyter/kernels/ir/kernel.json 
