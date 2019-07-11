@@ -61,6 +61,7 @@ def build_common(name, tag, extra_opts=''):
 
 
 available_builds = [
+    'base',
     'python',
     'alpine-base', 'alpine-ext',
     'compute-base',
@@ -91,11 +92,23 @@ def main(build, list_builds, _auto_push):
 
     auto_push.set(_auto_push)
 
+    if 'base' in build:
+#        build_kernel('base',    'ubuntu16.04-mkl2018.3')
+#        build_kernel('base',    'ubuntu16.04-mkl2019')
+#        build_kernel('base',    'ubuntu16.04-mkl2019.1')       
+#        build_kernel('base',    'ubuntu16.04-mkl2019.2')
+#        build_kernel('base',    'ubuntu18.04-mkl2019.3')
+        build_kernel('base',    'ubuntu18.04-mkl2019.4')                        
+    
     if 'python' in build:
-        build_kernel('base',    '3.6')
-        build_kernel('base',    '3.6-ubuntu18.04')
-        build_kernel('python',  '2.7-ubuntu18.04')
-        build_kernel('python',  '3.6-ubuntu18.04')
+        build_common('base',    'python3.6')
+        build_common('base',    'python3.6-ubuntu18.04')
+        build_common('base',    'python2.7')
+        build_common('base',    'python2.7-ubuntu18.04')
+        build_kernel('python',  '2.7')
+        build_kernel('python',  '2.7-ubuntu18.04')        
+        build_kernel('python',  '3.6')
+        build_kernel('python',  '3.6-ubuntu18.04')        
         build_kernel('python',  '3.7-anaconda2018.12')
 
     if 'alpine-base' in build:
@@ -120,8 +133,8 @@ def main(build, list_builds, _auto_push):
         build_kernel('scheme',  '9.2-alpine3.8')
 
     if 'compute-base' in build:
-        build_kernel('julia',   '1.0-ubuntu18.04')
-        build_kernel('r',       '3.5-ubuntu18.04')
+#        build_kernel('julia',   '1.0-ubuntu18.04')
+        build_kernel('r-base',       '3.6')
 
     # TODO: (not modernized) build_kernel('octave',  '4.2-debian')
     # TODO: (not implemented) build_kernel('swift',  'XX-alpine')
@@ -147,10 +160,6 @@ def main(build, list_builds, _auto_push):
         build_common('bazel', '0.15-ubuntu16.04')
         build_common('bazel', '0.20-ubuntu16.04')
         build_common('numpy', '1.15-py36-ubuntu16.04-mkl2019.0')
-        build_kernel('base', 'ubuntu16.04-mkl2018.3')
-        build_kernel('base', 'ubuntu16.04-mkl2019')
-        build_kernel('base', 'ubuntu16.04-mkl2019.1')       
-        build_kernel('base', 'ubuntu16.04-mkl2019.2')        
 
     ## Our TensorFlow currently depends on CUDA 9.0 + cuDNN 7.1
     if 'tf-pkg-old' in build:
