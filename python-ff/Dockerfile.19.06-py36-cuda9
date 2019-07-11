@@ -1,13 +1,10 @@
-FROM lablup/kernel-base:python3.6 as python-binary
-FROM lablup/common-tensorflow:ff.19.06-py36-cuda9 as tf-binary
+FROM nvcr.io/nvidia/tensorflow:19.05-py3
 
-FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
-MAINTAINER Mario Cho "m.cho@lablup.com"
+RUN apt-get update && \
+    apt-get install -y libsm6 libxext6 libxrender-dev
 
 RUN apt-get update -y && \
     apt-get install -y software-properties-common && \
-    add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
-    apt-get update -y && \
     apt-get install -y \
         ca-certificates \
         gcc g++ make \
@@ -68,36 +65,25 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     rm -rf /var/lib/apt/lists/
 
 ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
 
-# Install CUDA-9.0 + cuDNN 7.6.0
-RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
-    ldconfig
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY custom.css /home/work/.jupyter/custom/custom.css
+COPY logo.svg /home/work/.jupyter/custom/logo.svg
 
-COPY --from=python-binary /python.tar.gz /
-RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
 
+COPY requirements.txt .
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools && \
+    python3 -m pip install --no-cache-dir -U setuptools pip && \
+    python3 -m pip install --no-cache-dir -r requirements.txt && \
     python3 -m pip install --no-cache-dir wheel && \
-    python3 -m pip install --no-cache-dir h5py && \
-    python3 -m pip install --no-cache-dir Cython && \
-    python3 -m pip install --no-cache-dir requests && \
-    python3 -m pip install --no-cache-dir numpy scipy && \
-    python3 -m pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
-    python3 -m pip install --no-cache-dir aiozmq dataclasses tabulate && \
-    python3 -m pip install --no-cache-dir namedlist six "python-dateutil>=2" && \
-    python3 -m pip install --no-cache-dir versioneer && \    
-    python3 -m pip install --no-cache-dir pyproj Cartopy && \
-    python3 -m pip install --no-cache-dir pandas && \
-    python3 -m pip install --no-cache-dir seaborn && \
-    python3 -m pip install --no-cache-dir networkx cvxpy && \
-    python3 -m pip install --no-cache-dir scikit-learn scikit-image && \
-    python3 -m pip install --no-cache-dir pygments && \
-    python3 -m pip install --no-cache-dir future && \
+    python3 -m pip install --no-cache-dir https://download.pytorch.org/whl/cu100/torch-1.1.0-cp35-cp35m-linux_x86_64.whl && \
+    python3 -m pip install --no-cache-dir https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp35-cp35m-linux_x86_64.whl && \
     python3 -m pip install --no-cache-dir tensorwatch
 
 WORKDIR /tmp
@@ -114,7 +100,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D BUILD_opencv_java=OFF \
       -D WITH_CUDA=ON \
       -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-9.0 \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.1 \
       -D ENABLE_FAST_MATH=1 \
       -D CUDA_FAST_MATH=1 \
       -D WITH_CUBLAS=1 \
@@ -138,37 +124,16 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     cd /tmp && \
     rm -fr opencv* 
 
-COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
-RUN curl -O https://download.pytorch.org/whl/cu90/torch-1.1.0-cp36-cp36m-linux_x86_64.whl 
+RUN /usr/bin/python3 -m pip install --no-cache-dir opencv-python
 
-# Jupyter notebook extension 
-RUN mkdir -p /home/work/.jupyter/nbextension
-WORKDIR /home/work/.jupyter/nbextension
-
-RUN python3 -m pip install --no-cache-dir opencv-python
-RUN python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
-    python3 -m pip install --no-cache-dir pystan && \
-    python3 -m pip install --no-cache-dir fbprophet && \
-    python3 -m pip install --no-cache-dir torchvision && \
-    python3 -m pip install --no-cache-dir jupyter && \
-    python3 -m pip install --no-cache-dir keras && \
-    python3 -m pip install --no-cache-dir keras_applications && \
-    python3 -m pip install --no-cache-dir keras_preprocessing && \
-    python3 -m pip install --no-cache-dir ipython && \
-    python3 -m pip install --no-cache-dir ipywidgets && \
-    python3 -m pip install --no-cache-dir ipyparallel && \
-    python3 -m pip install --no-cache-dir jupyterlab && \
-    python3 -m pip install --no-cache-dir jupyterthemes && \    
-    python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
-    python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
-    python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
-    python3 -m pip install --no-cache-dir matplotlib bokeh && \
-    python3 -m pip install --no-cache-dir tf2onnx && \
+RUN /usr/bin/python3 -m pip install --no-cache-dir jupyterthemes && \    
+    /usr/bin/python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
+    /usr/bin/python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+    /usr/bin/python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
+    /usr/bin/python3 -m pip install --no-cache-dir tensorflow-hub==0.5.0 && \
+    /usr/bin/python3 -m pip install --no-cache-dir tf2onnx && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
-
-# python alternative support
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
@@ -180,32 +145,28 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
 
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "Lablup Full Feature 19.06 on Python 3.6 (CUDA 9.0)" && \
+RUN /usr/bin/python3 -m ipykernel install --display-name "Lablup Research 19.06 on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # for apt-get installation using /tmp
 RUN mkdir -p /tmp && \
     chown root:root /tmp && \
     chmod 1777 /tmp
-    
-# Install Jupyter notebook logo
-RUN mkdir -p /home/work/.jupyter/custom
-COPY custom.css /home/work/.jupyter/custom/custom.css
-COPY logo.svg /home/work/.jupyter/custom/logo.svg
 
 # Backend.AI specifics
+COPY policy.yml /etc/backend.ai/jail/policy.yml
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input" \
-      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.features="batch uid-match" \
+      ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
       ai.backend.resource.min.cuda.device=1 \
       ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/usr/local/bin/python" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,tensorboard:http:6006,jupyter:http:8080,jupyterlab:http:8090"
 
-COPY policy.yml /etc/backend.ai/jail/policy.yml
 WORKDIR /home/work
 # vim: ft=dockerfile
