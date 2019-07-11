@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:4.5.4
+DFROM continuumio/miniconda3:4.5.4
 # Intel Distributed Python 2019.04 with Conda
 
 RUN apt update -y && \
