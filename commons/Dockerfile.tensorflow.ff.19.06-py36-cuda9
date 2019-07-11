@@ -1,7 +1,7 @@
 # Build target: lablup/common-tensorflow:FF.19.06-py36-cuda9
 
 # import python-binary
-FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/base:python3.6 as python-binary
 
 FROM nvidia/cuda:9.0-base-ubuntu16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
