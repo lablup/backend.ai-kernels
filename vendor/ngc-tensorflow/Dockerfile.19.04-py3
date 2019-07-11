@@ -18,7 +18,7 @@ RUN /usr/bin/python3 -m pip install -U pip setuptools && \
     /usr/bin/python3 -m pip install --no-cache-dir jupyterlab
 
 # Install ipython kernelspec
-RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.5 (NGC/TensorFlow 19.05) on Backend.AI" && \
+RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.5 (NGC/TensorFlow 19.04) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # for apt-get installation using /tmp
