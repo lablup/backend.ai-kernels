@@ -30,11 +30,6 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 RUN python3 -m ipykernel install --display-name "Backend.AI CLI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
-# Install Jupyter notebook logo
-RUN mkdir -p /home/work/.jupyter/custom
-COPY custom.css /home/work/.jupyter/custom/custom.css
-COPY logo.svg /home/work/.jupyter/custom/logo.svg
-
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
