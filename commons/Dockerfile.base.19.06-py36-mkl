@@ -136,7 +136,6 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     LANG=C.UTF-8
 
-
 # Install numpy with MKL
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip && \
@@ -209,7 +208,6 @@ RUN python3 -m pip install --no-cache-dir pystan && \
     python3 -m pip install --no-cache-dir jupyter && \
     python3 -m pip install --no-cache-dir ipython && \
     python3 -m pip install --no-cache-dir ipywidgets && \
-    python3 -m pip install --no-cache-dir ipyparallel && \
     python3 -m pip install --no-cache-dir jupyterlab && \
     python3 -m pip install --no-cache-dir jupyterthemes && \    
     python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
