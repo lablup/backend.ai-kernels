@@ -3,7 +3,7 @@
 # ref: https://tensorflow.org
 
 # import python-binary
-FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/base:python3.6 as python-binary
 
 # Build target: lablup/common-tensorflow:2.0-py36-cuda9
 FROM nvidia/cuda:9.0-base-ubuntu16.04
@@ -129,11 +129,12 @@ RUN mkdir /bazel && \
 
 RUN : build TensorFlow pip package && \
     cd /tmp && \
-    git clone --branch=r${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
-#    curl -SL https://github.com/tensorflow/tensorflow/archive/v2.0.0-beta1.tar.gz | tar xzf - && \
+#    git clone --branch=r${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
+    curl -SL https://github.com/tensorflow/tensorflow/archive/v2.0.0-beta1.tar.gz | tar xzf - && \
+    mv tensorflow-2.0.0-beta1 tensorflow-${TF-VERSION} && \
     ldconfig
     
-RUN cd /tmp/tensorflow-${TF_VERSION} && \
+RUN cd /tmp/tensorflow-${TF-VERSION} && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
         LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
         tensorflow/tools/ci_build/builds/configured GPU \
@@ -142,7 +143,6 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
 	--copt=-mavx \
 	--copt=-mavx2 \
 	--config=cuda \
-	--config=mkl \
 	--config=monolithic \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
