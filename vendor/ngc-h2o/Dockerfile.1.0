@@ -36,6 +36,6 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
-      ai.backend.service-ports="h2o-1:http:12345,h2o-5:http:54321,h2o:http:88888,ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+      ai.backend.service-ports="h2o:http:88888,ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,h2o-1:http:12345,h2o-5:http:54321"
 
 # vim: ft=dockerfile
