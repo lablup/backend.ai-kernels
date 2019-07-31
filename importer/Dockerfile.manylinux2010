@@ -1,0 +1,39 @@
+FROM quay.io/pypa/manylinux2010_x86_64:latest
+
+ENV PYTHONUNBUFFERED=1 \
+    LANG=C.UTF-8
+
+# == Install Docker client to run docker commands ==
+
+RUN yum install -y yum-utils && \
+    yum-config-manager \
+	--add-repo \
+	https://download.docker.com/linux/centos/docker-ce.repo && \
+    yum install -y docker-ce-cli
+
+# == Make it a Backend.AI kernel ==
+
+COPY requirements.txt /root/
+RUN /opt/python/cp37-cp37m/bin/python -m pip install -U pip setuptools && \
+    /opt/python/cp37-cp37m/bin/python -m pip install -r /root/requirements.txt
+
+RUN /opt/python/cp37-cp37m/bin/python -m ipykernel install \
+	--display-name "Python 3.7 (Image Importer) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="NPROC" \
+      ai.backend.features="query batch uid-match" \
+      ai.backend.accelerators="cuda" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.base-distro="centos7.6" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/python/cp37-cp37m/bin/python" \
+      ai.backend.service-ports=""
+
+# == Install build scripts ==
+
+COPY build-image.sh /root
+
+# vim: ft=dockerfile
