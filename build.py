@@ -100,6 +100,8 @@ def main(build, list_builds, _auto_push):
 #        build_kernel('base',    'ubuntu16.04-mkl2019.2')
 #        build_kernel('base',    'ubuntu18.04-mkl2019.3')
         build_kernel('base',    'ubuntu18.04-mkl2019.4')
+        build_common('base', '19.06-py36')
+        build_common('base', '19.06-py36-cuda9')
 
     if 'importer' in build:
         build_kernel('importer', 'manylinux2010')
@@ -120,6 +122,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('c',       'gcc6.3-alpine3.8')
         build_kernel('c',       'gcc6.3-alpine3.8-tester')
         build_kernel('cpp',     'gcc6.3-alpine3.8')
+        build_kernel('fortran', '8.3-alpine3.8')        
         build_kernel('java',    '8-alpine3.8')
         build_kernel('nodejs',  '10-alpine3.8')
         build_kernel('nodejs',  '12-alpine3.8')
@@ -137,7 +140,7 @@ def main(build, list_builds, _auto_push):
         build_kernel('scheme',  '9.2-alpine3.8')
 
     if 'compute-base' in build:
-#        build_kernel('julia',   '1.0-ubuntu18.04')
+        build_kernel('julia',   '1.0-ubuntu18.04')
         build_kernel('r-base',       '3.6')
 
     # TODO: (not modernized) build_kernel('octave',  '4.2-debian')
@@ -219,16 +222,14 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-tensorflow', '1.5-py36-cuda9')
         build_kernel('python-tensorflow', '1.6-py36')
         build_kernel('python-tensorflow', '1.6-py36-cuda9')
-
-    if 'tf-current' in build:
-        build_common('base', '19.06-py36')
-        build_common('base', '19.06-py36-cuda9')
         build_kernel('python-tensorflow', '1.7-py36')
         build_kernel('python-tensorflow', '1.7-py36-cuda9')
         build_kernel('python-tensorflow', '1.8-py36')
         build_kernel('python-tensorflow', '1.8-py36-cuda9')
         build_kernel('python-tensorflow', '1.9-py36')
         build_kernel('python-tensorflow', '1.9-py36-cuda9')
+
+    if 'tf-current' in build:
         build_kernel('python-tensorflow', '1.10-py36')
         build_kernel('python-tensorflow', '1.10-py36-cuda9')
         build_kernel('python-tensorflow', '1.11-py36')
@@ -260,8 +261,6 @@ def main(build, list_builds, _auto_push):
     if 'ff' in build:
         build_common('tensorflow', 'ff.19.06-py36')
         build_common('tensorflow', 'ff.19.06-py36-cuda9')
-#        build_common('base', '19.07-py36-cuda9')
-#        build_kernel('python-ff', '19.07-py36-cuda9')
         build_kernel('python-ff', '19.06-py36')
         build_kernel('python-ff', '19.06-py36-cuda9')
 
