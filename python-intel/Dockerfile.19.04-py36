@@ -1,0 +1,64 @@
+FROM continuumio/miniconda3:4.5.4
+# Intel Distributed Python 2019.04 with Conda
+
+RUN apt update -y && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt install -y --no-install-recommends \
+   	apt-transport-https \
+	ca-certificates \
+	curl \
+	wget \
+	gnupg2 \
+	libexpat-dev 
+
+WORKDIR /usr/local
+
+RUN conda config --add channels intel && \
+    conda install -y -q intelpython3_full=2019.4 python=3 && \
+    conda install -c anaconda tensorflow-mkl && \
+    conda install -c conda-forge nodejs && \
+    conda install -c conda-forge jupyterlab && \
+    conda install -c conda-forge jupyterthemes && \
+    conda install -c conda-forge ipywidgets && \
+    conda install -c conda-forge jupyter_contrib_nbextensions && \
+    conda install -c conda-forge jupyter_nbextensions_configurator && \
+    conda clean --all && \
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
+    
+# Install ipython kernelspec
+RUN python3 -m ipykernel install --display-name "Intel Python 3.6 on Backend.AI" && \
+    cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY custom.css /home/work/.jupyter/custom/custom.css
+COPY logo.svg /home/work/.jupyter/custom/logo.svg
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
+      ai.backend.base-distro="ubuntu18.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+
+WORKDIR /home/work
+# vim: ft=dockerfile

@@ -1,7 +1,6 @@
 # Lablup/Python-TensorFlow 1.14 Python 3.6
 
-FROM lablup/common-tensorflow:1.14-py36 as tf-binary
-
+FROM lablup/common-tensorflow:1.14-py36-cuda9 as tf-binary
 FROM lablup/common-base:19.06-py36-cuda9
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
@@ -29,7 +28,7 @@ RUN mkdir -p /tmp && \
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
-      ai.backend.base-distro="ubuntu18.04" \
+      ai.backend.base-distro="ubuntu16.04" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
       ai.backend.resource.min.cuda.device=1 \

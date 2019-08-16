@@ -155,7 +155,7 @@ LABEL ai.backend.kernelspec=1 \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/opt/conda/bin/python" \
+      ai.backend.runtime-path="/usr/local/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080"
 ```
 

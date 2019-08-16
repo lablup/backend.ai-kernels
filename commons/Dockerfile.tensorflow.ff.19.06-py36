@@ -1,7 +1,7 @@
 # Build target lablup/commom-tensorflow:ff-19.06-py36
 
 # import python-binary
-FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/base:python3.6 as python-binary
 
 FROM ubuntu:16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
