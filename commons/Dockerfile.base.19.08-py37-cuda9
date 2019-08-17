@@ -60,6 +60,7 @@ RUN apt-get update -y && \
 	vim \
 	cmake \
 	yasm \
+	graphviz \
 	pkg-config \
         xz-utils \
         wget curl git-core \
@@ -231,6 +232,8 @@ RUN python3 -m pip install --no-cache-dir imbalanced-learn && \
     python3 -m pip install --no-cache-dir pygal && \
     python3 -m pip install --no-cache-dir mlxtend && \
     python3 -m pip install --no-cache-dir dtreeviz && \
+    python3 -m pip install --no-cache-dir pyglet && \
+    python3 -m pip install --no-cache-dir descartes && \
     python3 -m pip install --no-cache-dir geoplotlib && \
     python3 -m pip install --no-cache-dir featuretools && \
     python3 -m pip install --no-cache-dir graphviz && \
@@ -249,6 +252,7 @@ RUN python3 -m pip install --no-cache-dir imbalanced-learn && \
     python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
     python3 -m pip install --no-cache-dir matplotlib bokeh && \
     python3 -m pip install --no-cache-dir tensorwatch && \
+    python3 -m pip install --no-cache-dir torchvision && \
     python3 -m pip install --no-cache-dir tensorflow-hub==0.5.0 && \
     python3 -m pip install --no-cache-dir tf2onnx && \
     rm -rf /root/.cache && \
