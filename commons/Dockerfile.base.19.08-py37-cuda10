@@ -18,8 +18,9 @@ ENV NCCL_VERSION 2.4.7
 RUN apt-get update -y && \
     apt-get install -y nvinfer-runtime-trt-repo-ubuntu1604-5.0.2-ga-cuda10.0 && \
     apt-get update -y && \
-    apt-get install libnvinfer5=5.0.2-1+cuda10.0 && \
-    apt-get install libnvinfer-dev=5.0.2-1+cuda10.0
+    apt-get install -y --no-install-recommends \
+    	libnvinfer5=5.0.2-1+cuda10.0 \
+    	libnvinfer-dev=5.0.2-1+cuda10.0
 
 RUN apt-get update -y && \
     apt-mark unhold libnccl2 && \
