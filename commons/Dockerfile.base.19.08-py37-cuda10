@@ -34,10 +34,10 @@ RUN apt-get update -y && \
         cuda-cusolver-dev-10-1=$CUDA_VERSION-1 \
 	cuda-cusparse-10-1=$CUDA_VERSION-1 \
         cuda-cusparse-dev-10-1=$CUDA_VERSION-1 \
-        libnccl2=$NCCL_VERSION-1+$CUDA_PKG_VERSION \
-        libnccl-dev=$NCCL_VERSION-1+$CUDA_PKG_VERSION \
-	libcudnn7=$CUDNN_VERSION-1+$CUDA_PKG_VERSION \
-	libcudnn7-dev=$CUDNN_VERSION-1+$CUDA_PKG_VERSION \
+        libnccl2=$NCCL_VERSION-1+cuda10.1 \
+        libnccl-dev=$NCCL_VERSION-1+cuda10.1 \
+	libcudnn7=$CUDNN_VERSION-1+cuda10.1 \
+	libcudnn7-dev=$CUDNN_VERSION-1+cuda10.1 \
 	&& \
 	apt-mark hold libcudnn7 libnccl2 && \
 	rm -rf /var/lib/apt/lists/*
