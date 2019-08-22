@@ -15,6 +15,12 @@ ENV CUDA_PKG_VERSION 10-1=$CUDA_VERSION-1
 ENV CUDNN_VERSION 7.6.2.24
 ENV NCCL_VERSION 2.4.7
 
+RUN apt-get update && \
+    apt-get install nvinfer-runtime-trt-repo-ubuntu1604-5.1.5-ga-cuda10.1 && \
+    apt-get update && \
+    apt-get install libnvinfer5=5.1.5-1+cuda10.1 && \
+    apt-get install libnvinfer-dev=5.1.5-1+cuda10.1
+
 RUN apt-get update -y && \
     apt-mark unhold libnccl2 && \
     apt-get upgrade -y && \
@@ -36,17 +42,10 @@ RUN apt-get update -y && \
         cuda-cusparse-dev-10-1=$CUDA_VERSION-1 \
         libnccl2=$NCCL_VERSION-1+cuda10.1 \
         libnccl-dev=$NCCL_VERSION-1+cuda10.1 \
-	libcudnn7=$CUDNN_VERSION-1+cuda10.1 \
-	libcudnn7-dev=$CUDNN_VERSION-1+cuda10.1 \
 	&& \
-	apt-mark hold libcudnn7 libnccl2 && \
+	apt-mark hold libnccl2 && \
 	rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && \
-        apt-get install nvinfer-runtime-trt-repo-ubuntu1604-5.1.5-ga-cuda10.1 && \
-        apt-get update && \
-        apt-get install libnvinfer5=5.1.5-1+cuda10.1 && \
-        apt-get install libnvinfer-dev=5.1.5-1+cuda10.1
 	
 ENV PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/lib:$LD_LIBRARY_PATH \
