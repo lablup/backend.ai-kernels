@@ -100,10 +100,12 @@ def main(build, list_builds, _auto_push):
         build_common('base',    'python3.6-ubuntu18.04')
         build_common('base',    'python3.7')
         build_common('base',    'python3.7-ubuntu18.04')
-        build_common('base',    'ubuntu18.04-mkl2019.4')
+        build_common('base',    '19.08-mkl')
         build_common('base',    '19.06-py36')
         build_common('base',    '19.06-py36-cuda9')
         build_common('base',    '19.08-py37-cuda9')
+        build_common('base',    '19.08-py36-cuda10')
+        build_common('base',    '19.08-py37-cuda10')
 
     if 'importer' in build:
         build_kernel('importer', 'manylinux2010')
