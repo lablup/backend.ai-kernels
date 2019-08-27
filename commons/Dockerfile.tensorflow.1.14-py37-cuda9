@@ -1,23 +1,20 @@
-# Lablup 
-# Tensorflow 2.0 beta (CUDA9) & Python 3.6
-# ref: https://tensorflow.org
+# Build target: lablup/common-tensorflow:1.14-py37-cuda9
 
-# import python-binary
-FROM lablup/kernel-base:python3.6 as python-binary
+# base python 3.7
+FROM lablup/common-base:python3.7 as python-binary 
 
-# Build target: lablup/common-tensorflow:NextG.19.06-py36-cuda9
 FROM nvidia/cuda:9.0-base-ubuntu16.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
-ENV TF_VERSION 2.0.0-beta0
+ENV TF_VERSION 1.14
 ENV BAZEL_VERSION 0.24.1
 ENV CUDA_VERSION 9.0.176
-ENV CUDNN_VERSION 7.4.2.24
-ENV NCCL_VERSION 2.4.2
+ENV CUDNN_VERSION 7.6.0.64
+ENV NCCL_VERSION 2.4.7
 ENV TENSORT_VERSION 5.0.2
 ENV PYTHON_BIN_PATH /usr/local/bin/python
-ENV PYTHON_LIB_PATH /usr/local/lib/python3.6/site-packages 
+ENV PYTHON_LIB_PATH /usr/local/lib/python3.7/site-packages 
 ENV GCC_HOST_COMPILER_PATH /usr/bin/gcc 
 ENV CC_OPT_FLAGS "-march=x86-64 -mavx -mavx2 -mfma -mfpmath=both -msse4.1 -msse4.2" 
 ENV TF_NEED_JEMALLOC 1
@@ -28,7 +25,7 @@ ENV TF_NEED_VERBS 0
 ENV TF_NEED_OPENCL_SYCL 0
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_CLANG 0
-ENV TF_NEED_TENSORRT 0
+ENV TF_NEED_TENSORRT 1
 ENV TF_NEED_MPI 0
 ENV TF_NEED_S3 1
 ENV TF_CUDA_VERSION 9.0 
@@ -37,7 +34,6 @@ ENV TF_NCCL_VERSION 2
 ENV TF_CUDA_COMPUTE_CAPABILITIES 3.5,3.7,5.2,6.0,6.1,7.0 
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
-#ENV CUDNN_INSTALL_PATH /usr/local/cuda 
 ENV CI_BUILD_PYTHON python
 
 # Install system package dependencies
@@ -99,8 +95,7 @@ RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
 # Check Bazel/Python is runnable.
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
-RUN pip install -U setuptools pip && \
-    python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
+RUN python -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     pip install --no-cache-dir wheel numpy scipy && \
     pip install --no-cache-dir keras_applications && \
     pip install --no-cache-dir keras_preprocessing && \
@@ -129,8 +124,7 @@ RUN mkdir /bazel && \
 
 RUN : build TensorFlow pip package && \
     cd /tmp && \
-#    git clone --branch=v${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
-    curl -SL https://github.com/tensorflow/tensorflow/archive/v2.0.0-beta0.tar.gz | tar xzf - && \
+    git clone --branch=r${TF_VERSION} --depth=1 https://github.com/tensorflow/tensorflow.git tensorflow-${TF_VERSION} && \
     ldconfig
     
 RUN cd /tmp/tensorflow-${TF_VERSION} && \
@@ -142,6 +136,7 @@ RUN cd /tmp/tensorflow-${TF_VERSION} && \
 	--copt=-mavx \
 	--copt=-mavx2 \
 	--config=cuda \
+	--config=monolithic \
 	--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
     rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \

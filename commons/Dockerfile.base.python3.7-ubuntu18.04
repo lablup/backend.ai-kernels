@@ -1,11 +1,11 @@
-# Python 3.6.8 base kernel based ubuntu 16.04
+# Python 3.7.4 base kernel based ubuntu 18.04
 # base source from official repository at https://hub.docker.com/python/
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # GPG_KEY & Python version
 ENV GPG_KEY 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
-ENV PYTHON_VERSION 3.6.8
+ENV PYTHON_VERSION 3.7.4
 ENV DEBIAN_FRONTEND=noninteractive
 # /usr/local in this image only has its own built Python.
 ENV PATH /usr/local/bin:$PATH
@@ -59,7 +59,43 @@ RUN wget --no-check-certificate -O python.tar.xz "https://www.python.org/ftp/pyt
 	--with-system-expat \
 	--with-system-ffi \
 	--without-ensurepip && \
-    make -j "$(nproc)" && \
+    make -j "$(nproc)" \
+	PROFILE_TASK='-m test.regrtest --pgo \
+			test_array \
+			test_base64 \
+			test_binascii \
+			test_binhex \
+			test_binop \
+			test_bytes \
+			test_c_locale_coercion \
+			test_class \
+			test_cmath \
+			test_codecs \
+			test_compile \
+			test_complex \
+			test_csv \
+			test_decimal \
+			test_dict \
+			test_float \
+			test_fstring \
+			test_hashlib \
+			test_io \
+			test_iter \
+			test_json \
+			test_long \
+			test_math \
+			test_memoryview \
+			test_pickle \
+			test_re \
+			test_set \
+			test_slice \
+			test_struct \
+			test_threading \
+			test_time \
+			test_traceback \
+			test_unicode \
+		' \    
+	    && \
     make install && \
     ldconfig && \
     apt-mark auto '.*' > /dev/null && \
@@ -126,5 +162,5 @@ RUN cd /; \
     tar czpf python.tar.gz \
         /usr/local/bin \
         /usr/local/lib/libpython* \
-        /usr/local/lib/python3.6* \
+        /usr/local/lib/python3.7* \
         /usr/local/include

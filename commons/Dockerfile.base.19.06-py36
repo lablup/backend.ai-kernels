@@ -6,7 +6,7 @@
 ## Support Jupyter notebook extension
 
 # base python 3.6
-FROM lablup/kernel-base:python3.6-ubuntu18.04 as python-binary
+FROM lablup/common-base:python3.6-ubuntu18.04 as python-binary
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 FROM ubuntu:18.04

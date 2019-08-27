@@ -94,28 +94,34 @@ def main(build, list_builds, _auto_push):
     auto_push.set(_auto_push)
 
     if 'base' in build:
-#        build_kernel('base',    'ubuntu16.04-mkl2018.3')
-#        build_kernel('base',    'ubuntu16.04-mkl2019')
-#        build_kernel('base',    'ubuntu16.04-mkl2019.1')
-#        build_kernel('base',    'ubuntu16.04-mkl2019.2')
-#        build_kernel('base',    'ubuntu18.04-mkl2019.3')
-        build_kernel('base',    'ubuntu18.04-mkl2019.4')
-        build_common('base', '19.06-py36')
-        build_common('base', '19.06-py36-cuda9')
+        build_common('base',    'python2.7')
+        build_common('base',    'python2.7-ubuntu18.04')
+        build_common('base',    'python3.6')
+        build_common('base',    'python3.6-ubuntu18.04')
+        build_common('base',    'python3.7')
+        build_common('base',    'python3.7-ubuntu18.04')
+        build_common('base',    '19.08-mkl')
+        build_common('base',    '19.06-py36')
+        build_common('base',    '19.06-py36-cuda9')
+        build_common('base',    '19.08-py37-cuda9')
+        build_common('base',    '19.08-py36-cuda10')
+        build_common('base',    '19.08-py37-cuda10')
 
     if 'importer' in build:
         build_kernel('importer', 'manylinux2010')
 
     if 'python' in build:
-        build_common('base',    'python3.6')
-        build_common('base',    'python3.6-ubuntu18.04')
-        build_common('base',    'python2.7')
-        build_common('base',    'python2.7-ubuntu18.04')
         build_kernel('python',  '2.7')
         build_kernel('python',  '2.7-ubuntu18.04')
         build_kernel('python',  '3.6')
         build_kernel('python',  '3.6-ubuntu18.04')
         build_kernel('python',  '3.7-anaconda2018.12')
+        build_kernel('python',  '3.7-anaconda2019.07')        
+        build_kernel('python',    'ubuntu16.04-mkl2018.3')
+        build_kernel('python',    'ubuntu16.04-mkl2019')
+        build_kernel('python',    'ubuntu16.04-mkl2019.1')
+        build_kernel('python',    'ubuntu16.04-mkl2019.2')
+        build_kernel('python',    'ubuntu18.04-mkl2019.3')
 
     if 'alpine-base' in build:
         build_kernel('git',     'alpine3.8')
@@ -202,6 +208,7 @@ def main(build, list_builds, _auto_push):
         build_common('tensorflow', '1.13-py36-cuda9')
         build_common('tensorflow', '1.14-py36')
         build_common('tensorflow', '1.14-py36-cuda9')
+        build_common('tensorflow', '1.14-py37-cuda9')        
 
     if 'tf-pkg-future' in build:
         build_common('tensorflow', '2.0-py36')
@@ -249,7 +256,8 @@ def main(build, list_builds, _auto_push):
 #        build_kernel('python-tensorflow', '1.13-py36-srv-cuda9')
         build_kernel('python-tensorflow', '1.14-py36')
         build_kernel('python-tensorflow', '1.14-py36-cuda9')
-
+        build_kernel('python-tensorflow', '1.14-py37-cuda9')
+        
     if 'past' in build:
         build_common('tensorflow', 'ff.19.05-py36-cuda9')
         build_common('tensorflow', 'ff.19.06-py36')
@@ -259,10 +267,14 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-ff', '19.06-py36-cuda9')
 
     if 'ff' in build:
-        build_common('tensorflow', 'ff.19.06-py36')
-        build_common('tensorflow', 'ff.19.06-py36-cuda9')
-        build_kernel('python-ff', '19.06-py36')
-        build_kernel('python-ff', '19.06-py36-cuda9')
+       build_common('base',    'python3.7')
+       build_common('tensorflow', '1.14-py37-cuda9')        
+       build_common('base',    '19.08-py37-cuda9')
+       build_kernel('python-tensorflow', '1.14-py37-cuda9')
+#        build_common('tensorflow', 'ff.19.08-py37')
+#        build_common('tensorflow', 'ff.19.08-py37-cuda9')
+#        build_kernel('python-ff', '19.08-py37')
+#        build_kernel('python-ff', '19.08-py37-cuda9')
 
     if 'tf-future' in build:
         build_kernel('python-tensorflow', '2.0-py36')
@@ -360,7 +372,6 @@ def main(build, list_builds, _auto_push):
         build_kernel('vendor/ngc-nvcaffe', '19.05-py2')
 
         build_kernel('vendor/ngc-rapids',  '0.5-rapids-py3')
-#        build_kernel('vendor/ngc-chainer', '4.0-py3')
 
 if __name__ == '__main__':
     main()
