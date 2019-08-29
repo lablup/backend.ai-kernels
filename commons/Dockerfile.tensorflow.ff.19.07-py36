@@ -3,11 +3,11 @@
 # import python-binary
 FROM lablup/kernel-base:python3.6 as python-binary
 
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
-ENV TF_VERSION 1.14
+ENV TF_VERSION 2.0
 ENV BAZEL_VERSION 0.24.1
 ENV PYTHON_BIN_PATH /usr/local/bin/python
 ENV PYTHON_LIB_PATH /usr/local/lib/python3.6/site-packages 
@@ -63,19 +63,17 @@ COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
 # Check Python is runnable.
-# Also install TensorFlow build dependencies (ensure we have proper numpy)
-RUN 
 # Prepare for building TensorFlow wheel
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip && \
     python3 -c "import sys; print(sys.prefix); print(sys.version_info)" && \
     python3 -m pip install --no-cache-dir \
-#      wheel numpy scipy cupy-cuda101 && \
+       numpy scipy \
        wheel \
        mkl-devel ipp-devel daal-devel \
        intel-openmp tbb impi mkl_fft mkl_random \
        intel-numpy intel-scipy intel-scikit-learn \
-       daal4py tbb4py cupy-cuda101 \
+       cupy-cuda101 \
        pandas \
        keras_applications \
        keras_preprocessing \
