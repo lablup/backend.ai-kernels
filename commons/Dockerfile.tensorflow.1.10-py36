@@ -1,7 +1,7 @@
 # Build target: lablup/common-tensorflow:1.10-py36
 
 # import python-binary
-FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/base:python3.6-ubuntu18.04 as python-binary
 
 FROM ubuntu:18.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"

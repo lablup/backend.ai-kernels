@@ -1,4 +1,4 @@
-FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/base:python3.6 as python-binary
 
 # Build target: lablup/common-tensorflow:1.0-py36-cuda8
 FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
