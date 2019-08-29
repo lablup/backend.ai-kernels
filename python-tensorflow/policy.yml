@@ -1,4 +1,4 @@
-whitelist_paths:
+ㅊwhitelist_paths:
   OP_OPEN: ["*"]
   OP_ACCESS: ["*"]
   OP_EXEC: ["*"]
