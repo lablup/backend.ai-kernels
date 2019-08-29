@@ -6,10 +6,7 @@ ENV PYTHONUNBUFFERED=1 \
     LANG=C.UTF-8
 
 # ipython/jupyter is already installed in the Anaconda Python installed at /opt/conda.
-RUN /opt/conda/bin/python3 -m pip install ipython && \
-    /opt/conda/bin/python3 -m pip install jupyter && \
-    /opt/conda/bin/python3 -m pip install jupyterlab && \
-    /opt/conda/bin/python3 -m pip install opencv-python 
+RUN /opt/conda/bin/python3 -m pip install jupyterlab
 
 # Install ipython kernelspec
 RUN /opt/conda/bin/python3 -m ipykernel install \
@@ -21,11 +18,6 @@ RUN /opt/conda/bin/python3 -m ipykernel install \
 RUN mkdir -p /tmp && \
     chown root:root /tmp && \
     chmod 1777 /tmp
-
-# Install Jupyter notebook logo
-RUN mkdir -p /home/work/.jupyter/custom
-COPY custom.css /home/work/.jupyter/custom/custom.css
-COPY logo.svg /home/work/.jupyter/custom/logo.svg
 
 # Backend.AI specifics
 COPY policy.yml /etc/backend.ai/jail/policy.yml
