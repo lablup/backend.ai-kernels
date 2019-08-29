@@ -5,7 +5,7 @@
 ## Support Jupyter notebook extension
 
 # base python 3.6
-FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/base:python3.6 as python-binary
 
 FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
