@@ -1,0 +1,103 @@
+# Intel Distribution for base python 2.7 for Linux
+FROM lablup/base:python2.7-ubuntu18.04 as python-binary
+# http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/15559/l_pythoni2_p_2019.4.088.tar.gz
+FROM ubuntu:18.04
+MAINTAINER Mario Cho "m.cho@lablup.com"
+
+ENV MKL_VERSION 2019.4.243
+ENV NUMPY_VERSION 1.16.4
+ENV SCIPY_VERSION 1.2.2
+ENV LANG C.UTF-8
+
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
+
+WORKDIR /tmp
+RUN apt update -y && \
+    apt install -y --no-install-recommends \
+   	apt-transport-https \
+	ca-certificates \
+	curl \
+	wget \
+	gnupg2 \
+	libexpat-dev \
+	&& \
+    wget --no-check-certificate https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    wget --no-check-certificate https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
+    sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list' && \
+    sh -c 'echo deb https://apt.repos.intel.com/ipp all main > /etc/apt/sources.list.d/intel-ipp.list' && \
+    sh -c 'echo deb https://apt.repos.intel.com/tbb all main > /etc/apt/sources.list.d/intel-tbb.list' && \
+    sh -c 'echo deb https://apt.repos.intel.com/daal all main > /etc/apt/sources.list.d/intel-daal.list' && \
+    sh -c 'echo deb https://apt.repos.intel.com/mpi all main > /etc/apt/sources.list.d/intel-mpi.list' && \
+    sh -c 'echo deb https://apt.repos.intel.com/intelpython binary/ > /etc/apt/sources.list.d/intelpython.list' && \
+    apt-get update -y && \
+    apt -y install --no-install-recommends \
+        gcc g++ gfortran cpio git \
+	&& \
+    wget -q http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/15540/l_mkl_2019.4.243.tgz && \
+    tar -xzf l_mkl_2019.4.243.tgz && \
+    cd l_mkl_2019.4.243 &&  \
+    sed -i 's/ACCEPT_EULA=decline/ACCEPT_EULA=accept/g' silent.cfg && \
+    sed -i 's/ARCH_SELECTED=ALL/ARCH_SELECTED=INTEL64/g' silent.cfg && \
+    sed -i 's/COMPONENTS=DEFAULTS/COMPONENTS=;intel-comp-l-all-vars__noarch;intel-comp-nomcu-vars__noarch;intel-openmp__x86_64;intel-tbb-libs__x86_64;intel-mkl-common__noarch;intel-mkl-installer-license__noarch;intel-mkl-core__x86_64;intel-mkl-core-rt__x86_64;intel-mkl-doc__noarch;intel-mkl-doc-ps__noarch;intel-mkl-gnu__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-common-ps__noarch;intel-mkl-core-ps__x86_64;intel-mkl-common-c__noarch;intel-mkl-core-c__x86_64;intel-mkl-common-c-ps__noarch;intel-mkl-tbb__x86_64;intel-mkl-tbb-rt__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-common-f__noarch;intel-mkl-core-f__x86_64;intel-mkl-gnu-f-rt__x86_64;intel-mkl-gnu-f__x86_64;intel-mkl-f95-common__noarch;intel-mkl-f__x86_64;intel-mkl-psxe__noarch;intel-psxe-common__noarch;intel-psxe-common-doc__noarch;intel-compxe-pset/g' silent.cfg && \
+    ./install.sh -s silent.cfg && \
+    cd .. && \
+    rm -rf * && \
+    rm -rf /opt/intel/.*.log /opt/intel/compilers_and_libraries_2019.4.243/licensing && \
+    echo "/opt/intel/mkl/lib/intel64" >> /etc/ld.so.conf.d/intel.conf && \
+    ldconfig && \
+    echo "source /opt/intel/mkl/bin/mklvars.sh intel64" >> /etc/bash.bashrc
+
+# Install numpy with MKL
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
+    python3 -m pip install --no-cache-dir -U setuptools pip && \
+    python3 -m pip install --no-cache-dir wheel && \
+    python3 -m pip install --no-cache-dir h5py && \
+    python3 -m pip install --no-cache-dir Cython
+    
+# Install scipy
+RUN cd /tmp && \
+    git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
+    cd scipy && \
+    git checkout -b v${SCIPY_VERSION} && \  
+    cp site.cfg.example site.cfg && \
+    echo "\n[mkl]" >> site.cfg && \
+    echo "include_dirs = /opt/intel/mkl/include/intel64/" >> site.cfg && \
+    echo "library_dirs = /opt/intel/mkl/lib/intel64/" >> site.cfg && \
+    echo "mkl_libs = mkl_rt" >> site.cfg && \
+    echo "lapack_libs =" >> site.cfg && \
+    python3 setup.py bdist_wheel -d /tmp
+
+RUN cd /tmp && \
+    git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
+    cd numpy && \
+    git checkout -b v${NUMPY_VERSION} && \
+    cp site.cfg.example site.cfg && \
+    echo "\n[mkl]" >> site.cfg && \
+    echo "include_dirs = /opt/intel/mkl/include/intel64/" >> site.cfg && \
+    echo "library_dirs = /opt/intel/mkl/lib/intel64/" >> site.cfg && \
+    echo "mkl_libs = mkl_rt" >> site.cfg && \
+    echo "lapack_libs =" >> site.cfg && \
+    python3 setup.py bdist_wheel -d /tmp 
+
+RUN apt-mark auto '.*' > /dev/null && \
+    find /usr/local -type f -executable -not \( -name '*tkinter*' \) -exec ldd '{}' ';' \
+	| awk '/=>/ { print $(NF-1) }' \
+	| sort -u \
+	| xargs -r dpkg-query --search \
+	| cut -d: -f1 \
+	| sort -u \
+	| xargs -r apt-mark manual && \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
+    rm -rf /var/lib/apt/lists/* 
+
+RUN cd /tmp && \
+    find /usr/local -depth \
+	\( \
+	\( -type d -a \( -name test -o -name tests \) \) \
+	-o \
+	\( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
+	\) -exec rm -rf '{}' + ; \
+    rm -f get-pip.py
+	
