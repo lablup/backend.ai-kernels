@@ -3,9 +3,11 @@ FROM nvcr.io/nvidia/tensorflow:19.03-py3
 
 RUN apt-get update && \
     apt-get install -y libsm6 libxext6 libxrender-dev
+
 ENV PYTHONUNBUFFERED=1 \
-    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
     LANG=C.UTF-8
+
 RUN /usr/bin/python3 -m pip install -U pip setuptools && \
     /usr/bin/python3 -m pip install --no-cache-dir keras && \
     /usr/bin/python3 -m pip install --no-cache-dir keras_applications && \
@@ -25,11 +27,6 @@ RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.5 (NGC/Tensor
 RUN mkdir -p /tmp && \
     chown root:root /tmp && \
     chmod 1777 /tmp
-
-# Install Jupyter notebook logo
-RUN mkdir -p /home/work/.jupyter/custom
-COPY custom.css /home/work/.jupyter/custom/custom.css
-COPY logo.svg /home/work/.jupyter/custom/logo.svg
 
 # Backend.AI specifics
 COPY policy.yml /etc/backend.ai/jail/policy.yml
