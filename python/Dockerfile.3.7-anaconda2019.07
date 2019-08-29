@@ -1,4 +1,4 @@
-FROM continuumio/anaconda3:2018.12
+FROM continuumio/anaconda3:2019.07
 # Anaconda 2018.12 comes with Python 3.7
 
 RUN apt-get update && \
@@ -29,7 +29,7 @@ RUN conda install matplotlib bokeh && \
 # Install ipython kernelspec
 RUN /opt/conda/bin/python -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "Python 3.7 (Anaconda 2018.12) on Backend.AI" && \
+        --display-name "Python 3.7 (Anaconda 2019.07) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
