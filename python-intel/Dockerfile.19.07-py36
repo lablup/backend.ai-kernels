@@ -148,17 +148,6 @@ RUN jupyter nbextensions_configurator enable && \
     git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
     jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
 
-# Backend.AI specifics
-LABEL ai.backend.kernelspec="1" \
-      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input" \
-      ai.backend.resource.min.cpu="1" \
-      ai.backend.resource.min.mem="256m" \
-      ai.backend.base-distro="ubuntu18.04" \
-      ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/opt/conda/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
-
 RUN apt-mark auto '.*' > /dev/null && \
     find /usr/local -type f -executable -not \( -name '*tkinter*' \) -exec ldd '{}' ';' \
 		| awk '/=>/ { print $(NF-1) }' \
@@ -178,6 +167,17 @@ RUN cd /tmp && \
 	\( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
 	\) -exec rm -rf '{}' + ; \
     rm -f get-pip.py
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
 
 WORKDIR /home/work
 # vim: ft=dockerfile
