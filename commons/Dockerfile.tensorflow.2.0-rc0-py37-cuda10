@@ -30,7 +30,7 @@ ENV TF_NEED_VERBS 0
 ENV TF_NEED_OPENCL_SYCL 0
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_CLANG 0
-ENV TF_NEED_TENSORRT 0
+ENV TF_NEED_TENSORRT 1
 ENV TF_NEED_MPI 0
 ENV TF_NEED_S3 1
 ENV TF_CUDA_VERSION 10.1 
@@ -41,18 +41,15 @@ ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
 ENV CI_BUILD_PYTHON python
 
+ENV PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/lib:$LD_LIBRARY_PATH \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin":/usr/local/bin/mecab:$PATH \
+    LANG=C.UTF-8
+
 SHELL ["/bin/bash", "-c"]
 # Install system package dependencies
 # NOTE: running bazel requires JDK, not JRE!
 RUN apt-get update -y && \
-    apt-get install --no-install-recommends wget && \
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-ubuntu1604.pin && \
-    mv cuda-ubuntu1604.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
-    wget http://developer.download.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda-repo-ubuntu1604-10-1-local-10.1.243-418.87.00_1.0-1_amd64.deb && \
-    dpkg -i cuda-repo-ubuntu1604-10-1-local-10.1.243-418.87.00_1.0-1_amd64.deb && \
-    apt-key add /var/cuda-repo-10-1-local-10.1.243-418.87.00/7fa2af80.pub && \
-    apt-get update -y && \
-    apt-get install -y cuda && \
     apt-get install -y --no-install-recommends openjdk-8-jdk-headless && \
     apt-get install -y --no-install-recommends \
         curl gcc g++ make cmake git \
@@ -73,6 +70,9 @@ RUN apt-get update -y && \
 	libgeos-dev libgeos++-dev \
         libcurl3-dev \
         libfreetype6-dev \
+	libhdf5-dev \
+	libc-ares-dev \
+	libeigen3-dev \
         libhdf5-serial-dev \
         libpng12-dev \
         libzmq3-dev \
@@ -82,6 +82,8 @@ RUN apt-get update -y && \
         software-properties-common \
         zip unzip \
         zlib1g-dev \
+	openmpi-bin \
+	libopenmpi-dev \
         wget \
         imagemagick \
         graphviz \
@@ -89,6 +91,7 @@ RUN apt-get update -y && \
         sed \
         swig \
         git-core \
+	zip && \
 	zip && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* && \
@@ -103,6 +106,13 @@ RUN mkdir -p /usr/local/cuda-10.1/lib &&  \
     
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
+
+WORKDIR /tmp
+RUN curl -SL https://github.com/intel/mkl-dnn/archive/v0.20.4.tar.gz | tar zxf - && \
+    cd mkl-dnn-0.20.4 && \
+    mkdir -p build && cd build && cmake .. && \
+    make -j ${PROC} && \
+    make install
 
 # Check Bazel/Python is runnable.
 # Also install TensorFlow build dependencies (ensure we have proper numpy)
@@ -120,7 +130,8 @@ RUN pip install -U setuptools pip && \
 	scipy \
 	sklearn \
 	pandas \
-	future \
+#	ngraph-tensorflow-bridge \
+    	future \
 	portpicker \
 	enum34 && \
     rm -f /tmp/*.whl
@@ -160,11 +171,12 @@ RUN cd /tmp/tensorflow-${TF-VERSION} && \
         -c opt \
 	--copt=-mavx \
 	--copt=-mavx2 \
+#	--copt=mkl \
 	--config=cuda \
 	--config=monolithic \
-	--config=gdr \    
-	--config=verbs \  
-	--config=ngraph  \
+#	--config=gdr \    
+#	--config=verbs \  
+#	--config=ngraph  \
 	--config=numa  \ 
 	--config=dynamic_kernels \
 	--config=v2 \
