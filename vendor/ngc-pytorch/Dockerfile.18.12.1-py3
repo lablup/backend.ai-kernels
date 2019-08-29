@@ -19,11 +19,6 @@ RUN mkdir -p /tmp && \
     chown root:root /tmp && \
     chmod 1777 /tmp
 
-# Install Jupyter notebook logo
-RUN mkdir -p /home/work/.jupyter/custom
-COPY custom.css /home/work/.jupyter/custom/custom.css
-COPY logo.svg /home/work/.jupyter/custom/logo.svg
-
 # Backend.AI specifics
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 LABEL ai.backend.kernelspec="1" \
