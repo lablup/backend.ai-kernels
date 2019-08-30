@@ -1,12 +1,11 @@
 # Lablup/Python-TensorFlow 1.7 Python 3.6
 
-FROM lablup/common-tensorflow:1.7-py36 as tf-binary
-
+FROM lablup/common-tensorflow:1.8-py36-cuda9 as tf-binary
 FROM lablup/common-base:19.06-py36-cuda9
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "TensorFlow 1.7 on Python 3.6 (CUDA 9.0)" && \
+RUN python3 -m ipykernel install --display-name "TensorFlow 1.8 on Python 3.6 (CUDA 9.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
