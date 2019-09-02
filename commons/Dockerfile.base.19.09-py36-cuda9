@@ -7,24 +7,80 @@
 # base python 3.6
 FROM lablup/base:python3.6 as python-binary
 
-FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
+FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 ARG MPI_KIND=OpenMPI
 ARG NCCL_VERSION_OVERRIDE=2.2.13-1+cuda9.0
 ARG HOROVOD_BUILD_FLAGS=HOROVOD_GPU_ALLREDUCE=NCCL
+ARG key="https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB"
 
+# Add Intel MKL repository
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    	curl \
+	apt-transport-https \
+	gcc g++ make \
+	gfortran \
+	git \
+	&& \
+    curl "${key}" | apt-key add - && \
+    echo 'deb http://apt.repos.intel.com/mkl all main' | \
+    tee /etc/apt/sources.list.d/intel-mkl.list && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends intel-mkl-64bit-2018.1-038  && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    echo '/opt/intel/mkl/lib/intel64' | tee /etc/ld.so.conf.d/intel-mkl.conf && \
+    ldconfig
+
+#RUN curl -O https://www.mellanox.com/downloads/ofed/MLNX_OFED-3.4-1.0.0.0/MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu16.04-x86_64.tgz && \
+#    tar xcf MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu16.04-x86_64.tgz && \
+#    cd MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu16.04-x86_64 && \
+#    make && \
+#    make install 
+    
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
 ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/lib" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin":/usr/local/bin/mecab:$PATH \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64::/usr/local/nvidia/lib:/usr/local/lib:$LD_LIBRARY_PATH" \
+    PATH="/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab:$PATH" \
+    LANG=C.UTF-8 \
+    CC_OPT_FLAGS="-march=sandybridge -mtune=broadwell" \
+    CUBLAS_PKG_VERSION="9-0=9.0.425-1" \
+#    CUBLAS_VERSION_WAR1936603="9.0.425_384.144" \
+    CUDA_PKG_VERSION="9-0=9.0.176-1" \
+    CUDA_TOOLKIT_PATH="/usr/local/cuda" \
+    CUDA_VERSION="9.0.176" \
+    CUDNN_INSTALL_PATH="/usr/lib/x86_64-linux-gnu" \
+    HOROVOD_CUDA_HOME="/usr/local/cuda" \
+    HOROVOD_CUDA_INCLUDE="/usr/local/cuda/include" \
+    HOROVOD_CUDA_LIB="/usr/local/cuda/lib" \
+    HOROVOD_GPU_ALLREDUCE="NCCL" \
+    HOROVOD_NCCL_INCLUDE="/usr/include" \
+    HOROVOD_NCCL_LIB="/usr/lib/x86_64-linux-gnu" \
+    HOROVOD_NCCL_LINK="SHARED" \
+#    HOROVOD_WITHOUT_PYTORCH="1" \
+    LC_ALL="C.UTF-8" \
+    LESSCLOSE="/usr/bin/lesspipe %s %s" \
+    LESSOPEN="| /usr/bin/lesspipe %s" \
+    MOFED_VERSION="3.4-1.0.0.0" \
+    NCCL_INSTALL_PATH="/usr" \
+    NCCL_PKG_VERSION="2.2.13-1+cuda9.0" \
+    NCCL_VERSION="2.2.13" \
+    PYTHONIOENCODING="utf-8" \
+    SHLVL="1" \
+    TERM="xterm" \
+    TF_ADJUST_HUE_FUSED="1" \
+    TF_ADJUST_SATURATION_FUSED="1" \
+    TF_AUTOTUNE_THRESHOLD="2" \
+    TF_ENABLE_WINOGRAD_NONFUSED="1" \
+    TF_ENABLE_XLA="1" \
+    TF_NCCL_VERSION="2" \
+    TF_NEED_CUDA="1" \
+    TF_NEED_HDFS="0" \
+    TF_NEED_TENSORRT="1" \
     LANG=C.UTF-8
-
-# install konlpy
-RUN python3 -m pip install -U pip setuptools && \
-    python3 -m pip install --no-cache-dir konlpy h5py
 
 RUN apt-get update && \
     apt-get install -y \
@@ -34,16 +90,19 @@ RUN apt-get update && \
     cd /tmp && \
     curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
     tar zxfv mecab-0.996-ko-0.9.2.tar.gz && \
+    rm mecab-0.996-ko-0.9.2.tar.gz && \
     cd mecab-0.996-ko-0.9.2 && \
     ./configure && \
     make -j$(nproc) && \
     make check && \
     make install
 
+
 RUN echo "Install mecab-ko-dic" && \
     cd /tmp && \
     curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
     tar -zxvf mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    rm mecab-ko-dic-2.1.1-20180720.tar.gz && \
     cd mecab-ko-dic-2.1.1-20180720 && \
     ./autogen.sh && \
     ./configure && \
@@ -54,14 +113,16 @@ RUN echo "Install mecab-ko-dic" && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
 
+# install konlpy
+RUN python3 -m pip install -U pip setuptools && \
+    python3 -m pip install --no-cache-dir konlpy h5py
+
 RUN apt-get update -y && \
     apt-get install -y software-properties-common && \
     add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
     apt-get update -y && \
     apt-get install -y \
         ca-certificates \
-        gcc g++ make \
-	gfortran \
 	vim \
 	cmake \
 	yasm \
@@ -90,15 +151,17 @@ RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
     wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.1.tar.gz && \
     tar zxf openmpi-4.0.1.tar.gz && \
-    cd openmpi-4.0.0 && \
-    ./configure --enable-orterun-prefix-by-default && \
+    rm openmpi-4.0.1.tar.gz && \
+    cd openmpi-4.0.1 && \
+    ./configure --enable-orterun-prefix-by-default --with-cuda=/usr/local/cuda-9.0 && \
     make -j $(nproc) all && \
     make install && \
     ldconfig && \
     rm -rf /tmp/openmpi
 
 # Install Horovod, temporarily using CUDA stubs
-RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+RUN \
+#ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITH_MXNET=1 \
          python3 -m pip install --no-cache-dir horovod && \
     ldconfig
@@ -118,7 +181,6 @@ RUN echo NCCL_DEBUG=INFO >> /etc/nccl.conf
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs 
-
 
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
@@ -148,49 +210,6 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
-    PATH="/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
-    CC_OPT_FLAGS="-march=sandybridge -mtune=broadwell" \
-    CUBLAS_PKG_VERSION="9-0=9.0.425-1" \
-    CUBLAS_VERSION_WAR1936603="9.0.425_384.144" \
-    CUDA_PKG_VERSION="9-0=9.0.176-1" \
-    CUDA_TOOLKIT_PATH="/usr/local/cuda" \
-    CUDA_VERSION="9.0.176" \
-#    CUDA_VERSION_WAR1936603="9.0.176_384.81" \
-    CUDNN_INSTALL_PATH="/usr/lib/x86_64-linux-gnu" \
-#    CUDNN_VERSION="7.2.0" \
-#    CUDNN_VERSION_BUILD="7.2.1.38" \
-    HOROVOD_GPU_ALLREDUCE="NCCL" \
-    HOROVOD_NCCL_INCLUDE="/usr/include" \
-    HOROVOD_NCCL_LIB="/usr/lib/x86_64-linux-gnu" \
-    HOROVOD_NCCL_LINK="SHARED" \
-#    HOROVOD_WITHOUT_PYTORCH="1" \
-    LC_ALL="C.UTF-8" \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64" \
-    LESSCLOSE="/usr/bin/lesspipe %s %s" \
-    LESSOPEN="| /usr/bin/lesspipe %s" \
-#    MOFED_VERSION="3.4-1.0.0.0" \
-    NCCL_INSTALL_PATH="/usr" \
-    NCCL_PKG_VERSION="2.2.13-1+cuda9.0" \
-    NCCL_VERSION="2.2.13" \
-#    NVIDIA_BUILD_ID="604096" \
-#    NVIDIA_TENSORFLOW_VERSION="18.08" \
-#    NVIDIA_VISIBLE_DEVICES="all" \
-#    OLDPWD \
-    PYTHONIOENCODING="utf-8" \
-    SHLVL="1" \
-    TERM="xterm" \
-    TF_ADJUST_HUE_FUSED="1" \
-    TF_ADJUST_SATURATION_FUSED="1" \
-    TF_AUTOTUNE_THRESHOLD="2" \
-    TF_ENABLE_WINOGRAD_NONFUSED="1" \
-    TF_ENABLE_XLA="1" \
-    TF_NCCL_VERSION="2" \
-    TF_NEED_CUDA="1" \
-    TF_NEED_HDFS="0" \
-    TF_NEED_TENSORRT="1" \
-    LANG=C.UTF-8
 
 # Install CUDA-9.0 + cuDNN 7.6.0
 RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
