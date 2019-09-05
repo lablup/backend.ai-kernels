@@ -95,7 +95,8 @@ RUN apt-get update && \
     ./configure && \
     make -j$(nproc) && \
     make check && \
-    make install
+    make install && \
+    make clean 
 
 
 RUN echo "Install mecab-ko-dic" && \
@@ -161,7 +162,7 @@ RUN mkdir /tmp/openmpi && \
 
 # Install Horovod, temporarily using CUDA stubs
 RUN \
-#ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+    ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITH_MXNET=1 \
          python3 -m pip install --no-cache-dir horovod && \
     ldconfig
