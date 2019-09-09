@@ -1,132 +1,66 @@
-# Labup/Python-xxx Base kernel 19.06
+# Labup/Python-xxx Base kernel 19.08
 ## base Ubuntu 16.04
 ## Support TF-hub 0.5.0
 ## Support OpenCV 4.1.0
 ## Support Jupyter notebook extension
 
 # base python 3.6
-FROM lablup/base:python3.6 as python-binary
+FROM lablup/common-base:python3.6 as python-binary 
 
 FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
-ARG MPI_KIND=OpenMPI
-ARG NCCL_VERSION_OVERRIDE=2.2.13-1+cuda9.0
-ARG HOROVOD_BUILD_FLAGS=HOROVOD_GPU_ALLREDUCE=NCCL
-ARG key="https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB"
+ENV CUDA_VERSION 9.0.176
+ENV CUDA_PKG_VERSION 9-0=$CUDA_VERSION-1
+ENV CUDNN_VERSION 7.6.3.30
+ENV NCCL_VERSION 2.4.7
 
-# Add Intel MKL repository
 RUN apt-get update -y && \
+    apt-mark unhold libnccl2 && \
+    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    	curl \
-	apt-transport-https \
-	gcc g++ make \
-	gfortran \
-	git \
+        cuda-nvml-dev-$CUDA_PKG_VERSION \
+        cuda-command-line-tools-$CUDA_PKG_VERSION \
+	cuda-libraries-dev-$CUDA_PKG_VERSION \
+        cuda-minimal-build-$CUDA_PKG_VERSION \
+	cuda-libraries-$CUDA_PKG_VERSION \
+	cuda-cublas-9-0=9.0.176.4-1 \
+	cuda-core-9-0=9.0.176.3-1 \
+        cuda-cublas-dev-9-0=9.0.176.4-1 \
+	libcudnn7=$CUDNN_VERSION-1+cuda9.0 \
+	libcudnn7-dev=$CUDNN_VERSION-1+cuda9.0 \
 	&& \
-    curl "${key}" | apt-key add - && \
-    echo 'deb http://apt.repos.intel.com/mkl all main' | \
-    tee /etc/apt/sources.list.d/intel-mkl.list && \
-    apt-get update -y && \
-    apt-get install -y --no-install-recommends intel-mkl-64bit-2018.1-038  && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    echo '/opt/intel/mkl/lib/intel64' | tee /etc/ld.so.conf.d/intel-mkl.conf && \
+	apt-mark hold libcudnn7 libnccl2 && \
+	rm -rf /var/lib/apt/lists/*
+
+ENV PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/lib:$LD_LIBRARY_PATH \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin":/usr/local/bin/mecab:$PATH \
+    LANG=C.UTF-8
+
+# Install CUDA-9.0 + cuDNN 7.6.0
+RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
-#RUN curl -O https://www.mellanox.com/downloads/ofed/MLNX_OFED-3.4-1.0.0.0/MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu16.04-x86_64.tgz && \
-#    tar xcf MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu16.04-x86_64.tgz && \
-#    cd MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu16.04-x86_64 && \
-#    make && \
-#    make install 
-    
 COPY --from=python-binary /python.tar.gz /
 RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
 
-ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64::/usr/local/nvidia/lib:/usr/local/lib:$LD_LIBRARY_PATH" \
-    PATH="/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab:$PATH" \
-    LANG=C.UTF-8 \
-    CC_OPT_FLAGS="-march=sandybridge -mtune=broadwell" \
-    CUBLAS_PKG_VERSION="9-0=9.0.425-1" \
-#    CUBLAS_VERSION_WAR1936603="9.0.425_384.144" \
-    CUDA_PKG_VERSION="9-0=9.0.176-1" \
-    CUDA_TOOLKIT_PATH="/usr/local/cuda" \
-    CUDA_VERSION="9.0.176" \
-    CUDNN_INSTALL_PATH="/usr/lib/x86_64-linux-gnu" \
-    HOROVOD_CUDA_HOME="/usr/local/cuda" \
-    HOROVOD_CUDA_INCLUDE="/usr/local/cuda/include" \
-    HOROVOD_CUDA_LIB="/usr/local/cuda/lib" \
-    HOROVOD_GPU_ALLREDUCE="NCCL" \
-    HOROVOD_NCCL_INCLUDE="/usr/include" \
-    HOROVOD_NCCL_LIB="/usr/lib/x86_64-linux-gnu" \
-    HOROVOD_NCCL_LINK="SHARED" \
-#    HOROVOD_WITHOUT_PYTORCH="1" \
-    LC_ALL="C.UTF-8" \
-    LESSCLOSE="/usr/bin/lesspipe %s %s" \
-    LESSOPEN="| /usr/bin/lesspipe %s" \
-    MOFED_VERSION="3.4-1.0.0.0" \
-    NCCL_INSTALL_PATH="/usr" \
-    NCCL_PKG_VERSION="2.2.13-1+cuda9.0" \
-    NCCL_VERSION="2.2.13" \
-    PYTHONIOENCODING="utf-8" \
-    SHLVL="1" \
-    TERM="xterm" \
-    TF_ADJUST_HUE_FUSED="1" \
-    TF_ADJUST_SATURATION_FUSED="1" \
-    TF_AUTOTUNE_THRESHOLD="2" \
-    TF_ENABLE_WINOGRAD_NONFUSED="1" \
-    TF_ENABLE_XLA="1" \
-    TF_NCCL_VERSION="2" \
-    TF_NEED_CUDA="1" \
-    TF_NEED_HDFS="0" \
-    TF_NEED_TENSORRT="1" \
-    LANG=C.UTF-8
-
-RUN apt-get update && \
-    apt-get install -y \
-    	openjdk-8-jdk \
-	automake \
-	&& \
-    cd /tmp && \
-    curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
-    tar zxfv mecab-0.996-ko-0.9.2.tar.gz && \
-    rm mecab-0.996-ko-0.9.2.tar.gz && \
-    cd mecab-0.996-ko-0.9.2 && \
-    ./configure && \
-    make -j$(nproc) && \
-    make check && \
-    make install && \
-    make clean 
-
-
-RUN echo "Install mecab-ko-dic" && \
-    cd /tmp && \
-    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
-    tar -zxvf mecab-ko-dic-2.1.1-20180720.tar.gz && \
-    rm mecab-ko-dic-2.1.1-20180720.tar.gz && \
-    cd mecab-ko-dic-2.1.1-20180720 && \
-    ./autogen.sh && \
-    ./configure && \
-    make -j$(nproc) && \
-    sh -c 'echo "dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic" > /usr/local/etc/mecabrc' && \
-    make install && \
-    cd /tmp && \
-    git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
-    python3 -m pip install /tmp/mecab-python-0.996
-
-# install konlpy
-RUN python3 -m pip install -U pip setuptools && \
-    python3 -m pip install --no-cache-dir konlpy h5py
+# python alternative support
+RUN update-alternatives --install /usr/bin/python python /usr/local/bin/python3 2
 
 RUN apt-get update -y && \
     apt-get install -y software-properties-common && \
     add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
     apt-get update -y && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
         ca-certificates \
+        gcc g++ make \
+	gfortran \
 	vim \
 	cmake \
 	yasm \
+	graphviz \
 	pkg-config \
         xz-utils \
         wget curl git-core \
@@ -147,41 +81,47 @@ RUN apt-get update -y && \
 	libxine2-dev \
 	libv4l-dev
 
-# Install Open MPI
-RUN mkdir /tmp/openmpi && \
-    cd /tmp/openmpi && \
-    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.1.tar.gz && \
-    tar zxf openmpi-4.0.1.tar.gz && \
-    rm openmpi-4.0.1.tar.gz && \
-    cd openmpi-4.0.1 && \
-    ./configure --enable-orterun-prefix-by-default --with-cuda=/usr/local/cuda-9.0 && \
-    make -j $(nproc) all && \
-    make install && \
-    ldconfig && \
-    rm -rf /tmp/openmpi
-
-# Install Horovod, temporarily using CUDA stubs
-RUN \
-    ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-    HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITH_MXNET=1 \
-         python3 -m pip install --no-cache-dir horovod && \
-    ldconfig
-
-# Install OpenSSH for MPI to communicate between containers
-RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
-    mkdir -p /var/run/sshd
-
-# Allow OpenSSH to talk to containers without asking for confirmation
-RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
-    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
-    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
-
-# Set default NCCL parameters
-RUN echo NCCL_DEBUG=INFO >> /etc/nccl.conf
-
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs 
+
+ENV PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/lib" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/.local/bin:/bin":/usr/local/bin/mecab:$PATH \
+    LANG=C.UTF-8
+
+ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
+WORKDIR /tmp
+
+RUN python3 -m pip install -U pip setuptools && \
+    python3 -m pip install --no-cache-dir konlpy h5py
+RUN apt-get update && \
+    apt-get install -y \
+    	openjdk-8-jdk \
+	automake \
+	&& \
+    cd /tmp && \
+    curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
+    tar zxfv mecab-0.996-ko-0.9.2.tar.gz && \
+    cd mecab-0.996-ko-0.9.2 && \
+    ./configure && \
+    make -j$(nproc) && \
+    make check && \
+    make install
+
+RUN echo "Install mecab-ko-dic" && \
+    cd /tmp && \
+    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    tar -zxvf mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    cd mecab-ko-dic-2.1.1-20180720 && \
+    ./autogen.sh && \
+    ./configure && \
+    make -j$(nproc) && \
+    sh -c 'echo "dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic" > /usr/local/etc/mecabrc' && \
+    make install && \
+    cd /tmp && \
+    git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
+    python3 -m pip install /tmp/mecab-python-0.996
 
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
@@ -206,16 +146,15 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
 	libgoogle-glog-dev libgflags-dev \
 	libgphoto2-dev \
 	libeigen3-dev \
-	libhdf5-dev \	
+	libhdf5-dev \
+	libopenblas-dev \
+	openssh-client \
+	openssh-server \
+	lsof \
+	libcupti-dev \	
     && \	
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
-
-
-# Install CUDA-9.0 + cuDNN 7.6.0
-RUN ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
-    ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs 
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip && \
@@ -223,59 +162,20 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir h5py && \
     python3 -m pip install --no-cache-dir Cython && \
     python3 -m pip install --no-cache-dir requests && \
-    python3 -m pip install --no-cache-dir absl-py==0.3.0 && \
-    python3 -m pip install --no-cache-dir astor==0.7.1 && \
-    python3 -m pip install --no-cache-dir audioread==2.1.6 && \
-    python3 -m pip install --no-cache-dir cycler==0.10.0 && \
-    python3 -m pip install --no-cache-dir decorator==4.3.0 && \
-    python3 -m pip install --no-cache-dir future==0.16.0 && \
-    python3 -m pip install --no-cache-dir gast==0.2.0 && \
-    python3 -m pip install --no-cache-dir grpcio==1.13.0 && \
-    python3 -m pip install --no-cache-dir horovod==0.13.10 && \
-    python3 -m pip install --no-cache-dir joblib==0.11 && \
-    python3 -m pip install --no-cache-dir kiwisolver==1.0.1 && \
-    python3 -m pip install --no-cache-dir librosa==0.6.1 && \
-    python3 -m pip install --no-cache-dir llvmlite==0.24.0 && \
-    python3 -m pip install --no-cache-dir Markdown==2.6.11 && \
-    python3 -m pip install --no-cache-dir matplotlib==2.2.2 && \
-    python3 -m pip install --no-cache-dir mock==2.0.0 && \
-    python3 -m pip install --no-cache-dir mpi4py==3.0.0 && \
-    python3 -m pip install --no-cache-dir nltk==3.2.5 && \
-    python3 -m pip install --no-cache-dir numba==0.39.0 && \
-    python3 -m pip install --no-cache-dir numpy && \
-    python3 -m pip install --no-cache-dir nvidia-dali==0.1.2 && \
-    python3 -m pip install --no-cache-dir pandas==0.23.0 && \
-    python3 -m pip install --no-cache-dir pbr==4.2.0 && \
-    python3 -m pip install --no-cache-dir pexpect==4.6.0 && \
-    python3 -m pip install --no-cache-dir protobuf==3.6.0 && \
-    python3 -m pip install --no-cache-dir psutil==5.4.6 && \
-    python3 -m pip install --no-cache-dir ptyprocess==0.6.0 && \
-    python3 -m pip install --no-cache-dir pyparsing==2.2.0 && \
-    python3 -m pip install --no-cache-dir python-dateutil==2.7.3 && \
-    python3 -m pip install --no-cache-dir python-speech-features==0.6 && \
-    python3 -m pip install --no-cache-dir pytz==2018.5 && \
-    python3 -m pip install --no-cache-dir resampy==0.2.1 && \
-    python3 -m pip install --no-cache-dir scikit-learn && \
-    python3 -m pip install --no-cache-dir scipy && \
-    python3 -m pip install --no-cache-dir six==1.11.0 && \
-    python3 -m pip install --no-cache-dir tensorboard && \
-    python3 -m pip install --no-cache-dir termcolor==1.1.0 && \
-    python3 -m pip install --no-cache-dir Werkzeug==0.14.1 && \
+    python3 -m pip install --no-cache-dir numpy==1.14.3 && \
+    python3 -m pip install --no-cache-dir scipy==1.1.0 && \
     python3 -m pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     python3 -m pip install --no-cache-dir aiozmq dataclasses tabulate && \
     python3 -m pip install --no-cache-dir namedlist six "python-dateutil>=2" && \
     python3 -m pip install --no-cache-dir versioneer && \    
     python3 -m pip install --no-cache-dir pyproj Cartopy && \
-    python3 -m pip install --no-cache-dir pandas && \
-    python3 -m pip install --no-cache-dir seaborn && \
+    python3 -m pip install --no-cache-dir pandas==0.23.4 && \
     python3 -m pip install --no-cache-dir networkx cvxpy && \
-    python3 -m pip install --no-cache-dir scikit-learn scikit-image && \
+    python3 -m pip install --no-cache-dir scikit-learn==0.20.0 && \
+    python3 -m pip install --no-cache-dir lightgbm==2.2.2 && \
+    python3 -m pip install --no-cache-dir scikit-image && \
     python3 -m pip install --no-cache-dir pygments && \
-    python3 -m pip install --no-cache-dir future && \
-    python3 -m pip install --no-cache-dir tensorwatch
-    
-# Install mpi4py.
-RUN python3 -m pip install --no-cache-dir mpi4py
+    python3 -m pip install --no-cache-dir future 
 
 WORKDIR /tmp
 ENV OPENCV_VERSION="4.1.0"
@@ -315,31 +215,56 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     cd /tmp && \
     rm -fr opencv* 
 
-COPY policy.yml /etc/backend.ai/jail/policy.yml
-
 # Jupyter notebook extension
 RUN mkdir -p /home/work/.jupyter/nbextension
 WORKDIR /home/work/.jupyter/nbextension
 
 RUN python3 -m pip install --no-cache-dir opencv-python
 
-RUN python3 -m pip install --no-cache-dir pystan && \
+RUN python3 -m pip install --no-cache-dir imbalanced-learn && \
+    python3 -m pip install --no-cache-dir scikit-optimize && \
+    python3 -m pip install --no-cache-dir bayesian-optimization && \
+    python3 -m pip install --no-cache-dir scikit-plot && \
+    python3 -m pip install --no-cache-dir vecstack && \
+    python3 -m pip install --no-cache-dir category_encoders && \
+    python3 -m pip install --no-cache-dir scikit-surprise && \
+    python3 -m pip install --no-cache-dir konlpy && \
+    python3 -m pip install --no-cache-dir folium && \
+    python3 -m pip install --no-cache-dir lime && \
+    python3 -m pip install --no-cache-dir gensim && \
+    python3 -m pip install --no-cache-dir pyldavis && \
     python3 -m pip install --no-cache-dir fbprophet && \
+    python3 -m pip install --no-cache-dir seaborn && \
+    python3 -m pip install --no-cache-dir bokeh && \
+    python3 -m pip install --no-cache-dir plotly && \
+    python3 -m pip install --no-cache-dir pygal && \
+    python3 -m pip install --no-cache-dir mlxtend && \
+    python3 -m pip install --no-cache-dir dtreeviz && \
+    python3 -m pip install --no-cache-dir pyglet && \
+    python3 -m pip install --no-cache-dir descartes && \
+    python3 -m pip install --no-cache-dir geoplotlib && \
+    python3 -m pip install --no-cache-dir featuretools && \
+    python3 -m pip install --no-cache-dir graphviz && \
+    python3 -m pip install --no-cache-dir geopandas && \
+    python3 -m pip install --no-cache-dir keras_applications && \
+    python3 -m pip install --no-cache-dir keras_preprocessing && \
+    python3 -m pip install --no-cache-dir pillow && \
     python3 -m pip install --no-cache-dir jupyter && \
     python3 -m pip install --no-cache-dir ipython && \
     python3 -m pip install --no-cache-dir ipywidgets && \
     python3 -m pip install --no-cache-dir ipyparallel && \
     python3 -m pip install --no-cache-dir jupyterlab && \
-    python3 -m pip install --no-cache-dir jupyterthemes && \    
+    python3 -m pip install --no-cache-dir jupyterthemes && \
     python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
     python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
     python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
     python3 -m pip install --no-cache-dir matplotlib bokeh && \
+    python3 -m pip install --no-cache-dir tensorwatch && \
+    python3 -m pip install --no-cache-dir torchvision && \
+    python3 -m pip install --no-cache-dir tensorflow-hub==0.5.0 && \
+    python3 -m pip install --no-cache-dir tf2onnx && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
-
-# python alternative support
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
@@ -349,5 +274,7 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
     git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
     jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
+
+COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 WORKDIR /home/work
