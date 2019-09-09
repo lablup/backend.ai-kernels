@@ -253,6 +253,10 @@ RUN python3 -m pip install --no-cache-dir imbalanced-learn && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
+# NNI 19.09.06
+RUN git clone -b v1.0 https://github.com/Microsoft/nni.git && \
+    cd nni && \
+    source install.sh
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
