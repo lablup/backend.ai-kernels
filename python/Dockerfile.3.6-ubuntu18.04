@@ -1,8 +1,6 @@
 FROM ubuntu:18.04
 # Ubuntu 18.04 comes with Python 3.6
 
-ARG CODE_SERVER_VERSION=1.1156-vsc1.33.1
-
 RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
@@ -45,6 +43,8 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "Python 3.6 on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+ARG CODE_SERVER_VERSION=1.1156-vsc1.33.1
 
 COPY ./code-server.${CODE_SERVER_VERSION}.tar.xz /tmp/code-server.tar.xz
 # TODO: Bundle ms-python extension with code-server when code-server v2 is released.

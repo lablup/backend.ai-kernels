@@ -1,8 +1,6 @@
 FROM continuumio/anaconda3:2019.07
 # Anaconda 2018.12 comes with Python 3.7
 
-ARG CODE_SERVER_VERSION=1.1156-vsc1.33.1
-
 RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
@@ -33,6 +31,8 @@ RUN /opt/conda/bin/python -m ipykernel install \
         --prefix=/opt/conda/ \
         --display-name "Python 3.7 (Anaconda 2019.07) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+
+ARG CODE_SERVER_VERSION=1.1156-vsc1.33.1
 
 COPY ./code-server.${CODE_SERVER_VERSION}.tar.xz /tmp/code-server.tar.xz
 # TODO: Bundle ms-python extension with code-server when code-server v2 is released.
