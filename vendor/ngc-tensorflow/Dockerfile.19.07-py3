@@ -27,6 +27,13 @@ RUN mkdir -p /tmp && \
     chown root:root /tmp && \
     chmod 1777 /tmp
 
+ARG CODE_SERVER_VERSION=1.1156-vsc1.33.1
+
+COPY ./code-server.${CODE_SERVER_VERSION}.tar.xz /tmp/code-server.tar.xz
+# TODO: Bundle ms-python extension with code-server when code-server v2 is released.
+# COPY code-server.ext.tar.gz /tmp/code-server.ext.tar.gz
+RUN tar xvJf /tmp/code-server.tar.xz -C /usr/local/bin
+
 # Backend.AI specifics
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 LABEL ai.backend.kernelspec="1" \
@@ -40,6 +47,6 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
-      ai.backend.service-ports="ipython:pty:3000,tensorboard:http:6006,jupyter:http:8080,jupyterlab:http:8090"
+      ai.backend.service-ports="ipython:pty:3000,tensorboard:http:6006,jupyter:http:8080,jupyterlab:http:8090;vscode:http:8180"
 
 # vim: ft=dockerfile
