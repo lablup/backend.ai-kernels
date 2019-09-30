@@ -77,7 +77,7 @@ COPY logo.svg /home/work/.jupyter/custom/logo.svg
 
 ARG CODE_SERVER_VERSION=1.1156-vsc1.33.1
 
-COPY ../python/code-server.${CODE_SERVER_VERSION}.tar.xz /tmp/code-server.tar.xz# TODO: Bundle ms-python extension with code-server when code-server v2 is released.
+COPY ./code-server.${CODE_SERVER_VERSION}.tar.xz /tmp/code-server.tar.xz# TODO: Bundle ms-python extension with code-server when code-server v2 is released.
 # COPY code-server.ext.tar.gz /tmp/code-server.ext.tar.gz
 RUN tar xvJf /tmp/code-server.tar.xz -C /usr/local/bin
 
