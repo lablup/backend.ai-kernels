@@ -35,6 +35,17 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-path="/opt/python/cp37-cp37m/bin/python" \
       ai.backend.service-ports=""
 
+# == Pre-populate the required wheels ==
+
+COPY requirements-py2.txt /root/
+RUN /opt/python/cp27-cp27m/bin/pip wheel -r /root/requirements-py2.txt -w /root/wheelhouse/
+RUN /opt/python/cp35-cp35m/bin/pip wheel -r /root/requirements.txt -w /root/wheelhouse/
+RUN /opt/python/cp36-cp36m/bin/pip wheel -r /root/requirements.txt -w /root/wheelhouse/
+RUN /opt/python/cp37-cp37m/bin/pip wheel -r /root/requirements.txt -w /root/wheelhouse/
+RUN for whl in /root/wheelhouse/*.whl; do \
+      auditwheel repair "$whl" --plat manylinux2010_x86_64 -w /root/wheelhouse/; \
+    done
+
 # == Install build scripts ==
 
 COPY build-image.sh /root

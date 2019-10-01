@@ -1,6 +1,5 @@
 #! /bin/bash
 echo "Building Backend.AI Python support wheels for the new kernel image..."
-PLATFORM=manylinux2010_x86_64
 UTIL_PYBIN=/opt/python/cp37-cp37m/bin/python
 
 # The agent sets environment variables:
@@ -43,18 +42,16 @@ PYROOT="/opt/python/cp${PYVER}-cp${PYVER}m"
 echo "Detected Python version: $PYVER"
 
 echo ""
-echo "Buildling wheels for the query/batch-mode execution with ipykernel support..."
-# Compile wheels and make it compatible with manylinux2010
-"${PYROOT}/bin/pip" wheel -r requirements.txt -w /home/work/wheelhouse/
-for whl in /home/work/wheelhouse/*.whl; do
-  auditwheel repair "$whl" --plat $PLATFORM -w /home/work/wheelhouse/
-done
+echo "Wheelhouse contents:"
+ls -lh /root/wheelhouse/
 
 echo ""
 echo "Buildling the converted Docker image and pushing it to the registry..."
 # Convert the imported image into the Backend.AI-compatible kernel image
 echo ".docker" > /home/work/.dockerignore
 export DOCKER_BUILDKIT=1
+mkdir /home/work/wheelhouse
+cp /root/wheelhouse/*.whl /home/work/wheelhouse/
 docker build -t ${TARGET_IMAGE} -f /home/work/Dockerfile /home/work
 docker push ${TARGET_IMAGE}
 docker rmi ${SRC_IMAGE}
