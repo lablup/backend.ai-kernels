@@ -21,13 +21,16 @@ RUN /opt/python/cp37-cp37m/bin/python -m ipykernel install \
 	--display-name "Python 3.7 (Image Importer) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
+RUN curl -L -o /usr/bin/jq "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64" && \
+    chmod +x /usr/bin/jq
+
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="NPROC" \
       ai.backend.features="query batch uid-match" \
       ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.base-distro="centos7.6" \
+      ai.backend.base-distro="centos6.10" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/python/cp37-cp37m/bin/python" \
       ai.backend.service-ports=""
@@ -35,5 +38,8 @@ LABEL ai.backend.kernelspec="1" \
 # == Install build scripts ==
 
 COPY build-image.sh /root
+RUN mkdir -p /opt/container
+COPY bootstrap.sh /opt/container
+RUN chmod +rx /root
 
 # vim: ft=dockerfile
