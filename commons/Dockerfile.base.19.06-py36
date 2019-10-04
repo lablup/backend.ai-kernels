@@ -162,6 +162,7 @@ RUN python3 -m pip install --no-cache-dir pystan && \
     python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
     python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
     python3 -m pip install --no-cache-dir matplotlib bokeh && \
+    python3 -m pip install --no-cache-dir pycocotools contextlib2 && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
