@@ -1,0 +1,280 @@
+# Labup/Python-xxx Base kernel 19.09
+## base Ubuntu 16.04
+## Python 3.7.x
+## Support TF-hub 0.5.0
+## Support OpenCV 4.1.0
+## Support Jupyter notebook extension
+
+# base python 3.7
+FROM lablup/common-base:python3.7 as python-binary 
+
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu16.04
+MAINTAINER Mario Cho "m.cho@lablup.com"
+
+ENV CUDA_VERSION 10.0.130
+ENV CUDA_PKG_VERSION 10-1=$CUDA_VERSION-1
+ENV CUDNN_VERSION 7.6.4.38
+ENV NCCL_VERSION 2.4.7
+
+RUN apt-get update -y && \
+    apt-mark unhold libnccl2 && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+	cuda-core-10-0=$CUDA_VERSION-1 \
+	cuda-cublas-10-0=10.0.130-1 \
+        cuda-cublas-dev-10-0=10.0.130-1 \
+	&& \
+	apt-mark hold libnccl2 && \
+	rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    apt-get install -y nvinfer-runtime-trt-repo-ubuntu1604-5.0.2-ga-cuda10.0 && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    	libnvinfer5=5.1.5-1+cuda10.0 \
+    	libnvinfer-dev=5.1.5-1+cuda10.0
+
+ENV PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/lib:$LD_LIBRARY_PATH \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin":/usr/local/bin/mecab:$PATH \
+    LANG=C.UTF-8
+
+# Install CUDA-10.0 + cuDNN 7.6.0
+RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
+    ldconfig
+
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
+
+# python alternative support
+RUN update-alternatives --install /usr/bin/python python /usr/local/bin/python3 2
+
+RUN apt-get update -y && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        gcc g++ make \
+	gfortran \
+	openssh-server \
+	libopenmpi-dev \
+	openmpi-bin \
+	openmpi-common \
+	openmpi-doc \
+	binutils \
+	vim \
+	cmake \
+	yasm \
+	graphviz \
+	pkg-config \
+        xz-utils \
+        wget curl git-core \
+        vim-tiny bzip2 zip unzip \
+        libssl-dev \
+        libmpdec2 \
+        proj-bin libproj-dev \
+        libgeos-dev libgeos++-dev \
+        mime-support \
+        libpq-dev \
+	libjasper-dev \
+        libtiff-dev \
+        libjpeg-dev \
+        libpng-dev \
+	libavcodec-dev \
+        libavformat-dev \
+	libswscale-dev \
+	libxine2-dev \
+	libv4l-dev
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs 
+
+ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
+WORKDIR /tmp
+
+RUN python3 -m pip install -U pip setuptools && \
+    python3 -m pip install --no-cache-dir konlpy h5py
+RUN apt-get update && \
+    apt-get install -y \
+    	openjdk-8-jdk \
+	automake \
+	&& \
+    cd /tmp && \
+    curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
+    tar zxfv mecab-0.996-ko-0.9.2.tar.gz && \
+    cd mecab-0.996-ko-0.9.2 && \
+    ./configure && \
+    make -j$(nproc) && \
+    make check && \
+    make install
+
+RUN echo "Install mecab-ko-dic" && \
+    cd /tmp && \
+    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    tar -zxvf mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    cd mecab-ko-dic-2.1.1-20180720 && \
+    ./autogen.sh && \
+    ./configure && \
+    make -j$(nproc) && \
+    sh -c 'echo "dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic" > /usr/local/etc/mecabrc' && \
+    make install && \
+    cd /tmp && \
+    git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
+    python3 -m pip install /tmp/mecab-python-0.996
+
+RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
+   apt-get install -y \
+	libgstreamer1.0-dev \
+	libgstreamer-plugins-base1.0-dev \
+	libgtk-3-dev \
+        libtbb-dev \
+	libatlas-base-dev \
+	libdc1394-22-dev \
+	libxvidcore-dev \
+	libfaac-dev \
+	libmp3lame-dev \
+	libtheora-dev \
+	libvorbis-dev \
+	libxvidcore-dev \
+	libopencore-amrnb-dev libopencore-amrwb-dev \
+	libavresample-dev \
+	x264 \
+	libx264-dev \
+	v4l-utils \	
+	libprotobuf-dev protobuf-compiler \
+	libgoogle-glog-dev libgflags-dev \
+	libgphoto2-dev \
+	libeigen3-dev \
+	libhdf5-dev \	
+    && \	
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/
+
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
+    python3 -m pip install --no-cache-dir -U setuptools pip && \
+    python3 -m pip install --no-cache-dir wheel && \
+    python3 -m pip install --no-cache-dir h5py && \
+    python3 -m pip install --no-cache-dir Cython && \
+    python3 -m pip install --no-cache-dir requests && \
+    python3 -m pip install --no-cache-dir numpy==1.14.3 && \
+    python3 -m pip install --no-cache-dir scipy==1.1.0 && \
+    python3 -m pip install --no-cache-dir cupy && \
+    python3 -m pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
+    python3 -m pip install --no-cache-dir aiozmq dataclasses tabulate && \
+    python3 -m pip install --no-cache-dir namedlist six "python-dateutil>=2" && \
+    python3 -m pip install --no-cache-dir versioneer && \    
+    python3 -m pip install --no-cache-dir pyproj Cartopy && \
+    python3 -m pip install --no-cache-dir pandas==0.23.4 && \
+    python3 -m pip install --no-cache-dir networkx cvxpy && \
+    python3 -m pip install --no-cache-dir scikit-learn==0.20.0 && \
+    python3 -m pip install --no-cache-dir lightgbm==2.2.2 && \
+    python3 -m pip install --no-cache-dir scikit-image && \
+    python3 -m pip install --no-cache-dir pygments && \
+    python3 -m pip install --no-cache-dir future 
+
+WORKDIR /tmp
+ENV OPENCV_VERSION="4.1.0"
+RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+    wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
+    unzip ${OPENCV_VERSION}.zip && \
+    unzip opencv-contrib.zip && \
+    mkdir opencv-${OPENCV_VERSION}/cmake_binary && \
+    cd opencv-${OPENCV_VERSION}/cmake_binary && \
+    cmake \
+      -DCMAKE_BUILD_TYPE=RELEASE \
+      -D BUILD_TIFF=ON \
+      -D BUILD_opencv_java=OFF \
+      -D WITH_CUDA=ON \
+      -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.0 \
+      -D ENABLE_FAST_MATH=1 \
+      -D CUDA_FAST_MATH=1 \
+      -D WITH_CUBLAS=1 \
+      -D WITH_OPENGL=ON \
+      -D WITH_OPENCL=ON \
+      -D WITH_IPP=ON \
+      -D WITH_TBB=ON \
+      -D WITH_EIGEN=ON \
+      -D WITH_V4L=ON \
+      -D BUILD_TESTS=OFF \
+      -D BUILD_PERF_TESTS=OFF \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.1.0/modules" \
+      -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
+      -D PYTHON_EXECUTABLE=$(which python3) \
+      -D PYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
+      -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
+      .. 2>&1 | tee cmake_messages.txt && \
+    make -j${nproc} && \
+    make install && \
+    cd /tmp && \
+    rm -fr opencv* 
+
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
+RUN python3 -m pip install --no-cache-dir opencv-python
+
+RUN python3 -m pip install --no-cache-dir imbalanced-learn && \
+    python3 -m pip install --no-cache-dir scikit-optimize && \
+    python3 -m pip install --no-cache-dir bayesian-optimization && \
+    python3 -m pip install --no-cache-dir scikit-plot && \
+    python3 -m pip install --no-cache-dir vecstack && \
+    python3 -m pip install --no-cache-dir category_encoders && \
+    python3 -m pip install --no-cache-dir scikit-surprise && \
+    python3 -m pip install --no-cache-dir konlpy && \
+    python3 -m pip install --no-cache-dir folium && \
+    python3 -m pip install --no-cache-dir lime && \
+    python3 -m pip install --no-cache-dir gensim && \
+    python3 -m pip install --no-cache-dir pyldavis && \
+    python3 -m pip install --no-cache-dir fbprophet && \
+    python3 -m pip install --no-cache-dir seaborn && \
+    python3 -m pip install --no-cache-dir bokeh && \
+    python3 -m pip install --no-cache-dir plotly && \
+    python3 -m pip install --no-cache-dir pygal && \
+    python3 -m pip install --no-cache-dir mlxtend && \
+    python3 -m pip install --no-cache-dir dtreeviz && \
+    python3 -m pip install --no-cache-dir pyglet && \
+    python3 -m pip install --no-cache-dir descartes && \
+    python3 -m pip install --no-cache-dir geoplotlib && \
+    python3 -m pip install --no-cache-dir featuretools && \
+    python3 -m pip install --no-cache-dir graphviz && \
+    python3 -m pip install --no-cache-dir geopandas && \
+    python3 -m pip install --no-cache-dir keras_applications && \
+    python3 -m pip install --no-cache-dir keras_preprocessing && \
+    python3 -m pip install --no-cache-dir pillow && \
+    python3 -m pip install --no-cache-dir jupyter && \
+    python3 -m pip install --no-cache-dir ipython && \
+    python3 -m pip install --no-cache-dir ipywidgets && \
+    python3 -m pip install --no-cache-dir ipyparallel && \
+    python3 -m pip install --no-cache-dir jupyterlab && \
+    python3 -m pip install --no-cache-dir jupyterthemes && \
+    python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
+    python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+    python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
+    python3 -m pip install --no-cache-dir matplotlib bokeh && \
+    python3 -m pip install --no-cache-dir tensorwatch && \
+    python3 -m pip install --no-cache-dir torchvision && \
+    python3 -m pip install --no-cache-dir tensorflow-hub==0.5.0 && \
+    python3 -m pip install --no-cache-dir tf2onnx && \
+    python3 -m pip install --no-cache-dir contextlib2 && \
+    python3 -m pip install --no-cache-dir pycocotools && \
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
+    
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
+
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+WORKDIR /home/work
