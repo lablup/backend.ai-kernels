@@ -1,26 +1,24 @@
 # Lablup/Python-TensorFlow 2.0 Python 3.6
 
 FROM lablup/common-tensorflow:2.0-py36-cuda9 as tf-binary
-FROM lablup/common-base:19.06-py36-cuda9
+FROM lablup/common-base:19.09-py36-cuda9
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "TensorFlow 2.0 beta1on Python 3.6 (CUDA 9.0)" && \
+RUN python3 -m ipykernel install --display-name "TensorFlow 2.0 for Backend.AI, Python 3.6 & CUDA 9.0" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 COPY --from=tf-binary /tmp/tensorflow_pkg/tensorflow-*.whl /tmp
 
 RUN python3 -m pip install --no-cache-dir wheel /tmp/*.whl && \
-    python3 -m pip install --no-cache-dir keras && \
     python3 -m pip install --no-cache-dir keras_applications && \
     python3 -m pip install --no-cache-dir keras_preprocessing && \
-    python3 -m pip install --no-cache-dir tensorflow-hub==0.5.0 && \
-    python3 -m pip install --no-cache-dir tf2onnx && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
 # for apt-get installation using /tmp
 RUN mkdir -p /tmp && \
+    mkdir -p /home/work/logs && \
     chown root:root /tmp && \
     chmod 1777 /tmp
     
@@ -35,7 +33,8 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/local/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+      ai.backend.service-ports="ipython:pty:3000,tensorboard:http:6006,jupyter:http:8080,jupyterlab:http:8090"
 
 WORKDIR /home/work
 # vim: ft=dockerfile
+
