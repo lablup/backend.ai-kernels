@@ -1,5 +1,6 @@
-# Labup/Python-xxx Base kernel 19.08
+# Labup/Python-xxx Base kernel 19.09
 ## base Ubuntu 16.04
+## Python 3.6.8
 ## Support TF-hub 0.5.0
 ## Support OpenCV 4.1.0
 ## Support Jupyter notebook extension
@@ -12,26 +13,26 @@ MAINTAINER Mario Cho "m.cho@lablup.com"
 
 ENV CUDA_VERSION 9.0.176
 ENV CUDA_PKG_VERSION 9-0=$CUDA_VERSION-1
-ENV CUDNN_VERSION 7.6.3.30
+ENV CUDNN_VERSION 7.6.4.38
 ENV NCCL_VERSION 2.4.7
 
 RUN apt-get update -y && \
     apt-mark unhold libnccl2 && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-        cuda-nvml-dev-$CUDA_PKG_VERSION \
-        cuda-command-line-tools-$CUDA_PKG_VERSION \
-	cuda-libraries-dev-$CUDA_PKG_VERSION \
-        cuda-minimal-build-$CUDA_PKG_VERSION \
-	cuda-libraries-$CUDA_PKG_VERSION \
-	cuda-cublas-9-0=9.0.176.4-1 \
-	cuda-core-9-0=9.0.176.3-1 \
-        cuda-cublas-dev-9-0=9.0.176.4-1 \
-	libcudnn7=$CUDNN_VERSION-1+cuda9.0 \
-	libcudnn7-dev=$CUDNN_VERSION-1+cuda9.0 \
+	cuda-core-10-0=$CUDA_VERSION-1 \
+	cuda-cublas-10-0=10.0.130-1 \
+        cuda-cublas-dev-10-0=10.0.130-1 \
 	&& \
-	apt-mark hold libcudnn7 libnccl2 && \
+	apt-mark hold libnccl2 && \
 	rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    apt-get install -y nvinfer-runtime-trt-repo-ubuntu1604-5.0.2-ga-cuda9.0 && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    	libnvinfer5=5.1.5-1+cuda9.0 \
+    	libnvinfer-dev=5.1.5-1+cuda9.0
 
 ENV PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/lib:$LD_LIBRARY_PATH \
@@ -57,6 +58,12 @@ RUN apt-get update -y && \
         ca-certificates \
         gcc g++ make \
 	gfortran \
+	openssh-server \
+	libopenmpi-dev \
+	openmpi-bin \
+	openmpi-common \
+	openmpi-doc \
+	binutils \
 	vim \
 	cmake \
 	yasm \
@@ -79,16 +86,12 @@ RUN apt-get update -y && \
         libavformat-dev \
 	libswscale-dev \
 	libxine2-dev \
-	libv4l-dev
+1
+libv4l-dev
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs 
-
-ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/lib" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/root/.local/bin:/bin":/usr/local/bin/mecab:$PATH \
-    LANG=C.UTF-8
 
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 WORKDIR /tmp
@@ -146,12 +149,7 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
 	libgoogle-glog-dev libgflags-dev \
 	libgphoto2-dev \
 	libeigen3-dev \
-	libhdf5-dev \
-	libopenblas-dev \
-	openssh-client \
-	openssh-server \
-	lsof \
-	libcupti-dev \	
+	libhdf5-dev \	
     && \	
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
@@ -164,6 +162,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir requests && \
     python3 -m pip install --no-cache-dir numpy==1.14.3 && \
     python3 -m pip install --no-cache-dir scipy==1.1.0 && \
+    python3 -m pip install --no-cache-dir cupy && \
     python3 -m pip install --no-cache-dir pyzmq simplejson msgpack-python uvloop && \
     python3 -m pip install --no-cache-dir aiozmq dataclasses tabulate && \
     python3 -m pip install --no-cache-dir namedlist six "python-dateutil>=2" && \
@@ -263,6 +262,8 @@ RUN python3 -m pip install --no-cache-dir imbalanced-learn && \
     python3 -m pip install --no-cache-dir torchvision && \
     python3 -m pip install --no-cache-dir tensorflow-hub==0.5.0 && \
     python3 -m pip install --no-cache-dir tf2onnx && \
+    python3 -m pip install --no-cache-dir contextlib2 && \
+    python3 -m pip install --no-cache-dir pycocotools && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 
