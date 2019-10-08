@@ -86,8 +86,7 @@ RUN apt-get update -y && \
         libavformat-dev \
 	libswscale-dev \
 	libxine2-dev \
-1
-libv4l-dev
+	libv4l-dev
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
