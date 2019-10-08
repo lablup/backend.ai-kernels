@@ -6,7 +6,30 @@ RUN apt update -y && \
     apt install -y --no-install-recommends \
    	apt-transport-https \
 	ca-certificates \
-	curl \
+        gcc g++ make \
+	gfortran \
+	vim \
+	cmake \
+	yasm \
+	graphviz \
+	pkg-config \
+        xz-utils \
+        wget curl git-core \
+        vim-tiny bzip2 zip unzip \
+        libssl-dev \
+        libmpdec2 \
+        proj-bin libproj-dev \
+        libgeos-dev libgeos++-dev \
+        mime-support \
+        libpq-dev \
+        libtiff-dev \
+        libjpeg-dev \
+        libpng-dev \
+	libavcodec-dev \
+        libavformat-dev \
+	libswscale-dev \
+	libxine2-dev \
+	libv4l-dev \
 	git \
 	vim \
 	wget \
@@ -17,8 +40,6 @@ WORKDIR /usr/local
 
 RUN conda config --add channels intel && \
     conda install -y -q intelpython3_full=2019.4 python=3 && \
-    conda install -c anaconda tensorflow-mkl==1.13.1 && \
-    conda install -c anaconda tensorboard && \
     conda install -c anaconda opencv && \
     conda install -c conda-forge pycocotools && \
     conda install -c conda-forge nodejs && \
@@ -30,8 +51,6 @@ RUN conda config --add channels intel && \
     conda clean --all && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
-
-COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 ENV PYTHONUNBUFFERED=1 \
     LIBRARY_PATH="/opt/conda/lib/libfabric" \
@@ -68,6 +87,8 @@ RUN jupyter nbextensions_configurator enable && \
 RUN python3 -m ipykernel install --display-name "Intel Python 3.6 on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
@@ -77,8 +98,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,tensorboard:http:6006,jupyter:http:8080,jupyterlab:http:8090"
-
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
 
 WORKDIR /home/work
 # vim: ft=dockerfile
