@@ -6,9 +6,32 @@ RUN apt update -y && \
     apt install -y --no-install-recommends \
    	apt-transport-https \
 	ca-certificates \
-	curl \
+        gcc g++ make \
+	gfortran \
 	vim \
+	cmake \
+	yasm \
+	graphviz \
+	pkg-config \
+        xz-utils \
+        wget curl git-core \
+        vim-tiny bzip2 zip unzip \
+        libssl-dev \
+        libmpdec2 \
+        proj-bin libproj-dev \
+        libgeos-dev libgeos++-dev \
+        mime-support \
+        libpq-dev \
+        libtiff-dev \
+        libjpeg-dev \
+        libpng-dev \
+	libavcodec-dev \
+        libavformat-dev \
+	libswscale-dev \
+	libxine2-dev \
+	libv4l-dev \
 	git \
+	vim \
 	wget \
 	gnupg2 \
 	libexpat-dev 
