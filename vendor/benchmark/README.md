@@ -90,3 +90,7 @@ The target is to win at least 50 out of 100 games against the target model.
 ### Evaluation frequency
 Evaluations are performed after completing the training and are not timed.
 Checkpoints from every RL loop iteration are evaluated. 
+
+# 5. LICENSE , Notice
+It benchmark code forked from MLPerf v0.6 (https://github.com/mlperf/training_results_v0.6)
+All right about Multi GPU of Bechmark testing, preservation of copyright and license notices.
