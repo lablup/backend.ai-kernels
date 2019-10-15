@@ -1,0 +1,38 @@
+FROM ubuntu:19.04
+
+RUN apt-get update && \
+    apt-get install -y \
+    wget \
+    vim-tiny zip unzip \
+		python3-pip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/
+
+ENV PYTHONUNBUFFERED=1 \
+    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LANG=C.UTF-8
+
+RUN pip3 install --no-cache-dir -U setuptools && \
+    pip3 install --no-cache-dir backend.ai-client && \
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
+RUN wget https://github.com/tsl0922/ttyd/releases/download/1.5.1/ttyd_linux.x86_64 -O /usr/local/bin/ttyd
+COPY backendai_repl.sh /usr/local/bin/backendai_repl
+RUN chmod 755 /usr/local/bin/ttyd /usr/local/bin/backendai_repl
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="128m" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="backendai" \
+      ai.backend.runtime-path="/usr/local/bin/ttyd" \
+      ai.backend.service-ports="ttyd:http:8090"
+
+WORKDIR /home/work
+
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+# vim: ft=dockerfile
