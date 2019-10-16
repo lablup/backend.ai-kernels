@@ -1,0 +1,26 @@
+{
+    "prestart": [
+      {
+        "action": "write_tempfile",
+        "args": {
+          "body": "c.NotebookApp.allow_root = True\n"
+        },
+        "saveto": "jupyter_cfg"
+      },
+      {
+        "action": "writelines",
+        "args": {
+          "filename": "{jupyter_cfg}",
+          "body": [
+            "c.NotebookApp.ip = \"0.0.0.0\"",
+            "c.NotebookApp.port = {SVC_PORT}",
+            "c.NotebookApp.token = \"\"",
+            "c.FileContentsManager.delete_to_trash = False"
+          ],
+          "mode": "w+"
+        }
+      }
+    ],
+    "command": "{PYPATH}",
+    "args": "-m jupyterlab --no-browser --config {jupyter_cfg}"
+}

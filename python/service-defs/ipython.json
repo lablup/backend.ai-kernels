@@ -1,0 +1,4 @@
+{
+    "command": "{PYPATH}",
+    "args": "-m IPython"
+}

@@ -1,0 +1,12 @@
+{
+    "prestart": [
+      {
+        "action": "mkdir",
+        "args": {
+          "path": "/home/work/logs"
+        }
+      }
+    ],
+    "command": "{PYPATH}",
+    "args": "-m tensorboard.main --logdir /home/work/logs --host 0.0.0.0 --port {SVC_PORT} --debugger_port 6064"
+  }
