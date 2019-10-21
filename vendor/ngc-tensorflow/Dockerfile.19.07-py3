@@ -5,7 +5,7 @@ RUN apt-get update && \
     apt-get install -y libsm6 libxext6 libxrender-dev
 
 ENV PYTHONUNBUFFERED=1 \
-    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
     LANG=C.UTF-8
 
 RUN /usr/bin/python3 -m pip install -U pip setuptools && \
