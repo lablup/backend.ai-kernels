@@ -58,7 +58,7 @@ COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 ENV PYTHONUNBUFFERED=1 \
     LIBRARY_PATH="/opt/conda/lib/libfabric" \
-PATH="/opt/conda/bin/libfabric:/opt/conda/bin:/opt/conda/condabin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    PATH=/opt/conda/bin/libfabric:/opt/conda/bin:/opt/conda/condabin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"$PATH \
     LANG=C.UTF-8 \
     CLASSPATH="/opt/conda/lib/mpi.jar" \
     CONDA_DEFAULT_ENV="base" \
