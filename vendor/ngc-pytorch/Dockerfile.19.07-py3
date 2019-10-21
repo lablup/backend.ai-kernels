@@ -14,11 +14,6 @@ RUN /opt/conda/bin/python3 -m ipykernel install \
         --display-name "Python 3.6 CONDA (NGC/PyTorch 19.07) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
-# for apt-get installation using /tmp
-RUN mkdir -p /tmp && \
-    chown root:root /tmp && \
-    chmod 1777 /tmp
-
 # Backend.AI specifics
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 LABEL ai.backend.kernelspec="1" \
