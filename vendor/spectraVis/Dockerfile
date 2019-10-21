@@ -22,7 +22,7 @@ ENV PYTHONUNBUFFERED=1 \
     LANG=C.UTF-8
 
 # python alternative support
-RUN update-alternatives --install /usr/bin/python python /usr/local/bin/python3 2
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
