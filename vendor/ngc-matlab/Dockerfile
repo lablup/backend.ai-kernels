@@ -19,8 +19,10 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="matlab" \
-      ai.backend.runtime-path="/usr/local/bin/matlab" \
-      ai.backend.service-ports="vnc:tcp:5901,matlab:http:6080"
+      ai.backend.runtime-path="/usr/bin/python" \
+      ai.backend.service-ports="vnc:http:6080"
+
+COPY bootstrap.sh /opt/container/bootstrap.sh
 
 WORKDIR /home/work
 # vim: ft=dockerfile
