@@ -21,7 +21,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="vendor.ngc_matlab" \
       ai.backend.runtime-path="/usr/bin/python" \
-      ai.backend.service-ports="vnc:http:6080"
+      ai.backend.service-ports="vnc-web:http:6080"
 
 COPY bootstrap.sh /opt/container/bootstrap.sh
 
