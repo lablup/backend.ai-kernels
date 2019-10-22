@@ -28,8 +28,7 @@ ln -s /opt/noVNC/redirect.html /opt/noVNC/index.html
 rm -rf /tmp/.X*
 
 echo ">> Starting background VNC server"
-export PASSWORD=matlab
-printf "${PASSWORD}\n${PASSWORD}\n\n" | /opt/kernel/su-exec $LOCAL_USER_ID:$LOCAL_GROUP_ID vncpasswd
+printf "backendai\nbackendai\n\n" | /opt/kernel/su-exec $LOCAL_USER_ID:$LOCAL_GROUP_ID vncpasswd >/dev/null 2>&1
 
 cp -R /home/matlab/.config /home/work
 cp -R /home/matlab/Documents /home/work
