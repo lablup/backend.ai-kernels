@@ -7,6 +7,8 @@
         }
       }
     ],
-    "command": "/usr/local/bin/code-server",
-    "args": "-NHp 8180 --extensions-dir /home/work/.vscode-exts"
+    "command": [
+      "/usr/local/bin/code-server", "-NHp", "8180",
+      "--extensions-dir", "/home/work/.vscode-exts"
+    ]
 }

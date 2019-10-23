@@ -1,4 +1,5 @@
 {
-    "command": "{PYPATH}",
-    "args": "-m digits"
+    "command": [
+        "{runtime_path}", "-m", "digits"
+    ]
 }
