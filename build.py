@@ -383,5 +383,7 @@ def main(build, list_builds, _auto_push):
 
         build_kernel('vendor/ngc-rapids',  '0.5-rapids-py3')
 
+        build_kernel('vendor/ngc-matlab', 'r2019b')
+
 if __name__ == '__main__':
     main()
