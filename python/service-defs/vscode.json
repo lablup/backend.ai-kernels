@@ -1,14 +1,17 @@
 {
-    "prestart": [
-      {
-        "action": "mkdir",
-        "args": {
-          "path": "/home/work/.vscode-exts"
-        }
-      }
-    ],
+    "prestart": [],
     "command": [
-      "/usr/local/bin/code-server", "-NHp", "8180",
-      "--extensions-dir", "/home/work/.vscode-exts"
-    ]
+      "/opt/kernel/code-server", 
+      "--port", "8180",
+      "--extensions-dir", "/etc/backend.ai/vscode-exts"
+    ],
+    "allowed_arguments": [
+      "--auth"
+    ],
+    "allowed_envs": [
+      "PASSWORD"
+    ],
+    "default_arguments": {
+      "--auth": "none"
+    }
 }

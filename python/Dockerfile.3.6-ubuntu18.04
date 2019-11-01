@@ -53,9 +53,14 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,vscode:http:8180,jupyterlab:http:8090"
 
 COPY ./service-defs /etc/backend.ai/service-defs
 COPY policy.yml /etc/backend.ai/jail/policy.yml
+COPY ./vscode-exts.tar.gz /etc/backend.ai/vscode-exts.tar.gz
+
+RUN mkdir -p /etc/backend.ai/vscode-exts && \
+    tar xvzf /etc/backend.ai/vscode-exts.tar.gz -C /etc/backend.ai/vscode-exts && \
+    rm -rf /etc/backend.ai/vscode-exts.tar.gz
 
 # vim: ft=dockerfile
