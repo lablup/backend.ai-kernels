@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/caffe2:18.08-py2
+FROM nvcr.io/nvidia/caffe2:19.06-py2
 # NVIDIA Caffe2 with Python 2.7
 
 ENV PYTHONUNBUFFERED=1 \
@@ -14,7 +14,7 @@ RUN python -m pip install --no-cache-dir -U setuptools pip && \
 # Install ipython kernelspec
 RUN python -m ipykernel install \
         --prefix=/usr/bin/ \
-        --display-name "Python 2.7 (NGC/Caffe2 18.08) on Backend.AI" && \
+        --display-name "Python 2.7 (NGC/Caffe2 19.06) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python2/kernel.json
 
 # Backend.AI specifics
