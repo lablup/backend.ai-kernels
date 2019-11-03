@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "python3",
+    "-m",
+    "jupyter_caf_kernel",
+    "-f",
+    "{connection_file}"
+  ],
+  "display_name": "Coarray Fortran",
+  "language": "Fortran"
+}

@@ -1,0 +1,126 @@
+FROM ubuntu:18.04
+MAINTAINER Mario Cho "m.cho@lablup.com"
+
+ENV PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
+    LANG=C.UTF-8 
+#    DEBIAN_FRONTEND=noninteractive
+
+ARG OPENCOARRAYS_VERSION=2.8.0
+ENV GCC_VERSION 8.2.0
+
+RUN DEBIAN_FRONTEND=noninteractive transientBuildDeps="file" && \
+    set -v && \
+    cat /etc/issue &&  \
+    uname -a && \
+    echo "${DEBIAN_FRONTEND}" && \
+    apt-get update -y && \
+    apt-get install -y \
+    	software-properties-common && \
+    add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
+    apt-get update -y && \
+    apt-get install -y \
+        python3 python3-pip \
+	gfortran \
+        libssl-dev \
+	make \
+	curl \
+	wget \
+	gcc-8 \
+	gfortran-8 \
+	g++-8 \
+	mpich \
+	${transientBuildDeps} && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-8 && \
+    update-alternatives --set gcc "/usr/bin/gcc-8" && \
+    gcc --version && \
+    gfortran --version && \
+    mpiexec --version && \
+    mpifort --version && \
+    mpicc --version && \
+    apt-get clean && \
+    apt-get purge -y --auto-remove ${transientBuildDeps} && \
+    rm -rf /var/lib/apt/lists/* /var/log/* /tmp/* 
+
+# Install commonly-used wheels
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
+ python3 -m pip install --no-cache-dir -U setuptools && \
+    python3 -m pip install --no-cache-dir pyzmq && \
+    python3 -m pip install --no-cache-dir ipython && \
+    python3 -m pip install --no-cache-dir jupyter && \
+    python3 -m pip install --no-cache-dir jupyterlab
+
+# Build-time metadata as defined at http://label-schema.org
+    ARG BUILD_DATE
+    ARG VCS_REF
+    ARG VCS_URL
+    ARG VCS_VERSION=latest
+    LABEL org.label-schema.schema-version="1.0" \
+          org.label-schema.build-date="${BUILD_DATE}" \
+          org.label-schema.name="jupyter-CAF-kernel" \
+          org.label-schema.description="Fortran Jupyter kernel with OpenCoarrays and MPICH backend on Basckend.AI" \
+          org.label-schema.url="https://github.com/sourceryinstitute/jupyter-CAF-kernel/" \
+          org.label-schema.vcs-ref="${VCS_REF}" \
+          org.label-schema.vcs-url="${VCS_URL}" \
+          org.label-schema.version="${VCS_VERSION}" \
+          org.label-schema.vendor="SourceryInstitute" \
+          org.label-schema.license="MIT" 
+
+COPY ./jupyter-caf-kernel /opt/jupyter/jupyter-caf-kernel
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
+WORKDIR /tmp
+RUN DEBIAN_FRONTEND=noninteractive transientBuildDeps="cmake git" && \
+    set -v && \
+    echo "${DEBIAN_FRONTEND}" && \
+    apt-get update && \
+    apt-get install -y ${transientBuildDeps} && \
+    cmake --version && \
+    wget -nv -t 3 https://github.com/sourceryinstitute/opencoarrays/releases/download/${OPENCOARRAYS_VERSION}/OpenCoarrays-${OPENCOARRAYS_VERSION}.tar.gz && \
+    wget -nv -t 3 https://github.com/sourceryinstitute/opencoarrays/releases/download/${OPENCOARRAYS_VERSION}/opencoarrays-${OPENCOARRAYS_VERSION}-SHA256.txt && \
+    sha256sum -c opencoarrays-${OPENCOARRAYS_VERSION}-SHA256.txt && \
+    echo "sha" && \
+    tar xzf OpenCoarrays-${OPENCOARRAYS_VERSION}.tar.gz && \
+    cd OpenCoarrays-${OPENCOARRAYS_VERSION} && \
+    echo "Installing OpenCoarrays using CMake in $(pwd)" && \
+    mkdir build && \
+    cd build && \
+    gcc --version && \
+    gfortran --version && \
+    FC="`which gfortran`" CC="`which gcc`" cmake .. && \
+    make -j "$(nproc)" install && \
+    if [ "${RUN_TESTS}" = "true" ] ; then ctest --output-on-failure; fi && \
+    cd && \
+    rm -rf OpenCoarrays* opencoarrays* && \
+    caf --version && \
+    python3 -m pip install --no-cache-dir notebook==5.* && \
+    python3 -m pip install -e /opt/jupyter/jupyter-caf-kernel && \
+    jupyter-kernelspec install /opt/jupyter/jupyter-caf-kernel/Coarray-Fortran/ && \
+    jupyter-kernelspec list && \
+    rm -rf jupyter-caf-kernel && \
+    apt-get clean && \
+    apt-get purge -y --auto-remove ${transientBuildDeps} && \
+    rm -rf /var/lib/apt/lists/* /var/log/* /tmp/* 
+#    chown -R ${NB_USER} /home/${NB_USER&& }
+
+# Install ipython kernelspec
+RUN python3 -m ipykernel install --display-name "gFrotran 8.3 on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090"
+
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+# vim: ft=dockerfile
+
+#     build-essential \
+
+
