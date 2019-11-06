@@ -15,6 +15,7 @@ RUN /usr/bin/python3 -m pip install -U pip setuptools && \
     /usr/bin/python3 -m pip install --no-cache-dir ipython && \
     /usr/bin/python3 -m pip install --no-cache-dir pillow && \
     /usr/bin/python3 -m pip install --no-cache-dir h5py && \
+    /usr/bin/python3 -m pip install --no-cache-dir mpi4py && \
     /usr/bin/python3 -m pip install --no-cache-dir jupyter && \
     /usr/bin/python3 -m pip install --no-cache-dir jupyterlab
 
