@@ -1,0 +1,122 @@
+FROM continuumio/miniconda3:4.5.4
+# Intel Distributed Python 2019.04 with Conda
+
+RUN apt update -y && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt install -y --no-install-recommends \
+   	apt-transport-https \
+	ca-certificates \
+        gcc g++ make \
+	gfortran \
+	vim \
+	cmake \
+	yasm \
+	graphviz \
+	pkg-config \
+        xz-utils \
+        wget curl git-core \
+        vim-tiny bzip2 zip unzip \
+        libssl-dev \
+        libmpdec2 \
+        proj-bin libproj-dev \
+        libgeos-dev libgeos++-dev \
+        mime-support \
+        libpq-dev \
+        libtiff-dev \
+        libjpeg-dev \
+        libpng-dev \
+	libavcodec-dev \
+        libavformat-dev \
+	libswscale-dev \
+	libxine2-dev \
+	libv4l-dev \
+	git \
+	vim \
+	wget \
+	gnupg2 \
+	libexpat-dev 
+
+WORKDIR /usr/local
+
+RUN conda config --add channels intel && \
+    conda install -y -q intelpython3_full=2019.4 python=3 && \
+    conda install -c anaconda numpy==1.16.2 && \
+    conda install -c anaconda pandas==0.25.1 && \ 
+    conda install -c anaconda graphviz==0.13 && \ 
+    conda install -c anaconda Pillow==6.2.0 && \
+    conda install -c anaconda pydot==1.4.1 && \
+    conda install -c anaconda scikit-learn==0.20.3 && \
+    conda install -c anaconda scipy==1.2.1 && \
+    conda install -c anaconda seaborn==0.9.0 && \
+    conda install -c anaconda selenium==3.141.0 && \
+    conda install -c anaconda test-generator==0.1.1 && \
+    conda install -c anaconda defusedxml==0.5.0 && \
+    conda install -c anaconda networkx==2.3 && \
+    conda install -c anaconda google-images-download==2.8.0 && \
+    conda install -c anaconda pickle5 && \
+    conda install -c anaconda tensorflow-mkl==1.14.0 && \
+    conda install -c anaconda Keras==2.3.1 && \
+    conda install -c anaconda tensorboard && \
+    conda install -c anaconda opencv && \
+    conda install -c conda-forge pycocotools && \
+    conda install -c conda-forge nodejs && \
+    conda install -c conda-forge jupyterlab && \
+    conda install -c conda-forge jupyterthemes && \
+    conda install -c conda-forge ipywidgets && \
+    conda install -c conda-forge jupyter_contrib_nbextensions && \
+    conda install -c conda-forge jupyter_nbextensions_configurator && \
+    conda clean --all && \
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
+    
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+ENV PYTHONUNBUFFERED=1 \
+    LIBRARY_PATH="/opt/conda/lib/libfabric" \
+    PATH=/opt/conda/bin/libfabric:/opt/conda/bin:/opt/conda/condabin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
+    LANG=C.UTF-8 \
+    CLASSPATH="/opt/conda/lib/mpi.jar" \
+    CONDA_DEFAULT_ENV="base" \
+    CONDA_EXE="/opt/conda/bin/conda" \
+    CONDA_PREFIX="/opt/conda" \
+    CONDA_PROMPT_MODIFIER="(base) " \
+    CONDA_PYTHON_EXE="/opt/conda/bin/python" \
+    CONDA_SHLVL="1" \
+    FI_PROVIDER_PATH="/opt/conda/lib/libfabric/prov" \
+    HOME="/home/work" \
+    I_MPI_ROOT="/opt/conda" \
+    LC_ALL="C.UTF-8" \
+    LD_LIBRARY_PATH="/opt/conda/lib/libfabric:/opt/conda/lib" \
+    MANPATH="/opt/conda/share/man:"
+
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
+
+# Install ipython kernelspec
+RUN python3 -m ipykernel install --display-name "Intel Tensorflow 1.14 on Backend.AI" && \
+    cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,tensorboard:http:6006,jupyter:http:8080,jupyterlab:http:8090"
+
+
+WORKDIR /home/work
+# vim: ft=dockerfile
