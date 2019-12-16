@@ -1,6 +1,24 @@
-FROM continuumio/miniconda3:4.5.4
+FROM ubuntu:18.04
+#FROM continuumio/miniconda3:4.5.4
 # Intel Distributed Python 2019.04 with Conda
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+ENV PATH /opt/conda/bin:$PATH
 
+RUN apt-get update --fix-missing && \
+    apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 git mercurial subversion && \
+    apt-get clean
+
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.7.12-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh && \
+    /opt/conda/bin/conda clean -tipsy && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate base" >> ~/.bashrc && \
+    find /opt/conda/ -follow -type f -name '*.a' -delete && \
+    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
+    /opt/conda/bin/conda clean -afy
+    
 RUN apt update -y && \
     curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt install -y --no-install-recommends \
@@ -39,36 +57,59 @@ RUN apt update -y && \
 WORKDIR /usr/local
 
 RUN conda config --add channels intel && \
-    conda install -y -q intelpython3_full=2019.4 python=3 && \
-    conda install -c anaconda numpy==1.16.2 && \
+    conda install -y -q intelpython3_full=2019.5 python=3 
+RUN conda install -c anaconda numpy==1.16.2 && \
     conda install -c anaconda pandas==0.25.1 && \ 
-    conda install -c anaconda graphviz==0.13 && \ 
+    conda install -c anaconda graphviz==2.40.1 && \
+    conda install -c conda-forge python-graphviz==0.13.2 && \
     conda install -c anaconda Pillow==6.2.0 && \
     conda install -c anaconda pydot==1.4.1 && \
     conda install -c anaconda scikit-learn==0.20.3 && \
     conda install -c anaconda scipy==1.2.1 && \
-    conda install -c anaconda seaborn==0.9.0 && \
-    conda install -c anaconda selenium==3.141.0 && \
-    conda install -c anaconda test-generator==0.1.1 && \
+    conda install -c anaconda seaborn==0.9.0 
+RUN conda install -c anaconda selenium==3.141.0 && \
     conda install -c anaconda defusedxml==0.5.0 && \
     conda install -c anaconda networkx==2.3 && \
-    conda install -c anaconda google-images-download==2.8.0 && \
-    conda install -c anaconda pickle5 && \
-    conda install -c anaconda tensorflow-mkl==1.14.0 && \
-    conda install -c anaconda Keras==2.3.1 && \
-    conda install -c anaconda tensorboard && \
-    conda install -c anaconda opencv && \
+    conda install -c anaconda opencv 
+RUN conda install -c anaconda tensorflow-mkl==1.14.0 && \
+    conda install -c anaconda tensorboard 
+
+RUN conda install -c conda-forge Keras==2.3.1 && \
+    conda install -c conda-forge pickle5 && \
     conda install -c conda-forge pycocotools && \
     conda install -c conda-forge nodejs && \
     conda install -c conda-forge jupyterlab && \
     conda install -c conda-forge jupyterthemes && \
     conda install -c conda-forge ipywidgets && \
     conda install -c conda-forge jupyter_contrib_nbextensions && \
-    conda install -c conda-forge jupyter_nbextensions_configurator && \
-    conda clean --all && \
+    conda install -c conda-forge jupyter_nbextensions_configurator
+RUN conda install -c anaconda pip
+RUN pip install --no-cache-dir test-generator==0.1.1
+RUN conda clean --all && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
-    
+
+WORKDIR /tmp
+RUN git clone https://github.com/hardikvasa/google-images-download.git
+RUN cd google-images-download && python setup.py install    
+
+ARG INSTALL_DIR=/opt/intel/computer_vision_sdk
+
+WORKDIR /tmp
+RUN apt-get install -y --no-install-recommends cpio 
+RUN curl -O http://registrationcenter-download.intel.com/akdlm/irc_nas/16057/l_openvino_toolkit_p_2019.3.376.tgz && \
+    tar -xvzf l_openvino_toolkit_p_2019.3.376.tgz && \
+    cd l_openvino_toolkit_p_2019.3.376 && \
+    sed -i 's/decline/accept/g' silent.cfg && \
+    bash ./install.sh -s silent.cfg && \
+    bash $INSTALL_DIR/install_dependencies/install_cv_sdk_dependencies.sh && \
+    mkdir $INSTALL_DIR/deployment_tools/inference_engine/samples/build && \
+    cd $INSTALL_DIR/deployment_tools/inference_engine/samples/build && \
+    bash -c "source $INSTALL_DIR/bin/setupvars.sh && cmake .. && make -j{nproc}" && \
+    rm /tmp/l_openvino_toolkit_p_2019.3.376.tgz
+
+WORKDIR /usr/local
+
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 ENV PYTHONUNBUFFERED=1 \
