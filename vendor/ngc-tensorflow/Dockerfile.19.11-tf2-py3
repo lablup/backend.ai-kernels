@@ -19,6 +19,12 @@ RUN /usr/bin/python3 -m pip install -U pip setuptools && \
     /usr/bin/python3 -m pip install --no-cache-dir jupyter && \
     /usr/bin/python3 -m pip install --no-cache-dir jupyterlab
 
+# Patch for TensorBoard: ngc images enable --bind_all parameter by default.
+# This crashes tensorboard loading since kernel runner attaches --host 0.0.0.0
+# which mutually exclusive with --bind_all.
+# This patch removes the default value of --bind_all parameter.
+RUN sed -i.bak -e '335d' /usr/local/lib/python3.6/dist-packages/tensorboard/plugins/core/core_plugin.py
+
 # Install ipython kernelspec
 RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.6 (NGC 19.11 / TensorFlow 2.0) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
