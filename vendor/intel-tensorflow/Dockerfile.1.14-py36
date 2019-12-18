@@ -8,7 +8,7 @@ RUN apt-get update --fix-missing && \
     apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 git mercurial subversion && \
     apt-get clean
 
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.7.12-Linux-x86_64.sh -O ~/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
     /opt/conda/bin/conda clean -tipsy && \
@@ -17,7 +17,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.7.12-Linux-x86
     echo "conda activate base" >> ~/.bashrc && \
     find /opt/conda/ -follow -type f -name '*.a' -delete && \
     find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
-    /opt/conda/bin/conda clean -afy
+    /opt/conda/bin/conda clean -a
     
 RUN apt update -y && \
     curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
@@ -56,17 +56,20 @@ RUN apt update -y && \
 
 WORKDIR /usr/local
 
+#RUN conda config --set allow_conda_downgrades true
+#RUN conda install -n root conda=4.6 
 RUN conda config --add channels intel && \
     conda install -y -q intelpython3_full=2019.5 python=3 
-RUN conda install -c anaconda numpy==1.16.2 && \
-    conda install -c anaconda pandas==0.25.1 && \ 
-    conda install -c anaconda graphviz==2.40.1 && \
-    conda install -c conda-forge python-graphviz==0.13.2 && \
-    conda install -c anaconda Pillow==6.2.0 && \
-    conda install -c anaconda pydot==1.4.1 && \
-    conda install -c anaconda scikit-learn==0.20.3 && \
-    conda install -c anaconda scipy==1.2.1 && \
-    conda install -c anaconda seaborn==0.9.0 
+
+RUN conda install -c anaconda numpy==1.16.2
+RUN conda install -c anaconda pandas==0.25.1 
+RUN conda install -c anaconda graphviz==2.40.1
+RUN conda install -c conda-forge python-graphviz==0.13.2
+RUN conda install -c anaconda Pillow==6.2.0 
+RUN conda install -c anaconda pydot==1.4.1 
+RUN conda install -c anaconda scikit-learn==0.20.3 
+RUN conda install -c anaconda scipy==1.2.1 
+RUN conda install -c anaconda seaborn==0.9.0 
 RUN conda install -c anaconda selenium==3.141.0 && \
     conda install -c anaconda defusedxml==0.5.0 && \
     conda install -c anaconda networkx==2.3 && \
@@ -93,19 +96,22 @@ WORKDIR /tmp
 RUN git clone https://github.com/hardikvasa/google-images-download.git
 RUN cd google-images-download && python setup.py install    
 
-ARG INSTALL_DIR=/opt/intel/computer_vision_sdk
+ARG INSTALL_DIR=/opt/intel/openvino_2019.3.376
 
 WORKDIR /tmp
-RUN apt-get install -y --no-install-recommends cpio 
+RUN apt-get install -y --no-install-recommends cpio sudo
 RUN curl -O http://registrationcenter-download.intel.com/akdlm/irc_nas/16057/l_openvino_toolkit_p_2019.3.376.tgz && \
     tar -xvzf l_openvino_toolkit_p_2019.3.376.tgz && \
     cd l_openvino_toolkit_p_2019.3.376 && \
     sed -i 's/decline/accept/g' silent.cfg && \
-    bash ./install.sh -s silent.cfg && \
-    bash $INSTALL_DIR/install_dependencies/install_cv_sdk_dependencies.sh && \
-    mkdir $INSTALL_DIR/deployment_tools/inference_engine/samples/build && \
-    cd $INSTALL_DIR/deployment_tools/inference_engine/samples/build && \
-    bash -c "source $INSTALL_DIR/bin/setupvars.sh && cmake .. && make -j{nproc}" && \
+    bash ./install.sh -s silent.cfg 
+
+RUN cd $INSTALL_DIR/deployment_tools/model_optimizer/install_prerequisites && \
+    ./install_prerequisites.sh 
+RUN cd $INSTALL_DIR/deployment_tools/inference_engine/samples && \
+    bash build_samples.sh && \
+    bash -c "source $INSTALL_DIR/bin/setupvars.sh"
+RUN echo "source $INSTALL_DIR/bin/setupvars.sh" >> /root/.bashrc && \
     rm /tmp/l_openvino_toolkit_p_2019.3.376.tgz
 
 WORKDIR /usr/local
@@ -114,7 +120,7 @@ COPY policy.yml /etc/backend.ai/jail/policy.yml
 
 ENV PYTHONUNBUFFERED=1 \
     LIBRARY_PATH="/opt/conda/lib/libfabric" \
-    PATH=/opt/conda/bin/libfabric:/opt/conda/bin:/opt/conda/condabin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
+    PATH="/opt/intel/openvino_2019.3.376/deployment_tools/model_optimizer:/opt/intel/openvino_2019.3.376/python/python3.6:/opt/conda/bin/libfabric:/opt/conda/bin:/opt/conda/condabin:/opt/conda/bin:/opt/intel/openvino/python/python3.6:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     LANG=C.UTF-8 \
     CLASSPATH="/opt/conda/lib/mpi.jar" \
     CONDA_DEFAULT_ENV="base" \
@@ -127,7 +133,13 @@ ENV PYTHONUNBUFFERED=1 \
     HOME="/home/work" \
     I_MPI_ROOT="/opt/conda" \
     LC_ALL="C.UTF-8" \
-    LD_LIBRARY_PATH="/opt/conda/lib/libfabric:/opt/conda/lib" \
+    OpenCV_DIR="/opt/intel/openvino_2019.3.376/opencv/cmake" \
+    PYTHONPATH="/opt/intel/openvino_2019.3.376/python/python3.6:/opt/intel/openvino_2019.3.376/python/python3:/opt/intel/openvino_2019.3.376/deployment_tools/open_model_zoo/tools/accuracy_checker:/opt/intel/openvino_2019.3.376/deployment_tools/model_optimizer:" \
+    LD_LIBRARY_PATH="/opt/intel/openvino_2019.3.376/opencv/lib:/opt/intel/opencl:/opt/intel/openvino_2019.3.376/deployment_tools/inference_engine/external/hddl/lib:/opt/intel/openvino_2019.3.376/deployment_tools/inference_engine/external/gna/lib:/opt/intel/openvino_2019.3.376/deployment_tools/inference_engine/external/mkltiny_lnx/lib:/opt/intel/openvino_2019.3.376/deployment_tools/inference_engine/external/tbb/lib:/opt/intel/openvino_2019.3.376/deployment_tools/inference_engine/lib/intel64:/opt/intel/openvino_2019.3.376/openvx/lib:/opt/conda/lib/libfabric:/opt/conda/lib" \
+    InferenceEngine_DIR="/opt/intel/openvino_2019.3.376/deployment_tools/inference_engine/share" \
+    HDDL_INSTALL_DIR="/opt/intel/openvino_2019.3.376/deployment_tools/inference_engine/external/hddl" \
+    INTEL_CVSDK_DIR="/opt/intel/openvino_2019.3.376" \
+    INTEL_OPENVINO_DIR="/opt/intel/openvino_2019.3.376" \
     MANPATH="/opt/conda/share/man:"
 
 # Jupyter notebook extension
