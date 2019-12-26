@@ -1,0 +1,173 @@
+# This Dockerfile provides a starting point for a ROCm installation of 
+# MIOpen and tensorflow.
+
+# base python 3.6
+FROM lablup/common-base:python3.6 as python-binary 
+
+FROM ubuntu:16.04
+MAINTAINER Mario Cho "m.cho@lablup.com"
+
+ARG DEB_ROCM_REPO=http://repo.radeon.com/rocm/apt/debian/
+ARG ROCM_PATH=/opt/rocm
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV TF_NEED_ROCM 1
+ENV HOME /root/
+RUN apt update && apt install -y wget software-properties-common 
+
+# Add rocm repository
+RUN apt-get clean all
+RUN wget -qO - $DEB_ROCM_REPO/rocm.gpg.key | apt-key add -
+RUN sh -c  "echo deb [arch=amd64] $DEB_ROCM_REPO xenial main > /etc/apt/sources.list.d/rocm.list"
+
+# Install misc pkgs
+RUN apt-get update --allow-insecure-repositories && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  build-essential \
+  clang-3.8 \
+  clang-format-3.8 \
+  clang-tidy-3.8 \
+  cmake \
+  cmake-qt-gui \
+  ssh \
+  curl \
+  git \
+  libcurl3-dev \
+  libfreetype6-dev \
+  libhdf5-serial-dev \
+  libpng12-dev \
+  libzmq3-dev \
+  pkg-config \
+  rsync \
+  software-properties-common \
+  unzip \
+  zip \
+  zlib1g-dev \
+  apt-utils \
+  pkg-config \
+  g++-multilib \
+  libunwind-dev \
+  libfftw3-dev \
+  libelf-dev \
+  libncurses5-dev \
+  libpthread-stubs0-dev \
+  vim \
+  gfortran \
+  libboost-program-options-dev \
+  libssl-dev \
+  libboost-dev \
+  libboost-system-dev \
+  libboost-filesystem-dev \
+  rpm \
+  libnuma-dev \
+  pciutils \
+  virtualenv \
+  libxml2 \
+  libxml2-dev \
+  wget \
+  && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
+
+# Install rocm pkgs
+RUN apt-get update --allow-insecure-repositories && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated \
+    rocm-dev rocm-libs hipcub rocm-utils \
+    rocfft miopen-hip miopengemm rocblas hipblas rocrand rccl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV HCC_HOME=$ROCM_PATH/hcc
+ENV HIP_PATH=$ROCM_PATH/hip
+ENV OPENCL_ROOT=$ROCM_PATH/opencl
+ENV PATH="$HCC_HOME/bin:$HIP_PATH/bin:${PATH}"
+ENV PATH="$ROCM_PATH/bin:${PATH}"
+ENV PATH="$OPENCL_ROOT/bin:${PATH}"
+
+# Add target file to help determine which device(s) to build for
+RUN bash -c 'echo -e "gfx803\ngfx900\ngfx906\ngfx1010" >> /opt/rocm/bin/target.lst'
+
+# Setup environment variables, and add those environment variables at the end of ~/.bashrc 
+ARG HCC_HOME=/opt/rocm/hcc
+ARG HIP_PATH=/opt/rocm/hip
+ARG PATH=$HCC_HOME/bin:$HIP_PATH/bin:$PATH
+
+COPY --from=python-binary /python.tar.gz /
+RUN cd /; tar xzpf python.tar.gz; rm python.tar.gz; ldconfig
+
+# python alternative support
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
+    python3 -m pip install --no-cache-dir -U setuptools pip 
+
+RUN python3 -m pip --no-cache-dir install \
+        Pillow \
+        h5py \
+        ipykernel \
+        jupyter \
+        keras_applications==1.0.6 \
+        keras_preprocessing==1.0.5 \ 
+        matplotlib \
+        mock \
+        numpy==1.14.5 \ 
+        scipy \
+        sklearn \
+        pandas \
+        && \
+    python -m ipykernel.kernelspec
+
+# Set up Bazel.
+RUN echo "startup --batch" >>/etc/bazel.bazelrc
+RUN echo "build --spawn_strategy=standalone --genrule_strategy=standalone" \
+    >>/etc/bazel.bazelrc
+
+# Install the most recent bazel release.
+ENV BAZEL_VERSION 0.24.1
+WORKDIR /
+RUN mkdir /bazel && \
+    cd /bazel && \
+    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -o /bazel/LICENSE.txt https://raw.githubusercontent.com/bazelbuild/bazel/master/LICENSE && \
+    chmod +x bazel-*.sh && \
+    ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    cd / && \
+    rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
+
+# Download and build TensorFlow.
+WORKDIR /tensorflow-upstream
+RUN git clone --branch=r1.14-rocm --depth=1 https://github.com/ROCmSoftwarePlatform/tensorflow-upstream.git .
+
+# Set up the master bazelrc configuration file.
+RUN cp tensorflow/tools/ci_build/install/.bazelrc /etc/bazel.bazelrc
+
+# Configure the build for our ROCM configuration.
+ENV TF_NEED_ROCM 1
+ENV CI_BUILD_PYTHON=python3
+
+RUN tensorflow/tools/ci_build/builds/configured ROCM \
+    bazel build -c opt --config=rocm \
+        tensorflow/tools/pip_package:build_pip_package
+
+RUN bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/pip && \
+    pip3 --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
+    rm -rf /tmp/pip && \
+    rm -rf /root/.cache
+# Clean up pip wheel and Bazel cache when done.
+
+# Install ipython kernelspec
+RUN python3 -m ipykernel install --display-name "TensorFlow 1.14 on Python 3.6 (RoCM)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/local/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"
+
+WORKDIR /home/work
+# vim: ft=dockerfile
