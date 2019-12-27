@@ -27,8 +27,8 @@ e.g., `2.0-py36-ubuntu18.04-cuda9` means
 ### Intrinsic Image Functionality provided by Backend.AI
 
 On any image, you can run the following "in-container" service applications:
- - ttyd
- - sshd with SFTP/SCP enabled
+ - [ttyd](https://github.com/tsl0922/ttyd)
+ - sshd with SFTP/SCP enabled (based on [Dropbear](https://matt.ucc.asn.au/dropbear/dropbear.html) and OpenSSH's SCP/SFTP subsystems)
 
 Jupyter Notebook and Lab is available in most computation-oriented images, but not all.
 
@@ -38,10 +38,8 @@ Jupyter Notebook and Lab is available in most computation-oriented images, but n
 |--------------------|----------------------------|--------------------------------|---------|--------------------|
 | Python             | `lablup/python`            | `3.6-ubuntu18.04`              | O       |                    |
 | TensorFlow 2       | `lablup/python-tensorflow` | `2.0-py36-ubuntu18.04`         | O       | Bundled w/Keras 2  |
-| TensorFlow 2       | `lablup/python-tensorflow` | `2.0-py36-ubuntu18.04-cuda9`   | O       | Bundled w/Keras 2  |
 | TensorFlow 2       | `lablup/python-tensorflow` | `2.0-py36-ubuntu18.04-cuda10`  | O       | Bundled w/Keras 2  |
 | TensorFlow         | `lablup/python-tensorflow` | `1.14-py36-ubuntu18.04`        | O       | Bundled w/Keras 2  |
-| TensorFlow         | `lablup/python-tensorflow` | `1.14-py36-ubuntu18.04-cuda9`  | O       | Bundled w/Keras 2  |
 | TensorFlow         | `lablup/python-tensorflow` | `1.14-py36-ubuntu18.04-cuda10` | O       | Bundled w/Keras 2  |
 | PyTorch            | `lablup/python-torch`      | `1.3-py36-cuda10`              | O       |                    |
 
@@ -50,19 +48,23 @@ Jupyter Notebook and Lab is available in most computation-oriented images, but n
 | Language/Framework | Image Name                 | Version Tags                   | Jupyter |   Runtime Info.    |
 |--------------------|----------------------------|--------------------------------|---------|--------------------|
 | Python             | `lablup/python`            | `2.7-ubuntu18.04`              | O       |                    |
-| C                  | `lablup/c`                 | `6.3`                          |         | GCC on Alpine 3.8  |
-| C++ (14)           | `lablup/cpp`               | `6.3`                          |         | GCC on Alpine 3.8  |
-| Java               | `lablup/java`              | `8.0`                          |         |                    |
-| Linux Console      | `lablup/git`               | -                              |         | Bash on Alpine 3.8 |
-| Lua                | `lablup/lua`               | 5.3                            |         |                    |
-| Go                 | `lablup/go`                | 1.9                            |         |                    |
-| Node.js            | `lablup/nodejs`            | 6.14, 8.11, 10.11              |         |                    |
-| Octave             | `lablup/octave`            | 4.2                            | O       |                    |
-| Haskell            | `lablup/haskell`           | 8.2                            | O       |                    |
-| Rust               | `lablup/rust`              | 1.17                           |         |                    |
-| PHP                | `lablup/php`               | 7.1                            |         |                    |
-| R                  | `lablup/r`                 | 3.3                            | O       | CRAN R             |
-| Scala	             | `lablup/scala`             | 2.12                           |         |                    |
+| C                  | `lablup/c`                 | `gcc6.4-alpine3.8`             |         |                    |
+| C++ (14)           | `lablup/cpp`               | `gcc6.4-alpine3.8`             |         |                    |
+| Java               | `lablup/java`              | `8.0-alpine3.8`                |         |                    |
+| Lua                | `lablup/lua`               | `5.3-alpine3.8`                |         |                    |
+| Go                 | `lablup/go`                | `1.11-alpine3.8`               |         |                    |
+| Node.js            | `lablup/nodejs`            | `12.0-alpine3.8`               |         |                    |
+| Octave             | `lablup/octave`            | `4.2-ubuntu18.04`              | O       |                    |
+| Haskell            | `lablup/haskell`           | `ghc8.0-ubuntu18.04`           | O       |                    |
+| Rust               | `lablup/rust`              | `1.26-alpine3.8`               |         |                    |
+| PHP                | `lablup/php`               | `7-alpine3.8`                  |         |                    |
+| R                  | `lablup/r-base`            | `3.5-ubuntu18.04`              | O       | CRAN R             |
+| R                  | `lablup/r-base`            | `3.6-ubuntu18.04`              | O       | CRAN R             |
+| Scala	             | `lablup/scala`             | `2.12-ubuntu18.04`             |         |                    |
+| Scheme	         | `lablup/scheme`            | `9.2-alpine3.8`                |         |                    |
+| TensorFlow 2       | `lablup/python-tensorflow` | `2.0-py36-ubuntu18.04-cuda9`   | O       | Bundled w/Keras 2  |
+| TensorFlow         | `lablup/python-tensorflow` | `1.14-py36-ubuntu18.04-cuda9`  | O       | Bundled w/Keras 2  |
+| PyTorch            | `lablup/python-torch`      | `1.3-py36-cuda9`               | O       |                    |
 
 ## Community Images
 
