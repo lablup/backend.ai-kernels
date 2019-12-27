@@ -2,52 +2,88 @@
 
 Backend.AI agent kernels in various programming languages / toolkits and frameworks.
 
+## How to interpret the tables
 
-## Officially Supported Images
+### Support Levels
 
-### Supporting modes
+ * **Official**: We test and update these kernels for every Backend.AI release and guarantee them to work with our test workloads.
+   - When we install Backend.AI, these kernels are installed together by default.
+   - If users report package/library errors in them and when such errors are reproducible, we add them to our test scenarios for these images.
+ * **Semi-official**: We test and update these kernels frequently but does not provide as strong guarantee as the official ones.
+ * **Community**: We offer these kernels using open-source, publicly available Dockerfiles and base images, but do not guarantee their working on Backend.AI.
+   - Includes NGC (NVIDIA GPU Cloud) images.
+ * **Deprecated**: No longer supported. Use at your own risk.
 
-Here we list the latest versions of our supported kernel images.
-"\*" in the Query mode column means that it supports preservation of global contexts across different query runs.
+### Version Tags
 
-| Language      | Image Name              | Version         | Batch | Query | Input Hook | TTY | Runtime Impl. |
-|---------------|-------------------------|-----------------|-------|-------|---|---|--------------------|
-| C             | `lablup/kernel-c`       | 6.3             | O     | O     | O |   | GCC on Alpine 3.8  |
-| C++ (14)      | `lablup/kernel-cpp`     | 6.3             | O     | O     |   |   | GCC on Alpine 3.8  |
-| Go            | `lablup/kernel-go`      | 1.9             | O     | O     |   |   |                    |
-| Haskell       | `lablup/kernel-haskell` | 8.2             | O     | O     |   |   |                    |
-| Java          | `lablup/kernel-java`    | 8.0             | O     | O     |   |   |                    |
-| Linux Console | `lablup/kernel-git`     | -               | -     | -     | - | O | Bash on Alpine 3.8 |
-| Lua           | `lablup/kernel-lua`     | 5.3             | O     | O     |   |   |                    |
-| Node.js       | `lablup/kernel-nodejs`  | 6.14,8.11,10.11 | O     | O     |   |   |                    |
-| Octave        | `lablup/kernel-octave`  | 4.2             | O     | O     |   |   |                    |
-| Python        | `lablup/kernel-python`  | 2.7             | O     | O     | O |   | beta               |
-| Python        | `lablup/kernel-python`  | 3.6.6           | O     | O\*   | O |   |                    |
-| Rust          | `lablup/kernel-rust`    | 1.17            | O     | O     |   |   |                    |
-| PHP           | `lablup/kernel-php`     | 7.1             | O     | O     |   |   |                    |
-| R             | `lablup/kernel-r`       | 3.3             | O     | O     |   |   | CRAN R             |
-| Scala	        | `lablup/kernel-scala`   | 2.12            | O     | O     |   |   |                    |
+The version tags are composed of: (lang/framework version) - (primary base-platform name & its version) - (secondary base-platform name & its version) - ...
 
-| Deep-Learning Framework | Image Name    | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
-|------------|----------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/python-tensorflow` | 1.14    | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| PyTorch    | `lablup/python-torch`      | 1.1     | O     | O\*   | O   |   |                   |
-| caffe2     | `lablup/python-torch`      | 1.0     | O     | O\*   | O   |   |                   |
-| cafee      | `lablup/python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
-| CNTK       | `lablup/python-cntk`       | 2.6     | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| Chainer    | `lablup/python-chainer`    | 4.0     | O     | O\*   | O   |   |                   |
-| Theano     | `lablup/python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
-=======
-| Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
-|------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.14    | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| PyTorch    | `lablup/kernel-python-torch`      | 1.1     | O     | O\*   | O   |   |                   |
-| caffe2     | `lablup/kernel-python-torch`      | 1.0     | O     | O\*   | O   |   |                   |
-| cafee      | `lablup/kernel-python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
-| CNTK       | `lablup/kernel-python-cntk`       | 2.7     | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| Chainer    | `lablup/kernel-python-chainer`    | (WIP)   | O     | O\*   | O   |   |                   |
-| Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
+e.g., `2.0-py36-ubuntu18.04-cuda9` means
+ - Lang/framework version: `2.0`
+ - Primary base-platform: `py` (=`python`) `3.6`
+ - Secondary base-platform: `ubuntu` `18.04`
+ - Tertiary base-platform: `cuda` `9`
 
+### Intrinsic Image Functionality provided by Backend.AI
+
+On any image, you can run the following "in-container" service applications:
+ - ttyd
+ - sshd with SFTP/SCP enabled
+
+Jupyter Notebook and Lab is available in most computation-oriented images, but not all.
+
+## Official images
+
+| Language/Framework | Image Name                 | Version Tags                   | Jupyter |   Runtime Info.    |
+|--------------------|----------------------------|--------------------------------|---------|--------------------|
+| Python             | `lablup/python`            | `3.6-ubuntu18.04`              | O       |                    |
+| TensorFlow 2       | `lablup/python-tensorflow` | `2.0-py36-ubuntu18.04`         | O       | Bundled w/Keras 2  |
+| TensorFlow 2       | `lablup/python-tensorflow` | `2.0-py36-ubuntu18.04-cuda9`   | O       | Bundled w/Keras 2  |
+| TensorFlow 2       | `lablup/python-tensorflow` | `2.0-py36-ubuntu18.04-cuda10`  | O       | Bundled w/Keras 2  |
+| TensorFlow         | `lablup/python-tensorflow` | `1.14-py36-ubuntu18.04`        | O       | Bundled w/Keras 2  |
+| TensorFlow         | `lablup/python-tensorflow` | `1.14-py36-ubuntu18.04-cuda9`  | O       | Bundled w/Keras 2  |
+| TensorFlow         | `lablup/python-tensorflow` | `1.14-py36-ubuntu18.04-cuda10` | O       | Bundled w/Keras 2  |
+| PyTorch            | `lablup/python-torch`      | `1.3-py36-cuda10`              | O       |                    |
+
+## Semi-official Images
+
+| Language/Framework | Image Name                 | Version Tags                   | Jupyter |   Runtime Info.    |
+|--------------------|----------------------------|--------------------------------|---------|--------------------|
+| Python             | `lablup/python`            | `2.7-ubuntu18.04`              | O       |                    |
+| C                  | `lablup/c`                 | `6.3`                          |         | GCC on Alpine 3.8  |
+| C++ (14)           | `lablup/cpp`               | `6.3`                          |         | GCC on Alpine 3.8  |
+| Java               | `lablup/java`              | `8.0`                          |         |                    |
+| Linux Console      | `lablup/git`               | -                              |         | Bash on Alpine 3.8 |
+| Lua                | `lablup/lua`               | 5.3                            |         |                    |
+| Go                 | `lablup/go`                | 1.9                            |         |                    |
+| Node.js            | `lablup/nodejs`            | 6.14, 8.11, 10.11              |         |                    |
+| Octave             | `lablup/octave`            | 4.2                            | O       |                    |
+| Haskell            | `lablup/haskell`           | 8.2                            | O       |                    |
+| Rust               | `lablup/rust`              | 1.17                           |         |                    |
+| PHP                | `lablup/php`               | 7.1                            |         |                    |
+| R                  | `lablup/r`                 | 3.3                            | O       | CRAN R             |
+| Scala	             | `lablup/scala`             | 2.12                           |         |                    |
+
+## Community Images
+
+| Language/Framework | Image Name                 | Version Tags                   | Jupyter |   Runtime Info.    |
+|--------------------|----------------------------|--------------------------------|---------|--------------------|
+| Caffe2             | `lablup/python-caffe`      | 2.0                            | O       |                    |
+| CNTK               | `lablup/python-cntk`       | 2.6                            | O       | Bundled w/Keras 2  |
+| NGC TensorFlow     | `lablup/ngc-tensorflow`    | `19.09-py3`                    | O       | TensorFlow 1.1x optimized for CUDA 10 |
+| NGC TensorFlow     | `lablup/ngc-tensorflow`    | `19.07-py3`                    | O       | TensorFlow 1.1x optimized for CUDA 10 |
+| NGC TensorFlow     | `lablup/ngc-tensorflow`    | `19.05-py3`                    | O       | TensorFlow 1.1x optimized for CUDA 10 |
+...
+
+## Deprecated Images
+
+| Language/Framework | Image Name                 | Version Tags                   | Jupyter |   Runtime Info.    |
+|--------------------|----------------------------|--------------------------------|---------|--------------------|
+| Caffe              | `lablup/python-caffe`      | 1.0                            | O       |                    |
+| Chainer            | `lablup/python-chainer`    | 4.0                            | O       |                    |
+| Theano             | `lablup/python-theano`     | 1.0                            | O       | Bundled w/Keras 2  |
+
+## TODO: Sort out
 
 ### Deep learning based images
  * `base-mkl`    (Intel' Machine Learning Kits (MKL) works on CPU only kernel)
