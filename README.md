@@ -37,7 +37,8 @@ Here we list the latest versions of our supported kernel images.
 | CNTK       | `lablup/python-cntk`       | 2.6     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 | Chainer    | `lablup/python-chainer`    | 4.0     | O     | O\*   | O   |   |                   |
 | Theano     | `lablup/python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
-=======
+
+
 | Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
 | TensorFlow | `lablup/kernel-python-tensorflow` | 1.14    | O     | O\*   | O   |   | Bundled w/Keras 2 |
