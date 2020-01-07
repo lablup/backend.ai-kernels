@@ -20,6 +20,15 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
+# to fix ImportError: libgthread-2.0.so.0: 
+
+RUN apt-get update && \
+    apt-get install -y \
+    	    libgtk2.0-dev \
+	    && \
+    apt-get clean && \
+    rm -fr /var/lib/apt/lists/
+
 ENV CUDNN_VERSION 7.4.2.24
 LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
 RUN apt-get update && apt-get install -y --no-install-recommends \
