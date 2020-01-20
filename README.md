@@ -5,10 +5,53 @@ Backend.AI agent kernels in various programming languages / toolkits and framewo
 
 ## Officially Supported Images
 
-### Supporting modes
+### Warrented Images (Deep Learning Framework)
 
 Here we list the latest versions of our supported kernel images.
 "\*" in the Query mode column means that it supports preservation of global contexts across different query runs.
+
+| Deep-Learning Framework | Image Name                 | Version | Batch | Query | Input Hook | TTY | Runtime Impl.     |
+|-------------------------|----------------------------|---------|-------|-------|------------|-----|-------------------|
+| TensorFlow              | `lablup/python-tensorflow` | 1.14.0  | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 1.15.0  | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 2.0.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 2.1.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| PyTorch                 | `lablup/python-torch`      | 1.3     | O     | O\*   | O          |     |                   |
+| PyTorch                 | `lablup/python-torch`      | 1.4     | O     | O\*   | O          |     |                   |
+| CNTK                    | `lablup/python-cntk`       | 2.6     | O     | O\*   | O          |     |                   |
+| CNTK                    | `lablup/python-cntk`       | 2.7     | O     | O\*   | O          |     |                   |
+| MXnet                   | `lablup/python-mxnet`      | 1.4.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| MXnet                   | `lablup/python-mxnet`      | 1.5.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+
+### Warrented Images (NGC, Nvidia GPU Cloud)
+| Deep-Learning Framework | Image Name              | Version       | Batch | Query | Input Hook | TTY | Runtime Impl.     |
+|-------------------------|-------------------------|---------------|-------|-------|------------|-----|-------------------|
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.07-py2     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.07-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.08-py2     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.08-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.09-py2     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.09-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.10-py2     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.10-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.11-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.11-tf2-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.12-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 19.12-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.07-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.08-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.09-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.10-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.11-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.12-py3     | O     | O\*   | O          |     |                   |
+| NGC-MXNet               | `lablup/ngc-mxnet`      | 19.07-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-MXNet               | `lablup/ngc-mxnet`      | 19.08-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-MXNet               | `lablup/ngc-mxnet`      | 19.09-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-MXNet               | `lablup/ngc-mxnet`      | 19.10-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-MXNet               | `lablup/ngc-mxnet`      | 19.11-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-MXNet               | `lablup/ngc-mxnet`      | 19.12-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+
+### Commnunity-maintained Languages
 
 | Language      | Image Name              | Version         | Batch | Query | Input Hook | TTY | Runtime Impl. |
 |---------------|-------------------------|-----------------|-------|-------|---|---|--------------------|
@@ -28,76 +71,45 @@ Here we list the latest versions of our supported kernel images.
 | R             | `lablup/kernel-r`       | 3.3             | O     | O     |   |   | CRAN R             |
 | Scala	        | `lablup/kernel-scala`   | 2.12            | O     | O     |   |   |                    |
 
-| Deep-Learning Framework | Image Name    | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
-|------------|----------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/python-tensorflow` | 1.14    | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| PyTorch    | `lablup/python-torch`      | 1.1     | O     | O\*   | O   |   |                   |
-| caffe2     | `lablup/python-torch`      | 1.0     | O     | O\*   | O   |   |                   |
-| cafee      | `lablup/python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
-| CNTK       | `lablup/python-cntk`       | 2.6     | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| Chainer    | `lablup/python-chainer`    | 4.0     | O     | O\*   | O   |   |                   |
-| Theano     | `lablup/python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
 
-
-| Deep-Learning Framework | Image Name           | Version | Batch | Query | Input Hook | TTY | Runtime Impl. |
-|------------|-----------------------------------|---------|-------|-------|-----|---|-------------------|
-| TensorFlow | `lablup/kernel-python-tensorflow` | 1.14    | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| PyTorch    | `lablup/kernel-python-torch`      | 1.1     | O     | O\*   | O   |   |                   |
-| caffe2     | `lablup/kernel-python-torch`      | 1.0     | O     | O\*   | O   |   |                   |
-| cafee      | `lablup/kernel-python-caffe`      | 1.0     | O     | O\*   | O   |   |                   |
-| CNTK       | `lablup/kernel-python-cntk`       | 2.7     | O     | O\*   | O   |   | Bundled w/Keras 2 |
-| Chainer    | `lablup/kernel-python-chainer`    | (WIP)   | O     | O\*   | O   |   |                   |
-| Theano     | `lablup/kernel-python-theano`     | 1.0     | O     | O\*   | O   |   | Bundled w/Keras 2 |
-
-
-### Deep learning based images
+### Commnunity-maintained & Deep learning based images
  * `base-mkl`    (Intel' Machine Learning Kits (MKL) works on CPU only kernel)
  * `base-cuda`   (Nvidia' GPU & CUDA libarary compatibility, needed Nvidia-docker)
  * `base-TPU`    (Google TPU comptibility, on Google' Cloud)
  * `base-ROCm`   (AMD' GPU & OpenCL libarary compatibility, T.B.D.)
 
-| base-mkl                 | base-cuda                     | base-TPU                 | base-ROCm (T.B.D) |
-|--------------------------|-------------------------------|--------------------------|-------------------|
-| tensorflow-2.0-py36      | tensorflow-2.0-py36-cuda9     |                          |                   |
-| tensorflow-1.14-py36     | tensorflow-1.14-py36-cuda9    | tensorflow-1.14-py36-tpu |                   |
-| tensorflow-1.13-py36     | tensorflow-1.13-py36-cuda9    | tensorflow-1.13-py36-tpu |                   |
-| tensorflow-1.12-py36     | tensorflow-1.12-py36-cuda9    | tensorflow-1.12-py36-tpu |                   |
-| tensorflow-1.11-py36     | tensorflow-1.11-py36-cuda9    | tensorflow-1.11-py36-tpu |                   |
-| tensorflow-1.10-py36     | tensorflow-1.10-py36-cuda9    |                          |                   |
-| tensorflow-1.9-py36      | tensorflow-1.9-py36-cuda9     |                          |                   |
-| tensorflow-1.8-py36      | tensorflow-1.8-py36-cuda9     |                          |                   |
-| tensorflow-1.7-py36      | tensorflow-1.7-py36-cuda9     |                          |                   |
-| tensorflow-1.6-py36      | tensorflow-1.6-py36-cuda9     |                          |                   |
-| tensorflow-1.5-py36      | tensorflow-1.5-py36-cuda9     |                          |                   |
-| tensorflow-1.4-py36      | tensorflow-1.4-py36-cuda8     |                          |                   |
-| tensorflow-1.3-py36      | tensorflow-1.3-py36-cuda8     |                          |                   | 
-| tensorflow-1.2-py36      | tensorflow-1.2-py36-cuda8     |                          |                   |
-| tensorflow-1.1-py36      | tensorflow-1.1-py36-cuda8     |                          |                   |
-| tensorflow-1.0-py36      | tensorflow-1.0-py36-cuda8     |                          |                   |
-|                          | python-caffe2-1.0-py36-cuda9  |                          |                   |
-| python-torch-1.1-py36    | python-torch-1.1-py36-cuda9   |                          |                   |
-| python-torch-1.0-py36    | python-torch-1.0-py36-cuda9   |                          |                   |
-| python-torch-0.4-py36    | python-torch-0.4-py36-cuda9   |                          |                   |
-| python-torch-0.3-py36    | python-torch-0.3-py36-cuda9   |                          |                   |
-| python-torch-0.2-py36    | python-torch-0.2-py36-cuda8   |                          |                   |
-| python-cntk-2.7-py36     | python-cntk-2.7-py36-cuda9    |                          |                   |
-| python-cntk-2.6-py36     | python-cntk-2.6-py36-cuda9    |                          |                   |
-| python-cntk-2.5-py36     | python-cntk-2.5-py36-cuda9    |                          |                   |
-| python-cntk-2.4-py36     | python-cntk-2.4-py36-cuda9    |                          |                   |
-| python-cntk-2.3-py36     | python-cntk-2.3-py36-cuda9    |                          |                   |
-| python-cntk-2.2-py36     | python-cntk-2.2-py36-cuda9    |                          |                   |
-| python-cntk-2.1-py36     | python-cntk-2.1-py36-cuda9    |                          |                   |
-| python-cntk-2.0-py36     | python-cntk-2.0-py36-cuda9    |                          |                   |
-
-### Deep learning inference images
-
-| base                     |  base-cuda                     | base-TPU (T.B.D)         | base-ROCm (T.B.D) |
-|--------------------------|--------------------------------|--------------------------|-------------------|
-| tensorflow-1.14-py36-srv | tensorflow-1.14-py36-srv-cuda9 |                          |                   |
-| tensorflow-1.13-py36-srv | tensorflow-1.13-py36-srv-cuda9 |                          |                   |
-| tensorflow-1.12-py36-srv | tensorflow-1.12-py36-srv-cuda9 |                          |                   |
-| tensorflow-1.11-py36-srv | tensorflow-1.11-py36-srv-cuda9 |                          |                   |
-
+| base-mkl (Intel)      | base-cuda (Nvidia)           | base-TPU (Google)        | base-ROCm (AMD)           |
+|-----------------------|------------------------------|--------------------------|---------------------------|
+| tensorflow-1.14-py36  | tensorflow-1.14-py36-cuda9   | tensorflow-1.14-py36-tpu | tensorflow-1.14-py36-rocm |
+| tensorflow-1.13-py36  | tensorflow-1.13-py36-cuda9   | tensorflow-1.13-py36-tpu |                           |
+| tensorflow-1.12-py36  | tensorflow-1.12-py36-cuda9   |                          |                           |
+| tensorflow-1.11-py36  | tensorflow-1.11-py36-cuda9   |                          |                           |
+| tensorflow-1.10-py36  | tensorflow-1.10-py36-cuda9   |                          |                           |
+| tensorflow-1.9-py36   | tensorflow-1.9-py36-cuda9    |                          |                           |
+| tensorflow-1.8-py36   | tensorflow-1.8-py36-cuda9    |                          |                           |
+| tensorflow-1.7-py36   | tensorflow-1.7-py36-cuda9    |                          |                           |
+| tensorflow-1.6-py36   | tensorflow-1.6-py36-cuda9    |                          |                           |
+| tensorflow-1.5-py36   | tensorflow-1.5-py36-cuda9    |                          |                           |
+| tensorflow-1.4-py36   | tensorflow-1.4-py36-cuda8    |                          |                           |
+| tensorflow-1.3-py36   | tensorflow-1.3-py36-cuda8    |                          |                           |
+| tensorflow-1.2-py36   | tensorflow-1.2-py36-cuda8    |                          |                           |
+| tensorflow-1.1-py36   | tensorflow-1.1-py36-cuda8    |                          |                           |
+| tensorflow-1.0-py36   | tensorflow-1.0-py36-cuda8    |                          |                           |
+|                       | python-caffe2-1.0-py36-cuda9 |                          |                           |
+|                       | python-torch-1.2-py36-cuda9  |                          |                           |
+|                       | python-torch-1.1-py36-cuda9  |                          |                           |
+| python-torch-1.0-py36 | python-torch-1.0-py36-cuda9  |                          |                           |
+| python-torch-0.4-py36 | python-torch-0.4-py36-cuda9  |                          |                           |
+| python-torch-0.3-py36 | python-torch-0.3-py36-cuda9  |                          |                           |
+| python-torch-0.2-py36 | python-torch-0.2-py36-cuda8  |                          |                           |
+| python-cntk-2.7-py36  | python-cntk-2.7-py36-cuda9   |                          |                           |
+| python-cntk-2.6-py36  | python-cntk-2.6-py36-cuda9   |                          |                           |
+| python-cntk-2.5-py36  | python-cntk-2.5-py36-cuda9   |                          |                           |
+| python-cntk-2.4-py36  | python-cntk-2.4-py36-cuda9   |                          |                           |
+| python-cntk-2.3-py36  | python-cntk-2.3-py36-cuda9   |                          |                           |
+| python-cntk-2.2-py36  | python-cntk-2.2-py36-cuda9   |                          |                           |
+| python-cntk-2.1-py36  | python-cntk-2.1-py36-cuda9   |                          |                           |
+| python-cntk-2.0-py36  | python-cntk-2.0-py36-cuda9   |                          |                           |
 
 ## HOWTO: Adding a New Image
 
