@@ -50,6 +50,7 @@ Here we list the latest versions of our supported kernel images.
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.10-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.11-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.12-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-MATLAB              | `lablup/ngc-matlab`     | 2019b	    | O     | O\*   | O          |     | 	 	   |
 
 ### Commnunity-maintained Languages
 
