@@ -1,8 +1,7 @@
-FROM ubuntu:19.04
+FROM ubuntu:18.04
 
 RUN apt-get update && \
     apt-get install -y \
-    wget \
     vim-tiny zip unzip \
 		python3-pip && \
     apt-get clean && \
@@ -16,9 +15,8 @@ RUN pip3 install --no-cache-dir -U setuptools && \
     pip3 install --no-cache-dir backend.ai-client && \
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
-RUN wget https://github.com/tsl0922/ttyd/releases/download/1.5.1/ttyd_linux.x86_64 -O /usr/local/bin/ttyd
 COPY backendai_repl.sh /usr/local/bin/backendai_repl
-RUN chmod 755 /usr/local/bin/ttyd /usr/local/bin/backendai_repl
+RUN chmod 755 /usr/local/bin/backendai_repl
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
@@ -26,10 +24,10 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="128m" \
-      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.base-distro="ubuntu18.04" \
       ai.backend.runtime-type="backendai" \
-      ai.backend.runtime-path="/usr/local/bin/ttyd" \
-      ai.backend.service-ports="ttyd:http:8090"
+      ai.backend.runtime-path="/opt/backend.ai/bin/ttyd" \
+      ai.backend.service-ports="backendai-cli:http:8090"
 
 WORKDIR /home/work
 
