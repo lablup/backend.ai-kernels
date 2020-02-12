@@ -25,6 +25,7 @@ RUN apt-get update && \
 RUN apt-get update && \
     apt-get install -y \
     	    libgtk2.0-dev \
+	    tmux \
 	    && \
     apt-get clean && \
     rm -fr /var/lib/apt/lists/
@@ -100,11 +101,6 @@ RUN update-alternatives --install /usr/bin/python python /usr/local/bin/python3 
 # Install ipython kernelspec
 RUN python -m ipykernel install --display-name "TensorFlow 1.6 on Python 3.6 (CUDA 9.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
-
-# Install Jupyter notebook logo
-RUN mkdir -p /home/work/.jupyter/custom
-COPY custom.css /home/work/.jupyter/custom/custom.css
-COPY logo.svg /home/work/.jupyter/custom/logo.svg
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \

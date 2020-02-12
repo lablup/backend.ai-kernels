@@ -23,6 +23,7 @@ RUN /usr/bin/python3 -m pip install -U pip setuptools && \
 # This crashes tensorboard loading since kernel runner attaches --host 0.0.0.0
 # which mutually exclusive with --bind_all.
 # This patch removes the default value of --bind_all parameter.
+ADD diff-19.11-tf2-py3-tensorboard.patch .
 RUN patch /usr/local/lib/python3.6/dist-packages/tensorboard/plugins/core/core_plugin.py diff-19.11-tf2-py3-tensorboard.patch
 
 # Install ipython kernelspec
