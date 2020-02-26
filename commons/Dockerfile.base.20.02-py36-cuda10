@@ -1,8 +1,8 @@
 FROM nvidia/cuda:10.0-devel-ubuntu18.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
-ENV TENSORFLOW_VERSION=1.5.2
-ENV PYTORCH_VERSION=1.4.0
+ENV TENSORFLOW_VERSION=2.0.1
+ENV PYTORCH_VERSION=1.3.0
 ENV TORCHVISION_VERSION=0.5.0
 ENV TENSORBOARDX_VERSION=1.9
 ENV MXNET_VERSION=1.5.1
@@ -24,7 +24,7 @@ SHELL ["/bin/bash", "-cu"]
 RUN apt-get update && apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
         build-essential \
         cmake \
-        g++-4.8 \
+        g++-7 \
         git \
         curl \
         vim \
@@ -144,7 +144,7 @@ RUN python3 -m pip install --no-cache-dir https://download.pytorch.org/whl/cu100
 
 RUN python3 -m pip install --no-cache-dir mxnet-cu100==${MXNET_VERSION}
 
-o
+
 RUN python3 -m pip install --no-cache-dir tensorwatch==0.8.10
 
 # Jupyter notebook extension
