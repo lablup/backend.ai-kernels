@@ -1,0 +1,29 @@
+# Lablup/Python-TensorFlow 2.1 Python 3.6, CUDA10.0
+
+FROM lablup/common-base:20.03-py36-cuda10
+MAINTAINER Mario Cho "m.cho@lablup.com"
+
+ENV PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    LANG=C.UTF-8
+
+# Install ipython kernelspec
+RUN python3 -m ipykernel install --display-name "TensorFlow 2.1 on Python 3.6 (CUDA 10.0)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,nniboard:http:8080,jupyter:http:8070,jupyterlab:http:8090"
+
+WORKDIR /home/work
+# vim: ft=dockerfile
