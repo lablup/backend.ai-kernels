@@ -144,7 +144,6 @@ RUN python3 -m pip install --no-cache-dir https://download.pytorch.org/whl/cu100
 
 RUN python3 -m pip install --no-cache-dir mxnet-cu100==${MXNET_VERSION}
 
-o
 RUN python3 -m pip install --no-cache-dir tensorwatch==0.8.10
 
 # Jupyter notebook extension
@@ -180,8 +179,8 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
-    	    mpi4py \
-	    nni
+    	    mpi4py 
+
 	    
 # Install OpenSSH for MPI to communicate between containers
 RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
