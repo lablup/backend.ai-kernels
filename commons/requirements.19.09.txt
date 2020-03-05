@@ -28,11 +28,11 @@ coverage==5.0.3
 Cython==0.29.13
 cycler==0.10.0
 cvxpy==1.0.24
-dask==2.2.0
+dask==2.9.0
 defusedxml==0.6.0
-dataclasses==0.7
+dataclasses==0.6
 decorator==4.4.2
-dill==0.3.0
+dill==0.3.1.1
 ecos==2.0.7.post1
 entrypoints==0.3
 ephem==3.7.6.0
@@ -43,7 +43,7 @@ future==0.18.2
 Fiona==1.8.6
 folium==0.10.0
 funcy==1.13
-gast==0.3.3
+gast==0.2.2
 gensim==3.8.0
 geopandas==0.5.1
 geoplotlib==0.3.2
@@ -91,7 +91,7 @@ kiwisolver==1.1.0
 lesscpy==0.14.0
 lxml==4.5.0
 librosa==0.6.3
-llvmlite==0.29.0
+llvmlite==0.31.0
 lunardate==0.2.0
 Markdown==3.2.1
 MarkupSafe==1.1.1
@@ -104,7 +104,6 @@ nbconvert==5.6.1
 nbformat==5.0.4
 networkx==2.3
 nltk==3.2.5
-notebook==6.0.3
 numexpr==2.7.0
 onnx==1.6.0
 opencv-python==4.2.0.32
@@ -140,7 +139,6 @@ pyparsing==2.4.6
 pyproj==2.5.0
 pyrsistent==0.15.7
 pyshp==2.1.0
-pystan==2.19.1.1
 python-dateutil==2.8.1
 python-language-server[all]==0.31.8
 python-speech-features==0.6
@@ -171,14 +169,13 @@ simplejson==3.17.0
 six==1.14.0
 sklearn==0.0
 tabulate==0.8.6
-tblib==1.4.0
+tblib==1.6.0
 tensorflow-hub==0.7.0
 termcolor==1.1.0
 terminado==0.8.3
 test-generator==0.1.1
 testpath==0.4.4
 tf2onnx==1.5.5
-tornado==6.0.4
 tqdm==4.43.0
 traitlets==4.3.3
 typing==3.7.4.1
@@ -191,6 +188,6 @@ wcwidth==0.1.8
 webencodings==0.5.1
 Werkzeug==1.0.0
 widgetsnbextension==3.5.1
-wrapt==1.12.0
+wrapt==1.11.1
 zict==1.0.0
 zipp==3.1.0
