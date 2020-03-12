@@ -74,7 +74,7 @@ available_builds = [
     'tf-old', 'tf-current', 'tf-future',
     'caffe', 'pytorch',
     'cntk-builder','cntk',
-    'vendor-aws', 'vendor-ngc',
+    'vendor-aws', 'vendor-ngc', 'vendor-freecad',
 ]
 
 
@@ -337,6 +337,9 @@ def main(build, list_builds, _auto_push):
     # AWS polly
     if 'vendor-aws' in build:
         build_kernel('vendor/aws_polly', '0.1-alpine3.8')
+
+    if 'vendor-freecad' in build:
+        build_kernel('vendor/freecad', '0.1-cuda10', testing=True)
 
     if 'vendor-ngc' in build:
         build_kernel('vendor/ngc-caffe2', '18.08-py2')
