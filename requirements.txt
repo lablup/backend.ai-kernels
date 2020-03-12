@@ -1,2 +1,2 @@
 Click>=7.0
-contextvars>=2.3   
+contextvars>=2.3 ; python_version<"3.7"
