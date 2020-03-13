@@ -1,21 +1,27 @@
 FROM nvidia/cuda:10.0-devel-ubuntu18.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
+ENV TENSORFLOW_VERSION=2.1.0
 ENV PYTORCH_VERSION=1.3.0
-ENV TORCHVISION_VERSION=0.4.1
+ENV TORCHVISION_VERSION=0.5.0
 ENV TORCHAUDIO_VERSION=0.4.0
+ENV TORCHTEXT_VERSION=0.5.0
 ENV TENSORBOARDX_VERSION=1.9
-ENV CUDNN_VERSION=7.6.0.64-1+cuda10.0
+ENV MXNET_VERSION=1.5.1
+ARG CUDA=10.0
+ARG LIBNVINFER=6.0.1-1
+ARG LIBNVINFER_MAJOR_VERSION=6
+ENV CUDNN_VERSION=7.6.4.38-1+cuda10.0
 ENV NCCL_VERSION=2.4.8-1+cuda10.0
 ENV DEBIAN_FRONTEND=noninteractive
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 
-# Python 2.7 or 3.6 is supported by Ubuntu Bionic out of the box
+# Python 2.7 or 3.67 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
 ENV PYTHON_VERSION=${python}
 
 ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda/lib64/stubs:/usr/include/x64_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
     LANG=C.UTF-8
 
@@ -44,6 +50,16 @@ RUN apt-get update -y && \
         libmpdec2 \
 	pdsh curl sudo net-tools \
 	iputils-ping \
+        libcublas10=10.2.1.243-1 \ 
+        libcublas-dev=10.2.1.243-1 \
+        cuda-command-line-tools-${CUDA/./-} \
+        cuda-nvrtc-${CUDA/./-} \
+        cuda-nvrtc-dev-${CUDA/./-} \
+        cuda-cudart-dev-${CUDA/./-} \
+        cuda-cufft-dev-${CUDA/./-} \
+        cuda-curand-dev-${CUDA/./-} \
+        cuda-cusolver-dev-${CUDA/./-} \
+        cuda-cusparse-dev-${CUDA/./-} \
         libcudnn7=${CUDNN_VERSION} \
         libnccl2=${NCCL_VERSION} \
         libnccl-dev=${NCCL_VERSION} \
@@ -72,11 +88,21 @@ RUN apt-get update -y && \
 	libfreetype6-dev \
 	fonts-nanum \
 	fonts-nanum-coding \
-	fonts-nanum-extra
+	fonts-nanum-extra && \
+    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete 
+#    && rm /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs
+
+RUN apt-get update && \
+        apt-get install -y --no-install-recommends libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
+        libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
+        libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
+        libnvinfer-plugin${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
 
 # OFED
 ENV STAGE_DIR=/tmp
@@ -118,34 +144,37 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 # Install TensorFlow, Keras, PyTorch and MXNet
 RUN python3 -m pip install pip --no-cache-dir -Iv \
     	    Cython==0.29.13 \
-            numpy==1.16.5 \
+	    numpy==1.16.3 \
     	    scipy==1.4.1 \
 	    scikit-image==0.16.2 \
-    	    scikit-learn==0.21.3 \
-	    matplotlib==3.1.3 \
+    	    scikit-learn==0.22.2 \
 	    tornado==6.0.4 \
 	    pystan==2.19.1.1 \
-	    notebook==6.0.3
-	    
-RUN python3 -m pip install --no-cache-dir \
-    	https://download.pytorch.org/whl/cu100/torch-${PYTORCH_VERSION}%2Bcu100-cp36-cp36m-linux_x86_64.whl \
-        https://download.pytorch.org/whl/cu100/torchvision-${TORCHVISION_VERSION}%2Bcu100-cp36-cp36m-linux_x86_64.whl \
-        https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-linux_x86_64.whl && \
-    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}	
-RUN python3 -m pip install --no-cache-dir --extra-index-url \
-    	    https://developer.download.nvidia.com/compute/redist/cuda/10.0 \
-	    nvidia-dali 	    
+	    pycairo==1.19.0 \
+	    matplotlib==3.1.3 
+RUN python3 -m pip install pip --no-cache-dir \
+    	    Cartopy==0.17.0 \
+	    notebook==6.0.3 
 
 WORKDIR /tmp
-COPY ./requirements.20.03.txt /tmp
-RUN python3 -m pip install --no-cache-dir -Ir requirements.20.03.txt
+COPY ./requirements.20.01.txt /tmp
+RUN python3 -m pip install --no-cache-dir -Ir requirements.20.01.txt
+
+RUN python3 -m pip install pip --no-cache-dir \
+        pandas==1.0.1 \
+    	https://download.pytorch.org/whl/cu100/torch-${PYTORCH_VERSION}%2Bcu100-cp36-cp36m-linux_x86_64.whl \
+        https://download.pytorch.org/whl/cu100/torchvision-${TORCHVISION_VERSION}%2Bcu100-cp36-cp36m-linux_x86_64.whl \
+        https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-linux_x86_64.whl \
+        torchtext==${TORCHTEXT_VERSION} && \
+    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}	
+	    
+RUN python3 -m pip install --no-cache-dir --extra-index-url \
+    	    https://developer.download.nvidia.com/compute/redist/cuda/10.0 \
+	    nvidia-dali 
 
 RUN python3 -m pip install --no-cache-dir -Iv \
-    	    tensorwatch==0.8.10 \
-	    jupyterlab-nvdashboard==0.2.0 \
-	    && \
-    python3 -m pip install --no-cache-dir konlpy h5py && \
-    rm -f /tmp/*.whl /tmp/requirements.20.03.txt
+    	    konlpy h5py && \
+    rm -f /tmp/*.whl /tmp/requirements.20.01.txt
 
 RUN apt-get update && \
     apt-get install -y \
@@ -272,30 +301,43 @@ RUN git clone --recursive https://github.com/Microsoft/LightGBM && \
     cd ../python-package && \
     python3 setup.py install --precompile
 
-# add 19.09.06
-RUN git clone https://github.com/scikit-optimize/scikit-optimize.git && \
-    cd scikit-optimize && \
-    python3 -m pip install -r requirements.txt && \
-    python3 setup.py develop
+# Install Open MPI
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.1.tar.gz && \
+    tar zxf openmpi-4.0.1.tar.gz && \
+    cd openmpi-4.0.1 && \
+    ./configure --enable-orterun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    rm -rf /tmp/openmp*i
 
-RUN python3 -m pip install --no-cache-dir imbalanced-learn && \
-    python3 -m pip install --no-cache-dir bayesian-optimization && \
-    python3 -m pip install --no-cache-dir scikit-plot && \
-    python3 -m pip install --no-cache-dir vecstack && \
-    python3 -m pip install --no-cache-dir category_encoders && \
-    python3 -m pip install --no-cache-dir scikit-surprise && \
-    python3 -m pip install --no-cache-dir folium && \
-    python3 -m pip install --no-cache-dir lime && \
-    python3 -m pip install --no-cache-dir pyldavis && \
-    python3 -m pip install --no-cache-dir mlxtend && \
-    python3 -m pip install --no-cache-dir dtreeviz && \
-    python3 -m pip install --no-cache-dir pyglet && \
-    python3 -m pip install --no-cache-dir descartes && \
-    python3 -m pip install --no-cache-dir pydot && \
-    python3 -m pip install --no-cache-dir tpot && \
-    python3 -m pip install --no-cache-dir catboost && \       
+# Install Horovod, temporarily using CUDA stubs
+RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+    HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
+    HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
+    pip install --no-cache-dir horovod==0.19.0 && \
+    ldconfig
+
+RUN python3 -m pip install --no-cache-dir \
+    	    mpi4py==3.0.3 \
+	    nni && \
     rm -rf /root/.cache && \
-    rm -f /tmp/*.whl
+    rm -rf /tmp/*
+
+# Install OpenSSH for MPI to communicate between containers
+RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
+    mkdir -p /var/run/sshd
+
+# Allow OpenSSH to talk to containers without asking for confirmation
+RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
+    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
+    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
+
+# Install ipython kernelspec
+Run python3 -m ipykernel install --display-name "PyTorch 1.3 on Python 3.6 (CUDA 10.0)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Jupyter notebook extension
 RUN mkdir -p /home/work/.jupyter/nbextension
@@ -310,42 +352,6 @@ RUN jupyter nbextensions_configurator enable && \
     git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
     jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding 
 
-# Install Open MPI
-RUN mkdir /tmp/openmpi && \
-    cd /tmp/openmpi && \
-    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.1.tar.gz && \
-    tar zxf openmpi-4.0.1.tar.gz && \
-    cd openmpi-4.0.1 && \
-    ./configure --enable-orterun-prefix-by-default && \
-    make -j $(nproc) all && \
-    make install && \
-    ldconfig && \
-    rm -rf /tmp/openmpi
-
-# Install Horovod, temporarily using CUDA stubs
-RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-    HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
-    HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.0 && \
-    ldconfig
-
-RUN python3 -m pip install --no-cache-dir \
-    	    mpi4py==3.0.3 \
-	    nni
-	    
-# Install OpenSSH for MPI to communicate between containers
-RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
-    mkdir -p /var/run/sshd
-
-# Allow OpenSSH to talk to containers without asking for confirmation
-RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
-    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
-    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
-
-# Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "PyTorch 1.3 on Python 3.6 (CUDA 10.0)" && \
-    cat /usr/local/share/jupyter/kernels/python3/kernel.json
-
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
@@ -357,7 +363,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8070,jupyterlab:http:8090"
+      ai.backend.service-ports="ipython:pty:3000,tensorboard:http:6006,jupyter:http:8080,jupyterlab:http:8090"
 
 WORKDIR /home/work
 # vim: ft=dockerfile
