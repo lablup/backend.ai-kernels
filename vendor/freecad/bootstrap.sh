@@ -1,5 +1,6 @@
 #! /bin/bash
 
+echo "DEBUG DATETIME: $(date)"
 echo ">> Setting up FreeCAD environment"
 #export USAGE=cloud
 #export VARIANTmatlab=matlabLNU

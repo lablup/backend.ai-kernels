@@ -9,6 +9,7 @@ ENV PYTHONUNBUFFERED=1 \
 # Backend.AI specifics
 USER root
 COPY policy.yml /etc/backend.ai/jail/policy.yml
+COPY ./service-defs /etc/backend.ai/service-defs
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="uid-match" \
@@ -18,9 +19,8 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.device=1 \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.base-distro="ubuntu16.04" \
-      ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/usr/bin/python" \
-      ai.backend.service-ports="vnc-web:http:6080"
+      ai.backend.runtime-type="app" \
+      ai.backend.service-ports=""
 
 COPY bootstrap.sh /opt/container/bootstrap.sh
 
