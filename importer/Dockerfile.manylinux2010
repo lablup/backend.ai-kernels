@@ -1,4 +1,4 @@
-FROM quay.io/pypa/manylinux2010_x86_64:latest
+FROM quay.io/pypa/manylinux2010_x86_64:2020-03-07-1825e8f
 
 ENV PYTHONUNBUFFERED=1 \
     LANG=C.UTF-8
@@ -14,11 +14,11 @@ RUN yum install -y yum-utils && \
 # == Make it a Backend.AI kernel ==
 
 COPY requirements.txt /root/
-RUN /opt/python/cp37-cp37m/bin/python -m pip install -U pip setuptools && \
-    /opt/python/cp37-cp37m/bin/python -m pip install -r /root/requirements.txt
+RUN /opt/python/cp38-cp38/bin/python -m pip install -U pip setuptools && \
+    /opt/python/cp38-cp38/bin/python -m pip install -r /root/requirements.txt
 
-RUN /opt/python/cp37-cp37m/bin/python -m ipykernel install \
-	--display-name "Python 3.7 (Image Importer) on Backend.AI" && \
+RUN /opt/python/cp38-cp38/bin/python -m ipykernel install \
+	--display-name "Python 3.8 (Image Importer) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 RUN curl -L -o /usr/bin/jq "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64" && \
@@ -30,9 +30,9 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.base-distro="centos6.10" \
+      ai.backend.base-distro="centos7.6" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/opt/python/cp37-cp37m/bin/python" \
+      ai.backend.runtime-path="/opt/python/cp38-cp38/bin/python" \
       ai.backend.service-ports=""
 
 # == Pre-populate the required wheels ==
@@ -42,6 +42,7 @@ RUN /opt/python/cp27-cp27m/bin/pip wheel -r /root/requirements-py2.txt -w /root/
 RUN /opt/python/cp35-cp35m/bin/pip wheel -r /root/requirements.txt -w /root/wheelhouse/
 RUN /opt/python/cp36-cp36m/bin/pip wheel -r /root/requirements.txt -w /root/wheelhouse/
 RUN /opt/python/cp37-cp37m/bin/pip wheel -r /root/requirements.txt -w /root/wheelhouse/
+RUN /opt/python/cp38-cp38/bin/pip wheel -r /root/requirements.txt -w /root/wheelhouse/
 RUN for whl in /root/wheelhouse/*.whl; do \
       auditwheel repair "$whl" --plat manylinux2010_x86_64 -w /root/wheelhouse/; \
     done

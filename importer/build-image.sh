@@ -1,6 +1,6 @@
 #! /bin/bash
 echo "Building Backend.AI Python support wheels for the new kernel image..."
-UTIL_PYBIN=/opt/python/cp37-cp37m/bin/python
+UTIL_PYBIN=/opt/python/cp38-cp38/bin/python
 
 # The agent sets environment variables:
 echo "Settings:"
@@ -38,7 +38,12 @@ PYVER_FULL=$(docker run --rm -it "${SRC_IMAGE}" "${RUNTIME_PATH}" --version | cu
 PYVER_MAJOR=$(echo $PYVER_FULL | cut -d . -f 1)
 PYVER_MINOR=$(echo $PYVER_FULL | cut -d . -f 2)
 PYVER="${PYVER_MAJOR}${PYVER_MINOR}"
-PYROOT="/opt/python/cp${PYVER}-cp${PYVER}m"
+if [ "$PYVER_MAJOR" -ge 3 -a "$PYVER_MAJOR" -ge 8 ]; then
+  # Python 3.8 and later no longer distinguish "pymalloc" build in the ABI flags.
+  PYROOT="/opt/python/cp${PYVER}-cp${PYVER}"
+else
+  PYROOT="/opt/python/cp${PYVER}-cp${PYVER}m"
+fi
 echo "Detected Python version: $PYVER"
 
 echo ""
