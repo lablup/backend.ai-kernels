@@ -20,7 +20,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="app" \
-      ai.backend.service-ports=""
+      ai.backend.service-ports="vnc-web:http:6080"
 
 COPY bootstrap.sh /opt/container/bootstrap.sh
 
