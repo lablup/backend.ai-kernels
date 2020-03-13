@@ -92,6 +92,7 @@ RUN apt-get update -y && \
 RUN find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
     rm /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a
 
+
 RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
     && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
     && ldconfig
@@ -322,7 +323,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
 RUN python3 -m pip install --no-cache-dir opencv-python && \
     rm -rf /root/.cache 
 
-# add 19.09.06
+# XGBoost
 RUN git clone  --recursive https://github.com/dmlc/xgboost && \
     cd xgboost && \
     mkdir build && \
@@ -350,7 +351,7 @@ RUN mkdir /tmp/openmpi && \
     make -j $(nproc) all && \
     make install && \
     ldconfig && \
-    rm -rf /tmp/openmp*i
+    rm -rf /tmp/openmpi*
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
