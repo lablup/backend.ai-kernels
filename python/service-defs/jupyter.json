@@ -6,7 +6,7 @@
         "body": [
           "c.NotebookApp.allow_root = True\n",
           "c.NotebookApp.ip = \"0.0.0.0\"",
-          "c.NotebookApp.port = {ports}",
+          "c.NotebookApp.port = {ports[0]}",
           "c.NotebookApp.token = \"\"",
           "c.FileContentsManager.delete_to_trash = False"
         ]

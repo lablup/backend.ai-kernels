@@ -1,8 +1,8 @@
 {
     "prestart": [],
     "command": [
-      "/opt/kernel/code-server", 
-      "--port", "8180",
+      "/opt/kernel/code-server",
+      "--port", "{ports[0]}",
       "--extensions-dir", "/etc/backend.ai/vscode-exts"
     ],
     "allowed_arguments": [
