@@ -1,18 +1,12 @@
-FROM nvidia/cuda:10.0-devel-ubuntu18.04
+FROM nvidia/cuda:10.1-devel-ubuntu18.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
-ENV TENSORFLOW_VERSION=2.1.0
-ENV PYTORCH_VERSION=1.3.0
-ENV TORCHVISION_VERSION=0.5.0
-ENV TORCHAUDIO_VERSION=0.4.0
-ENV TORCHTEXT_VERSION=0.5.0
-ENV TENSORBOARDX_VERSION=1.9
-ENV MXNET_VERSION=1.5.1
-ARG CUDA=10.0
+ARG CUDA=10.1
 ARG LIBNVINFER=6.0.1-1
 ARG LIBNVINFER_MAJOR_VERSION=6
-ENV CUDNN_VERSION=7.6.4.38-1+cuda10.0
-ENV NCCL_VERSION=2.4.8-1+cuda10.0
+ARG CUDNN=7.6.4.38-1
+ENV CUDNN_VERSION=7.6.4.38-1+cuda10.1
+ENV NCCL_VERSION=2.4.8-1+cuda10.1
 ENV DEBIAN_FRONTEND=noninteractive
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 
@@ -21,7 +15,7 @@ ARG python=3.6
 ENV PYTHON_VERSION=${python}
 
 ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda/lib64/stubs:/usr/include/x64_64-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda/lib64/stubs:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
     LANG=C.UTF-8
 
@@ -50,9 +44,9 @@ RUN apt-get update -y && \
         libmpdec2 \
 	pdsh curl sudo net-tools \
 	iputils-ping \
+        cuda-command-line-tools-${CUDA/./-} \
         libcublas10=10.2.1.243-1 \ 
         libcublas-dev=10.2.1.243-1 \
-        cuda-command-line-tools-${CUDA/./-} \
         cuda-nvrtc-${CUDA/./-} \
         cuda-nvrtc-dev-${CUDA/./-} \
         cuda-cudart-dev-${CUDA/./-} \
@@ -61,8 +55,13 @@ RUN apt-get update -y && \
         cuda-cusolver-dev-${CUDA/./-} \
         cuda-cusparse-dev-${CUDA/./-} \
         libcudnn7=${CUDNN_VERSION} \
+	libcudnn7-dev=${CUDNN}+cuda${CUDA} \
         libnccl2=${NCCL_VERSION} \
         libnccl-dev=${NCCL_VERSION} \
+        libcurl3-dev \
+        libfreetype6-dev \
+        libhdf5-serial-dev \
+        libzmq3-dev \
         libjpeg-dev \
         libpng-dev \
 	libsm6 \
@@ -70,7 +69,9 @@ RUN apt-get update -y && \
 	libxrender-dev \
 	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
         libgeos-dev libgeos++-dev \
-        mime-support \
+        pkg-config \
+        zlib1g-dev \
+	mime-support \
 	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
         python${PYTHON_VERSION} \
         python${PYTHON_VERSION}-dev \
@@ -85,13 +86,16 @@ RUN apt-get update -y && \
 	libboost-dev \
 	libboost-system-dev \
 	libboost-filesystem-dev \
-	libfreetype6-dev \
 	fonts-nanum \
 	fonts-nanum-coding \
-	fonts-nanum-extra && \
-    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete 
-#    && rm /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a
+	fonts-nanum-extra
+RUN find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
+    rm /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a
 
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
+    && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
+    && ldconfig
+    
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs
@@ -126,8 +130,8 @@ RUN mkdir -p ${STAGE_DIR} && \
     dpkg-buildpackage -us -uc && \
     dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.0-8_all.deb
 
-# Install CUDA-10.0 + cuDNN 7.6.0
-RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
+# Install CUDA-10.1 + cuDNN 7.6.0
+RUN ln -s /usr/local/cuda-10.1 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
@@ -157,24 +161,29 @@ RUN python3 -m pip install pip --no-cache-dir \
 	    notebook==6.0.3 
 
 WORKDIR /tmp
-COPY ./requirements.20.01.txt /tmp
-RUN python3 -m pip install --no-cache-dir -Ir requirements.20.01.txt
+COPY ./requirements.20.03.txt /tmp
+RUN python3 -m pip install --no-cache-dir -Ir requirements.20.03.txt
+
+ENV PYTORCH_VERSION=1.3.1
+ENV TORCHVISION_VERSION=0.4.2
+ENV TORCHAUDIO_VERSION=0.3.2
+ENV TORCHTEXT_VERSION=0.5.0
+ENV TENSORBOARDX_VERSION=1.9
 
 RUN python3 -m pip install pip --no-cache-dir \
         pandas==1.0.1 \
-    	https://download.pytorch.org/whl/cu100/torch-${PYTORCH_VERSION}%2Bcu100-cp36-cp36m-linux_x86_64.whl \
-        https://download.pytorch.org/whl/cu100/torchvision-${TORCHVISION_VERSION}%2Bcu100-cp36-cp36m-linux_x86_64.whl \
-        https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-linux_x86_64.whl \
+    	https://download.pytorch.org/whl/cu101/torch-${PYTORCH_VERSION}-cp36-cp36m-linux_x86_64.whl \
+        https://download.pytorch.org/whl/cu101/torchvision-${TORCHVISION_VERSION}-cp36-cp36m-linux_x86_64.whl \
+        https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-manylinux1_x86_64.whl \
         torchtext==${TORCHTEXT_VERSION} && \
-    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}	
-	    
+    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}	    
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
     	    https://developer.download.nvidia.com/compute/redist/cuda/10.0 \
 	    nvidia-dali 
 
 RUN python3 -m pip install --no-cache-dir -Iv \
     	    konlpy h5py && \
-    rm -f /tmp/*.whl /tmp/requirements.20.01.txt
+    rm -f /tmp/*.whl /tmp/requirements.20.03.txt
 
 RUN apt-get update && \
     apt-get install -y \
@@ -256,7 +265,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D BUILD_opencv_java=OFF \
       -D WITH_CUDA=ON \
       -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.0 \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.1 \
       -D ENABLE_FAST_MATH=1 \
       -D CUDA_FAST_MATH=1 \
       -D WITH_CUBLAS=1 \
@@ -296,7 +305,7 @@ RUN git clone  --recursive https://github.com/dmlc/xgboost && \
 RUN git clone --recursive https://github.com/Microsoft/LightGBM && \
     cd LightGBM && \
     mkdir build ; cd build && \
-    cmake -DUSE_GPU=1 -DOpenCL_LIBRARY=/usr/local/cuda-10.0/lib64/libOpenCL.so -DOpenCL_INCLUDE_DIR=/usr/local/cuda-10.0/include/ .. && \
+    cmake -DUSE_GPU=1 -DOpenCL_LIBRARY=/usr/local/cuda-10.1/lib64/libOpenCL.so -DOpenCL_INCLUDE_DIR=/usr/local/cuda-10.1/include/ .. && \
     make -j$(nproc) && \
     cd ../python-package && \
     python3 setup.py install --precompile
@@ -336,7 +345,7 @@ RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_confi
     mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
 
 # Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "PyTorch 1.3 on Python 3.6 (CUDA 10.0)" && \
+Run python3 -m ipykernel install --display-name "PyTorch 1.3 on Python 3.6 (CUDA 10.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Jupyter notebook extension
