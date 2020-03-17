@@ -1,0 +1,109 @@
+# ------------- libglvnd build stage -------------
+FROM ubuntu:16.04 as glvnd
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        ca-certificates \
+        make \
+        automake \
+        autoconf \
+        libtool \
+        pkg-config \
+        python \
+        libxext-dev \
+        libx11-dev \
+        x11proto-gl-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+ARG LIBGLVND_VERSION=v1.1.0
+
+WORKDIR /opt/libglvnd
+RUN git clone --branch="${LIBGLVND_VERSION}" https://github.com/NVIDIA/libglvnd.git . && \
+    ./autogen.sh && \
+    ./configure --prefix=/usr/local --libdir=/usr/local/lib/x86_64-linux-gnu && \
+    make -j"$(nproc)" install-strip && \
+    find /usr/local/lib/x86_64-linux-gnu -type f -name 'lib*.la' -delete
+
+RUN dpkg --add-architecture i386 && \
+    apt-get update && apt-get install -y --no-install-recommends \
+        gcc-multilib \
+        libxext-dev:i386 \
+        libx11-dev:i386 && \
+    rm -rf /var/lib/apt/lists/*
+
+# 32-bit libraries
+RUN make distclean && \
+    ./autogen.sh && \
+    ./configure --prefix=/usr/local --libdir=/usr/local/lib/i386-linux-gnu --host=i386-linux-gnu "CFLAGS=-m32" "CXXFLAGS=-m32" "LDFLAGS=-m32" && \
+    make -j"$(nproc)" install-strip && \
+    find /usr/local/lib/i386-linux-gnu -type f -name 'lib*.la' -delete
+
+
+# ------------ FreeCAD main image ---------------
+# Note: FreeCAD image is based on Ubuntu 16.04 (Xenial)
+FROM izone/freecad:latest
+
+ENV PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64" \
+    PATH="/home/work/.local/bin:/opt/FreeCAD/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    LANG=C.UTF-8
+
+# Install noVNC
+ENV NOVNC=/opt/noVNC
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+        apt-utils \
+        libx11-6 \
+        libxext6 \
+        libxt6 \
+        libnss3 \
+        libglu1-mesa \
+        libosmesa6 \
+        net-tools \
+        git \
+        xterm \
+        vnc4server \
+        xfce4 \
+        ca-certificates \
+        sudo \
+    && apt-get remove -y \
+        tumbler \
+        pulseaudio \
+        gvfs \
+    && apt-get clean \
+    && apt-get -y autoremove \
+    && rm -rf /var/lib/apt/lists/*
+RUN git clone --depth 1 --branch v1.0.0 https://github.com/novnc/noVNC.git "${NOVNC}" && \
+    git clone --depth 1 --branch v0.8.0 https://github.com/novnc/websockify.git "${NOVNC}/utils/websockify" && \
+    find "${NOVNC}" -name ".git*" | xargs rm -rf && \
+    ln -s "${NOVNC}/vnc.html" "${NOVNC}/index.html"
+
+# Install OpenGL support
+COPY --from=glvnd /usr/local/lib/x86_64-linux-gnu /usr/local/lib/x86_64-linux-gnu
+COPY --from=glvnd /usr/local/lib/i386-linux-gnu /usr/local/lib/i386-linux-gnu
+COPY 10_nvidia.json /usr/local/share/glvnd/egl_vendor.d/10_nvidia.json
+RUN echo '/usr/local/lib/x86_64-linux-gnu' >> /etc/ld.so.conf.d/glvnd.conf && \
+    echo '/usr/local/lib/i386-linux-gnu' >> /etc/ld.so.conf.d/glvnd.conf && \
+    ldconfig
+ENV LD_LIBRARY_PATH /usr/local/lib/x86_64-linux-gnu:/usr/local/lib/i386-linux-gnu${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+# Backend.AI specifics
+USER root
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+COPY ./service-defs /etc/backend.ai/service-defs
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="uid-match" \
+      ai.backend.accelerators="cuda" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="app" \
+      ai.backend.service-ports="vnc-web:http:6080"
+
+COPY bootstrap.sh /opt/container/bootstrap.sh
+
+WORKDIR /home/work
+# vim: ft=dockerfile
