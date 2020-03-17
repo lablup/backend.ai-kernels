@@ -22,7 +22,7 @@ def print_header(s):
     click.secho(s, fg='yellow', bold=True)
 
 
-def build_kernel(name, tag, extra_opts='', *, squash=False):
+def build_kernel(name, tag, extra_opts='', *, squash=False, testing=False):
     assert Path(name).is_dir()
 
     sq = '--squash' if squash else ''
@@ -44,11 +44,15 @@ def build_kernel(name, tag, extra_opts='', *, squash=False):
                     'the new kernelspec.',
                     fg='yellow', err=True)
         return
+    if testing:
+        img_ref = f'beta.docker.backend.ai/testing/{short_name}:{tag}'
+    else:
+        img_ref = f'lablup/{short_name}:{tag}'
     run('docker build '
-        f'-t lablup/{short_name}:{tag} {extra_opts} '
+        f'-t {img_ref} {extra_opts} '
         f'-f {dockerfile} {sq} {name}')
     if auto_push.get():
-        run(f'docker push lablup/{short_name}:{tag}')
+        run(f'docker push {img_ref}')
 
 
 def build_common(name, tag, extra_opts=''):
@@ -74,7 +78,7 @@ available_builds = [
     'tf-old', 'tf-current', 'tf-future',
     'caffe', 'pytorch',
     'cntk-builder','cntk',
-    'vendor-aws', 'vendor-ngc',
+    'vendor-aws', 'vendor-ngc', 'vendor-freecad',
 ]
 
 
@@ -337,6 +341,9 @@ def main(build, list_builds, _auto_push):
     # AWS polly
     if 'vendor-aws' in build:
         build_kernel('vendor/aws_polly', '0.1-alpine3.8')
+
+    if 'vendor-freecad' in build:
+        build_kernel('vendor/freecad', '0.18-glvnd1.1')
 
     if 'vendor-ngc' in build:
         build_kernel('vendor/ngc-caffe2', '18.08-py2')
