@@ -33,6 +33,7 @@ RUN /opt/conda/bin/python -m ipykernel install \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
+COPY ./service-defs /etc/backend.ai/service-defs
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
