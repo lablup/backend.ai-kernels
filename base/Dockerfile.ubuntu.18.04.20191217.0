@@ -40,6 +40,7 @@ RUN set -xe \
 
 # make systemd-detect-virt return "docker"
 # See: https://github.com/systemd/systemd/blob/aa0c34279ee40bce2f9681b496922dedbadfca19/src/basic/virt.c#L434
+
 RUN mkdir -p /run/systemd && echo 'docker' > /run/systemd/container
 
 CMD ["/bin/bash"]
