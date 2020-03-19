@@ -11,6 +11,13 @@ RUN yum install -y yum-utils && \
 	https://download.docker.com/linux/centos/docker-ce.repo && \
     yum install -y docker-ce-cli
 
+# == Install PIL (pillow) dependencies ==
+RUN yum install -y \
+        zlib-devel libjpeg-devel libtiff-devel libfreetype-devel liblecms2-devel \
+        libwebp-devel openjpeg-devel \
+        libimagequant-devel \
+        libraqm-devel
+
 # == Make it a Backend.AI kernel ==
 
 COPY requirements.txt /root/
