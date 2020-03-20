@@ -10,7 +10,7 @@ cat >/home/work/Desktop/FreeCAD.desktop <<EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=FreeCAD 0.16
+Name=FreeCAD
 Comment=
 Exec=/opt/FreeCAD/bin/FreeCAD
 Icon=/opt/FreeCAD/data/freecad-icon-64.png
@@ -39,7 +39,6 @@ unsetenv SESSION_MANAGER
 # Startup scripts, e.g. /etc/xdg/xfce4/xinitrc require
 # http://en.wikipedia.org/wiki/D-Bus to run correctly.
 unsetenv DBUS_SESSION_BUS_ADDRESS
-
 
 # Set VNCSESSION to tell /etc/xdg/xfce4/xinitrc to not run xscreensaver
 # http://vstone.eu/2009/04/disabling-xscreensaver-when-using-xfce-vnc/
