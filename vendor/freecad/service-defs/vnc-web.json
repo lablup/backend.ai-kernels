@@ -1,0 +1,8 @@
+{
+    "command": [
+      "/opt/noVNC/utils/launch.sh",
+      "--vnc", "localhost:5901",
+      "--listen", "{ports[0]}"
+    ],
+    "url_template": "{protocol}://{host}:{port}/vnc.html?host={host}&port={port}&password=backendai&autoconnect=true"
+}
