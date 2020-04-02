@@ -79,7 +79,7 @@ LABEL maintainer="jshin@lablup.com"
 
 COPY --from=builder /src/web/dist/ /usr/local/lib/web/frontend/
 COPY rootfs /
-RUN cp /etc/supervisor/conf.d/supervisord.xfce /etc/supervisor/conf.d/supervisord.conf
+RUN cp /etc/supervisor/conf.d/supervisord.gnome /etc/supervisor/conf.d/supervisord.conf
 RUN ln -sf /usr/local/lib/web/frontend/static/websockify /usr/local/lib/web/frontend/static/novnc/utils/websockify && \
 	chmod +x /usr/local/lib/web/frontend/static/websockify/run
 
@@ -105,5 +105,5 @@ LABEL ai.backend.kernelspec="1" \
 
 COPY ./service-defs /etc/backend.ai/service-defs
 COPY policy.yml /etc/backend.ai/jail/policy.yml
-COPY bootstrap_xfce.sh /opt/container/bootstrap.sh
+COPY bootstrap_gnome.sh /opt/container/bootstrap.sh
 WORKDIR /home/work
