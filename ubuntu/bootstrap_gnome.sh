@@ -56,7 +56,12 @@ unsetenv DBUS_SESSION_BUS_ADDRESS
 # Set VNCSESSION to tell /etc/xdg/xfce4/xinitrc to not run xscreensaver
 # http://vstone.eu/2009/04/disabling-xscreensaver-when-using-xfce-vnc/
 setenv VNCSESSION yes
+setenv DISPLAY :1
 gnome-session &
+gnome-panel &
+gnome-settings-daemon &
+metacity &
+nautilus &
 # Make sure that copy / paste are correctly forwarded to the VNC viewer
 vncconfig -nowin &
 EOF
@@ -64,6 +69,8 @@ chmod +x /home/work/.vnc/xstartup
 
 mkdir -p $HOME/.config/nautilus
 chown -R $USER:$USER $HOME/.config/nautilus 
+mkdir -p $HOME/.gtk-bookmarks
+chown -R $USER:$USER $HOME/.gtk-bookmarks 
 
 cat >/home/work/.xscreensaver <<EOF
 mode: off
