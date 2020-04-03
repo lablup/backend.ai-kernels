@@ -58,7 +58,6 @@ unsetenv DBUS_SESSION_BUS_ADDRESS
 setenv VNCSESSION yes
 setenv DISPLAY :1
 gnome-session &
-gnome-panel &
 gnome-settings-daemon &
 metacity &
 nautilus &
