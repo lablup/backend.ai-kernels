@@ -1,0 +1,14 @@
+{
+    "prestart": [],
+    "command": [
+      "true"
+    ],
+    "allowed_arguments": [
+    ],
+    "allowed_envs": [
+      "PASSWORD"
+    ],
+    "default_arguments": {
+      "--auth": "none"
+    }
+}
