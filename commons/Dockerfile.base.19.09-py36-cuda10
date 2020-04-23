@@ -4,7 +4,8 @@ FROM nvidia/cuda:10.0-devel-ubuntu18.04
 ARG CUDA=10.0
 ARG LIBNVINFER=6.0.1-1
 ARG LIBNVINFER_MAJOR_VERSION=6
-ARG CUDNN=7.6.2.24-1
+ARG CUDNN=7.6.5.32-1
+ENV CUDNN_VERSION=7.6.5.32-1+cuda10.0
 ENV NCCL_VERSION=2.4.8-1+cuda10.0
 ENV DEBIAN_FRONTEND=noninteractive
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
@@ -14,7 +15,7 @@ ARG python=3.6
 ENV PYTHON_VERSION=${python}
 
 ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda/lib64/stubs:/usr/include/x86_64-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
     LANG=C.UTF-8
 
@@ -27,33 +28,19 @@ RUN apt-get update -y && \
     apt-get update -y && \
     apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
         build-essential \
-	ca-certificates \
-        gcc g++ make \
-	gfortran \
-	dkms \
-        git \
-        curl \
-        vim \
-	yasm \
-        wget zip unzip \
         ca-certificates \
         software-properties-common \
-  	openssh-client openssh-server \
-        libssl-dev \
-        libmpdec2 \
-	pdsh curl sudo net-tools \
-	iputils-ping \
-        cuda-command-line-tools-${CUDA/./-} \
-        libcublas10=10.2.1.243-1 \ 
-        libcublas-dev=10.2.1.243-1 \
-        cuda-nvrtc-${CUDA/./-} \
-        cuda-nvrtc-dev-${CUDA/./-} \
-        cuda-cudart-dev-${CUDA/./-} \
-        cuda-cufft-dev-${CUDA/./-} \
-        cuda-curand-dev-${CUDA/./-} \
-        cuda-cusolver-dev-${CUDA/./-} \
-        cuda-cusparse-dev-${CUDA/./-} \
-        libcudnn7=${CUDNN}+cuda${CUDA} \
+        g++-4.8 \
+        git \
+	gfortran \
+	dkms \
+        curl \
+ 	yasm \
+        wget zip unzip \
+        vim \
+	pdsh curl net-tools \
+	vim iputils-ping wget \
+        libcudnn7=${CUDNN_VERSION} \
 	libcudnn7-dev=${CUDNN}+cuda${CUDA} \
         libnccl2=${NCCL_VERSION} \
         libnccl-dev=${NCCL_VERSION} \
@@ -92,19 +79,24 @@ RUN apt-get update -y && \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
     rm /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a
 
-RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
-    && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
-    && ldconfig
-
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get update -y && \
-    apt-get install -y nodejs
+# Install CUDA-10.0 + cuDNN 7.6.0
+RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
+    ldconfig
 
 RUN apt-get update && \
         apt-get install -y --no-install-recommends libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
-        libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
-        libnvinfer-plugin${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz
+
+RUN apt-get update && \
+        apt-get install -y --no-install-recommends libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
+        libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
 
@@ -127,16 +119,13 @@ RUN mkdir -p ${STAGE_DIR} && \
     cd ${STAGE_DIR} && \
     tar xzf ${STAGE_DIR}/nvidia-peer-memory_1.0.orig.tar.gz && \
     cd ${STAGE_DIR}/nvidia-peer-memory-1.0 && \
+    apt-get install -y dkms && \
     dpkg-buildpackage -us -uc && \
     dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.0-8_all.deb
 
-# Install CUDA-10.0 + cuDNN 7.6.0
-RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
-    ldconfig
 
 RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
-        apt-get install -y python${PYTHON_VERSION}-distutils python-apt ; \
+        apt-get install -y python${PYTHON_VERSION}-distutils; \
     fi
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
@@ -306,13 +295,26 @@ RUN mkdir /tmp/openmpi && \
     rm -rf /tmp/openmpi*
 
 # Install OpenSSH for MPI to communicate between containers
-RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
+RUN apt-get update -y ; apt-get install -y --no-install-recommends openssh-client openssh-server && \
     mkdir -p /var/run/sshd
 
 # Allow OpenSSH to talk to containers without asking for confirmation
 RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
     echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
     mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
+
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
 
 RUN apt autoclean && \
     rm -rf /var/lib/apt/lists/* && \	
