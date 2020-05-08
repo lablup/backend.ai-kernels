@@ -36,12 +36,11 @@ RUN apt-get update -y && \
         vim \
 	yasm \
         wget zip unzip \
-        ca-certificates \
         software-properties-common \
   	openssh-client openssh-server \
         libssl-dev \
         libmpdec2 \
-	pdsh curl sudo net-tools \
+	pdsh curl net-tools \
 	iputils-ping \
         cuda-command-line-tools-${CUDA/./-} \
         libcublas10=10.2.1.243-1 \ 
@@ -130,8 +129,8 @@ RUN mkdir -p ${STAGE_DIR} && \
     dpkg-buildpackage -us -uc && \
     dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.0-8_all.deb
 
-# Install CUDA-10.0 + cuDNN 7.6.0
-RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
+# Install CUDA-10.1 + cuDNN 7.6.0
+RUN ln -s /usr/local/cuda-10.1 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
