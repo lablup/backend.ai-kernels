@@ -33,12 +33,28 @@ RUN apt-get update && \
 	libnvinfer-dev=$TENSORT_VERSION-1+cuda9.0 \
         libnccl2=$NCCL_VERSION-1+cuda9.0 \
         libnccl-dev=$NCCL_VERSION-1+cuda9.0 \
-    	cuda-libraries-$CUDA_PKG_VERSION && \
+    	cuda-libraries-$CUDA_PKG_VERSION \
+	curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* 
 
+# Add Intel MKL repository
+ENV key="https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB"
+RUN curl "${key}" | apt-key add - && \
+    echo 'deb http://apt.repos.intel.com/mkl all main' | \
+      tee /etc/apt/sources.list.d/intel-mkl.list
+RUN apt-get update
+
+# Multiple candidates for intel-mkl-64bit, so have to be specific
+RUN apt-get install -y --no-install-recommends intel-mkl-64bit-2018.1-038
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Ensure loader can find MKL path
+RUN echo '/opt/intel/mkl/lib/intel64' | tee /etc/ld.so.conf.d/intel-mkl.conf
+RUN ldconfig
+
 # Link NCCL libray and header where the build script expects them.
-RUN mkdir /usr/local/cuda-9.0/lib &&  \
+RUN mkdir -p /usr/local/cuda-9.0/lib &&  \
     ln -s /usr/local/cuda-9.0 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.2.1 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig && \
@@ -95,6 +111,7 @@ RUN python3 -m pip install -U setuptools pip wheel && \
 	matplotlib \
 	numpy \
 	protobuf \
+	pynvrtc \
 	pydot \
 	python-nvd3 \
 	pyyaml \
@@ -121,7 +138,7 @@ RUN git clone --recursive https://github.com/pytorch/pytorch && \
     cd build && \
     cmake .. \
         -DCUDA_ARCH_NAME=Manual \
-	-DCUDA_ARCH_BIN="35 52 60 61" \
+	-DCUDA_ARCH_BIN="30 35 50 52 60 61 70" \
 	-DCUDA_ARCH_PTX="61" \
 	-DUSE_NNPACK=OFF \
 	-DUSE_ROCKSDB=OFF \

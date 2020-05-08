@@ -1,4 +1,4 @@
-FROM lablup/kernel-base:python3.6 as python-binary
+FROM lablup/common-base:python3.6 as python-binary
 
 FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
@@ -17,18 +17,29 @@ ENV CUDNN_INSTALL_PATH /usr/local/cuda
 RUN apt update -y && \
     apt install -y \
         ca-certificates \
+	gcc g++ make cmake \
+	git \
         wget \
-        libexpat1 libgdbm3 libbz2-dev libffi6 libsqlite3-0 liblzma5 zlib1g \
+	libgflags-dev \
+	libgoogle-glog-dev \
+	libgtest-dev \
+	libiomp-dev \
+	libleveldb-dev \
+	liblmdb-dev \
+	libopencv-dev \
+	libopenmpi-dev \
+	libprotobuf-dev \
+	libsnappy-dev \
+	openmpi-bin \
+	openmpi-doc \
+	protobuf-compiler \
+	libexpat1 libgdbm3 libbz2-dev libffi6 libsqlite3-0 liblzma5 zlib1g \
 	libmpdec2 \
-        libssl1.0.0 \
 	libssl-dev \
         libncursesw5 libtinfo5 libreadline6 \
 	proj-bin \
         libgeos-dev \
         mime-support \
-	git \
-	gcc g++ \
-	cmake \
         libproj-dev libgeos-dev \	
         libzmq3-dev libuv1
 
