@@ -12,7 +12,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 
 ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda/lib64/stubs:/usr/include/x86_64-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
     LANG=C.UTF-8
 
@@ -98,7 +98,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.device=0 \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
