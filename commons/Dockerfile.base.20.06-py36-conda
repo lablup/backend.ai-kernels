@@ -1,0 +1,57 @@
+# Labup/Python-xxx Base kernel 19.06 to support Intel MKL
+
+## Base kernel Intel Distributed Python 2019.04 with Conda & Ubuntu 18.04
+## Support Intel MKL 19.04
+## Support TF-hub 0.5.0
+## Support OpenCV 4.1.0
+## Support Jupyter notebook extension
+
+FROM continuumio/miniconda3:4.5.4
+
+RUN apt update -y && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt install -y software-properties-common && \
+    apt install -y --no-install-recommends \
+   	apt-transport-https \
+	ca-certificates \
+	curl \
+	wget \
+	gnupg2 \
+	libexpat-dev 
+
+# Install Jupyter notebook logo
+RUN mkdir -p /home/work/.jupyter/custom
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+WORKDIR /usr/local
+
+RUN conda config --add channels intel && \
+    conda install -y -q intelpython3_full=2019.4 python=3 && \
+    conda install -c conda-forge nodejs && \
+    conda install -c conda-forge opencv && \
+    conda install -c conda-forge tensorflow-hub==0.5.0 && \
+    conda install -c conda-forge tf2onnx && \
+    conda install -c conda-forge jupyterlab && \
+    conda install -c conda-forge jupyterthemes && \
+    conda install -c conda-forge ipywidgets && \
+    conda install -c conda-forge jupyter_contrib_nbextensions && \
+    conda install -c conda-forge jupyter_nbextensions_configurator && \
+    conda clean --all && \
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
+
+
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
+
+WORKDIR /home/work
