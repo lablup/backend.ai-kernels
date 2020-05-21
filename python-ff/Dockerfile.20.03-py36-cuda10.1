@@ -1,8 +1,8 @@
 FROM lablup/common-base:20.03-py36-cuda10.1
 
 # Install TensorFlow, Keras, PyTorch and MXNet
-ENV TENSORFLOW_VERSION=2.1.0
-ENV PYTORCH_VERSION=1.4.0
+ENV TENSORFLOW_VERSION=2.2.0
+ENV PYTORCH_VERSION=1.5.0
 ENV TORCHVISION_VERSION=0.5.0
 ENV TORCHAUDIO_VERSION=0.4.0
 ENV TORCHTEXT_VERSION=0.5.0
@@ -12,12 +12,12 @@ ARG CUDA=10.1
 ARG LIBNVINFER=6.0.1-1
 ARG LIBNVINFER_MAJOR_VERSION=6
 ENV CUDNN_VERSION=7.6.4.38-1+cuda10.1
-ENV NCCL_VERSION=2.4.8-1+cuda10.1
+ENV NCCL_VERSION=2.5.7-1+cuda10.1
 ENV DEBIAN_FRONTEND=noninteractive
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 
 ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda/lib64/stubs:/usr/include/x86_64-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
     LANG=C.UTF-8
 
