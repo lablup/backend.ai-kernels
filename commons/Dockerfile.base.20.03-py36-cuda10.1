@@ -14,7 +14,7 @@ ARG python=3.6
 ENV PYTHON_VERSION=${python}
 
 ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda/lib64/stubs:/usr/include/x86_64-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
     LANG=C.UTF-8
 
@@ -127,7 +127,7 @@ RUN mkdir -p ${STAGE_DIR} && \
     tar xzf ${STAGE_DIR}/nvidia-peer-memory_1.0.orig.tar.gz && \
     cd ${STAGE_DIR}/nvidia-peer-memory-1.0 && \
     dpkg-buildpackage -us -uc && \
-    dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.0-8_all.deb
+    dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.0-9_all.deb
 
 # Install CUDA-10.1 + cuDNN 7.6.0
 RUN ln -s /usr/local/cuda-10.1 /usr/local/cuda && \
@@ -317,5 +317,19 @@ RUN apt autoclean && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
+
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+#    jupyter labextension install jupyterlab-nvdashboard && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding 
 
 WORKDIR /home/work
