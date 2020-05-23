@@ -1,4 +1,4 @@
-FROM lablup/common-base:20.03-py36-cuda10.1
+FROM lablup/common-base:20.05-py36-cuda10.1
 
 # Install TensorFlow, Keras, PyTorch and MXNet
 ENV PYTORCH_VERSION=1.5.0
@@ -29,15 +29,13 @@ RUN python3 -m pip install pip --no-cache-dir -Iv \
 	    pystan==2.19.1.1 \
 	    notebook==6.0.3
 
-RUN python3 -m pip install --no-cache-dir \
+RUN python3 -m pip install pip --no-cache-dir \
+        pandas==1.0.1 \
     	https://download.pytorch.org/whl/cu101/torch-${PYTORCH_VERSION}%2Bcu101-cp36-cp36m-linux_x86_64.whl \
         https://download.pytorch.org/whl/cu101/torchvision-${TORCHVISION_VERSION}%2Bcu101-cp36-cp36m-linux_x86_64.whl \
         https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-linux_x86_64.whl \
         torchtext==${TORCHTEXT_VERSION} && \
-    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}	
-RUN python3 -m pip install --no-cache-dir --extra-index-url \
-    	    https://developer.download.nvidia.com/compute/redist/cuda/10.0 \
-	    nvidia-dali 	    
+    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
 RUN python3 -m pip install pip --no-cache-dir \
 	    jupyter-tensorboard==0.2.0 \
@@ -48,8 +46,8 @@ RUN python3 -m pip install pip --no-cache-dir \
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir git+https://github.com/horovod/horovod && \
-#    horovod==0.19.0 && \
+    pip install --no-cache-dir horovod==0.19.2 && \
+#    pip install --no-cache-dir git+https://github.com/horovod/horovod && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
@@ -59,20 +57,6 @@ RUN python3 -m pip install --no-cache-dir \
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "PyTorch 1.5 on Python 3.6 (CUDA 10.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
-
-# Jupyter notebook extension
-RUN mkdir -p /home/work/.jupyter/nbextension
-WORKDIR /home/work/.jupyter/nbextension
-
-RUN jupyter nbextensions_configurator enable && \
-    jupyter contrib nbextension install && \
-    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
-    jupyter contrib nbextension install && \
-    jupyter serverextension enable --py jupyterlab --sys-prefix && \
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
-#    jupyter labextension install jupyterlab-nvdashboard && \
-    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding 
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
