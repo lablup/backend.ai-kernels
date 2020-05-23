@@ -76,20 +76,6 @@ RUN python3 -m pip install --no-cache-dir \
 Run python3 -m ipykernel install --display-name "TensorFlow 2.2 on Python 3.6 (CUDA 10.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
-# Jupyter notebook extension
-RUN mkdir -p /home/work/.jupyter/nbextension
-WORKDIR /home/work/.jupyter/nbextension
-
-RUN jupyter nbextensions_configurator enable && \
-    jupyter contrib nbextension install && \
-    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
-    jupyter contrib nbextension install && \
-    jupyter serverextension enable --py jupyterlab --sys-prefix && \
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
-#    jupyter labextension install jupyterlab-nvdashboard && \
-    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding 
-
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
