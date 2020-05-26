@@ -1,12 +1,7 @@
-FROM lablup/common-base:20.03-py36-cuda10.0
+FROM lablup/common-base:20.03-py36-cuda10
 
 # Install TensorFlow
 ENV TENSORFLOW_VERSION=1.15.3
-ENV DEBIAN_FRONTEND=noninteractive
-ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
-
-# Set default shell to /bin/bash
-SHELL ["/bin/bash", "-cu"]
 
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "TensorFlow 1.15.3 on Python 3.6 (CUDA 10.0)" && \
@@ -15,9 +10,9 @@ Run python3 -m ipykernel install --display-name "TensorFlow 1.15.3 on Python 3.6
 RUN python3 -m pip install pip --no-cache-dir \
 	    pandas==1.0.1 \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
-       	    tensorboard==1.15 \
+       	    tensorboard==1.15.0 \
 	    ngraph-tensorflow-bridge \
-	    tensor2tensor==1.15.4 \
+	    tensor2tensor==1.15.5 \
 	    jupyter-tensorboard==0.2.0 \
     	    tensorwatch==0.8.10 
 

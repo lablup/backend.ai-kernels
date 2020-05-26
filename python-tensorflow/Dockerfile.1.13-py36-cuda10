@@ -1,22 +1,22 @@
-# Lablup/Python-TensorFlow 1.15 Python 3.6, CUDA10.0
+# Lablup/Python-TensorFlow 1.13 Python 3.6, CUDA10
 
-FROM lablup/common-base:20.03-py36-cuda10
+FROM lablup/common-base:19.06-py36-cuda10
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install TensorFlow
-ENV TENSORFLOW_VERSION=1.15.3
+ENV TENSORFLOW_VERSION=1.13.1
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "TensorFlow 1.15.3 on Python 3.6 (CUDA 10)" && \
+Run python3 -m ipykernel install --display-name "TensorFlow 1.13.1 on Python 3.6 (CUDA 10)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 RUN python3 -m pip install pip --no-cache-dir \
 	    pandas==1.0.1 \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
-       	    tensorboard==1.15 \
+       	    tensorboard==1.13 \
 	    ngraph-tensorflow-bridge \
-	    tensor2tensor==1.15.4 \
+	    tensor2tensor==1.13.4 \
 	    jupyter-tensorboard==0.2.0 \
     	    tensorwatch==0.8.10 
 
