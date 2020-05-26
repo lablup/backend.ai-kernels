@@ -321,4 +321,18 @@ RUN apt autoclean && \
     rm -rf /root/.cache && \
     rm -rf /tmp/*
 
+# Jupyter notebook extension
+RUN mkdir -p /home/work/.jupyter/nbextension
+WORKDIR /home/work/.jupyter/nbextension
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+#    jupyter labextension install jupyterlab-nvdashboard && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding 
+
 WORKDIR /home/work

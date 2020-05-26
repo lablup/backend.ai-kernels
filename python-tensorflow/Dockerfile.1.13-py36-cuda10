@@ -1,16 +1,35 @@
-# Lablup/Python-TensorFlow 1.13 Python 3.6, CUDA10.0
+# Lablup/Python-TensorFlow 1.15 Python 3.6, CUDA10.0
 
-FROM lablup/common-base:19.06-py36-cuda10
+FROM lablup/common-base:20.03-py36-cuda10
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
-ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/nvidia/lib64" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
-    LANG=C.UTF-8
+# Install TensorFlow
+ENV TENSORFLOW_VERSION=1.15.3
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "TensorFlow 1.13 on Python 3.6 (CUDA 10.0)" && \
+Run python3 -m ipykernel install --display-name "TensorFlow 1.15.3 on Python 3.6 (CUDA 10)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+RUN python3 -m pip install pip --no-cache-dir \
+	    pandas==1.0.1 \
+    	    tensorflow-gpu==${TENSORFLOW_VERSION} \
+       	    tensorboard==1.15 \
+	    ngraph-tensorflow-bridge \
+	    tensor2tensor==1.15.4 \
+	    jupyter-tensorboard==0.2.0 \
+    	    tensorwatch==0.8.10 
+
+# Install Horovod, temporarily using CUDA stubs
+RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+    HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
+    HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
+    pip install --no-cache-dir horovod==0.19.0 && \
+    ldconfig
+
+RUN python3 -m pip install --no-cache-dir \
+    	    mpi4py==3.0.3 \
+	    nni
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
@@ -19,11 +38,11 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=1 \
-      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,nniboard:http:8080,jupyter:http:8070,jupyterlab:http:8090"
+      ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090,ipython:pty:3000,tensorboard:http:6006"
 
 WORKDIR /home/work
 # vim: ft=dockerfile

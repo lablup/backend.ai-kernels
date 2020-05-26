@@ -1,7 +1,7 @@
-FROM lablup/common-base:19.09-py36-cuda10
+FROM lablup/common-base:20.03-py36-cuda10.0
 
-# Install TensorFlow, Keras, PyTorch and MXNet
-ENV TENSORFLOW_VERSION=1.14.0
+# Install TensorFlow
+ENV TENSORFLOW_VERSION=1.15.3
 ENV DEBIAN_FRONTEND=noninteractive
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 
@@ -9,15 +9,15 @@ ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 SHELL ["/bin/bash", "-cu"]
 
 # Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "TensorFlow 1.14.0 on Python 3.6 (CUDA 10.0)" && \
+Run python3 -m ipykernel install --display-name "TensorFlow 1.15.3 on Python 3.6 (CUDA 10.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 RUN python3 -m pip install pip --no-cache-dir \
 	    pandas==1.0.1 \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
-       	    tensorboard==1.14 \
+       	    tensorboard==1.15 \
 	    ngraph-tensorflow-bridge \
-	    tensor2tensor==1.14.1 \
+	    tensor2tensor==1.15.4 \
 	    jupyter-tensorboard==0.2.0 \
     	    tensorwatch==0.8.10 
 
@@ -39,8 +39,8 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=1 \
-      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
       ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090,ipython:pty:3000,tensorboard:http:6006"
