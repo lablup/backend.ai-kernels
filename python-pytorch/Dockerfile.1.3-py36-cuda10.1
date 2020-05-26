@@ -31,8 +31,8 @@ RUN python3 -m pip install pip --no-cache-dir -Iv \
 
 RUN python3 -m pip install pip --no-cache-dir \
         pandas==1.0.1 \
-    	https://download.pytorch.org/whl/cu101/torch-${PYTORCH_VERSION}%2Bcu101-cp36-cp36m-linux_x86_64.whl \
-        https://download.pytorch.org/whl/cu101/torchvision-${TORCHVISION_VERSION}%2Bcu101-cp36-cp36m-linux_x86_64.whl \
+    	https://download.pytorch.org/whl/cu101/torch-${PYTORCH_VERSION}-cp36-cp36m-linux_x86_64.whl \
+        https://download.pytorch.org/whl/cu101/torchvision-${TORCHVISION_VERSION}-cp36-cp36m-linux_x86_64.whl \
         https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-linux_x86_64.whl \
         torchtext==${TORCHTEXT_VERSION} && \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
