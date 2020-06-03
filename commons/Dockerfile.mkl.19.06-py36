@@ -19,39 +19,21 @@ RUN apt update -y && \
 	ca-certificates \
 	curl \
 	wget \
-<<<<<<< HEAD
 	gnupg && \
     wget --no-check-certificate https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     wget --no-check-certificat https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
-=======
-	gnupg2 \
-	libexpat-dev \
-	&& \
-    wget --no-check-certificate https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
-    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
-    wget --no-check-certificate https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
->>>>>>> 8d1809ac0578160ffe3f42d5a21d03b3ee4c5856
     sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list' && \
     sh -c 'echo deb https://apt.repos.intel.com/ipp all main > /etc/apt/sources.list.d/intel-ipp.list' && \
     sh -c 'echo deb https://apt.repos.intel.com/tbb all main > /etc/apt/sources.list.d/intel-tbb.list' && \
     sh -c 'echo deb https://apt.repos.intel.com/daal all main > /etc/apt/sources.list.d/intel-daal.list' && \
     sh -c 'echo deb https://apt.repos.intel.com/mpi all main > /etc/apt/sources.list.d/intel-mpi.list' && \
-<<<<<<< HEAD
-    sh -c 'echo deb https://apt.repos.intel.com/intelpython binary/ > /etc/apt/sources.list.d/intelpython.list' 
-RUN apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y install --no-install-recommends \
-        gcc g++ gfortran cpio ibexpat 
-RUN cd /tmp && \
-    curl -O http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/15540/l_mkl_2019.4.243.tgz && \
-=======
     sh -c 'echo deb https://apt.repos.intel.com/intelpython binary/ > /etc/apt/sources.list.d/intelpython.list' && \
     apt-get update -y && \
     apt -y install --no-install-recommends \
         gcc g++ gfortran cpio git \
 	&& \
     wget -q http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/15540/l_mkl_2019.4.243.tgz && \
->>>>>>> 8d1809ac0578160ffe3f42d5a21d03b3ee4c5856
     tar -xzf l_mkl_2019.4.243.tgz && \
     cd l_mkl_2019.4.243 &&  \
     sed -i 's/ACCEPT_EULA=decline/ACCEPT_EULA=accept/g' silent.cfg && \
