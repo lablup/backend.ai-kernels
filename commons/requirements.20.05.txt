@@ -125,6 +125,7 @@ MarkupSafe==1.1.1
 mccabe==0.6.1
 mistune==0.8.4
 mlxtend==0.17.2
+mlflow==1.8.0
 more-itertools==7.2.0
 msgpack==0.6.1
 msgpack-python==0.5.6
