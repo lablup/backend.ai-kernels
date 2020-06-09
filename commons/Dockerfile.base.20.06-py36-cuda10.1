@@ -147,7 +147,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 # Install TensorFlow, Keras, PyTorch and MXNet
 RUN python3 -m pip install --no-cache-dir -Iv \
     	    Cython==0.29.13 \
-	    numpy==1.14.5 \
+	    numpy==1.19rc2 \
     	    scipy==1.4.1 \
 	    scikit-image==0.16.2 \
     	    scikit-learn==0.22.2 \
@@ -331,13 +331,5 @@ RUN jupyter nbextensions_configurator enable && \
 #    jupyter labextension install jupyterlab-nvdashboard && \
     git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
     jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding 
-
-RUN python3 -m pip install --upgrade --force-reinstall --no-cache-dir \
-	    numpy==1.14.5 \
-    	    scipy==1.4.1 \
-	    scikit-image==0.16.2 \
-    	    scikit-learn==0.22.2 \
-	    matplotlib==3.1.1 
-
 
 WORKDIR /home/work
