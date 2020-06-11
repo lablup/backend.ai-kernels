@@ -140,32 +140,48 @@ RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
+RUN apt-get update -y && \
+    apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
+       libatlas-base-dev libopenblas-dev
+       
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip 
 
-# Install TensorFlow, Keras, PyTorch and MXNet
-RUN python3 -m pip install --no-cache-dir -Iv \
+COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
+COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
+#COPY ./scipy-1.4.1-cp36-cp36m-linux_x86_64.whl /tmp
+RUN python3 -m pip install --no-cache-dir --upgrade -Iv \
     	    Cython==0.29.13 \
-	    numpy==1.19rc2 \
-    	    scipy==1.4.1 \
-	    scikit-image==0.16.2 \
-    	    scikit-learn==0.22.2 \
+	    /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
+	    /tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
 	    tornado==6.0.4 \
 	    pystan==2.19.1.1 \
 	    pycairo==1.19.0 \
 	    matplotlib==3.1.1 
+
+WORKDIR /tmp
+RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
+    cd OpenBLAS && \
+    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=32 FC=gfortran && \
+    make install
+RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
+    cd /tmp/scs-python && \
+    python setup.py install --scs --gpu
+    
 RUN python3 -m pip install pip --no-cache-dir \
     	    Cartopy==0.17.0 \
 	    notebook==6.0.3 
 
 WORKDIR /tmp
 COPY ./requirements.20.06.txt /tmp
-RUN python3 -m pip install --no-cache-dir -Ivr requirements.20.06.txt
-
-# NLP
-RUN python3 -m pip install --no-cache-dir konlpy h5py && \
+RUN python3 -m pip install --no-cache-dir -r requirements.20.06.txt && \
     rm -f /tmp/*.whl /tmp/requirements.20.06.txt
+
+RUN python3 -m pip install pip --no-cache-dir \
+	    jupyterlab_hdf \
+	    jupyter-lsp \
+	    python-language-server[all]
 
 RUN apt-get update && \
     apt-get install -y \
@@ -328,8 +344,16 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
-#    jupyter labextension install jupyterlab-nvdashboard && \
+    jupyter labextension install jupyterlab-nvdashboard && \
     git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding 
+    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
+    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
+    jupyter serverextension enable --py jupyter_lsp && \
+    jupyter labextension install --no-build @jupyterlab/toc && \
+#    jupyter labextension install @jupyterlab/hdf5 
+    jupyter labextension install --no-build jupyterlab-nvdashboard 
+    
 
 WORKDIR /home/work
