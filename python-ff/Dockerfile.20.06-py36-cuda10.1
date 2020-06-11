@@ -24,19 +24,19 @@ ENV PYTHONUNBUFFERED=1 \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
-RUN python3 -m pip install pip --no-cache-dir \
-	    tensorflow-transform==0.22.0 \
+RUN python3 -m pip install pip --no-cache-dir --upgrade \
+	    tensorflow-transform==0.21.2 \
 	    tensorflow_model_analysis==0.21.6 \
 	    ngraph-tensorflow-bridge==0.18.0 \
 	    adanet==0.8.0
 
-RUN python3 -m pip install pip --no-cache-dir \
+RUN python3 -m pip install pip --no-cache-dir --upgrade \
 	    pandas==1.0.4 \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
        	    tensorboard==2.2.2 \
-	    tensorflow-metadata==0.22.1 \
+	    tensorflow-metadata==0.21.2 \
 	    tensorflow-datasets==3.1.0 \
-	    tensorflow_probability==0.10.0  \
+	    tensorflow_probability==0.7.0  \
 	    tensorflow-addons==0.10.0 \
 	    neural-structured-learning==1.1.0 \
 	    tensorflow-model-optimization==0.3.0 \
@@ -44,7 +44,7 @@ RUN python3 -m pip install pip --no-cache-dir \
 	    tensorflow_text==2.2.0 \
 	    tensorflow-graphics-gpu==1.0.0 \
 	    tensorflow-gan==2.0.0 \
-	    tensorflow-data-validation==0.22.0 \
+	    tensorflow-data-validation==0.21.4 \
 	    fairness-indicators==0.1.2 \
 	    tensorboard-plugin-fairness-indicators==0.0.5 \
 	    fairness==0.1.8 \
@@ -79,7 +79,7 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     pip install --no-cache-dir horovod==0.19.4 && \
     ldconfig
 
-RUN python3 -m pip install --no-cache-dir \
+RUN python3 -m pip install --no-cache-dir --upgrade \
     	    mpi4py==3.0.3 \
 	    nni==1.6 \
 	    scikit-nni==0.2.1
