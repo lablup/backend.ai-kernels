@@ -1,4 +1,4 @@
-FROM lablup/common-base:20.03-py36-cuda10.1
+FROM lablup/common-base:20.06-py36-cuda10.1
 
 # Install TensorFlow, Keras, PyTorch and MXNet
 ENV TENSORFLOW_VERSION=2.2.0
@@ -11,59 +11,54 @@ ENV PYTHONUNBUFFERED=1 \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
-RUN python3 -m pip install pip --no-cache-dir \
+RUN python3 -m pip install pip --no-cache-dir --upgrade \
 	    tensorflow-transform==0.21.2 \
 	    tensorflow_model_analysis==0.21.6 \
-	    ngraph-tensorflow-bridge \
+	    ngraph-tensorflow-bridge==0.18.0 \
 	    adanet==0.8.0
 
-RUN python3 -m pip install pip --no-cache-dir \
-	    pandas==1.0.1 \
+RUN python3 -m pip install pip --no-cache-dir --upgrade  \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
-       	    tensorboard==2.1.1 \
+       	    tensorboard==2.2.2 \
 	    tensorflow-metadata==0.21.1 \
 	    tensorflow-datasets==3.1.0 \
-	    tensorflow_probability==0.9.0  \
-	    tensorflow-addons==0.8.3 \
-	    neural-structured-learning \
-	    tensorflow-model-optimization==0.2.1 \
-	    tensorflow-hub==0.7.0 \
-	    tensorflow_text==2.1.1 \
+	    tensorflow_probability==0.7.0  \
+	    tensorflow-addons==0.10.0 \
+	    neural-structured-learning==1.1.0 \
+	    tensorflow-model-optimization==0.3.0 \
+	    tensorflow-hub==0.8.0 \
 	    tensorflow-graphics-gpu==1.0.0 \
 	    tensorflow-gan==2.0.0 \
-	    tensorflow_text==2.1.1 \
+	    tensorflow_text==2.2.1 \
 	    tensorflow-data-validation==0.21.5 \
 	    fairness-indicators==0.1.2 \
-	    tensorboard-plugin-fairness-indicators==0.0.3 \
+	    tensorboard-plugin-fairness-indicators==0.0.5 \
 	    fairness==0.1.8 \
-	    tfx==0.21.2 \
-	    tfx-bsl==0.21.4 \
-	    tf-agents==0.3.0  \
+	    tfx==0.21.4 \
+	    tfx-bsl==0.22.0 \
+	    tf-agents==0.5.0  \
 	    tensorflow-lattice-gpu==0.9.8 \
-	    tensorflow-lattice==2.0.3 \
-	    tensorflow_ranking==0.2.3 \
+	    tensorflow-lattice==2.0.4 \
+	    tensorflow_ranking==0.3.1 \
 	    tensorflow-compression==1.3 \
-	    tensor2tensor==1.15.4 \
-	    mesh-tensorflow \
-	    tensorflow-io==0.12.0 \
+	    tensor2tensor==1.15.6 \
+	    mesh-tensorflow==0.1.13 \
+	    tensorflow-io==0.13.0 \
 	    jupyter-tensorboard==0.2.0 \
-    	    tensorwatch==0.8.10 \
-	    jupyterlab-nvdashboard==0.2.0 
-
-RUN python3 -m pip install --no-cache-dir \
-    	    tensorwatch==0.8.10 \
-	    jupyterlab-nvdashboard==0.2.0 
+    	    tensorwatch==0.9.1 \
+	    jupyterlab-nvdashboard==0.3.1 
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.0 && \
+    pip install --no-cache-dir horovod==0.19.4 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-	    nni
+	    nni==1.6 \
+	    scikit-nni==0.2.1
 
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "TensorFlow 2.2 on Python 3.6 (CUDA 10.1)" && \
