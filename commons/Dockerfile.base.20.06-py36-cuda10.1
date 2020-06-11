@@ -343,17 +343,15 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter contrib nbextension install && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
-    jupyter labextension install jupyterlab-nvdashboard && \
-    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
+#    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+#    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
     jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
 #    jupyter labextension install @jupyterlab/hdf5 
-    jupyter labextension install --no-build jupyterlab-nvdashboard 
-    
+    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+    jupyter lab build
 
 WORKDIR /home/work
