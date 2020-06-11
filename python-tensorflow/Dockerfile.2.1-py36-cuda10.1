@@ -1,5 +1,4 @@
-
-FROM lablup/common-base:20.03-py36-cuda10.1
+FROM lablup/common-base:20.06-py36-cuda10.1
 
 # Install TensorFlow, Keras, PyTorch and MXNet
 ENV TENSORFLOW_VERSION=2.1.1
@@ -12,14 +11,13 @@ ENV PYTHONUNBUFFERED=1 \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
-RUN python3 -m pip install pip --no-cache-dir \
+RUN python3 -m pip install pip --no-cache-dir --upgrade \
 	    tensorflow-transform==0.21.2 \
 	    tensorflow_model_analysis==0.21.6 \
 	    ngraph-tensorflow-bridge \
 	    adanet==0.8.0
 
-RUN python3 -m pip install pip --no-cache-dir \
-	    pandas==1.0.1 \
+RUN python3 -m pip install pip --no-cache-dir --upgrade \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
        	    tensorboard==2.1.1 \
 	    tensorflow-metadata==0.21.1 \
@@ -48,10 +46,6 @@ RUN python3 -m pip install pip --no-cache-dir \
 	    mesh-tensorflow \
 	    tensorflow-io==0.12.0 \
 	    jupyter-tensorboard==0.2.0 \
-    	    tensorwatch==0.8.10 \
-	    jupyterlab-nvdashboard==0.2.0 
-
-RUN python3 -m pip install --no-cache-dir \
     	    tensorwatch==0.8.10 \
 	    jupyterlab-nvdashboard==0.2.0 
 
