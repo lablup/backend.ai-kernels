@@ -1,6 +1,6 @@
 # Lablup/Python-TensorFlow 1.13 Python 3.6, CUDA10
 
-FROM lablup/common-base:19.06-py36-cuda10
+FROM lablup/common-base:20.06-py36-cuda10
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install TensorFlow
@@ -11,8 +11,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 Run python3 -m ipykernel install --display-name "TensorFlow 1.13.1 on Python 3.6 (CUDA 10)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
-RUN python3 -m pip install pip --no-cache-dir \
-	    pandas==1.0.1 \
+RUN python3 -m pip uninstall -y \
+    	    tensorflow==${TENSORFLOW_VERSION} 
+
+RUN python3 -m pip install pip --no-cache-dir --upgrade \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
        	    tensorboard==1.13 \
 	    ngraph-tensorflow-bridge \
@@ -24,12 +26,13 @@ RUN python3 -m pip install pip --no-cache-dir \
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.0 && \
+    pip install --no-cache-dir horovod==0.19.4 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-	    nni
+	    nni==1.6 \
+	    scikit-nni==0.2.1
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
