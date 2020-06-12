@@ -1,18 +1,20 @@
-FROM lablup/common-base:20.03-py36-cuda10
+FROM lablup/common-base:20.06-py36-cuda10
 
 # Install TensorFlow
 ENV TENSORFLOW_VERSION=2.0.2
 
 # Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "TensorFlow 2.0.2 on Python 3.6 (CUDA 10)" && \
+Run python3 -m ipykernel install --display-name "TensorFlow 2.0.2 on Python 3.6 (CUDA 10.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
-RUN python3 -m pip install pip --no-cache-dir \
-	    pandas==1.0.1 \
+RUN python3 -m pip uninstall --no-cache-dir -y \
+    	    tensorflow==${TENSORFLOW_VERSION}
+
+RUN python3 -m pip install --no-cache-dir --upgrade \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
-       	    tensorboard==2.0 \
+       	    tensorboard==2.0.0 \
 	    ngraph-tensorflow-bridge \
-	    tensor2tensor==2.0 \
+	    tensor2tensor==1.15.6 \
 	    jupyter-tensorboard==0.2.0 \
     	    tensorwatch==0.8.10 
 
@@ -20,12 +22,13 @@ RUN python3 -m pip install pip --no-cache-dir \
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.0 && \
+    pip install --no-cache-dir horovod==0.19.4 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-	    nni
+	    nni==1.6 \
+	    scikit-nni==0.2.1
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
