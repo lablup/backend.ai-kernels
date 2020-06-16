@@ -1,4 +1,4 @@
-FROM lablup/common-base:20.05-py36-cuda10.1
+FROM lablup/common-base:20.06-py36-cuda10.1
 
 # Install TensorFlow, Keras, PyTorch and MXNet
 ENV PYTORCH_VERSION=1.3.1
@@ -17,27 +17,14 @@ ENV PYTHONUNBUFFERED=1 \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
-# Install TensorFlow, Keras, PyTorch and MXNet
-RUN python3 -m pip install pip --no-cache-dir -Iv \
-    	    Cython==0.29.13 \
-            numpy==1.16.5 \
-    	    scipy==1.4.1 \
-	    scikit-image==0.16.2 \
-    	    scikit-learn==0.21.3 \
-	    matplotlib==3.1.3 \
-	    tornado==6.0.4 \
-	    pystan==2.19.1.1 \
-	    notebook==6.0.3
-
-RUN python3 -m pip install pip --no-cache-dir \
-        pandas==1.0.1 \
+RUN python3 -m pip install --no-cache-dir --upgrade \
     	https://download.pytorch.org/whl/cu101/torch-${PYTORCH_VERSION}-cp36-cp36m-linux_x86_64.whl \
         https://download.pytorch.org/whl/cu101/torchvision-${TORCHVISION_VERSION}-cp36-cp36m-linux_x86_64.whl \
         https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-linux_x86_64.whl \
         torchtext==${TORCHTEXT_VERSION} && \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
-RUN python3 -m pip install pip --no-cache-dir \
+RUN python3 -m pip install --no-cache-dir \
 	    jupyter-tensorboard==0.2.0 \
     	    tensorwatch==0.8.10 \
 	    jupyterlab-nvdashboard==0.2.0 
@@ -46,13 +33,13 @@ RUN python3 -m pip install pip --no-cache-dir \
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.2 && \
-#    pip install --no-cache-dir git+https://github.com/horovod/horovod && \
+    pip install --no-cache-dir horovod==0.19.4 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-	    nni
+	    nni==1.6 \
+	    scikit-nni==0.2.1
 
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "PyTorch 1.3 on Python 3.6 (CUDA 10.1)" && \
@@ -69,7 +56,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,tensorboard:http:6006,jupyter:http:8080,jupyterlab:http:8090"
+      ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090,ipython:pty:3000,tensorboard:http:6006"
 
 WORKDIR /home/work
 # vim: ft=dockerfile
