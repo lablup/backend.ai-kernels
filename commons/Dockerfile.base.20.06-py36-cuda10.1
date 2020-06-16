@@ -151,12 +151,11 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 
 COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
 COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
-#COPY ./scipy-1.4.1-cp36-cp36m-linux_x86_64.whl /tmp
+
 RUN python3 -m pip install --no-cache-dir --upgrade -Iv \
     	    Cython==0.29.20 \
 	    /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
 	    /tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
-#	    pandas==1.0.4 \
 	    tornado==6.0.4 \
 	    pystan==2.19.1.1 \
 	    pycairo==1.19.0 \
@@ -344,7 +343,7 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
 #    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
 #    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
-    jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
+#   jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
