@@ -6,16 +6,17 @@ ARG LIBNVINFER=6.0.1-1
 ARG LIBNVINFER_MAJOR_VERSION=6
 ARG CUDNN=7.6.5.32-1
 ENV NCCL_VERSION=2.6.4-1+cuda10.1
-ENV DEBIAN_FRONTEND=noninteractive
-ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 
 # Python 2.7 or 3.6 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
 ENV PYTHON_VERSION=${python}
 
-ENV PYTHONUNBUFFERED=1 \
+ENV DEBIAN_FRONTEND=noninteractive \
+    MPLBACKEND=Svg \
+    PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
+    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
 # Set default shell to /bin/bash
@@ -152,36 +153,33 @@ COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
 COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
 #COPY ./scipy-1.4.1-cp36-cp36m-linux_x86_64.whl /tmp
 RUN python3 -m pip install --no-cache-dir --upgrade -Iv \
-    	    Cython==0.29.13 \
+    	    Cython==0.29.20 \
 	    /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
 	    /tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
+#	    pandas==1.0.4 \
 	    tornado==6.0.4 \
 	    pystan==2.19.1.1 \
 	    pycairo==1.19.0 \
+	    python-language-server[all] \	    
 	    matplotlib==3.1.1 
 
 WORKDIR /tmp
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
-    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=32 FC=gfortran && \
+    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
 RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
     
 RUN python3 -m pip install pip --no-cache-dir \
-    	    Cartopy==0.17.0 \
+    	    Cartopy==0.18.0 \
 	    notebook==6.0.3 
 
 WORKDIR /tmp
 COPY ./requirements.20.06.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.20.06.txt && \
+RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.20.06.txt && \
     rm -f /tmp/*.whl /tmp/requirements.20.06.txt
-
-RUN python3 -m pip install pip --no-cache-dir \
-	    jupyterlab_hdf \
-	    jupyter-lsp \
-	    python-language-server[all]
 
 RUN apt-get update && \
     apt-get install -y \
