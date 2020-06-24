@@ -24,42 +24,50 @@ ENV PYTHONUNBUFFERED=1 \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
-RUN python3 -m pip install pip --no-cache-dir --upgrade \
+RUN python3 -m pip install --no-cache-dir --upgrade \
+	    gast==0.2.2 \
+	    'httplib2<0.18.0,>=0.8' \
+	    'coverage<5.0,>=4.5' \
+	    'mock<4.0,>=3.0' \
+    	    tensorflow==${TENSORFLOW_VERSION}  \
+       	    tensorboard==2.1.1 
+
+RUN python3 -m pip install --no-cache-dir --upgrade \
+	    -q git+https://github.com/google-research/tensorflow_constrained_optimization 
+RUN python3 -m pip install --no-cache-dir --upgrade \
+	    -q git+https://github.com/tensorflow/fairness-indicators
+RUN python3 -m pip install --no-cache-dir \
+	    cachetools==3.1.0 \
 	    tensorflow-transform==0.21.2 \
 	    tensorflow_model_analysis==0.21.6 \
 	    ngraph-tensorflow-bridge==0.18.0 \
-	    adanet==0.8.0
-
-RUN python3 -m pip install pip --no-cache-dir --upgrade \
-	    pandas==1.0.4 \
-    	    tensorflow-gpu==${TENSORFLOW_VERSION} \
-       	    tensorboard==2.2.2 \
 	    tensorflow-metadata==0.21.2 \
 	    tensorflow-datasets==3.1.0 \
-	    tensorflow_probability==0.7.0  \
+	    tensorflow_probability==0.7.0 \ 
 	    tensorflow-addons==0.10.0 \
 	    neural-structured-learning==1.1.0 \
-	    tensorflow-model-optimization==0.3.0 \
+	    tensorflow-model-optimization==0.3.0 
+RUN python3 -m pip install --no-cache-dir \
+	    tfx==0.21.4 \
+	    tfx-bsl==0.21.4 \
+	    tf-agents==0.5.0  
+RUN python3 -m pip install --no-cache-dir \
+	    tensorflow_constrained_optimization \
 	    tensorflow-hub==0.8.0 \
 	    tensorflow_text==2.2.0 \
 	    tensorflow-graphics-gpu==1.0.0 \
 	    tensorflow-gan==2.0.0 \
-	    tensorflow-data-validation==0.21.4 \
-	    fairness-indicators==0.1.2 \
-	    tensorboard-plugin-fairness-indicators==0.0.5 \
-	    fairness==0.1.8 \
-	    tfx==0.21.4 \
-	    tfx-bsl==0.22.0 \
-	    tf-agents==0.5.0  \
-	    tensorflow-lattice-gpu==0.9.8 \ 
+	    tensorflow-data-validation==0.21.4 
+RUN python3 -m pip install --no-cache-dir \
+	    jupyter-tensorboard==0.2.0 \
+	    tensorflow-plot==0.3.2 \
 	    tensorflow-lattice==2.0.4 \
 	    tensorflow_ranking==0.3.1 \
 	    tensorflow-compression==1.3 \
 	    tensor2tensor==1.15.6 \
 	    mesh-tensorflow==0.1.13 \
-	    tensorflow-io==0.13.0 \
-	    jupyter-tensorboard==0.2.0 \
     	    tensorwatch==0.9.1 \
+	    tensorflow-io==0.13.0  \
 	    jupyterlab-nvdashboard==0.3.1 
 
 RUN python3 -m pip install pip --no-cache-dir \
@@ -76,13 +84,12 @@ RUN python3 -m pip install --no-cache-dir mxnet-cu101==${MXNET_VERSION}
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITH_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.4 && \
+    pip install --no-cache-dir horovod==0.19.0 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir --upgrade \
     	    mpi4py==3.0.3 \
-	    nni==1.6 \
-	    scikit-nni==0.2.1
+	    nni==1.6 
 
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "Lablup FF 20.06 on Python 3.6 (CUDA 10.1)" && \
