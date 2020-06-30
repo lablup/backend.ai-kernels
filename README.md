@@ -81,31 +81,41 @@ Here we list the latest versions of our supported kernel images.
  * `base-cuda`   (Nvidia' GPU & CUDA libarary compatibility, needed Nvidia-docker)
  * `base-TPU`    (Google TPU comptibility, on Google' Cloud)
  * `base-ROCm`   (AMD' GPU & OpenCL libarary compatibility, T.B.D.)
-
-| base-mkl (Intel)      | base-cuda (Nvidia)           | base-TPU (Google)        | base-ROCm (AMD)           |
-|-----------------------|------------------------------|--------------------------|---------------------------|
-| tensorflow-1.14-py36  | tensorflow-1.14-py36-cuda9   | tensorflow-1.14-py36-tpu | tensorflow-1.14-py36-rocm |
-| tensorflow-1.13-py36  | tensorflow-1.13-py36-cuda9   | tensorflow-1.13-py36-tpu |                           |
-| tensorflow-1.12-py36  | tensorflow-1.12-py36-cuda9   |                          |                           |
-| tensorflow-1.11-py36  | tensorflow-1.11-py36-cuda9   |                          |                           |
-| tensorflow-1.10-py36  | tensorflow-1.10-py36-cuda9   |                          |                           |
-| tensorflow-1.9-py36   | tensorflow-1.9-py36-cuda9    |                          |                           |
-| tensorflow-1.8-py36   | tensorflow-1.8-py36-cuda9    |                          |                           |
-| tensorflow-1.7-py36   | tensorflow-1.7-py36-cuda9    |                          |                           |
-| tensorflow-1.6-py36   | tensorflow-1.6-py36-cuda9    |                          |                           |
-| tensorflow-1.5-py36   | tensorflow-1.5-py36-cuda9    |                          |                           |
-| tensorflow-1.4-py36   | tensorflow-1.4-py36-cuda8    |                          |                           |
-| tensorflow-1.3-py36   | tensorflow-1.3-py36-cuda8    |                          |                           |
-| tensorflow-1.2-py36   | tensorflow-1.2-py36-cuda8    |                          |                           |
-| tensorflow-1.1-py36   | tensorflow-1.1-py36-cuda8    |                          |                           |
-| tensorflow-1.0-py36   | tensorflow-1.0-py36-cuda8    |                          |                           |
-|                       | python-caffe2-1.0-py36-cuda9 |                          |                           |
-|                       | python-torch-1.2-py36-cuda9  |                          |                           |
-|                       | python-torch-1.1-py36-cuda9  |                          |                           |
-| python-torch-1.0-py36 | python-torch-1.0-py36-cuda9  |                          |                           |
-| python-torch-0.4-py36 | python-torch-0.4-py36-cuda9  |                          |                           |
-| python-torch-0.3-py36 | python-torch-0.3-py36-cuda9  |                          |                           |
-| python-torch-0.2-py36 | python-torch-0.2-py36-cuda8  |                          |                           |
+ 
+| base-mkl (Intel)      | base-cuda (Nvidia)             | base-TPU (Google)        | base-ROCm (AMD)           |
+|-----------------------|--------------------------------|--------------------------|---------------------------|
+| tensorflow-1.14-py36  | tensorflow-1.15-py36-cuda10    |	         	    |                           |
+| tensorflow-1.14-py36  | tensorflow-1.14-py36-cuda10    | tensorflow-1.14-py36-tpu | tensorflow-1.14-py36-rocm |
+| tensorflow-1.13-py36  | tensorflow-1.13-py36-cuda10    | tensorflow-1.13-py36-tpu |                           |
+| tensorflow-1.12-py36  | tensorflow-1.12-py36-cuda9     |                          |                           |
+| tensorflow-1.11-py36  | tensorflow-1.11-py36-cuda9     |                          |                           |
+| tensorflow-1.10-py36  | tensorflow-1.10-py36-cuda9     |                          |                           |
+| tensorflow-1.9-py36   | tensorflow-1.9-py36-cuda9      |                          |                           |
+| tensorflow-1.8-py36   | tensorflow-1.8-py36-cuda9      |                          |                           |
+| tensorflow-1.7-py36   | tensorflow-1.7-py36-cuda9      |                          |                           |
+| tensorflow-1.6-py36   | tensorflow-1.6-py36-cuda9      |                          |                           |
+| tensorflow-1.5-py36   | tensorflow-1.5-py36-cuda9      |                          |                           |
+| tensorflow-1.4-py36   | tensorflow-1.4-py36-cuda8      |                          |                           |
+| tensorflow-1.3-py36   | tensorflow-1.3-py36-cuda8      |                          |                           |
+| tensorflow-1.2-py36   | tensorflow-1.2-py36-cuda8      |                          |                           |
+| tensorflow-1.1-py36   | tensorflow-1.1-py36-cuda8      |                          |                           |
+| tensorflow-1.0-py36   | tensorflow-1.0-py36-cuda8      |                          |                           |
+|                       | python-caffe2-1.0-py36-cuda9   |                          |                           |
+|                       | python-torch-1.5-py36-cuda10.1 |                          |                           |
+|                       | python-torch-1.4-py36-cuda10.1 |                          |                           |
+|                       | python-torch-1.3-py36-cuda10.1 |                          |                           |
+|                       | python-torch-1.2-py36-cuda9    |                          |                           |
+|                       | python-torch-1.1-py36-cuda9    |                          |                           |
+| python-torch-1.0-py36 | python-torch-1.0-py36-cuda9    |                          |                           |
+| python-torch-0.4-py36 | python-torch-0.4-py36-cuda9    |                          |                           |
+| python-torch-0.3-py36 | python-torch-0.3-py36-cuda9    |                          |                           |
+| python-torch-0.2-py36 | python-torch-0.2-py36-cuda8    |                          |                           |
+|                       | python-mxnet-1.5-py36-cuda10.1 |                          |                           |
+|                       | python-mxnet-1.4-py36-cuda10 |                          |                           |
+|                       | python-mxnet-1.3-py36-cuda10 |                          |                           |
+|                       | python-mxnet-1.2-py36-cuda9  |                          |                           |
+|                       | python-mxnet-1.1-py36-cuda9  |                          |                           |
+|                       | python-mxnet-1.0-py36-cuda9  |                          |                           |
 | python-cntk-2.7-py36  | python-cntk-2.7-py36-cuda9   |                          |                           |
 | python-cntk-2.6-py36  | python-cntk-2.6-py36-cuda9   |                          |                           |
 | python-cntk-2.5-py36  | python-cntk-2.5-py36-cuda9   |                          |                           |
