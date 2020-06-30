@@ -24,6 +24,7 @@ Here we list the latest versions of our supported kernel images.
 | CNTK                    | `lablup/python-cntk`       | 2.7     | O     | O\*   | O          |     |                   |
 | MXnet                   | `lablup/python-mxnet`      | 1.4.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | MXnet                   | `lablup/python-mxnet`      | 1.5.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| All-in-one Environment  | `lablup/python-ff`         | 20.07   | O     | O\*   | O          |     |                   |
 
 ### Warrented Images (NGC, Nvidia GPU Cloud)
 | Deep-Learning Framework | Image Name              | Version       | Batch | Query | Input Hook | TTY | Runtime Impl.     |
