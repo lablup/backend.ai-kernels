@@ -33,19 +33,16 @@ RUN python3 -m pip install --no-cache-dir \
 	    tensorflow_probability \ 
 	    tensorflow-addons==0.8.3 \
 	    neural-structured-learning \
-	    tensorflow-model-optimization 
-RUN python3 -m pip install --no-cache-dir \
+	    tensorflow-model-optimization \
 	    tfx==0.22.0 \
 	    tfx-bsl==0.22.0 \
-	    tf-agents==0.5.0  
-RUN python3 -m pip install --no-cache-dir \
+	    tf-agents==0.5.0  \
 	    tensorflow_constrained_optimization \
 	    tensorflow-hub==0.8.0 \
 	    tensorflow_text==2.2.1 \
 	    tensorflow-graphics-gpu==1.0.0 \
 	    tensorflow-gan==2.0.0 \
-	    tensorflow-data-validation==0.22.0 
-RUN python3 -m pip install --no-cache-dir \
+	    tensorflow-data-validation==0.22.0 \
 	    jupyter-tensorboard==0.2.0 \
 	    tensorflow-plot==0.3.2 \
 	    tensorflow-lattice==2.0.5 \
@@ -55,13 +52,21 @@ RUN python3 -m pip install --no-cache-dir \
 	    mesh-tensorflow==0.1.13 \
     	    tensorwatch==0.9.1 \
 	    tensorflow-io==0.13.0  \
-	    jupyterlab-nvdashboard==0.3.1 
+	    jupyterlab-nvdashboard==0.3.1 \
+    	    tensorflow==${TENSORFLOW_VERSION}  \
+       	    tensorboard==2.1.1 
 
+RUN python3 -m pip install --no-cache-dir --extra-index-url \
+    	    https://developer.download.nvidia.com/compute/redist \
+	    nvidia-dali-cuda100 && \
+    python3 -m pip install --no-cache-dir --extra-index-url \
+	    https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
+	    
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.0 && \
+    pip install --no-cache-dir horovod==0.19.4 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
@@ -87,7 +92,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090,ipython:pty:3000,tensorboard:http:6006"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
 
 WORKDIR /home/work
 # vim: ft=dockerfile
