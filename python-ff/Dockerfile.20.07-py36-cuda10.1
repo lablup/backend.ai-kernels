@@ -25,50 +25,51 @@ ENV PYTHONUNBUFFERED=1 \
 SHELL ["/bin/bash", "-cu"]
 
 RUN python3 -m pip install --no-cache-dir --upgrade \
-	    gast==0.2.2 \
+	    gast==0.3.3 \
 	    'httplib2<0.18.0,>=0.8' \
 	    'coverage<5.0,>=4.5' \
-	    'mock<4.0,>=3.0' \
+	    mock==3.0.5 \
     	    tensorflow==${TENSORFLOW_VERSION}  \
+	    mesh-tensorflow==0.1.16 \
        	    tensorboard==2.2.2 
 
 RUN python3 -m pip install --no-cache-dir --upgrade \
 	    -q git+https://github.com/google-research/tensorflow_constrained_optimization 
 RUN python3 -m pip install --no-cache-dir --upgrade \
-	    -q git+https://github.com/tensorflow/fairness-indicators
-RUN python3 -m pip install --no-cache-dir \
 	    cachetools==3.1.0 \
 	    tensorflow-transform==0.22.0 \
 	    tensorflow_model_analysis==0.22.2 \
 	    ngraph-tensorflow-bridge==0.18.0 \
 	    tensorflow-metadata==0.22.2 \
-	    tensorflow-datasets==3.1.0 \
-	    tensorflow_probability \ 
-	    tensorflow-addons==0.10.0 \
-	    neural-structured-learning==1.1.0 \
-	    tensorflow-model-optimization==0.3.0 
-RUN python3 -m pip install --no-cache-dir \
-	    tfx==0.22.0 \
-	    tfx-bsl==0.22.0 \
-	    tf-agents==0.5.0  
-RUN python3 -m pip install --no-cache-dir \
-	    tensorflow_constrained_optimization \
+	    tensorflow-datasets==3.2.0 \
+	    tensorflow_probability==0.10.1 \
+    	    tensorwatch==0.9.1 \
 	    tensorflow-hub==0.8.0 \
+	    tensorflow-addons==0.10.0 \
 	    tensorflow_text==2.2.1 \
+	    neural-structured-learning==1.1.0 \
+	    tensorflow_constrained_optimization \
 	    tensorflow-graphics-gpu==1.0.0 \
 	    tensorflow-gan==2.0.0 \
-	    tensorflow-data-validation==0.22.0 
-RUN python3 -m pip install --no-cache-dir \
+	    tensorflow-data-validation==0.22.2 \
+	    tensorflow-model-optimization==0.3.0 
+RUN python3 -m pip install --no-cache-dir --upgrade \
 	    jupyter-tensorboard==0.2.0 \
+	    tf-agents==0.5.0 \
+	    tf-slim==1.1.0 \
 	    tensorflow-plot==0.3.2 \
 	    tensorflow-lattice==2.0.5 \
+	    tensorflow-io==0.13.0  \
+	    tfx==0.22.0 \
+	    tfx-bsl==0.22.1 
+RUN python3 -m pip install --no-cache-dir \
 	    tensorflow_ranking==0.3.1 \
 	    tensorflow-compression==1.3 \
-	    tensor2tensor \
-	    mesh-tensorflow==0.1.13 \
-    	    tensorwatch==0.9.1 \
-	    tensorflow-io==0.13.0  \
+	    tensor2tensor==1.15.7 \
 	    jupyterlab-nvdashboard==0.3.1 
+
+RUN python3 -m pip install --no-cache-dir --upgrade \
+	    -q git+https://github.com/tensorflow/fairness-indicators
 
 RUN python3 -m pip install pip --no-cache-dir \
     	https://download.pytorch.org/whl/cu101/torch-${PYTORCH_VERSION}%2Bcu101-cp36-cp36m-linux_x86_64.whl \
@@ -78,6 +79,12 @@ RUN python3 -m pip install pip --no-cache-dir \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}	    
 
 RUN python3 -m pip install --no-cache-dir mxnet-cu101==${MXNET_VERSION}
+
+RUN python3 -m pip install --no-cache-dir --extra-index-url \
+    	    https://developer.download.nvidia.com/compute/redist \
+	    nvidia-dali-cuda100 && \
+    python3 -m pip install --no-cache-dir --extra-index-url \
+	    https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
