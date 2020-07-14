@@ -361,4 +361,10 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
 
+WORKDIR /tmp
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    bash install.sh && \
+    rm -rf /tmp/*
+
 WORKDIR /home/work
