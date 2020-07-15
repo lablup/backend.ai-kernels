@@ -7,7 +7,7 @@ RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
         wget curl git-core \
-        python3 python3-pip \
+        python3 python3-dev python3-pip \
         libssl-dev \
         libmpdec2 \
         proj-bin libproj-dev \
@@ -15,11 +15,12 @@ RUN apt-get update && \
         mime-support \
 	locales \
 	fonts-texgyre \
+	less \
 	vim-tiny \
 	liblapack3 \
         gcc g++ gfortran && \
     apt-get autoclean && \
-    rm -rf /var/lib/apt/lists/
+    rm -rf /var/lib/apt/lists/*
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
@@ -40,8 +41,32 @@ RUN apt update && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 && \
     add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/' && \
     apt update && \
-    apt install -y r-base libxml2-dev && \
+    apt install -y --no-install-recommends \
+#        libopenblas0-pthread \
+	littler \
+	r-cran-littler \
+	r-base=${R_VERSION}-* \
+	r-base-dev=${R_VERSION}-* \
+	r-recommended=${R_VERSION}-* \
+	libxml2-dev && \
     ldd /usr/lib/R/lib/libR.so 
+
+RUN ln -s /usr/lib/R/site-library/littler/examples/build.r /usr/local/bin/build.r && \
+    ln -s /usr/lib/R/site-library/littler/examples/check.r /usr/local/bin/check.r && \
+    ln -s /usr/lib/R/site-library/littler/examples/install.r /usr/local/bin/install.r && \
+    ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r && \
+    ln -s /usr/lib/R/site-library/littler/examples/installBioc.r /usr/local/bin/installBioc.r && \
+    ln -s /usr/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r && \
+    ln -s /usr/lib/R/site-library/littler/examples/testInstalled.r /usr/local/bin/testInstalled.r && \
+    install.r docopt && \
+    rm -rf /tmp/downloaded_packages/ /tmp/*.rds && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /tmp
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    bash install.sh && \
+    rm -rf /tmp/*
 
 # Install commonly-used wheels
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
@@ -66,27 +91,26 @@ RUN Rscript -e "install.packages(c('rzmq','repr','IRkernel','IRdisplay'),type = 
     Rscript -e "install.packages(c('stm','stmCorrViz'))" && \
     Rscript -e "install.packages(c('jsonlite','jsonview','XML','xml2','xmlview'))" && \
     Rscript -e "install.packages(c('igraph'))"
-RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6 On Backend.AI' , user = FALSE)" && \
+RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 3.6.3 On Backend.AI' , user = FALSE)" && \
     rm -rf /root/.local/share/jupyter && \
     jupyter kernelspec list && \
     cat /usr/local/share/jupyter/kernels/ir/kernel.json 
     
-# Install Jupyter notebook logo
-RUN mkdir -p /home/work/.jupyter/custom
-COPY policy.yml /etc/backend.ai/jail/policy.yml
-
-# Jupyter notebook extension
-RUN mkdir -p /home/work/.jupyter/nbextension
-WORKDIR /home/work/.jupyter/nbextension
-
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter contrib nbextension install && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
-    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding
+    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
+#    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+#    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
+#    jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
+    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
+#    jupyter serverextension enable --py jupyter_lsp && \
+    jupyter labextension install --no-build @jupyterlab/toc && \
+#    jupyter labextension install @jupyterlab/hdf5 
+    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+    jupyter lab build
 
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
