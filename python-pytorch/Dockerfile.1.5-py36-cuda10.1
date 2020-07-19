@@ -25,6 +25,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
 RUN python3 -m pip install --no-cache-dir \
+	    transformers \
 	    jupyter-tensorboard==0.2.0 \
     	    tensorwatch==0.8.10 \
 	    jupyterlab-nvdashboard==0.2.0 
