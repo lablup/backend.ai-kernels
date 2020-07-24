@@ -1,0 +1,29 @@
+FROM nvcr.io/nvidia/nemo:v0.11
+# NVIDIA NEMO with Python 3.6 (CONDA)
+
+ENV PYTHONUNBUFFERED=1 \
+    LANG=C.UTF-8
+
+# ipython/jupyter is already installed in the Anaconda Python installed at /opt/conda.
+RUN /opt/conda/bin/python3 -m pip install jupyterlab
+
+# Install ipython kernelspec
+RUN /opt/conda/bin/python3 -m ipykernel install \
+        --prefix=/opt/conda/ \
+        --display-name "Python 3.6 CONDA (NGC/NEMO v0.11) on Backend.AI" && \
+    cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch uid-match" \
+      ai.backend.accelerators="cuda" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000, jupyterlab:http:8090,tensorboard:http:6006"
+# vim: ft=dockerfile
