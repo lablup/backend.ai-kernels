@@ -1,7 +1,7 @@
 FROM lablup/common-base:20.07-py36-cuda10.1
 
 # Install TensorFlow, Keras, PyTorch and MXNet
-ENV TENSORFLOW_VERSION=2.3.0-rc2
+ENV TENSORFLOW_VERSION=2.3.0
 
 ENV PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
@@ -58,11 +58,17 @@ RUN python3 -m pip install --no-cache-dir \
 RUN python3 -m pip install --no-cache-dir \
     	    tensorflow==${TENSORFLOW_VERSION}  
 
+RUN python3 -m pip install --no-cache-dir --extra-index-url \
+    	    https://developer.download.nvidia.com/compute/redist \
+	    nvidia-dali-cuda100 && \
+    python3 -m pip install --no-cache-dir --extra-index-url \
+	    https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
+
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.4 && \
+    pip install --no-cache-dir horovod==0.19.5 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
@@ -73,9 +79,6 @@ RUN python3 -m pip install --no-cache-dir \
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "TensorFlow 2.3 on Python 3.6 (CUDA 10.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
-
-RUN jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
-    jupyter nbextension enable --py tensorflow_model_analysis
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
