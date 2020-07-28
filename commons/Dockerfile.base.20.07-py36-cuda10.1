@@ -74,6 +74,9 @@ RUN apt-get update -y && \
 	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
         python${PYTHON_VERSION} \
         python${PYTHON_VERSION}-dev \
+	libxml2-dev \
+	libxslt1-dev \
+	libasound2-dev \
 	libnuma-dev \
 	libjasper-dev \
         libtiff-dev \
@@ -357,7 +360,8 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
-#    jupyter labextension install @jupyterlab/hdf5 
+#    jupyter labextension install @jupyterlab/hdf5 && \
+    jupyter nbextension enable --py tensorflow_model_analysis && \
     jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
 
