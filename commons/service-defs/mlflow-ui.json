@@ -1,0 +1,7 @@
+{
+  "prestart": [],
+  "command": [
+    "/usr/local/bin/mlflow",
+    "ui"
+  ]
+}
