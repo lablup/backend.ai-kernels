@@ -64,9 +64,9 @@ RUN tensorflow/tools/ci_build/builds/configured CPU  \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
     tensorflow/tools/pip_package:build_pip_package && \
     bazel-bin/tensorflow/tools/pip_package/build_pip_package "${WHL_DIR}" && \
-    python3 -m pip --no-cache-dir install --upgrade "${WHL_DIR}"/tensorflow-*.whl && \
-    python3 -m pip --no-cache-dir install \
-        tensorboard==1.14 && \
+    python3 -m pip --no-cache-dir install --upgrade "${WHL_DIR}"/tensorflow-*.whl 
+RUN python3 -m pip --no-cache-dir install \
+        tensorboard==1.15 && \
     rm -rf /root/.cache
 # Clean up Bazel cache when done.
 
