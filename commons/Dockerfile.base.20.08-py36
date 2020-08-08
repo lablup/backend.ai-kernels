@@ -1,14 +1,24 @@
 FROM ubuntu:18.04
 
+ARG WHL_DIR="/tmp/pip"
+
+
+
+
+
+
+
 # Python 2.7 or 3.6 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
 ENV PYTHON_VERSION=${python}
-ARG WHL_DIR="/tmp/pip"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
+    \
+    \
     PATH="/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
+    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
 # Set default shell to /bin/bash
@@ -109,6 +119,8 @@ COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
 COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
 
 RUN python3 -m pip install --no-cache-dir --upgrade -Iv \
+            git+https://github.com/haven-jeon/PyKoSpacing.git \
+	    git+https://github.com/ssut/py-hanspell.git \
     	    Cython==0.29.20 \
 	    /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
 	    /tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
@@ -127,7 +139,6 @@ RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python3 setup.py install --scs
     
-
 RUN python3 -m pip install pip --no-cache-dir \
     	    Cartopy==0.18.0 \
 	    notebook==6.0.3 
@@ -166,6 +177,18 @@ RUN echo "Install mecab-ko-dic" && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
 
+WORKDIR /tmp
+RUN git clone https://github.com/kakao/khaiii.git  && \
+    cd khaiii && \
+    mkdir -p build && \
+    cd build && \
+    cmake .. && \
+    make all && \
+    make resource && \
+    make install && \
+    make package_python && \
+    python3 -m pip install package_python
+
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
@@ -203,7 +226,7 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3
     rm /tmp/cmake-install.sh
 
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.3.0"
+ENV OPENCV_VERSION="4.4.0"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
