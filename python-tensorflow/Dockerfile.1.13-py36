@@ -75,7 +75,6 @@ RUN tensorflow/tools/ci_build/builds/configured CPU  \
         --config=gdr \ 
         --config=verbs \
 #        --config=ngraph \
-        --config=numa \
         --config=v1 \
 	--linkopt=-znoexecstack \
 	--linkopt=-zrelro \
