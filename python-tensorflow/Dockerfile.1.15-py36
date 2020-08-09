@@ -56,13 +56,33 @@ COPY .bazelrc /root/.mkl.bazelrc
 RUN echo "import /root/.mkl.bazelrc" >>/root/.bazelrc
 
 RUN tensorflow/tools/ci_build/builds/configured CPU  \
-    bazel --bazelrc=/root/.bazelrc build -c opt \
-        --config=mkl \
+      bazel --bazelrc=/root/.bazelrc build \
+        -c opt \
+        --copt=-msse4.1 \
+        --copt=-msse4.2 \
 	--copt=-mavx \
 	--copt=-mavx2 \
+	--copt=-mfma \
+	--copt=-mfpmath=both \ 
+	--copt=-O3 \
+	--copt=-Wformat \
+	--copt=-Wformat-security \
+	--copt=-fstack-protector \
+	--copt=-fPIC \
+	--copt=-fpic \
+        --config=mkl \
 	--config=monolithic \
+        --config=gdr \ 
+        --config=verbs \
+#        --config=ngraph \
+        --config=numa \
+        --config=v1 \
+	--linkopt=-znoexecstack \
+	--linkopt=-zrelro \
+	--linkopt=-znow \
+	--linkopt=-fstack-protector \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
-    tensorflow/tools/pip_package:build_pip_package && \
+      -k //tensorflow/tools/pip_package:build_pip_package && \
     bazel-bin/tensorflow/tools/pip_package/build_pip_package "${WHL_DIR}" && \
     python3 -m pip --no-cache-dir install --upgrade "${WHL_DIR}"/tensorflow-*.whl 
 RUN python3 -m pip --no-cache-dir install \
