@@ -74,8 +74,6 @@ RUN tensorflow/tools/ci_build/builds/configured CPU  \
 	--config=monolithic \
         --config=gdr \ 
         --config=verbs \
-#        --config=ngraph \
-        --config=v1 \
 	--linkopt=-znoexecstack \
 	--linkopt=-zrelro \
 	--linkopt=-znow \
