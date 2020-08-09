@@ -2,12 +2,6 @@ FROM ubuntu:18.04
 
 ARG WHL_DIR="/tmp/pip"
 
-
-
-
-
-
-
 # Python 2.7 or 3.6 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
 ENV PYTHON_VERSION=${python}
@@ -114,6 +108,12 @@ WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip 
 
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3-Linux-x86_64.sh \
+         -q -O /tmp/cmake-install.sh && \
+    chmod u+x /tmp/cmake-install.sh && \
+    mkdir /usr/bin/cmake && \
+    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
+    rm /tmp/cmake-install.sh
 
 COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
 COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
@@ -146,8 +146,10 @@ RUN python3 -m pip install pip --no-cache-dir \
 WORKDIR /tmp
 COPY ./requirements.20.08.txt /tmp
 RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.20.08.txt && \
+    python3 -m pip uninstall -y tensorboard tensorboard-plugin-wit tensorflow tensorflow-estimator && \
     rm -f /tmp/*.whl /tmp/requirements.20.08.txt
 
+# install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
     apt-get install -y \
     	openjdk-8-jdk \
@@ -184,10 +186,11 @@ RUN git clone https://github.com/kakao/khaiii.git  && \
     cd build && \
     cmake .. && \
     make all && \
-    make resource && \
+    make large_resource && \
     make install && \
     make package_python && \
-    python3 -m pip install package_python
+    cd package_python && \
+    python3 -m pip install .
 
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
@@ -218,13 +221,6 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3-Linux-x86_64.sh \
-         -q -O /tmp/cmake-install.sh && \
-    chmod u+x /tmp/cmake-install.sh && \
-    mkdir /usr/bin/cmake && \
-    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
-    rm /tmp/cmake-install.sh
-
 WORKDIR /tmp
 ENV OPENCV_VERSION="4.4.0"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
@@ -247,7 +243,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D WITH_V4L=ON \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.3.0/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.4.0/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
@@ -279,10 +275,8 @@ RUN git clone --recursive https://github.com/Microsoft/LightGBM && \
     cd ../python-package && \
     python3 setup.py install --precompile
 
-
-WORKDIR /root
-
 # Install Open MPI
+WORKDIR /root
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
     wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.4.tar.gz && \
@@ -293,33 +287,29 @@ RUN mkdir /tmp/openmpi && \
     make install && \
     ldconfig && \
     rm -rf /tmp/openmpi*
-
 # Install OpenSSH for MPI to communicate between containers
 RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
     mkdir -p /var/run/sshd
-
 # Allow OpenSSH to talk to containers without asking for confirmation
 RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
     echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
     mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
-
 # Create a wrapper for OpenMPI to allow running as root by default
 RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
     echo '#!/bin/bash' > /usr/local/bin/mpirun && \
     echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
     chmod a+x /usr/local/bin/mpirun
-
 # Configure OpenMPI to run good defaults:
 RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
-
 # Install OpenSSH for MPI to communicate between containers
 RUN mkdir -p /var/run/sshd
-
 # Allow OpenSSH to talk to containers without asking for confirmation
 RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
     echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
     mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
 
+# install git-lfs
+WORKDIR /tmp
 RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.11.0.tar.gz && \
     tar -zxf git-lfs-linux-amd64-v2.11.0.tar.gz && \
     bash install.sh && \
@@ -340,7 +330,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter lab build
-
 
 RUN apt autoclean && \
     rm -rf /var/lib/apt/lists/* && \	
