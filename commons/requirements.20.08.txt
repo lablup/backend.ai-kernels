@@ -54,6 +54,7 @@ docutils==0.15.2
 dtreeviz==0.8.1
 EasyProcess==0.3
 ecos==2.0.7.post1
+elegy==0.1.5
 entrypoints==0.3
 ephem==3.7.6.0
 fastrlock==0.4
