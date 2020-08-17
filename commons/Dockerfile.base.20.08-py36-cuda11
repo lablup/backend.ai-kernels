@@ -131,8 +131,8 @@ RUN mkdir -p ${STAGE_DIR} && \
     cd ${STAGE_DIR}/nv_peer_memory && \
     ./build_module.sh && \
     cd ${STAGE_DIR} && \
-    tar xzf ${STAGE_DIR}/nvidia-peer-memory_1.0.orig.tar.gz && \
-    cd ${STAGE_DIR}/nvidia-peer-memory-1.0 && \
+    tar xzf ${STAGE_DIR}/nvidia-peer-memory_1.1.orig.tar.gz && \
+    cd ${STAGE_DIR}/nvidia-peer-memory-1.1 && \
     dpkg-buildpackage -us -uc && \
     dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.1-0_all.deb
 
@@ -179,7 +179,7 @@ RUN python3 -m pip install pip --no-cache-dir \
 WORKDIR /tmp
 COPY ./requirements.20.08.txt /tmp
 RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.20.08.txt && \
-    python3 -m pip uninstall tensorboard tensorboard-plugin-wit tensorflow tensorflow-gpu tensorflow-estimator && \
+    python3 -m pip uninstall -y tensorboard tensorboard-plugin-wit tensorflow tensorflow-gpu tensorflow-estimator && \
     rm -f /tmp/*.whl /tmp/requirements.20.08.txt
 
 # install NLP packages *mecab-ko & khai*
@@ -241,7 +241,7 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3-Linux-x86_64.sh \
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.1/cmake-3.18.1-Linux-x86_64.sh \
          -q -O /tmp/cmake-install.sh && \
     chmod u+x /tmp/cmake-install.sh && \
     mkdir /usr/bin/cmake && \
