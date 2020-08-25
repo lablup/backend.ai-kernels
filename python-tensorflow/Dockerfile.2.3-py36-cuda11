@@ -90,10 +90,9 @@ ENV WHL_DIR=/tmp/pip3
 COPY .bazelrc /root/.mkl.bazelrc
 RUN echo "import /root/.mkl.bazelrc" >>/root/.bazelrc
 
+ENV TF_NEED_TENSORRT=1
 ENV TF_CUDA_COMPUTE_CAPABILITIES sm_35,sm_37,sm_52,sm_60,sm_61,sm_70,sm_75,compute_70,compute_75,compute_80
 
-#ENV TF_NEED_TENSORRT=1
-#ENV TENSORRT_INSTALL_PATH=/usr/local/tensorrt
 RUN tensorflow/tools/ci_build/builds/configured GPU  \
       bazel --bazelrc=/root/.bazelrc build \
         -c opt \
@@ -142,7 +141,6 @@ RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
 	    nni==1.6 \
 	    scikit-nni==0.2.1
-
 
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
     	    https://developer.download.nvidia.com/compute/redist \
