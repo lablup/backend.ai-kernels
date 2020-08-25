@@ -38,7 +38,7 @@ RUN python3 -m pip install --no-cache-dir \
     	    tensorwatch==0.9.1 \
 	    tensorflow-hub==0.8.0 \
 	    tensorflow-addons==0.10.0 \
-	    tensorflow_text==2.2.1 \
+	    tensorflow_text==2.3.0 \
 	    neural-structured-learning==1.1.0 \
 	    tensorflow_constrained_optimization \
 	    tensorflow-graphics-gpu==1.0.0 \
