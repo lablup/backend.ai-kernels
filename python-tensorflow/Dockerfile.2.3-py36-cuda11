@@ -90,9 +90,10 @@ ENV WHL_DIR=/tmp/pip3
 COPY .bazelrc /root/.mkl.bazelrc
 RUN echo "import /root/.mkl.bazelrc" >>/root/.bazelrc
 
-#ENV CUDA_FORCE_PTX_JIT 1
-ENV TF_CUDA_COMPUTE_CAPABILITIES 3.5,3.7,5.2,6.0,6.1,7.0 ,7.5,8.0
+ENV TF_CUDA_COMPUTE_CAPABILITIES sm_35,sm_37,sm_52,sm_60,sm_61,sm_70,sm_75,compute_70,compute_75,compute_80
 
+#ENV TF_NEED_TENSORRT=1
+#ENV TENSORRT_INSTALL_PATH=/usr/local/tensorrt
 RUN tensorflow/tools/ci_build/builds/configured GPU  \
       bazel --bazelrc=/root/.bazelrc build \
         -c opt \
