@@ -51,7 +51,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
 	    tf-slim==1.1.0 \
 	    tensorflow-plot==0.3.2 \
 	    tensorflow-lattice==2.0.5 \
-	    tensorflow-io==0.13.0  \
+	    tensorflow-io==0.15.0  \
 	    tfx==0.22.0 \
 	    tfx-bsl==0.22.1 
 RUN python3 -m pip install --no-cache-dir \
