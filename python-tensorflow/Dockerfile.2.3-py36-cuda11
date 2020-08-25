@@ -29,7 +29,7 @@ RUN mkdir /bazel && \
 RUN python3 -m pip install --no-cache-dir \
     	    mesh-tensorflow==0.1.16 \
 	    cachetools==3.1.0 \
-	    tensorflow-transform==0.22.0 \
+	    tensorflow-transform==0.23.0 \
 	    tensorflow_model_analysis==0.22.2 \
 	    ngraph-tensorflow-bridge==0.18.0 \
 	    tensorflow-metadata==0.22.2 \
@@ -89,6 +89,9 @@ ENV WHL_DIR=/tmp/pip3
 # --copt=-march="avx2" \
 COPY .bazelrc /root/.mkl.bazelrc
 RUN echo "import /root/.mkl.bazelrc" >>/root/.bazelrc
+
+#ENV CUDA_FORCE_PTX_JIT 1
+ENV TF_CUDA_COMPUTE_CAPABILITIES 3.5,3.7,5.2,6.0,6.1,7.0 ,7.5,8.0
 
 RUN tensorflow/tools/ci_build/builds/configured GPU  \
       bazel --bazelrc=/root/.bazelrc build \
