@@ -52,7 +52,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
 	    tensorflow-plot==0.3.2 \
 	    tensorflow-lattice==2.0.5 \
 	    tensorflow-io==0.15.0  \
-	    tfx==0.22.0 \
+	    tfx==0.22.1 \
 	    tfx-bsl==0.22.1 
 RUN python3 -m pip install --no-cache-dir \
 	    tensorflow_ranking==0.3.1 \
