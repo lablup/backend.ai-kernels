@@ -145,7 +145,20 @@ RUN python3 -m pip install --no-cache-dir \
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
     	    https://developer.download.nvidia.com/compute/redist \
 	    nvidia-dali-cuda110
+#RUN python3 -m pip install --no-cache-dir \
+#    	    --extra-index-url https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda110 
+#WORKDIR /tmp
+#RUN git clone  --recursive https://github.com/NVIDIA/DALI && \
+#    cd DALI && \
+#    mkdir build && \
+#    cd build && \
+#    cmake -D CMAKE_BUILD_TYPE=Release .. && \
+#    make -j"$(nproc)" && \
+#    cd .. && \
+#    python3 -m pip install --no-cache-dir dali/python
+    	
 
+	    
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "TensorFlow 2.3 on Python 3.6 & CUDA 11.0" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
