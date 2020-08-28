@@ -6,6 +6,7 @@ ARG LIBNVINFER=6.0.1-1
 ARG LIBNVINFER_MAJOR_VERSION=6
 ARG CUDNN=7.6.5.32-1
 ENV NCCL_VERSION=2.7.6-1+cuda10.1
+ENV CUDNN_VERSION 7.6.5.32
 
 # Python 2.7 or 3.6 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
@@ -42,7 +43,6 @@ RUN apt-get update -y && \
         libssl-dev \
         libmpdec2 \
 	pdsh curl net-tools \
-	iputils-ping \
         cuda-command-line-tools-${CUDA/./-} \
         libcublas10=10.2.1.243-1 \ 
         libcublas-dev=10.2.1.243-1 \
@@ -57,6 +57,7 @@ RUN apt-get update -y && \
 	libcudnn7-dev=${CUDNN}+cuda${CUDA} \
         libnccl2=${NCCL_VERSION} \
         libnccl-dev=${NCCL_VERSION} \
+	iputils-ping \
         libcurl3-dev \
         libfreetype6-dev \
         libhdf5-serial-dev \
@@ -74,6 +75,9 @@ RUN apt-get update -y && \
 	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
         python${PYTHON_VERSION} \
         python${PYTHON_VERSION}-dev \
+	libxml2-dev \
+	libxslt1-dev \
+	libasound2-dev \
 	libnuma-dev \
 	libjasper-dev \
         libtiff-dev \
@@ -97,7 +101,7 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
     && ldconfig
 
-# Install CUDA-10.1 + cuDNN 7.6.0
+# Install CUDA-10.1 + cuDNN 7.6
 RUN ln -s /usr/local/cuda-10.1 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
@@ -107,12 +111,17 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get install -y nodejs
 
 RUN apt-get update && \
-        apt-get install -y --no-install-recommends libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
+    apt-get install -y --no-install-recommends \
+        libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
-        libnvinfer-plugin${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
-        && apt-get clean \
-        && rm -rf /var/lib/apt/lists/*
+        libnvinfer-plugin${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add OpenCL ICD files for LightGBM
+RUN mkdir -p /etc/OpenCL/vendors && \
+    echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
 
 # OFED
 ENV STAGE_DIR=/tmp
@@ -131,10 +140,10 @@ RUN mkdir -p ${STAGE_DIR} && \
     cd ${STAGE_DIR}/nv_peer_memory && \
     ./build_module.sh && \
     cd ${STAGE_DIR} && \
-    tar xzf ${STAGE_DIR}/nvidia-peer-memory_1.0.orig.tar.gz && \
-    cd ${STAGE_DIR}/nvidia-peer-memory-1.0 && \
+    tar xzf ${STAGE_DIR}/nvidia-peer-memory_1.1.orig.tar.gz && \
+    cd ${STAGE_DIR}/nvidia-peer-memory-1.1 && \
     dpkg-buildpackage -us -uc && \
-    dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.0-9_all.deb
+    dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.1-0_all.deb
 
 RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
         apt-get install -y python${PYTHON_VERSION}-distutils python-apt ; \
@@ -179,8 +188,15 @@ RUN python3 -m pip install pip --no-cache-dir \
 WORKDIR /tmp
 COPY ./requirements.20.08.txt /tmp
 RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.20.08.txt && \
+    python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
+    python3 -m pip uninstall -y tensorboard tensorboard-plugin-wit tensorflow tensorflow-gpu \
+        tensorflow-estimator tensorflow-addons tensorflow-datasets \
+	tensorflow-gan tensorflow-hub tensorflow-metadata \
+	tensorflow-probability 	tensorflow-text \
+	tensorflow-model-analysis tensorflow-serving-api && \
     rm -f /tmp/*.whl /tmp/requirements.20.08.txt
 
+# install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
     apt-get install -y \
     	openjdk-8-jdk \
@@ -239,7 +255,7 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3-Linux-x86_64.sh \
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.1/cmake-3.18.1-Linux-x86_64.sh \
          -q -O /tmp/cmake-install.sh && \
     chmod u+x /tmp/cmake-install.sh && \
     mkdir /usr/bin/cmake && \
@@ -247,7 +263,7 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3
     rm /tmp/cmake-install.sh
 
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.3.0"
+ENV OPENCV_VERSION="4.4.0"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -272,7 +288,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D WITH_V4L=ON \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.3.0/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.4.0/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
@@ -325,30 +341,39 @@ RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_confi
     echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
     mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
 
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
+
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+
+# Install OpenSSH for MPI to communicate between containers
+RUN mkdir -p /var/run/sshd
+
+# Allow OpenSSH to talk to containers without asking for confirmation
+RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
+    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
+    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
+
+# install git-lfs
+WORKDIR /tmp
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    bash install.sh && \
+    rm -rf /tmp/*
+
 COPY ./service-defs /etc/backend.ai/service-defs
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.4.1/code-server-3.4.1-linux-amd64.tar.gz \
   | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.4.1-linux-amd64 /usr/local/lib/code-server-3.4.1 && \
     ln -s /usr/local/lib/code-server-3.4.1/bin/code-server /usr/local/bin/code-server
-#COPY ./vscode-exts.tar.gz /etc/backend.ai/vscode-exts.tar.gz
-
-#RUN mkdir -p /etc/backend.ai/vscode-exts && \
-#    tar xvzf /etc/backend.ai/vscode-exts.tar.gz -C /etc/backend.ai/vscode-exts && \
-#    rm -rf /etc/backend.ai/vscode-exts.tar.gz
-
-RUN apt autoclean && \
-    rm -rf /var/lib/apt/lists/* && \	
-    rm -rf /root/.cache && \
-    rm -rf /tmp/*
-
-# Jupyter notebook extension
-RUN mkdir -p /home/work/.jupyter/nbextension
-WORKDIR /home/work/.jupyter/nbextension
 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
-    jupyter contrib nbextension install && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
 #    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
@@ -358,14 +383,16 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
 #    jupyter labextension install @jupyterlab/hdf5 
-    jupyter nbextension enable --py tensorflow_model_analysis \
+    jupyter nbextension enable execute_time/ExecuteTime && \
+    jupyter nbextension enable toc2/main && \
+    jupyter labextension install @pyviz/jupyterlab_pyviz && \
+    jupyter labextension install @bokeh/jupyter_bokeh && \
     jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
 
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.11.0.tar.gz && \
-    tar -zxf git-lfs-linux-amd64-v2.11.0.tar.gz && \
-    mv git-lfs-2.11.0/git-lfs /usr/bin/ && \
-    rm -rf git-lfs-2.11.0 && \
-    rm -rf git-lfs-linux-amd64-2.11.0.tar.gz
+RUN apt autoclean && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
 
 WORKDIR /home/work
