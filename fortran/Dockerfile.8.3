@@ -24,11 +24,13 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
+COPY ./service-defs /etc/backend.ai/service-defs
+
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "gFrotran 8.3 on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
-
+# Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
@@ -37,8 +39,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090"
-COPY policy.yml /etc/backend.ai/jail/policy.yml
+      ai.backend.service-ports="jupyter:http:8080,vscode:http:8180,jupyterlab:http:8090"
 
 # vim: ft=dockerfile
 
