@@ -173,9 +173,20 @@ RUN python3 -m pip install --no-cache-dir --upgrade -Iv \
 	    matplotlib==3.1.1 
 
 WORKDIR /tmp
-RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
-    cd OpenBLAS && \
-    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
+RUN mkdir -p /tmp/objconv && \
+    cd /tmp/objconv && \
+    curl -O "https://raw.githubusercontent.com/MacPython/openblas-libs/master/objconv/source.zip" && \
+    unzip source.zip && \
+    g++ -O1 -o objconv *.cpp
+WORKDIR /tmp/openblas
+ENV CFLAGS=-Wl,-strip-all \
+    CXXFLAGS=-Wl,-strip-all \
+    FFLAGS=-Wl,-strip-all
+    
+RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git /tmp/openblas && \
+    cd /tmp/openblas && \
+    make DYNAMIC_ARCH=1 NO_AFFINITY=1 USE_OPENMP=0 NUM_THREADS=64 BINARY=64 INTERFACE64=1 SYMBOLSUFFIX=64_ OBJCONV=/tmp/objconv/objconv FC=gfortran > /dev/null 2>&1 && \
+    make PREFIX=/opt/OpenBLAS INTERFACE64=1 SYMBOLSUFFIX=64_ OBJCONV=/tmp/objconv/objconv install  && \
     make install
 RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
