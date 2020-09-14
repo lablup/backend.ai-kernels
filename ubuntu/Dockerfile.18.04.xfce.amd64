@@ -81,22 +81,49 @@ RUN ln -sf /usr/local/lib/web/frontend/static/websockify /usr/local/lib/web/fron
 RUN ln -sf /usr/local/lib/web/frontend/static/vnc.html /usr/local/lib/web/frontend/static/index.html
 RUN ln -sf /usr/local/lib/web/frontend/static/novnc/vnc.html /usr/local/lib/web/frontend/static/novnc/index.html
 
+####### Install CUDA for GPU acceleration
+RUN apt update \
+    && apt-get -y --install-recommends install wget dirmngr \
+    && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin \
+    && mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600 \
+    && wget http://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb \
+    && dpkg -i cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb \
+    && apt-key add /var/cuda-repo-10-2-local-10.2.89-440.33.01/7fa2af80.pub \
+    && apt-get -y update \
+    && apt-get -y install cuda \
+    && apt autoclean -y \
+    && apt autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+####### XRDP
+RUN apt update \
+    && apt install -y --no-install-recommends --allow-unauthenticated \
+        xrdp \
+    && apt autoclean -y \
+    && apt autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+####### Last setup
+
 EXPOSE 80
 
 ENV HOME=/home/work \
     SHELL=/bin/bash
-HEALTHCHECK --interval=30s --timeout=5s CMD curl --fail http://127.0.0.1:6079/api/health
+#HEALTHCHECK --interval=30s --timeout=5s CMD curl --fail http://127.0.0.1:6079/api/health
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.features="uid-match" \
+      ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device="0" \
+      ai.backend.resource.min.cuda.shares="0" \
       ai.backend.resource.preferred.shmem="512m" \
       ai.backend.base-distro="ubuntu18.04" \
       ai.backend.runtime-type="app" \
-      ai.backend.service-ports="xfce:http:80,vnc:http:5900"
+      ai.backend.service-ports="xfce:http:80,vnc:http:5900,xrdp:http:3389"
 
 COPY ./service-defs /etc/backend.ai/service-defs
 COPY policy.yml /etc/backend.ai/jail/policy.yml
