@@ -111,13 +111,17 @@ RUN jupyter nbextensions_configurator enable && \
 #    jupyter labextension install @jupyterlab/hdf5 
     jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
+RUN ln -s /usr/lib/x86_64-linux-gnu/libffi.so.7 /usr/lib/x86_64-linux-gnu/libffi.so.6
+#RUN ln -s /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libssl.so.1.0.0
+
+COPY ./service-defs /etc/backend.ai/service-defs
 
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="256m" \
-      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.base-distro="ubuntu20.04" \
       ai.backend.runtime-type="r" \
       ai.backend.runtime-path="/usr/bin/python3" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090"

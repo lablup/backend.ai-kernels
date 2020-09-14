@@ -8,7 +8,7 @@ ENV TORCHVISION_VERSION=0.6.1
 ENV TORCHAUDIO_VERSION=0.5.1
 ENV TORCHTEXT_VERSION=0.6.0
 ENV TENSORBOARDX_VERSION=2.1
-ENV MXNET_VERSION=1.6.0
+ENV MXNET_VERSION=1.6.0.post0
 ARG CUDA=10.1
 ARG LIBNVINFER=6.0.1-1
 ARG LIBNVINFER_MAJOR_VERSION=6
@@ -99,6 +99,9 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
 	    nni==1.7 \
 	    scikit-nni==0.2.1
 
+# Install MLFlow
+RUN python3 -m pip install --no-cache-dir mlflow
+
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "Lablup FF 20.08 on Python 3.6 (CUDA 10.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
@@ -114,7 +117,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:http:5000,nniboard:http:8080"
 
 WORKDIR /home/work
 # vim: ft=dockerfile

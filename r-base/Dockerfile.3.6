@@ -112,6 +112,8 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
 
+COPY ./service-defs /etc/backend.ai/service-defs
+
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
