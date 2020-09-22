@@ -1,17 +1,201 @@
 FROM nvcr.io/nvidia/pytorch:20.08-py3
 # NVIDIA PyTorch with Python 3.6 (CONDA)
 
-ENV PYTHONUNBUFFERED=1 \
-    PATH=/opt/conda/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
+RUN apt-get update && \
+    apt-get install -y libsm6 libxext6 libxrender-dev
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    MPLBACKEND=Svg \
+    PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
+    PATH="/usr/local/nvm/versions/node/v14.8.0/bin:/opt/conda/bin:/opt/cmake-3.14.6-Linux-x86_64/bin/:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
-# ipython/jupyter is already installed in the Anaconda Python installed at /opt/conda.
-RUN /opt/conda/bin/python3 -m pip install jupyterlab
+RUN update-alternatives --install /opt/conda/bin/python python /opt/conda/bin/python3 2
 
-# Install ipython kernelspec
+# install NLP packages *mecab-ko & khai*
+RUN apt-get update && \
+    apt-get install -y \
+    	openjdk-8-jdk \
+	libasound2-dev \
+	gfortran \
+	automake \
+	&& \
+    cd /tmp && \
+    curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
+    tar zxfv mecab-0.996-ko-0.9.2.tar.gz && \
+    cd mecab-0.996-ko-0.9.2 && \
+    ./configure && \
+    make -j$(nproc) && \
+    make check && \
+    make install
+
+RUN echo "Install mecab-ko-dic" && \
+    cd /tmp && \
+    ldconfig && \
+    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    tar -zxvf mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    cd mecab-ko-dic-2.1.1-20180720 && \
+    ./autogen.sh && \
+    ./configure && \
+    make -j$(nproc) && \
+    sh -c 'echo "dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic" > /usr/local/etc/mecabrc' && \
+    make install && \
+    cd /tmp && \
+    git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
+    /opt/conda/bin/python3 -m pip install /tmp/mecab-python-0.996
+
+# OpenCV
+RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
+   apt-get install -y \
+	libgstreamer1.0-dev \
+	libgstreamer-plugins-base1.0-dev \
+	libgtk-3-dev \
+        libtbb-dev \
+	libatlas-base-dev \
+	libdc1394-22-dev \
+	libxvidcore-dev \
+	libfaac-dev \
+	libmp3lame-dev \
+	libtheora-dev \
+	libvorbis-dev \
+	libxvidcore-dev \
+	libopencore-amrnb-dev libopencore-amrwb-dev \
+	libavresample-dev \
+	x264 \
+	libx264-dev \
+	v4l-utils \	
+	libprotobuf-dev protobuf-compiler \
+	libgoogle-glog-dev libgflags-dev \
+	libgphoto2-dev \
+	libeigen3-dev \
+	libhdf5-dev \	
+    && \	
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/
+
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.1/cmake-3.18.1-Linux-x86_64.sh \
+         -q -O /tmp/cmake-install.sh && \
+    chmod u+x /tmp/cmake-install.sh && \
+    mkdir -p /usr/bin/cmake && \
+    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
+    rm /tmp/cmake-install.sh
+
+WORKDIR /tmp
+ENV OPENCV_VERSION="4.4.0"
+RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+    wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
+    unzip ${OPENCV_VERSION}.zip && \
+    unzip opencv-contrib.zip && \
+    mkdir opencv-${OPENCV_VERSION}/cmake_binary && \
+    cd opencv-${OPENCV_VERSION}/cmake_binary && \
+    cmake \
+      -DCMAKE_BUILD_TYPE=RELEASE \
+      -D BUILD_TIFF=ON \
+      -D BUILD_opencv_java=OFF \
+      -D WITH_CUDA=ON \
+      -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.0 \
+      -D ENABLE_FAST_MATH=1 \
+      -D CUDA_FAST_MATH=1 \
+      -D WITH_CUBLAS=1 \
+      -D WITH_OPENGL=ON \
+      -D WITH_OPENCL=ON \
+      -D WITH_IPP=ON \
+      -D WITH_TBB=ON \
+      -D WITH_EIGEN=ON \
+      -D WITH_V4L=ON \
+      -D BUILD_TESTS=OFF \
+      -D BUILD_PERF_TESTS=OFF \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.4.0/modules" \
+      -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
+      -D PYTHON_EXECUTABLE=$(which python3) \
+      -D PYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
+      -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
+      .. 2>&1 | tee cmake_messages.txt && \
+    make -j$(nproc) && \
+    make install && \
+    cd /tmp && \
+    /opt/conda/bin/python3 -m pip install --no-cache-dir opencv-python && \
+    rm -fr opencv* 
+
+
+WORKDIR /tmp
+RUN curl https://bootstrap.pypa.io/get-pip.py | /opt/conda/bin/python3 && \
+    /opt/conda/bin/python3 -m pip install --no-cache-dir -U setuptools pip 
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs
+
+COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
+COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
+
+WORKDIR /tmp
+RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
+    cd OpenBLAS && \
+    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
+    make install
+RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
+    cd /tmp/scs-python && \
+    /opt/conda/bin/python3 setup.py install --scs --gpu
+
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
+    	    Cython==0.29.20 \
+	    /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
+	    /tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
+	    tornado==6.0.4 \
+	    pystan==2.19.1.1 \
+	    pycairo==1.19.0 \
+	    jupyter \
+	    cftime \
+	    python-language-server[all] \	    
+	    matplotlib==3.1.1 
+
+WORKDIR /tmp
+COPY ./requirements.20.08.txt /tmp
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir --ignore-installed -r requirements.20.08.txt && \
+    /opt/conda/bin/python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
+    rm -f /tmp/*.whl /tmp/requirements.20.08.txt
+
+# install git-lfs
+WORKDIR /tmp
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    bash install.sh && \
+    rm -rf /tmp/*
+
+COPY ./service-defs /etc/backend.ai/service-defs
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.4.1/code-server-3.4.1-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-3.4.1-linux-amd64 /usr/local/lib/code-server-3.4.1 && \
+    ln -s /usr/local/lib/code-server-3.4.1/bin/code-server /usr/local/bin/code-server
+
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
+    jupyter serverextension enable --py jupyter_lsp && \
+    jupyter labextension install --no-build @jupyterlab/toc && \
+    jupyter nbextension enable execute_time/ExecuteTime && \
+    jupyter nbextension enable toc2/main && \
+    jupyter labextension install @pyviz/jupyterlab_pyviz && \
+    jupyter labextension install @bokeh/jupyter_bokeh && \
+    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+    jupyter lab build
+
+RUN apt autoclean && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "Python 3.6 CONDA (NGC/PyTorch 20.08) on Backend.AI" && \
+        --display-name "PyTorch 1.6 (NGC 20.08/Python 3.6 Conda) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
@@ -19,12 +203,15 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=0 \
-      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,tensorboard:http:6006"
+      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
 
+WORKDIR /home/work
 # vim: ft=dockerfile
