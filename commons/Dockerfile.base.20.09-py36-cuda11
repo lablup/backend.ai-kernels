@@ -7,6 +7,8 @@ ARG LIBNVINFER_MAJOR_VERSION=7
 ARG CUDNN=8.0.3.33-1
 ENV NCCL_VERSION=2.7.8-1+cuda11.0
 ENV CUDNN_VERSION 8.0.3.33
+ENV MKL_VERSION=2020.3
+ENV MKL_BUILD=279
 
 # Python 2.7 or 3.6 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
@@ -113,6 +115,13 @@ RUN apt-get update && \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+WORKDIR /tmp
+RUN mkdir -p /opt/intel/lib && \
+    curl -fsSL https://anaconda.org/intel/mkl-static/${MKL_VERSION}/download/linux-64/mkl-static-${MKL_VERSION}-intel_${MKL_BUILD}.tar.bz2 | tar xjv && \
+    mv lib/* /opt/intel/lib/ && \
+    curl -fsSL https://anaconda.org/intel/mkl-include/${MKL_VERSION}/download/linux-64/mkl-include-${MKL_VERSION}-intel_${MKL_BUILD}.tar.bz2 | tar xjv && \
+    mv include /opt/intel/
 
 # Add OpenCL ICD files for LightGBM
 RUN mkdir -p /etc/OpenCL/vendors && \
