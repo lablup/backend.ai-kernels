@@ -72,6 +72,7 @@ RUN apt-get update -y && \
 	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
         python${PYTHON_VERSION} \
         python${PYTHON_VERSION}-dev \
+	intel-mkl-2020.3-111 intel-ipp-2020.2-108 intel-tbb-2020.3-108 intel-daal-2020.2-108 intel-mpi-2019.8-108 \
 	libxml2-dev \
 	libxslt1-dev \
 	libasound2-dev \
@@ -92,6 +93,11 @@ RUN apt-get update -y && \
 	fonts-nanum-coding \
 	fonts-nanum-extra \
 	&& \
+    echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
+    echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
+    echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
+    echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
+    ldconfig && \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete 
 
 RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
