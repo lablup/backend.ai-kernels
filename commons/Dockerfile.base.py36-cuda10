@@ -108,19 +108,19 @@ RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.5 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get update -y && \
-    apt-get install -y nodejs
-
 RUN apt-get update && \
-    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
 	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-    
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends nodejs
+
+
 # Add OpenCL ICD files for LightGBM
 RUN mkdir -p /etc/OpenCL/vendors && \
     echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
