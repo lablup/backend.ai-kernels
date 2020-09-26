@@ -211,12 +211,13 @@ WORKDIR /tmp
 COPY ./requirements.txt /tmp
 RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.txt && \
     python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
-    python3 -m pip uninstall -y tensorboard tensorboard-plugin-wit tensorflow tensorflow-gpu \
+    python3 -m pip uninstall -y \
+        tensorboard tensorboard-plugin-wit tensorflow \
         tensorflow-estimator tensorflow-addons tensorflow-datasets \
 	tensorflow-gan tensorflow-hub tensorflow-metadata \
 	tensorflow-probability 	tensorflow-text \
 	tensorflow-model-analysis tensorflow-serving-api \
-	pytorch && \
+	torch && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install NLP packages *mecab-ko & khai*
