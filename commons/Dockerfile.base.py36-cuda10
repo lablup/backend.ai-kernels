@@ -200,14 +200,11 @@ RUN cd /tmp && \
     echo "mkl_libs = mkl_rt" >> site.cfg && \
     echo "lapack_libs =" >> site.cfg && \
     python3 -m pip install -U --no-cache-dir /tmp/numpy-1.19.2-cp36-cp36m-linux_x86_64.whl && \
-#    python3 -m pip install --verbose --no-build-isolation --editable . && \
-#    python3 setup.py bdist_wheel -d /tmp && \ 
     python3 setup.py install 
 
 RUN python3 -m pip install pip --no-cache-dir \
     	    Cartopy==0.18.0 \
 	    notebook==6.0.3 
-
 
 WORKDIR /tmp
 COPY ./requirements.txt /tmp
@@ -217,7 +214,8 @@ RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.txt && \
         tensorflow-estimator tensorflow-addons tensorflow-datasets \
 	tensorflow-gan tensorflow-hub tensorflow-metadata \
 	tensorflow-probability 	tensorflow-text \
-	tensorflow-model-analysis tensorflow-serving-api && \
+	tensorflow-model-analysis tensorflow-serving-api \
+	pytorch && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install NLP packages *mecab-ko & khai*
