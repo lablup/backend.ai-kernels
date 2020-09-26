@@ -9,6 +9,8 @@ ENV NCCL_VERSION=2.6.4-1+cuda10.0
 ENV CUDNN_VERSION 7.6.5.32
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
+ENV NUMPY_VERSION 1.19.2
+ENV SCIPY_VERSION 1.5.2
 
 # Python 2.7 or 3.6 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
@@ -17,30 +19,37 @@ ENV PYTHON_VERSION=${python}
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include:/usr/local/lib:$LD_LIBRARY_PATH" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    LIBRARY_PATH="/usr/local/cuda/lib64/stubs:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
+WORKDIR /tmp
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends software-properties-common && \
-    add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
-    apt-get update -y && \
-    apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
+    apt-get install -y --no-install-recommends \
         build-essential \
-	ca-certificates \
         gcc g++ make \
 	gfortran \
+        wget zip unzip \
+        software-properties-common && \
+    add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
+    wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
+    apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
+	ca-certificates \
 	dkms \
         git \
         curl \
         vim \
 	yasm \
-        wget zip unzip \
-        software-properties-common \
   	openssh-client openssh-server \
         libssl-dev \
         libmpdec2 \
@@ -77,19 +86,19 @@ RUN apt-get update -y && \
 	libboost-dev \
 	libboost-system-dev \
 	libboost-filesystem-dev \
+	openblas-devel lapack-devel \
 	xvfb \
 	fonts-nanum \
 	fonts-nanum-coding \
 	fonts-nanum-extra \
 	&& \
-    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
-    rm /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a
+    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete 
 
 RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
     && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
     && ldconfig
 
-# Install CUDA-10.0 + cuDNN 8.0.3
+# Install CUDA-10.0 + cuDNN 7.6.5
 RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.5 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
@@ -99,21 +108,14 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get install -y nodejs
 
 RUN apt-get update && \
+    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
 	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
-        libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-WORKDIR /tmp
-RUN mkdir -p /opt/intel/lib && \
-    curl -fsSL https://anaconda.org/intel/mkl-static/${MKL_VERSION}/download/linux-64/mkl-static-${MKL_VERSION}-intel_${MKL_BUILD}.tar.bz2 | tar xjv && \
-    mv lib/* /opt/intel/lib/ && \
-    curl -fsSL https://anaconda.org/intel/mkl-include/${MKL_VERSION}/download/linux-64/mkl-include-${MKL_VERSION}-intel_${MKL_BUILD}.tar.bz2 | tar xjv && \
-    mv include /opt/intel/
-
+    
 # Add OpenCL ICD files for LightGBM
 RUN mkdir -p /etc/OpenCL/vendors && \
     echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
@@ -146,21 +148,12 @@ RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
-RUN apt-get update -y && \
-    apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
-       libatlas-base-dev libopenblas-dev
-       
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip 
 
-COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
-COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
-
 RUN python3 -m pip install --no-cache-dir --upgrade -Iv \
-    	    Cython==0.29.20 \
-	    /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
-	    /tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
+    	    Cython==0.29.21 \
 	    tornado==6.0.4 \
 	    pystan==2.19.1.1 \
 	    pycairo==1.19.0 \
@@ -170,26 +163,56 @@ RUN python3 -m pip install --no-cache-dir --upgrade -Iv \
 WORKDIR /tmp
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
-    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
+    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 && \
     make install
+
 RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
-    
+
+RUN cd /tmp && \
+    git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
+    cd numpy && \
+    git checkout -b v${NUMPY_VERSION} && \
+    cp site.cfg.example site.cfg && \
+    echo "[mkl]" >> site.cfg && \
+    echo "include_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include/" >> site.cfg && \
+    echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
+    echo "mkl_libs = mkl_rt" >> site.cfg && \
+    echo "lapack_libs =" >> site.cfg && \
+    python3 setup.py bdist_wheel -d /tmp 
+
+
+# Install scipy
+RUN cd /tmp && \
+    git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
+    cd scipy && \
+    git checkout -b v${SCIPY_VERSION} && \  
+    cp site.cfg.example site.cfg && \
+    echo "[mkl]" >> site.cfg && \
+    echo "include_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include/" >> site.cfg && \
+    echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
+    echo "mkl_libs = mkl_rt" >> site.cfg && \
+    echo "lapack_libs =" >> site.cfg && \
+    python3 -m pip install -U --no-cache-dir /tmp/numpy-1.19.2-cp36-cp36m-linux_x86_64.whl && \
+#    python3 -m pip install --verbose --no-build-isolation --editable . && \
+    python3 setup.py bdist_wheel -d /tmp
+
 RUN python3 -m pip install pip --no-cache-dir \
     	    Cartopy==0.18.0 \
 	    notebook==6.0.3 
 
+
 WORKDIR /tmp
-COPY ./requirements.20.09.txt /tmp
-RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.20.09.txt && \
+COPY ./requirements.txt /tmp
+RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.txt && \
     python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
     python3 -m pip uninstall -y tensorboard tensorboard-plugin-wit tensorflow tensorflow-gpu \
         tensorflow-estimator tensorflow-addons tensorflow-datasets \
 	tensorflow-gan tensorflow-hub tensorflow-metadata \
 	tensorflow-probability 	tensorflow-text \
 	tensorflow-model-analysis tensorflow-serving-api && \
-    rm -f /tmp/*.whl /tmp/requirements.20.09.txt
+    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
@@ -311,7 +334,7 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     git clone --recursive --branch stable --depth 1 https://github.com/microsoft/LightGBM && \
     cd LightGBM && mkdir build && cd build && \
     cmake -DUSE_GPU=1 -DOpenCL_LIBRARY=/usr/local/cuda/lib64/libOpenCL.so -DOpenCL_INCLUDE_DIR=/usr/local/cuda/include/ .. && \
-    make OPENCL_HEADERS=/usr/local/cuda-11.0/targets/x86_64-linux/include LIBOPENCL=/usr/local/cuda-11.0/targets/x86_64-linux/lib -j$(nproc) && \
+    make OPENCL_HEADERS=/usr/local/cuda-10.0/targets/x86_64-linux/include LIBOPENCL=/usr/local/cuda-10.0/targets/x86_64-linux/lib -j$(nproc) && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
 
