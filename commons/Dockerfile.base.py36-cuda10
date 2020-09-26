@@ -91,17 +91,18 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	fonts-nanum-coding \
 	fonts-nanum-extra \
 	&& \
-    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete 
-
+    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
+    rm -fr /var/lib/apt/lists/* && \
+    
 RUN echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
     ldconfig 
 
-RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
-    && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
-    && ldconfig
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
+    ldconfig
 
 # Install CUDA-10.0 + cuDNN 7.6.5
 RUN ln -s /usr/local/cuda-10.0 /usr/local/cuda && \
@@ -233,10 +234,9 @@ RUN apt-get update && \
     make check && \
     make install
 
-RUN echo "Install mecab-ko-dic" && \
-    cd /tmp && \
-    ldconfig && \
-    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
+# Install mecab-ko-dic" 
+WORKDIR /tmp
+RUN curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
     tar -zxvf mecab-ko-dic-2.1.1-20180720.tar.gz && \
     cd mecab-ko-dic-2.1.1-20180720 && \
     ./autogen.sh && \
