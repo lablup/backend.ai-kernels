@@ -27,8 +27,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 SHELL ["/bin/bash", "-cu"]
 
 WORKDIR /tmp
-RUN rm -fr /var/lib/apt/lists/* && \
-    apt-get update -y && \
+RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         build-essential \
         gcc g++ make \
@@ -39,6 +38,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    rm -fr /var/lib/apt/lists/* && \
     wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
     apt-get update -y && \
     apt-get install -y --no-install-recommends \
@@ -93,8 +93,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	&& \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
     rm -fr /var/lib/apt/lists/* && \
-    
-RUN echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
+    echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
