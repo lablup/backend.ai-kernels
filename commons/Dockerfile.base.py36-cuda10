@@ -202,7 +202,7 @@ RUN cd /tmp && \
     python3 -m pip install -U --no-cache-dir /tmp/numpy-1.19.2-cp36-cp36m-linux_x86_64.whl && \
 #    python3 -m pip install --verbose --no-build-isolation --editable . && \
 #    python3 setup.py bdist_wheel -d /tmp && \ 
-    python3 setup install 
+    python3 setup.py install 
 
 RUN python3 -m pip install pip --no-cache-dir \
     	    Cartopy==0.18.0 \
