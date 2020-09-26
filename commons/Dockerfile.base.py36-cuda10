@@ -86,7 +86,7 @@ RUN apt-get update -y && \
 	libboost-dev \
 	libboost-system-dev \
 	libboost-filesystem-dev \
-	libopenblas-devel liblapack-devel \
+	libopenblas-dev liblapack-dev \
 	xvfb \
 	fonts-nanum \
 	fonts-nanum-coding \
