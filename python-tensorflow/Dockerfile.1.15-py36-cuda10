@@ -1,7 +1,7 @@
 FROM lablup/common-base:20.09-py36-cuda10
 
 # Install TensorFlow
-ENV TENSORFLOW_VERSION=1.15.4
+ARG TF_BUILD_VERSION=r1.15
 ENV BAZEL_VERSION 0.26.1
 
 # Set up Bazel.
@@ -70,6 +70,8 @@ RUN tensorflow/tools/ci_build/builds/configured GPU  \
 	--copt=-fstack-protector \
 	--copt=-fPIC \
 	--copt=-fpic \
+	--config=opt \
+	--config=cuda \
         --config=mkl \
 	--config=monolithic \
         --config=gdr \ 
@@ -81,10 +83,12 @@ RUN tensorflow/tools/ci_build/builds/configured GPU  \
 	--linkopt=-zrelro \
 	--linkopt=-znow \
 	--linkopt=-fstack-protector \
+	--linkopt -ldl \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
       -k //tensorflow/tools/pip_package:build_pip_package && \
     bazel-bin/tensorflow/tools/pip_package/build_pip_package "${WHL_DIR}" && \
     python3 -m pip --no-cache-dir install --upgrade "${WHL_DIR}"/tensorflow-*.whl 
+
 RUN python3 -m pip --no-cache-dir install \
         tensorboard==1.15 \
  	ngraph-tensorflow-bridge \
