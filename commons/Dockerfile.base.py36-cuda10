@@ -34,8 +34,9 @@ RUN apt-get update -y && \
 	gfortran \
         wget zip unzip \
         software-properties-common && \
-    rm -fr /var/lib/apt/lists/* && \
-    add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
+    rm -fr /var/lib/apt/lists/*
+
+RUN add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
@@ -91,12 +92,13 @@ RUN apt-get update -y && \
 	fonts-nanum-coding \
 	fonts-nanum-extra \
 	&& \
+    rm -fr /var/lib/apt/lists/* && \
     echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
     ldconfig 
 
 RUN find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
