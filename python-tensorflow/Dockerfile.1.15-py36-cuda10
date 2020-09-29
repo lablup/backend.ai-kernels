@@ -1,103 +1,26 @@
+# Lablup/Python-TensorFlow 1.15 Python 3.6, CUDA10.0
+
 FROM lablup/common-base:20.09-py36-cuda10
+MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install TensorFlow
-ARG TF_BUILD_VERSION=r1.15
-ENV BAZEL_VERSION 0.26.1
+ENV TENSORFLOW_VERSION=1.15.4
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Set up Bazel.
+# Install ipython kernelspec
+Run python3 -m ipykernel install --display-name "TensorFlow 1.15 on Python 3.6 (CUDA 10)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
-# Running bazel inside a `docker build` command causes trouble, cf:
-#   https://github.com/bazelbuild/bazel/issues/134
-# The easiest solution is to set up a bazelrc file forcing --batch.
-RUN echo "startup --batch" >>/etc/bazel.bazelrc
-# Similarly, we need to workaround sandboxing issues:
-#   https://github.com/bazelbuild/bazel/issues/418
-RUN echo "build --spawn_strategy=standalone --genrule_strategy=standalone" \
-    >>/etc/bazel.bazelrc
+RUN python3 -m pip uninstall -y \
+    	    tensorflow==${TENSORFLOW_VERSION} 
 
-WORKDIR /
-RUN mkdir /bazel && \
-    cd /bazel && \
-    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
-    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -o /bazel/LICENSE.txt https://raw.githubusercontent.com/bazelbuild/bazel/master/LICENSE && \
-    chmod +x bazel-*.sh && \
-    ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
-    cd / && \
-    rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
-
-# Download and build TensorFlow.
-WORKDIR /tensorflow
-
-# Download and build TensorFlow.
-# Enable checking out both tags and branches
-RUN export TAG_PREFIX="v" && \
-    echo ${TF_BUILD_VERSION} | grep -q ^${TAG_PREFIX}; \
-    if [ $? -eq 0 ]; then \
-        git clone --depth=1 https://github.com/tensorflow/tensorflow.git . && \
-        git fetch --tags && \
-        git checkout ${TF_BUILD_VERSION}; \
-   else \
-        git clone --depth=1 --branch=${TF_BUILD_VERSION} https://github.com/tensorflow/tensorflow.git . ; \
-    fi
-
-RUN yes "" | python3 configure.py
-RUN cp .bazelrc /root/.bazelrc
-
-ENV CI_BUILD_PYTHON ${PYTHON}
-ENV WHL_DIR=/tmp/pip3
-# Set bazel build parameters in .bazelrc in parameterized_docker_build.sh
-# Use --copt=-march values to get optimized builds appropriate for the hardware
-#   platform of your choice.
-# For ivy-bridge or sandy-bridge
-# --copt=-march="avx" \
-# For haswell, broadwell, or skylake
-# --copt=-march="avx2" \
-COPY .bazelrc /root/.mkl.bazelrc
-RUN echo "import /root/.mkl.bazelrc" >>/root/.bazelrc
-
-RUN tensorflow/tools/ci_build/builds/configured GPU  \
-      bazel --bazelrc=/root/.bazelrc build \
-        -c opt \
-        --copt=-msse4.1 \
-        --copt=-msse4.2 \
-	--copt=-mavx \
-	--copt=-mavx2 \
-	--copt=-mfma \
-	--copt=-mfpmath=both \ 
-	--copt=-O3 \
-	--copt=-Wformat \
-	--copt=-Wformat-security \
-	--copt=-fstack-protector \
-	--copt=-fPIC \
-	--copt=-fpic \
-	--config=opt \
-	--config=cuda \
-        --config=mkl \
-	--config=monolithic \
-        --config=gdr \ 
-        --config=verbs \
-#        --config=ngraph \
-        --config=numa \
-        --config=v1 \
-	--linkopt=-znoexecstack \
-	--linkopt=-zrelro \
-	--linkopt=-znow \
-	--linkopt=-fstack-protector \
-	--linkopt -ldl \
-        --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
-      -k //tensorflow/tools/pip_package:build_pip_package && \
-    bazel-bin/tensorflow/tools/pip_package/build_pip_package "${WHL_DIR}" && \
-    python3 -m pip --no-cache-dir install --upgrade "${WHL_DIR}"/tensorflow-*.whl 
-
-RUN python3 -m pip --no-cache-dir install \
-        tensorboard==1.15 \
- 	ngraph-tensorflow-bridge \
-	tensor2tensor==1.15.7 \
-	jupyter-tensorboard==0.2.0 \
-    	tensorwatch==0.9.1 \
-	&& \
-    rm -rf /root/.cache
-# Clean up Bazel cache when done.
+RUN python3 -m pip install --no-cache-dir \
+    	    tensorflow-gpu==${TENSORFLOW_VERSION} \
+       	    tensorboard==1.15 \
+	    ngraph-tensorflow-bridge 
+#	    tensor2tensor==1.15.7 
+#	    jupyter-tensorboard==0.2.0 
+#   	    tensorwatch==0.8.10 
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
@@ -111,10 +34,6 @@ RUN python3 -m pip install --no-cache-dir \
 	    nni==1.8 \
 	    scikit-nni==0.2.1
 
-# Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "TensorFlow 1.15.4 on Python 3.6 (CUDA 10.0)" && \
-    cat /usr/local/share/jupyter/kernels/python3/kernel.json
-
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
@@ -127,6 +46,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
+
 
 WORKDIR /home/work
 # vim: ft=dockerfile
