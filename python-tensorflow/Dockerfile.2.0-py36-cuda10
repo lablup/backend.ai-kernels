@@ -1,4 +1,4 @@
-FROM lablup/common-base:20.06-py36-cuda10
+FROM lablup/common-base:20.09-py36-cuda10
 
 # Install TensorFlow
 ENV TENSORFLOW_VERSION=2.0.2
