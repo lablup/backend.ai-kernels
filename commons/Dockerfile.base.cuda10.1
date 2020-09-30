@@ -31,8 +31,10 @@ RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         build-essential \
         gcc g++ make \
+	automake \
 	gfortran \
         wget zip unzip \
+    	openjdk-8-jdk \
         software-properties-common && \
     rm -fr /var/lib/apt/lists/*
 
@@ -109,20 +111,21 @@ RUN find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name
 # Install CUDA-10.1 + cuDNN 7.6.5
 RUN ln -s /usr/local/cuda-10.1 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.5 /usr/local/cuda/lib64/libcudnn.so && \
+    rm -rf /var/lib/apt/lists/* && \
     ldconfig
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
-        libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
-        && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
     apt-get install -y --no-install-recommends nodejs
 
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
+        libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
+        libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
+        libnvinfer-plugin${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Add OpenCL ICD files for LightGBM
 RUN mkdir -p /etc/OpenCL/vendors && \
@@ -223,10 +226,8 @@ RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install NLP packages *mecab-ko & khai*
-RUN apt-get update && \
+RUN apt-get update -y && \
     apt-get install -y \
-    	openjdk-8-jdk \
-	automake \
 	&& \
     cd /tmp && \
     curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
