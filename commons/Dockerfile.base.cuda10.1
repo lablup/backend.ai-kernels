@@ -27,18 +27,21 @@ ENV DEBIAN_FRONTEND=noninteractive \
 SHELL ["/bin/bash", "-cu"]
 
 WORKDIR /tmp
-RUN apt-get update -y && \
+RUN apt autoclean && \
+    rm -fr /var/lib/apt/lists/* && \
+    apt-get update -o Acquire::CompressionTypes::Order::=gz && \
+    apt-get update -y && \
+    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
         build-essential \
         gcc g++ make \
 	automake \
 	gfortran \
         wget zip unzip \
-    	openjdk-8-jdk \
-        software-properties-common && \
-    rm -fr /var/lib/apt/lists/*
+        software-properties-common 
 
-RUN add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
+RUN apt update -y && \
+    add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
@@ -67,6 +70,7 @@ RUN add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security
 	libxrender-dev \
 	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
         libgeos-dev libgeos++-dev \
+    	openjdk-8-jdk \
         pkg-config \
         zlib1g-dev \
 	mime-support \
@@ -102,6 +106,7 @@ RUN add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     ldconfig 
+
 
 RUN find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
