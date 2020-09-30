@@ -1,7 +1,7 @@
-FROM lablup/common-base:20.07-py36-cuda10.1
+FROM lablup/common-base:20.09-py36-cuda10.1
 
 # Install TensorFlow, Keras, PyTorch and MXNet
-ENV TENSORFLOW_VERSION=2.2.0
+ENV TENSORFLOW_VERSION=2.2.1
 
 ENV PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
@@ -70,7 +70,7 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-	    nni==1.6 \
+	    nni==1.8 \
 	    scikit-nni==0.2.1
 
 # Install ipython kernelspec
