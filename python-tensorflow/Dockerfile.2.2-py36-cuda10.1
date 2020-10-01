@@ -3,15 +3,20 @@ FROM lablup/common-base:20.09-py36-cuda10.1
 # Install TensorFlow, Keras, PyTorch and MXNet
 ENV TENSORFLOW_VERSION=2.2.1
 
-ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/bin/mecab" \
+ENV DEBIAN_FRONTEND=noninteractive \
+    MPLBACKEND=Svg \
+    PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include:/usr/local/lib:$LD_LIBRARY_PATH" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    LIBRARY_PATH="/usr/local/cuda/lib64/stubs:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
+    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
 RUN python3 -m pip install --no-cache-dir --upgrade \
+    	    Cython==0.29.21 \
 	    gast==0.3.3 \
 	    'httplib2<0.18.0,>=0.8' \
 	    'coverage<5.0,>=4.5' \
@@ -22,7 +27,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
 
 RUN python3 -m pip install --no-cache-dir --upgrade \
 	    -q git+https://github.com/google-research/tensorflow_constrained_optimization 
-RUN python3 -m pip install --no-cache-dir --upgrade \
+RUN python3 -m pip install --no-cache-dir -I \
 	    cachetools==3.1.0 \
 	    tensorflow-transform==0.22.0 \
 	    tensorflow_model_analysis==0.22.2 \
@@ -40,7 +45,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
 	    tensorflow-gan==2.0.0 \
 	    tensorflow-data-validation==0.22.2 \
 	    tensorflow-model-optimization==0.3.0 
-RUN python3 -m pip install --no-cache-dir --upgrade \
+RUN python3 -m pip install --no-cache-dir -I \
 	    jupyter-tensorboard==0.2.0 \
 	    tf-agents==0.5.0 \
 	    tf-slim==1.1.0 \
@@ -49,18 +54,35 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
 	    tensorflow-io==0.13.0  \
 	    tfx==0.22.0 \
 	    tfx-bsl==0.22.1 
-RUN python3 -m pip install --no-cache-dir \
+RUN python3 -m pip install --no-cache-dir -I \
 	    tensorflow_ranking==0.3.1 \
 	    tensorflow-compression==1.3 \
 	    tensor2tensor==1.15.7 \
 	    jupyterlab-nvdashboard==0.3.1 
+
+# Install scipy
+ENV SCIPY_VERSION 1.5.2
+RUN cd /tmp && \
+    python3 -m pip uninstall -y scipy && \
+    git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
+    cd scipy && \
+    git checkout -b v${SCIPY_VERSION} && \  
+    cp site.cfg.example site.cfg && \
+    echo "[mkl]" >> site.cfg && \
+    echo "include_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include/" >> site.cfg && \
+    echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
+    echo "mkl_libs = mkl_rt" >> site.cfg && \
+    echo "lapack_libs =" >> site.cfg && \
+#    python3 -m pip install -U --no-cache-dir /tmp/numpy-1.18.5-cp36-cp36m-linux_x86_64.whl && \
+    python3 setup.py install 
 
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
     	    https://developer.download.nvidia.com/compute/redist \
 	    nvidia-dali-cuda100 && \
     python3 -m pip install --no-cache-dir --extra-index-url \
 	    https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
-	    
+
+
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
