@@ -227,7 +227,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.txt && \
 	tensorflow-probability 	tensorflow-text \
 	tensorflow-model-analysis tensorflow-serving-api \
 	torch && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
+    rm -f /tmp/requirements.txt
 
 # install NLP packages *mecab-ko & khai*
 WORKDIR /tmp
@@ -389,8 +389,7 @@ RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_confi
 WORKDIR /tmp
 RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.11.0.tar.gz && \
     tar -zxf git-lfs-linux-amd64-v2.11.0.tar.gz && \
-    bash install.sh && \
-    rm -rf /tmp/*
+    bash install.sh 
 
 COPY ./service-defs /etc/backend.ai/service-defs
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.4.1/code-server-3.4.1-linux-amd64.tar.gz \
@@ -415,7 +414,6 @@ RUN jupyter nbextensions_configurator enable && \
 
 RUN apt autoclean && \
     rm -rf /var/lib/apt/lists/* && \	
-    rm -rf /root/.cache && \
-    rm -rf /tmp/*
+    rm -rf /root/.cache 
 
 WORKDIR /home/work
