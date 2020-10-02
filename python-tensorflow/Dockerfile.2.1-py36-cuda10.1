@@ -6,7 +6,6 @@ ENV TENSORFLOW_VERSION=2.1.2
 RUN python3 -m pip install --no-cache-dir --upgrade \
 	    -q git+https://github.com/google-research/tensorflow_constrained_optimization 
 
-COPY ./numpy-1.18.5-cp36-cp36m-linux_x86_64.whl /tmp
 RUN python3 -m pip install --no-cache-dir -I \
 	    tensorflow-transform==0.21.2 \
 	    tensorflow_model_analysis==0.21.6 \
@@ -37,12 +36,27 @@ RUN python3 -m pip install --no-cache-dir -I \
 RUN python3 -m pip uninstall -y \
 	    numpy==1.19.2 \ 
             tensorflow==2.3.1 \
-	    tensorflow-gpu==2.3.1 
-
-RUN python3 -m pip install --no-cache-dir \
-	    /tmp/numpy-1.18.5-cp36-cp36m-linux_x86_64.whl \
+	    tensorflow-gpu==2.3.1 \
 	    && \
-    python3 -m pip install --no-cache-dir \	    
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache 
+
+COPY ./numpy-1.18.5-cp36-cp36m-linux_x86_64.whl /tmp
+# Install scipy
+RUN cd /tmp && \
+    git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
+    cd scipy && \
+    git checkout -b v${SCIPY_VERSION} && \  
+    cp site.cfg.example site.cfg && \
+    echo "[mkl]" >> site.cfg && \
+    echo "include_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include/" >> site.cfg && \
+    echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
+    echo "mkl_libs = mkl_rt" >> site.cfg && \
+    echo "lapack_libs =" >> site.cfg && \
+    python3 -m pip install -U --no-cache-dir /tmp/numpy-1.18.5-cp36-cp36m-linux_x86_64.whl && \
+    python3 setup.py install 
+
+RUN python3 -m pip install --no-cache-dir \	    
     	    tensorflow==${TENSORFLOW_VERSION}  \
        	    tensorboard==2.1.1 
 
