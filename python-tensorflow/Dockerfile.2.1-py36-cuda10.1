@@ -17,8 +17,6 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
 
 RUN python3 -m pip install --no-cache-dir --upgrade \
 	    -q git+https://github.com/google-research/tensorflow_constrained_optimization 
-RUN python3 -m pip install --no-cache-dir --upgrade \
-	    -q git+https://github.com/tensorflow/fairness-indicators
 RUN python3 -m pip install --no-cache-dir \
 	    tensorflow-transform==0.21.2 \
 	    tensorflow_model_analysis==0.21.6 \
