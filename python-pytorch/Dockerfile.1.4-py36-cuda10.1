@@ -1,4 +1,4 @@
-FROM lablup/common-base:20.07-py36-cuda10.1
+FROM lablup/common-base:20.09-cuda10.1
 
 ENV PYTORCH_VERSION=1.4.0
 ENV TORCHVISION_VERSION=0.5.0
@@ -10,14 +10,6 @@ ENV NCCL_VERSION=2.4.8-1+cuda10.0
 ENV DEBIAN_FRONTEND=noninteractive
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 
-ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
-    LANG=C.UTF-8
-
-# Set default shell to /bin/bash
-SHELL ["/bin/bash", "-cu"]
-
 RUN python3 -m pip install --no-cache-dir --upgrade \
     	https://download.pytorch.org/whl/cu101/torch-${PYTORCH_VERSION}-cp36-cp36m-linux_x86_64.whl \
         https://download.pytorch.org/whl/cu101/torchvision-${TORCHVISION_VERSION}-cp36-cp36m-linux_x86_64.whl \
@@ -25,15 +17,15 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
         torchtext==${TORCHTEXT_VERSION} && \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
-RUN python3 -m pip install --no-cache-dir \
-	    transformers \
-	    jupyter-tensorboard==0.2.0 \
-    	    tensorwatch==0.8.10 \
-	    jupyterlab-nvdashboard==0.2.0 
-
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
     	    https://developer.download.nvidia.com/compute/redist \
 	    nvidia-dali-cuda100
+
+WORKDIR /tmp
+RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt /tmp/torch2trt && \
+    cd /tmp/torch2trt && \
+    python3 setup.py install --plugins && \
+    rm -fr /tmp/torch2trt  
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
@@ -44,7 +36,7 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-	    nni==1.6 \
+	    nni==1.8 \
 	    scikit-nni==0.2.1
 
 # Install ipython kernelspec
