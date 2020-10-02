@@ -39,8 +39,10 @@ RUN python3 -m pip uninstall -y \
             tensorflow==2.3.1 \
 	    tensorflow-gpu==2.3.1 
 
-RUN python3 -m pip install --no-cache-dir -I \
+RUN python3 -m pip install --no-cache-dir \
 	    /tmp/numpy-1.18.5-cp36-cp36m-linux_x86_64.whl \
+	    && \
+    python3 -m pip install --no-cache-dir \	    
     	    tensorflow==${TENSORFLOW_VERSION}  \
        	    tensorboard==2.1.1 
 
