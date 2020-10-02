@@ -13,9 +13,9 @@ SHELL ["/bin/bash", "-cu"]
 
 RUN python3 -m pip install --no-cache-dir --upgrade \
 	    -q git+https://github.com/google-research/tensorflow_constrained_optimization 
+
+COPY ./numpy-1.18.5-cp36-cp36m-linux_x86_64.whl /tmp
 RUN python3 -m pip install --no-cache-dir -I \
-    	    tensorflow==${TENSORFLOW_VERSION}  \
-       	    tensorboard==2.1.1 \
 	    tensorflow-transform==0.21.2 \
 	    tensorflow_model_analysis==0.21.6 \
 	    tensorflow-metadata==0.21.1 \
@@ -41,7 +41,16 @@ RUN python3 -m pip install --no-cache-dir -I \
 	    tensorflow-io==0.13.0  \
 	    jupyterlab-nvdashboard==0.3.1 \
     	    tensorflow==${TENSORFLOW_VERSION}  \
-       	    tensorboard==2.1.1 
+       	    tensorboard==2.1.1 \
+	    && \
+   python3 -m pip uninstall --no-cache-dir
+            tensorflow==2.3.1 \
+	    tensorflow-gpu==2.3.1 \
+	    && \
+   python3 -m pip install --no-cache-dir -I \
+	    /tmp/numpy-1.18.5-cp36-cp36m-linux_x86_64.whl \
+    	    tensorflow==${TENSORFLOW_VERSION}  \
+       	    tensorboard==2.1.1 \
 
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
     	    https://developer.download.nvidia.com/compute/redist \
