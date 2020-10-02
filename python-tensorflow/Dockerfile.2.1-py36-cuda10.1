@@ -43,7 +43,7 @@ RUN python3 -m pip install --no-cache-dir -I \
     	    tensorflow==${TENSORFLOW_VERSION}  \
        	    tensorboard==2.1.1 \
 	    && \
-   python3 -m pip uninstall --no-cache-dir
+   python3 -m pip uninstall \
             tensorflow==2.3.1 \
 	    tensorflow-gpu==2.3.1 \
 	    && \
