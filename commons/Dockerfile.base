@@ -166,7 +166,7 @@ RUN cd /tmp && \
     echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
     echo "mkl_libs = mkl_rt" >> site.cfg && \
     echo "lapack_libs =" >> site.cfg && \
-    python3 -m pip install -U --no-cache-dir /tmp/numpy-{NUMPY_VERSION}-cp36-cp36m-linux_x86_64.whl && \
+    python3 -m pip install -U --no-cache-dir /tmp/numpy-${NUMPY_VERSION}-cp36-cp36m-linux_x86_64.whl && \
     python3 setup.py install 
 
 RUN python3 -m pip install pip --no-cache-dir \
