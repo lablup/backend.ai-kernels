@@ -34,17 +34,19 @@ RUN python3 -m pip install --no-cache-dir -I \
     	    tensorflow==${TENSORFLOW_VERSION}  \
        	    tensorboard==2.1.1 
 RUN python3 -m pip uninstall -y \
-	    numpy==1.19.2 \ 
+	    numpy==1.19.2 \
+	    scipy==1.4.1 \
             tensorflow==2.3.1 \
 	    tensorflow-gpu==2.3.1 \
 	    && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache 
 
+WORKDIR /tmp
 COPY ./numpy-1.18.5-cp36-cp36m-linux_x86_64.whl /tmp
+
 # Install scipy
-RUN cd /tmp && \
-    git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
+RUN git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
     cd scipy && \
     git checkout -b v${SCIPY_VERSION} && \  
     cp site.cfg.example site.cfg && \
@@ -53,16 +55,23 @@ RUN cd /tmp && \
     echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
     echo "mkl_libs = mkl_rt" >> site.cfg && \
     echo "lapack_libs =" >> site.cfg && \
-    python3 -m pip install -U --no-cache-dir /tmp/numpy-1.18.5-cp36-cp36m-linux_x86_64.whl && \
+    python3 -m pip install -U --no-cache-dir \
+        cython \
+	/tmp/numpy-1.18.5-cp36-cp36m-linux_x86_64.whl && \
     python3 setup.py install 
 
 RUN python3 -m pip install --no-cache-dir \	    
-    	    tensorflow==${TENSORFLOW_VERSION}  \
-       	    tensorboard==2.1.1 
+       	    tensorboard==2.1.1 \
+	    && \
+    python3 -m pip uninstall -y \
+	    tensorflow==2.1.1 && \
+    python3 -m pip install --no-cache-dir \	    
+    	    tensorflow-gpu==${TENSORFLOW_VERSION}  
 
 RUN python3 -m pip install --extra-index-url \
-       https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100
-RUN python3 -m pip install --extra-index-url \
+       https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 \
+       && \
+    python3 -m pip install --extra-index-url \
        https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
 	    
 # Install Horovod, temporarily using CUDA stubs
