@@ -27,6 +27,7 @@ RUN apt-get update -y && \
         gcc g++ make \
 	automake \
 	gfortran \
+	gpg-agent \
         wget zip unzip \
         software-properties-common 
 
