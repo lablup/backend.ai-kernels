@@ -1,0 +1,61 @@
+FROM lablup/common-base:20.09-cuda10.1
+
+# Install TensorFlow, Keras, PyTorch and MXNet
+ENV PYTORCH_VERSION=1.7.0-rc1
+ENV TORCHVISION_VERSION=0.6.0
+ENV TORCHAUDIO_VERSION=0.5.0
+ENV TORCHTEXT_VERSION=0.6.0
+ENV TENSORBOARDX_VERSION=1.9
+ENV DEBIAN_FRONTEND=noninteractive
+ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
+
+RUN python3 -m pip install --no-cache-dir --upgrade \
+    	https://download.pytorch.org/whl/cu101/torch-${PYTORCH_VERSION}%2Bcu101-cp36-cp36m-linux_x86_64.whl \
+        https://download.pytorch.org/whl/cu101/torchvision-${TORCHVISION_VERSION}%2Bcu101-cp36-cp36m-linux_x86_64.whl \
+        https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-linux_x86_64.whl \
+        torchtext==${TORCHTEXT_VERSION} && \
+    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
+
+
+RUN python3 -m pip install --no-cache-dir --extra-index-url \
+    	    https://developer.download.nvidia.com/compute/redist \
+	    nvidia-dali-cuda100
+
+# torch2trt PyTorch to TensorRT converter which utilizes the TensorRT Python API
+WORKDIR /tmp
+RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt /tmp/torch2trt && \
+    cd /tmp/torch2trt && \
+    python3 setup.py install --plugins && \
+    rm -fr /tmp/torch2trt  
+     
+# Install Horovod, temporarily using CUDA stubs
+RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+    HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
+    HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
+    pip install --no-cache-dir horovod==0.19.4 && \
+    ldconfig
+
+RUN python3 -m pip install --no-cache-dir \
+    	    mpi4py==3.0.3 \
+	    nni==1.8 \
+	    scikit-nni==0.2.1
+
+# Install ipython kernelspec
+Run python3 -m ipykernel install --display-name "PyTorch 1.7 on Python 3.6 (CUDA 10.1)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
+
+WORKDIR /home/work
+# vim: ft=dockerfile
