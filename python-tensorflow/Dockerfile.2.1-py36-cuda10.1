@@ -46,11 +46,10 @@ RUN python3 -m pip install --no-cache-dir \
     	    tensorflow==${TENSORFLOW_VERSION}  \
        	    tensorboard==2.1.1 
 
-RUN python3 -m pip install --no-cache-dir --extra-index-url \
-    	    https://developer.download.nvidia.com/compute/redist \
-	    nvidia-dali-cuda100 && \
-    python3 -m pip install --no-cache-dir --extra-index-url \
-	    https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
+RUN python3 -m pip install --extra-index-url \
+       https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100
+RUN python3 -m pip install --extra-index-url \
+       https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
 	    
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
