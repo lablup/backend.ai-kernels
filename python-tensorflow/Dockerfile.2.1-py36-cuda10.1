@@ -42,7 +42,7 @@ RUN python3 -m pip uninstall -y \
 RUN python3 -m pip install --no-cache-dir -I \
 	    /tmp/numpy-1.18.5-cp36-cp36m-linux_x86_64.whl \
     	    tensorflow==${TENSORFLOW_VERSION}  \
-       	    tensorboard==2.1.1 \
+       	    tensorboard==2.1.1 
 
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
     	    https://developer.download.nvidia.com/compute/redist \
