@@ -1,7 +1,7 @@
-FROM lablup/common-base:20.06-py36-cuda10
+FROM lablup/common-base:20.09-py36-cuda10
 
 # Install TensorFlow
-ENV TENSORFLOW_VERSION=2.0.2
+ENV TENSORFLOW_VERSION=2.0.3
 
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "TensorFlow 2.0.2 on Python 3.6 (CUDA 10.0)" && \
@@ -13,10 +13,10 @@ RUN python3 -m pip uninstall --no-cache-dir -y \
 RUN python3 -m pip install --no-cache-dir --upgrade \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
        	    tensorboard==2.0.0 \
-	    ngraph-tensorflow-bridge \
-	    tensor2tensor==1.15.6 \
-	    jupyter-tensorboard==0.2.0 \
-    	    tensorwatch==0.8.10 
+	    ngraph-tensorflow-bridge 
+#	    tensor2tensor==1.15.6 \
+#	    jupyter-tensorboard==0.2.0 \
+#   	    tensorwatch==0.8.10 
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
@@ -27,7 +27,7 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-	    nni==1.6 \
+	    nni==1.8 \
 	    scikit-nni==0.2.1
 
 # Backend.AI specifics
@@ -41,7 +41,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090,ipython:pty:3000,tensorboard:http:6006"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
 
 WORKDIR /home/work
 # vim: ft=dockerfile

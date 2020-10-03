@@ -1,7 +1,7 @@
-FROM lablup/common-base:20.07-py36-cuda10.1
+FROM lablup/common-base:20.09-cuda10.1
 
 # Install TensorFlow, Keras, PyTorch and MXNet
-ENV PYTORCH_VERSION=1.6.0
+ENV PYTORCH_VERSION=1.5.1
 ENV TORCHVISION_VERSION=0.6.0
 ENV TORCHAUDIO_VERSION=0.5.0
 ENV TORCHTEXT_VERSION=0.6.0
@@ -9,26 +9,12 @@ ENV TENSORBOARDX_VERSION=1.9
 ENV DEBIAN_FRONTEND=noninteractive
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 
-ENV PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/mecab" \
-    LANG=C.UTF-8
-
-# Set default shell to /bin/bash
-SHELL ["/bin/bash", "-cu"]
-
 RUN python3 -m pip install --no-cache-dir --upgrade \
     	https://download.pytorch.org/whl/cu101/torch-${PYTORCH_VERSION}%2Bcu101-cp36-cp36m-linux_x86_64.whl \
         https://download.pytorch.org/whl/cu101/torchvision-${TORCHVISION_VERSION}%2Bcu101-cp36-cp36m-linux_x86_64.whl \
         https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-linux_x86_64.whl \
         torchtext==${TORCHTEXT_VERSION} && \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
-
-RUN python3 -m pip install --no-cache-dir \
-	    transformers \
-	    jupyter-tensorboard==0.2.0 \
-    	    tensorwatch==0.8.10 \
-	    jupyterlab-nvdashboard==0.2.0 
 
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
     	    https://developer.download.nvidia.com/compute/redist \
@@ -50,7 +36,7 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-	    nni==1.6 \
+	    nni==1.8 \
 	    scikit-nni==0.2.1
 
 # Install ipython kernelspec
