@@ -126,7 +126,6 @@ RUN HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
-    	    temsorboard==1.15 \
 	    mpi4py==3.0.3 \
 	    nni==1.8 \
 	    scikit-nni==0.2.1
