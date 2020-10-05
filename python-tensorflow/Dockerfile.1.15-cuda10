@@ -18,9 +18,6 @@ RUN python3 -m pip install --no-cache-dir \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
        	    tensorboard==1.15 \
 	    ngraph-tensorflow-bridge 
-#	    tensor2tensor==1.15.7 
-#	    jupyter-tensorboard==0.2.0 
-#   	    tensorwatch==0.8.10 
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
