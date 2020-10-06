@@ -37,6 +37,20 @@ RUN python3 -m pip uninstall -y \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache 
 
+# Install TensorFlow, Keras, PyTorch and MXNet
+ENV TENSORFLOW_VERSION=2.2.1
+
+RUN python3 -m pip install --no-cache-dir -I \	    
+       	    tensorboard==2.2.2 \
+    	    tensorflow-gpu==${TENSORFLOW_VERSION}  \
+	    && \
+    python3 -m pip uninstall -y \
+	    numpy==1.19.2 \
+	    scipy==1.4.1 \
+	    && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache 	    
+
 # Install scipy
 ENV SCIPY_VERSION 1.5.2
 
@@ -56,12 +70,6 @@ RUN git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scip
 	/tmp/numpy-1.18.5-cp36-cp36m-linux_x86_64.whl && \
     python3 setup.py install 
 
-# Install TensorFlow, Keras, PyTorch and MXNet
-ENV TENSORFLOW_VERSION=2.2.1
-
-RUN python3 -m pip install --no-cache-dir -I \	    
-       	    tensorboard==2.2.2 \
-    	    tensorflow-gpu==${TENSORFLOW_VERSION}  
 
 RUN python3 -m pip install --extra-index-url \
        https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 \
