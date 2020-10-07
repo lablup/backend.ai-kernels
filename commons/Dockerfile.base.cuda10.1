@@ -415,6 +415,6 @@ RUN jupyter nbextensions_configurator enable && \
 RUN apt autoclean && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
-    rm -rf /tmp
+    rm -rf /tmp/*
 
 WORKDIR /home/work
