@@ -1,19 +1,13 @@
-FROM lablup/common-base:20.09-py36-cuda10.1
+FROM lablup/common-base:20.09-cuda10
 
 # Install TensorFlow, Keras, PyTorch and MXNet
-ENV PYTORCH_VERSION=1.4.0
-ENV TORCHVISION_VERSION=0.5.0
-ENV TORCHAUDIO_VERSION=0.4.0
-ENV TORCHTEXT_VERSION=0.5.0
-ENV TENSORBOARDX_VERSION=2.1
+ENV PYTORCH_VERSION=1.0.1
+ENV TENSORBOARDX_VERSION=1.9
 ENV DEBIAN_FRONTEND=noninteractive
 ENV mecab_dicdir /usr/local/lib/mecab/dic/mecab-ko-dic
 
 RUN python3 -m pip install --no-cache-dir --upgrade \
-    	https://download.pytorch.org/whl/cu100/torch-1.4.0%2Bcu100-cp36-cp36m-linux_x86_64.whl \
-        https://download.pytorch.org/whl/cu100/torchvision-0.5.0%2Bcu100-cp36-cp36m-linux_x86_64.whl \
-        https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp36-cp36m-linux_x86_64.whl \
-        torchtext==${TORCHTEXT_VERSION} && \
+    	https://download.pytorch.org/whl/cu100/torch-1.0.1-cp36-cp36m-linux_x86_64.whl && \ 
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
@@ -26,30 +20,22 @@ RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt /tmp/torch2trt && \
     cd /tmp/torch2trt && \
     python3 setup.py install --plugins && \
     rm -fr /tmp/torch2trt  
-     
+
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.20.3 && \
+    pip install --no-cache-dir horovod==0.19.4 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
 	    nni==1.8 \
-	    cx_oracle==8.0.1 \
-	    mlflow==1.11.0 \
-	    mlflow-extend==0.1.6 \
 	    scikit-nni==0.2.1
 
 # Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "PyTorch 1.4 on Python 3.6 (CUDA 10.1)" && \
+Run python3 -m ipykernel install --display-name "PyTorch 1.0 on Python 3.6 (CUDA 10)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
-
-RUN apt autoclean && \
-    rm -rf /var/lib/apt/lists/* && \	
-    rm -rf /root/.cache && \
-    rm -rf /tmp/*
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
@@ -62,7 +48,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:http:5000,nniboard:http:8080"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
 
 WORKDIR /home/work
 # vim: ft=dockerfile

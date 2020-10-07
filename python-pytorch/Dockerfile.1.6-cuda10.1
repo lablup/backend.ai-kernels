@@ -46,6 +46,11 @@ RUN python3 -m pip install --no-cache-dir \
 Run python3 -m ipykernel install --display-name "PyTorch 1.6 on Python 3.6 (CUDA 10.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
+RUN apt autoclean && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
@@ -57,7 +62,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:http:5000,nniboard:http:8080"
 
 WORKDIR /home/work
 # vim: ft=dockerfile
