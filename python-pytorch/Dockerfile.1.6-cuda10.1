@@ -1,4 +1,4 @@
-FROM lablup/common-base:20.09-cuda10.1
+FROM lablup/common-base:20.09-py36-cuda10.1
 
 # Install TensorFlow, Keras, PyTorch and MXNet
 ENV PYTORCH_VERSION=1.6.0
@@ -31,16 +31,19 @@ RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt /tmp/torch2trt && \
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.4 && \
+    pip install --no-cache-dir horovod==0.20.3 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
 	    nni==1.8 \
+	    cx_oracle==8.0.1 \
+	    mlflow==1.11.0 \
+	    mlflow-extend==0.1.6 \
 	    scikit-nni==0.2.1
 
 # Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "PyTorch 1.6.0 on Python 3.6 (CUDA 10.1)" && \
+Run python3 -m ipykernel install --display-name "PyTorch 1.6 on Python 3.6 (CUDA 10.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
