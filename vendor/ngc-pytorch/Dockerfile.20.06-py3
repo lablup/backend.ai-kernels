@@ -8,6 +8,68 @@ ENV PYTHONUNBUFFERED=1 \
 # ipython/jupyter is already installed in the Anaconda Python installed at /opt/conda.
 RUN /opt/conda/bin/python3 -m pip install jupyterlab
 
+WORKDIR /tmp
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs
+
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.11.0.tar.gz && \
+    bash install.sh && \
+    rm -rf /tmp/*
+
+COPY ./service-defs /etc/backend.ai/service-defs
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.4.1/code-server-3.4.1-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-3.4.1-linux-amd64 /usr/local/lib/code-server-3.4.1 && \
+    ln -s /usr/local/lib/code-server-3.4.1/bin/code-server /usr/local/bin/code-server
+
+RUN python3 -m pip install --no-cache-dir \
+      jupyter==1.0.0 \
+      jupyter-client==6.0.0 \
+      jupyter-console==6.1.0 \
+      jupyter-contrib-core==0.3.3 \
+      jupyter-contrib-nbextensions==0.5.1 \
+      jupyter-core==4.6.3 \
+      jupyter-highlight-selected-word==0.2.0 \
+      jupyter-js-widgets-nbextension==0.0.2.dev0 \
+      jupyter-lsp==0.8.0 \
+      jupyter-latex-envs==1.4.6 \
+      jupyter-nbextensions-configurator==0.4.1 \
+      jupyter-server-proxy==1.2.0 \
+      jupyterlab==2.1.4 \
+      jupyterlabutils==0.9.0 \
+      jupyterlab-git==0.20.0 \
+      jupyterlab-github==2.0.0 \
+      jupyterlab-zip==1.0.1 \
+      jupyterlab-server==1.1.5 \
+      jupyterlab_hdf==0.3.0 \
+      jupyterthemes==0.20.0 \
+      Keras==2.3.1 \
+      Keras-Applications==1.0.8 \
+      Keras-Preprocessing==1.1.0
+
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
+    jupyter serverextension enable --py jupyter_lsp && \
+    jupyter labextension install --no-build @jupyterlab/toc && \
+    jupyter nbextension enable execute_time/ExecuteTime && \
+    jupyter nbextension enable toc2/main && \
+    jupyter labextension install @pyviz/jupyterlab_pyviz && \
+    jupyter labextension install @bokeh/jupyter_bokeh && \
+    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+    jupyter lab build
+
+RUN apt autoclean && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+
 # Install ipython kernelspec
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
@@ -15,18 +77,17 @@ RUN /opt/conda/bin/python3 -m ipykernel install \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
-COPY policy.yml /etc/backend.ai/jail/policy.yml
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch uid-match" \
-      ai.backend.accelerators="cuda" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=1 \
-      ai.backend.resource.min.cuda.shares=0.1 \
-      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000, jupyter:http:8080,jupyterlab:http:8090"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
 
+WORKDIR /home/work
 # vim: ft=dockerfile
