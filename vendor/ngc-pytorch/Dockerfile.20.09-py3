@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/pytorch:20.06-py3
+FROM nvcr.io/nvidia/pytorch:20.09-py3
 # NVIDIA PyTorch with Python 3.6 (CONDA)
 
 ENV PYTHONUNBUFFERED=1 \
@@ -73,7 +73,7 @@ RUN apt autoclean && \
 # Install ipython kernelspec
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "Python 3.6 CONDA (NGC/PyTorch 20.06) on Backend.AI" && \
+        --display-name "Python 3.6 CONDA (NGC/PyTorch 20.09) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics

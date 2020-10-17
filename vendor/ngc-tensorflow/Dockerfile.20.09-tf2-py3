@@ -1,12 +1,18 @@
-FROM nvcr.io/nvidia/pytorch:20.06-py3
-# NVIDIA PyTorch with Python 3.6 (CONDA)
+FROM nvcr.io/nvidia/tensorflow:20.09-tf2-py3
+# NVIDIA DIGITS runs on Python 3.6
 
-ENV PYTHONUNBUFFERED=1 \
-    PATH=/opt/conda/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
+RUN apt-get update && \
+    apt-get install -y libsm6 libxext6 libxrender-dev
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    MPLBACKEND=Svg \
+    PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu:$LD_LIBRARY_PATH" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab:$PATH" \
+    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
-# ipython/jupyter is already installed in the Anaconda Python installed at /opt/conda.
-RUN /opt/conda/bin/python3 -m pip install jupyterlab
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 WORKDIR /tmp
 
@@ -71,22 +77,22 @@ RUN apt autoclean && \
     rm -rf /tmp/*
 
 # Install ipython kernelspec
-RUN /opt/conda/bin/python3 -m ipykernel install \
-        --prefix=/opt/conda/ \
-        --display-name "Python 3.6 CONDA (NGC/PyTorch 20.06) on Backend.AI" && \
-    cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.6 (NGC 20.09 / TensorFlow 2.3) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=0 \
-      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
 
 WORKDIR /home/work
