@@ -39,7 +39,7 @@ RUN python3 -m pip install --no-cache-dir \
       jupyter-lsp==0.8.0 \
       jupyter-latex-envs==1.4.6 \
       jupyter-nbextensions-configurator==0.4.1 \
-      jupyter-server-proxy==1.2.0 \
+      jupyter-server-proxy==1.5.0 \
       jupyterlab==2.1.4 \
       jupyterlabutils==0.9.0 \
       jupyterlab-git==0.20.0 \
@@ -47,6 +47,7 @@ RUN python3 -m pip install --no-cache-dir \
       jupyterlab-zip==1.0.1 \
       jupyterlab-server==1.1.5 \
       jupyterlab_hdf==0.3.0 \
+      dask-labextension==3.0.0 \
       jupyterthemes==0.20.0 
 
 RUN jupyter nbextensions_configurator enable && \
@@ -61,6 +62,8 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable toc2/main && \
     jupyter labextension install @pyviz/jupyterlab_pyviz && \
     jupyter labextension install @bokeh/jupyter_bokeh && \
+    jupyter labextension install dask-labextension && \
+    jupyter serverextension enable dask_labextension && \
     jupyter lab build
 
 RUN apt autoclean && \
