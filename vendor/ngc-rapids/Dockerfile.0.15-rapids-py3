@@ -1,12 +1,12 @@
 # The RAPIDS suite of software libraries gives you the freedom to execute end-to-end data science and analytics pipelines entirely on GPUs.
 
-FROM nvcr.io/nvidia/rapidsai/rapidsai:0.15-cuda11.0-base-ubuntu18.04
+FROM nvcr.io/nvidia/rapidsai/rapidsai:0.15-cuda11.0-runtime-ubuntu18.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
-    PATH=/opt/conda/bin:/rapids:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
+    PATH=/opt/conda/envs/rapids/bin:/opt/conda/condabin:/opt/conda/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LD_LIBRARY_PATH=/opt/conda/envs/rapids/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64 \
     LANG=C.UTF-8
 
@@ -26,9 +26,6 @@ RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-l
     rm -rf /tmp/*
 
 COPY ./service-defs /etc/backend.ai/service-defs
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.4.1/code-server-3.4.1-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
-    mv /usr/local/lib/code-server-3.4.1-linux-amd64 /usr/local/lib/code-server-3.4.1 && \
-    ln -s /usr/local/lib/code-server-3.4.1/bin/code-server /usr/local/bin/code-server
 
 RUN python3 -m pip install --no-cache-dir \
       jupyter==1.0.0 \
@@ -50,11 +47,7 @@ RUN python3 -m pip install --no-cache-dir \
       jupyterlab-zip==1.0.1 \
       jupyterlab-server==1.1.5 \
       jupyterlab_hdf==0.3.0 \
-      jupyterthemes==0.20.0 \
-      Keras==2.3.1 \
-      Keras-Applications==1.0.8 \
-      Keras-Preprocessing==1.1.0
-
+      jupyterthemes==0.20.0 
 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
@@ -68,7 +61,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable toc2/main && \
     jupyter labextension install @pyviz/jupyterlab_pyviz && \
     jupyter labextension install @bokeh/jupyter_bokeh && \
-    jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
 
 RUN apt autoclean && \
@@ -91,6 +83,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,rapids:http:5000,jupyter:http:8787,jupyterlab:http:8888,vscode:http:8180,tensorboard:http:6006"
+      ai.backend.service-ports="ipython:pty:3000,jupyterlab:http:8888,dask:http:8686,dask2:http:8787"
 
+WORKDIR /home/work
 # vim: ft=dockerfile
