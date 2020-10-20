@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LD_LIBRARY_PATH=/opt/conda/envs/rapids/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64 \
     LANG=C.UTF-8
 
-RUN update-alternatives --install /opt/conda/bin/python python /opt/conda/bin/python3 2
+RUN update-alternatives --install /opt/conda/envs/rapids/bin/python python /opt/conda/envs/rapids/bin/python3 2
 
 WORKDIR /tmp
 
@@ -73,7 +73,7 @@ RUN apt autoclean && \
 
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "Python 3.7 (NGC/RAPIDS 0.15) on Backend.AI" && \
-    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+    cat /opt/conda/envs/rapids/share/jupyter/kernels/python3/kernel.json
 
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
@@ -85,7 +85,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.runtime-path="/opt/conda/envs/rapids/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyterlab:http:8888,dask:http:8686,dask2:http:8787"
 
 WORKDIR /home/work
