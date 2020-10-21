@@ -11,7 +11,8 @@ RUN /usr/bin/python3 -m pip install -U pip setuptools && \
     /usr/bin/python3 -m pip install --no-cache-dir keras && \
     /usr/bin/python3 -m pip install --no-cache-dir pillow && \
     /usr/bin/python3 -m pip install --no-cache-dir mpi4py && \
-    /usr/bin/python3 -m pip install --no-cache-dir jupyter
+    /usr/bin/python3 -m pip install --no-cache-dir jupyter && \
+    /usr/bin/python3 -m pip uninstall colour-science
 
 # Install ipython kernelspec
 RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.6 (NGC 20.07 / TensorFlow 1.15) on Backend.AI" && \
