@@ -1,4 +1,4 @@
-FROM lablup/common-base:20.08-py36
+FROM lablup/common-base:20.09-py36
 
 ARG TF_BUILD_VERSION=r1.6
 # Install the most recent bazel release.
@@ -97,7 +97,7 @@ RUN HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-	    nni==1.6 \
+	    nni==1.8 \
 	    scikit-nni==0.2.1
 
 # Install ipython kernelspec

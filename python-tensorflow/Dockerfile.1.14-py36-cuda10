@@ -1,6 +1,6 @@
 # Lablup/Python-TensorFlow 1.14 Python 3.6, CUDA10.0
 
-FROM lablup/common-base:20.06-py36-cuda10
+FROM lablup/common-base:20.09-py36-cuda10
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
 # Install TensorFlow
@@ -11,27 +11,27 @@ ENV DEBIAN_FRONTEND=noninteractive
 Run python3 -m ipykernel install --display-name "TensorFlow 1.14 on Python 3.6 (CUDA 10)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
-RUN python3 -m pip uninstall -y \
-    	    tensorflow==${TENSORFLOW_VERSION} 
-
-RUN python3 -m pip install --no-cache-dir --upgrade \
+RUN python3 -m pip install --no-cache-dir \
     	    tensorflow-gpu==${TENSORFLOW_VERSION} \
        	    tensorboard==1.14 \
-	    ngraph-tensorflow-bridge \
-	    tensor2tensor==1.14.1 \
-	    jupyter-tensorboard==0.2.0 \
-    	    tensorwatch==0.8.10 
+	    ngraph-tensorflow-bridge 
+
+RUN python3 -m pip install --extra-index-url \
+       https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.19.4 && \
+    pip install --no-cache-dir horovod==0.19.5 && \
     ldconfig
 
-RUN python3 -m pip install --no-cache-dir \
+RUN python3 -m pip install --no-cache-dir --upgrade \
     	    mpi4py==3.0.3 \
-	    nni==1.6 \
+	    nni==1.8 \
+	    cx_oracle==8.0.1 \
+	    mlflow==1.11.0 \
+	    mlflow-extend==0.1.6 \
 	    scikit-nni==0.2.1
 
 # Backend.AI specifics
@@ -45,7 +45,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090,ipython:pty:3000,tensorboard:http:6006"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:http:5000,nniboard:http:8080"
 
 WORKDIR /home/work
 # vim: ft=dockerfile

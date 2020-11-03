@@ -8,7 +8,7 @@ ENV TORCHVISION_VERSION=0.7.0
 ENV TORCHAUDIO_VERSION=0.6.0
 ENV TORCHTEXT_VERSION=0.7.0
 ENV TENSORBOARDX_VERSION=2.1
-ENV MXNET_VERSION=1.7.0.post0
+ENV MXNET_VERSION=1.6.0.post0
 ARG CUDA=10.1
 ARG LIBNVINFER=6.0.1-1
 ARG LIBNVINFER_MAJOR_VERSION=6
@@ -111,7 +111,7 @@ RUN python3 -m pip install --no-cache-dir --extra-index-url \
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITH_MXNET=1 \
-    pip install --no-cache-dir horovod==${HOROVOD_VERSION} && \
+    pip install --no-cache-dir horovod==0.20.3 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir --upgrade \

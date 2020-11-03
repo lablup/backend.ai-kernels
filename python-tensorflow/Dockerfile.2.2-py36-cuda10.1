@@ -1,6 +1,19 @@
 FROM lablup/common-base:20.09-py36-cuda10.1
 
-ENV HOROVOD_VERSION 0.20.3
+RUN mkdir -p /opt/oracle && \
+    cd /opt/oracle && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends libaio1 default-libmysqlclient-dev && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+    unzip instantclient-basiclite-linuxx64.zip && \
+    rm -f instantclient-basiclite-linuxx64.zip && \
+    cd /opt/oracle/instantclient* && \
+    rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
+    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+    ldconfig
+
 RUN python3 -m pip install --no-cache-dir --upgrade \
 	    -q git+https://github.com/google-research/tensorflow_constrained_optimization 
 RUN python3 -m pip install --no-cache-dir -I \
@@ -78,6 +91,7 @@ RUN python3 -m pip install --extra-index-url \
        https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
 	    
 # Install Horovod, temporarily using CUDA stubs
+ENV HOROVOD_VERSION 0.20.3
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
@@ -88,6 +102,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
     	    mpi4py==3.0.3 \
 	    nni==1.8 \
 	    cx_oracle==8.0.1 \
+	    mysqlclient==2.0.1 \
 	    mlflow==1.11.0 \
 	    mlflow-extend==0.1.6 \
 	    scikit-nni==0.2.1

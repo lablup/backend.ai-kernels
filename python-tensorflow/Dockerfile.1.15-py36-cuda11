@@ -1,6 +1,6 @@
-FROM lablup/common-base:20.08-py36-cuda11
+FROM lablup/common-base:20.09-py36-cuda11
 
-ARG TF_BUILD_VERSION=v1.15.3+nv20.07
+ARG TF_BUILD_VERSION=v1.15.4
 # Install the most recent bazel release.
 ENV BAZEL_VERSION 0.26.1
 
@@ -33,11 +33,11 @@ WORKDIR /tensorflow
 RUN export TAG_PREFIX="v" && \
     echo ${TF_BUILD_VERSION} | grep -q ^${TAG_PREFIX}; \
     if [ $? -eq 0 ]; then \
-        git clone --depth=1 https://github.com/nvidia/tensorflow.git . && \
+        git clone --depth=1 https://github.com/tensorflow/tensorflow.git . && \
         git fetch --tags && \
         git checkout ${TF_BUILD_VERSION}; \
    else \
-        git clone --depth=1 --branch=${TF_BUILD_VERSION} https://github.com/nvidida/tensorflow.git . ; \
+        git clone --depth=1 --branch=${TF_BUILD_VERSION} https://github.com/tensorflow/tensorflow.git . ; \
     fi
 
 RUN yes "" | python3 configure.py
@@ -56,9 +56,10 @@ COPY .bazelrc /root/.mkl.bazelrc
 RUN echo "import /root/.mkl.bazelrc" >>/root/.bazelrc
 
 ENV TF_NEED_TENSORRT=1
-ENV TF_CUDA_COMPUTE_CAPABILITIES sm_37,sm_52,sm_60,sm_61,sm_70,sm_75,compute_70,compute_75,compute_80
+#ENV TF_CUDA_COMPUTE_CAPABILITIES sm_37,sm_52,sm_60,sm_61,sm_70,sm_75,compute_70,compute_75,compute_80
+ENV TF_CUDA_COMPUTE_CAPABILITIES 3.7,5.2,6.0,6.1,7.0,7.5,8.0
 
-RUN tensorflow/tools/ci_build/builds/configured CPU  \
+RUN tensorflow/tools/ci_build/builds/configured GPU  \
       bazel --bazelrc=/root/.bazelrc build \
         -c opt \
         --copt=-msse4.1 \

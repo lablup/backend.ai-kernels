@@ -1,8 +1,8 @@
-FROM lablup/common-base:20.08-py36-cuda11
+FROM lablup/common-base:20.09-py36-cuda10.1
 
-ARG TF_BUILD_VERSION=r2.3
+ARG TF_BUILD_VERSION=r2.2
 # Install the most recent bazel release.
-ENV BAZEL_VERSION 3.1.0
+ENV BAZEL_VERSION 2.0.0
 
 # Set up Bazel.
 
@@ -145,8 +145,8 @@ RUN python3 -m pip install --no-cache-dir \
 RUN python3 -m pip install --no-cache-dir --extra-index-url \
     	    https://developer.download.nvidia.com/compute/redist \
 	    nvidia-dali-cuda110
-#RUN python3 -m pip install --no-cache-dir \
-#    	    --extra-index-url https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda110 
+RUN python3 -m pip install --no-cache-dir \
+            --extra-index-url https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda110 
 #WORKDIR /tmp
 #RUN git clone  --recursive https://github.com/NVIDIA/DALI && \
 #    cd DALI && \
@@ -160,7 +160,7 @@ RUN python3 -m pip install --no-cache-dir --extra-index-url \
 
 	    
 # Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "TensorFlow 2.3 on Python 3.6 & CUDA 11.0" && \
+Run python3 -m ipykernel install --display-name "TensorFlow 2.2 on Python 3.6 & CUDA 10.1" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
