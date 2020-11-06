@@ -1,8 +1,8 @@
-FROM nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04
+FROM nvidia/cuda:11.1-cudnn8-devel-ubuntu18.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
-ARG CUDA=11.0
-ARG LIBNVINFER=7.2.0-1
+ARG CUDA=11.1
+ARG LIBNVINFER=7.2.1-1
 ARG LIBNVINFER_MAJOR_VERSION=7
 ARG CUDNN=8.0.3.33-1
 ENV NCCL_VERSION=2.7.8-1+cuda11.0
@@ -97,8 +97,8 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
     ldconfig
 
-# Install CUDA-11.0 + cuDNN 8.0.3
-RUN ln -s /usr/local/cuda-11.0 /usr/local/cuda && \
+# Install CUDA-11.1 + cuDNN 8.0.3
+RUN ln -s /usr/local/cuda-11.1 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.0.3 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
@@ -111,6 +111,7 @@ RUN apt-get update && \
 	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
 #        libnvinfer-bin=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
+	libnvinfer-plugin7 \
         libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
         && \
     apt-get clean && \
@@ -163,13 +164,8 @@ WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip 
 
-COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
-COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
-
-RUN python3 -m pip install --no-cache-dir --upgrade -Iv \
+RUN python3 -m pip install --no-cache-dir --upgrade \
     	    Cython==0.29.20 \
-	    /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
-	    /tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
 	    tornado==6.0.4 \
 	    pystan==2.19.1.1 \
 	    pycairo==1.19.0 \
@@ -190,15 +186,15 @@ RUN python3 -m pip install pip --no-cache-dir \
 	    notebook==6.0.3 
 
 WORKDIR /tmp
-COPY ./requirements.20.08.txt /tmp
-RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.20.08.txt && \
+COPY ./requirements.txt /tmp
+RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.txt && \
     python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
     python3 -m pip uninstall -y tensorboard tensorboard-plugin-wit tensorflow tensorflow-gpu \
         tensorflow-estimator tensorflow-addons tensorflow-datasets \
 	tensorflow-gan tensorflow-hub tensorflow-metadata \
 	tensorflow-probability 	tensorflow-text \
 	tensorflow-model-analysis tensorflow-serving-api && \
-    rm -f /tmp/*.whl /tmp/requirements.20.08.txt
+    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
