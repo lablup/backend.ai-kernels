@@ -4,9 +4,9 @@ FROM nvidia/cuda:11.1-cudnn8-devel-ubuntu18.04
 ARG CUDA=11.1
 ARG LIBNVINFER=7.2.1-1
 ARG LIBNVINFER_MAJOR_VERSION=7
-ARG CUDNN=8.0.3.33-1
-ENV NCCL_VERSION=2.7.8-1+cuda11.0
-ENV CUDNN_VERSION 8.0.3.33
+ARG CUDNN=8.0.4.30-1
+ENV NCCL_VERSION=2.7.8-1+cuda11.1
+ENV CUDNN_VERSION 8.0.4.30
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
 
@@ -17,6 +17,7 @@ ENV PYTHON_VERSION=${python}
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
+    LIBRARY_PATH /usr/local/cuda/lib64/stubs \
     LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
