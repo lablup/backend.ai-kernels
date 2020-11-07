@@ -373,8 +373,8 @@ RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_confi
 
 # install git-lfs
 WORKDIR /tmp
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.11.0.tar.gz && \
-    tar -zxf git-lfs-linux-amd64-v2.11.0.tar.gz && \
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.12.1/git-lfs-linux-amd64-v2.12.1.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.12.1.tar.gz && \
     bash install.sh && \
     rm -rf /tmp/*
 
