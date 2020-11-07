@@ -9,6 +9,8 @@ ENV NCCL_VERSION=2.7.8-1+cuda11.1
 ENV CUDNN_VERSION 8.0.4.30
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
+ENV NUMPY_VERSION 1.18.5
+ENV SCIPY_VERSION 1.5.2
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
@@ -159,16 +161,26 @@ RUN mkdir -p ${STAGE_DIR} && \
     dpkg-buildpackage -us -uc && \
     dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.1-0_all.deb
 
+RUN mkdir -p /opt/oracle && \
+    cd /opt/oracle && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends libaio1 default-libmysqlclient-dev && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+    unzip instantclient-basiclite-linuxx64.zip && \
+    rm -f instantclient-basiclite-linuxx64.zip && \
+    cd /opt/oracle/instantclient* && \
+    rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
+    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+    ldconfig
+
 RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
         apt-get install -y python${PYTHON_VERSION}-distutils python-apt ; \
     fi
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
-RUN apt-get update -y && \
-    apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
-       libatlas-base-dev libopenblas-dev
-       
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip 
@@ -182,30 +194,38 @@ RUN python3 -m pip install --no-cache-dir --upgrade \
 	    matplotlib==3.1.1 
 
 WORKDIR /tmp
-
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
-RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
-    cd /tmp/scs-python && \
+RUN cd /tmp && \
+    git clone --recursive https://github.com/bodono/scs-python.git  && \
+    cd scs-python && \
     python setup.py install --scs --gpu
+RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
+    cd numpy && \
+    git checkout -b v${NUMPY_VERSION} && \
+    cp site.cfg.example site.cfg && \
+    echo "[mkl]" >> site.cfg && \
+    echo "include_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include/" >> site.cfg && \
+    echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
+    echo "mkl_libs = mkl_rt" >> site.cfg && \
+    echo "lapack_libs =" >> site.cfg && \
+    python3 setup.py bdist_wheel -d /tmp 
 
-
-RUN python3 -m pip install pip --no-cache-dir \
-    	    Cartopy==0.18.0 \
-	    notebook==6.0.3 
-
-WORKDIR /tmp
-COPY ./requirements.txt /tmp
-RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.txt && \
-    python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
-    python3 -m pip uninstall -y tensorboard tensorboard-plugin-wit tensorflow tensorflow-gpu \
-        tensorflow-estimator tensorflow-addons tensorflow-datasets \
-	tensorflow-gan tensorflow-hub tensorflow-metadata \
-	tensorflow-probability 	tensorflow-text \
-	tensorflow-model-analysis tensorflow-serving-api && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
+# Install scipy
+RUN cd /tmp && \
+    git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
+    cd scipy && \
+    git checkout -b v${SCIPY_VERSION} && \  
+    cp site.cfg.example site.cfg && \
+    echo "[mkl]" >> site.cfg && \
+    echo "include_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include/" >> site.cfg && \
+    echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
+    echo "mkl_libs = mkl_rt" >> site.cfg && \
+    echo "lapack_libs =" >> site.cfg && \
+    python3 -m pip install -U --no-cache-dir /tmp/numpy-1.18.5-cp37-cp37m-linux_x86_64.whl && \
+    python3 setup.py install 
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
@@ -236,6 +256,22 @@ RUN echo "Install mecab-ko-dic" && \
     cd /tmp && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
+
+RUN python3 -m pip install pip --no-cache-dir \
+    	    Cartopy==0.18.0 \
+	    notebook==6.0.3 
+
+WORKDIR /tmp
+COPY ./requirements.txt /tmp
+RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.txt && \
+    python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
+    python3 -m pip uninstall -y tensorboard tensorboard-plugin-wit tensorflow tensorflow-gpu \
+        tensorflow-estimator tensorflow-addons tensorflow-datasets \
+	tensorflow-gan tensorflow-hub tensorflow-metadata \
+	tensorflow-probability 	tensorflow-text \
+	tensorflow-model-analysis tensorflow-serving-api && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
+
 
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
@@ -331,19 +367,6 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
 
-RUN mkdir -p /opt/oracle && \
-    cd /opt/oracle && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get update -y && \
-    apt-get install -y --no-install-recommends libaio1 default-libmysqlclient-dev && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
-    unzip instantclient-basiclite-linuxx64.zip && \
-    rm -f instantclient-basiclite-linuxx64.zip && \
-    cd /opt/oracle/instantclient* && \
-    rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
-    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
-    ldconfig
  
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
