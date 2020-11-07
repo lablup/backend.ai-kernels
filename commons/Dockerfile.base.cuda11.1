@@ -96,13 +96,6 @@ RUN rm -fr /var/lib/apt/lists/* && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
 
-RUN apt update && apt install curl xz-utils -y --no-install-recommends && NCCL_DOWNLOAD_SUM=34000cbe6a0118bfd4ad898ebc5f59bf5d532bbf2453793891fa3f1621e25653 && \
-    curl -fsSL https://developer.nvidia.com/compute/machine-learning/nccl/secure/2.7.8/agnostic/x64/nccl_2.7.8-1+cuda11.1_x86_64.txz -O && \
-    echo "$NCCL_DOWNLOAD_SUM  nccl_2.7.8-1+cuda11.1_x86_64.txz" | sha256sum -c - && \
-    tar --no-same-owner --keep-old-files --lzma -xvf nccl_2.7.8-1+cuda11.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
-    tar --no-same-owner --keep-old-files --lzma -xvf  nccl_2.7.8-1+cuda11.1_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
-    rm nccl_2.7.8-1+cuda11.1_x86_64.txz && \
-    ldconfig 
 
 RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
