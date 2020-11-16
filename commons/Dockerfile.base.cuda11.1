@@ -135,7 +135,7 @@ RUN mkdir -p /etc/OpenCL/vendors && \
 # OFED
 ENV STAGE_DIR=/tmp
 RUN mkdir -p ${STAGE_DIR}
-ENV MLNX_OFED_VERSION=5.1-2.3.7
+ENV MLNX_OFED_VERSION=5.1-2.3.7.1
 RUN cd ${STAGE_DIR} && \
     wget -q -O - http://www.mellanox.com/downloads/ofed/MLNX_OFED-${MLNX_OFED_VERSION}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64.tgz | tar xzf -
 RUN cd ${STAGE_DIR}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64 && \
