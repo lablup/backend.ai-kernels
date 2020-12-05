@@ -215,7 +215,7 @@ RUN apt autoclean && \
 
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "PyTorch 1.7 (NGC 20.11/Python 3.6 Conda) on Backend.AI" && \
+        --display-name "PyTorch 1.8 (NGC 20.11/Python 3.6 Conda) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
