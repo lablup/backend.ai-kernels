@@ -323,7 +323,7 @@ RUN git clone --recursive https://github.com/Microsoft/LightGBM && \
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
-    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.1.0.tar.gz && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.0.tar.gz && \
     tar zxf openmpi-4.1.0.tar.gz && \
     cd openmpi-4.1.0 && \
     ./configure --enable-orterun-prefix-by-default && \
