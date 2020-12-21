@@ -383,7 +383,7 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter lab build
 
 WORKDIR /tmp
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.11.0/git-lfs-linux-amd64-v2.13.1.tar.gz && \
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.1/git-lfs-linux-amd64-v2.13.1.tar.gz && \
     tar -zxf git-lfs-linux-amd64-v2.13.1.tar.gz && \
     bash install.sh && \
     rm -rf /tmp/*
