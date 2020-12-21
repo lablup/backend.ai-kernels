@@ -331,6 +331,14 @@ RUN mkdir /tmp/openmpi && \
     make install && \
     ldconfig && \
     rm -rf /tmp/openmpi*
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
+
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 # Install OpenSSH for MPI to communicate between containers
 RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
@@ -346,11 +354,7 @@ RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.8.0/code-se
   | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.8.0-linux-amd64 /usr/local/lib/code-server-3.8.0 && \
     ln -s /usr/local/lib/code-server-3.8.0/bin/code-server /usr/local/bin/code-server
-#COPY ./vscode-exts.tar.gz /etc/backend.ai/vscode-exts.tar.gz
-
-#RUN mkdir -p /etc/backend.ai/vscode-exts && \
-#    tar xvzf /etc/backend.ai/vscode-exts.tar.gz -C /etc/backend.ai/vscode-exts && \
-#    rm -rf /etc/backend.ai/vscode-exts.tar.gz
+RUN python3 -m pip install --no-cache-dir tensorflow-model-analysis
 
 RUN apt autoclean && \
     rm -rf /var/lib/apt/lists/* && \	
