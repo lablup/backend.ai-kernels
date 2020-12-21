@@ -134,8 +134,8 @@ RUN mkdir -p ${STAGE_DIR} && \
     cd ${STAGE_DIR}/nv_peer_memory && \
     ./build_module.sh && \
     cd ${STAGE_DIR} && \
-    tar xzf ${STAGE_DIR}/nvidia-peer-memory_1.0.orig.tar.gz && \
-    cd ${STAGE_DIR}/nvidia-peer-memory-1.0 && \
+    tar xzf ${STAGE_DIR}/nvidia-peer-memory_1.1.orig.tar.gz && \
+    cd ${STAGE_DIR}/nvidia-peer-memory-1.1 && \
     dpkg-buildpackage -us -uc && \
     dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.1-0_all.deb
 
