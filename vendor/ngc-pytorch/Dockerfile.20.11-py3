@@ -245,5 +245,6 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
 
+RUN sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc
 WORKDIR /home/work
 # vim: ft=dockerfile
