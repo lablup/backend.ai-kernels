@@ -18,11 +18,12 @@ RUN python3 -m pip install --no-cache-dir \
 RUN python3 -m pip install --no-cache-dir \
       --use-feature=2020-resolver \
         requests_oauthlib==1.2.0 \
-	neural-structured-learning==1.3.1
-
+	neural-structured-learning==1.3.1 \
+	pydot==1.4.0 \
+	proto-plus==1.10.2
 RUN python3 -m pip install --no-cache-dir \
       --use-feature=2020-resolver \
-	    tensorflow-transform==0.24.1 \
+	    tensorflow-transform==0.25.0 \
 	    tensorflow_model_analysis \
 	    tensorflow-datasets==4.1.0 \
 	    tensorflow_probability==0.11.1 \ 
