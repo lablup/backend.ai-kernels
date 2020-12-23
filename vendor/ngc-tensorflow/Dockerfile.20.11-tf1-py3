@@ -155,12 +155,11 @@ RUN cd /tmp && \
     python3 setup.py install 
 	    
 WORKDIR /tmp
-COPY ./requirements.20.08.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.20.08.txt && \
+COPY ./requirements.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
     python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
-    python3 -m pip install --no-cache-dir -I \
-        sklearn && \
-    rm -f /tmp/*.whl /tmp/requirements.20.08.txt
+    python3 -m pip install --no-cache-dir -I sklearn && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install git-lfs
 WORKDIR /tmp
@@ -209,6 +208,8 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter lab build
 
 RUN apt autoclean && \
+    sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
+    python3 -m pip uninstall -y  tensorboard-plugin-wit && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
@@ -226,11 +227,11 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
       ai.backend.resource.min.cuda.device=1 \
-v      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
-RUN sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc
+
 WORKDIR /home/work
 # vim: ft=dockerfile
