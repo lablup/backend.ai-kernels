@@ -211,7 +211,7 @@ pyqt5==5.15.0
 pyrsistent==0.15.7
 pyshp==2.1.0
 PySocks==1.7.1
-pytest==5.1.0
+pytest==5.4.3
 python-dateutil==2.8.1
 python-jsonrpc-server==0.3.4
 python-language-server==0.33.1
