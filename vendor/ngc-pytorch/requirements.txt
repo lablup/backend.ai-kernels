@@ -265,7 +265,7 @@ termcolor==1.1.0
 terminado==0.8.3
 test-generator==0.1.1
 testpath==0.4.4
-tf2onnx==1.7.2
+tf2onnx==0.4.1
 toml==0.10.0
 toolz==0.10.0
 TPOT==0.11.1
