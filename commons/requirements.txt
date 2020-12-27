@@ -1,4 +1,4 @@
-absl-py==0.8.0
+absl-py==0.9.0
 aiohttp==3.6.2
 aiozmq==0.9.0
 adanet==0.8.0
@@ -157,7 +157,6 @@ ngraph-tensorflow-bridge==0.18.0
 nltk==3.2.5
 numba==0.48.0
 numexpr==2.7.0
-nvidia-dlprof==0.0.1.dev4
 oauthlib==3.1.0
 oauth2client==3.0.0
 onnx==1.6.0
