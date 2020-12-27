@@ -160,8 +160,8 @@ numba==0.48.0
 numexpr==2.7.0
 oauthlib==3.1.0
 oauth2client==3.0.0
-onnx==1.2.1
-onnx-plaidml==0.6.3
+onnx==1.8.0
+#onnx-plaidml==0.6.3
 opt-einsum==3.2.0
 osqp==0.5.0
 packaging==20.3
@@ -265,7 +265,7 @@ termcolor==1.1.0
 terminado==0.8.3
 test-generator==0.1.1
 testpath==0.4.4
-tf2onnx==0.4.0
+tf2onnx==1.7.2
 toml==0.10.0
 toolz==0.10.0
 TPOT==0.11.1
