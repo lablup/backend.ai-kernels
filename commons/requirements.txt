@@ -157,6 +157,7 @@ ngraph-tensorflow-bridge==0.18.0
 nltk==3.2.5
 numba==0.48.0
 numexpr==2.7.0
+nvidia-dlprof==0.0.1.dev4
 oauthlib==3.1.0
 oauth2client==3.0.0
 onnx==1.6.0
@@ -260,6 +261,7 @@ statsmodels==0.11.1
 stopit==1.1.2
 tabulate==0.8.7
 tblib==1.6.0
+tensorflow_model_analysis==0.26.0
 termcolor==1.1.0
 terminado==0.8.3
 test-generator==0.1.1
