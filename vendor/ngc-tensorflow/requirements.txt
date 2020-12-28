@@ -119,7 +119,7 @@ jupyterlab-github==2.0.0
 jupyterlab-server==1.1.5
 jupyterlab_hdf==0.3.0
 jupyterthemes==0.20.0
-Keras==2.3.1
+Keras==2.2.4
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.0
 kss==1.3.1
@@ -188,7 +188,7 @@ py==1.8.0
 pyaml==19.12.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
-pyarrow==0.15.1
+pyarrow==0.16.0
 pycocotools==2.0.0
 pycodestyle==2.5.0
 pycparser==2.19
