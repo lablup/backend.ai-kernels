@@ -269,11 +269,12 @@ termcolor==1.1.0
 terminado==0.8.3
 tensorflow_datasets==4.1.0
 tensorflow_metadata==0.23.0
-tensorflow_model_analysis==0.24.3
+tensorflow_model_analysis==0.23.0
 tensorflow_hub==0.10.0
 tensorflow_text==2.3.0
 test-generator==0.1.1
 testpath==0.4.4
+tfx-bsl==0.23.0
 tf2onnx==1.5.5
 toml==0.10.0
 toolz==0.10.0
