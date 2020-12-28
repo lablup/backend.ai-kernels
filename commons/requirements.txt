@@ -252,7 +252,7 @@ Shapely==1.7.0
 simpervisor==0.3
 simpleaudio==1.0.4
 simplejson==3.17.0
-six==1.14.0
+six==1.11.0
 smart-open==1.9.0
 snowballstemmer==2.0.0
 sortedcontainers==2.1.0
