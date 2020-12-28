@@ -265,7 +265,7 @@ tabulate==0.8.7
 tblib==1.6.0
 termcolor==1.1.0
 terminado==0.8.3
-tensorflow_metadata==0.26.0
+tensorflow_metadata==0.23.0
 tensorflow_hub==0.10.0
 test-generator==0.1.1
 testpath==0.4.4
