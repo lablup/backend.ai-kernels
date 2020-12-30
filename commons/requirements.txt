@@ -73,7 +73,7 @@ geoplotlib==0.3.2
 google-auth==1.18.0
 google-auth-oauthlib==0.4.1
 google-images-download==2.8.0
-google-pasta==0.1.8
+google-pasta==0.2
 graphviz==0.14
 grpcio==1.32.0
 gym==0.17.3
