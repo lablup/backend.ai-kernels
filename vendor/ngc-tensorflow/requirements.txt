@@ -77,9 +77,9 @@ gast==0.2.2
 gensim==3.8.0
 geopandas==0.5.1
 geoplotlib==0.3.2
-google_api_core==1.21.0
-google_api_python_client==1.18.0
-google-auth==1.18.0
+google_api_core==1.24.1
+google_api_python_client==1.12.8
+google-auth==1.21.1
 google-auth-oauthlib==0.4.1
 google_cloud_bigtable==0.32.1
 google-images-download==2.8.0
