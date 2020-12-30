@@ -8,7 +8,7 @@ ARG CUDNN=8.0.5.39-1
 ENV NCCL=2.8.3
 ENV NCCL_VERSION=2.8.3-1+cuda11.1
 ENV CUDNN_VERSION 8.0.5.43
-ENV MLNX_OFED_VERSION=5.1-2.3.7
+ENV MLNX_OFED_VERSION=5.1-2.3.7.1
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
 ENV NUMPY_VERSION 1.19.4
@@ -145,25 +145,23 @@ RUN mkdir -p /etc/OpenCL/vendors && \
     echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
 
 # OFED
-ENV STAGE_DIR=/tmp
-RUN mkdir -p ${STAGE_DIR}
-RUN cd ${STAGE_DIR} && \
-    wget -q -O - http://www.mellanox.com/downloads/ofed/MLNX_OFED-${MLNX_OFED_VERSION}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64.tgz | tar xzf -
-RUN cd ${STAGE_DIR}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64 && \
+WORKDIR /tmp
+RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64.tgz | tar xzf - && \
+    cd /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64 && \
     ./mlnxofedinstall --user-space-only --without-fw-update --all -q && \
-    cd ${STAGE_DIR} && \
-    rm -rf ${STAGE_DIR}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64*
+    cd /tmp && \
+    rm -rf /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64*
     
 # nvidia-peer
-RUN mkdir -p ${STAGE_DIR} && \
-    git clone https://github.com/Mellanox/nv_peer_memory.git ${STAGE_DIR}/nv_peer_memory && \
-    cd ${STAGE_DIR}/nv_peer_memory && \
+WORKDIR /tmp
+RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory && \
+    cd /tmp/nv_peer_memory && \
     ./build_module.sh && \
-    cd ${STAGE_DIR} && \
-    tar xzf ${STAGE_DIR}/nvidia-peer-memory_1.1.orig.tar.gz && \
-    cd ${STAGE_DIR}/nvidia-peer-memory-1.1 && \
+    cd /tmp && \
+    tar xzf /tmp/nvidia-peer-memory_1.1.orig.tar.gz && \
+    cd /tmp/nvidia-peer-memory-1.1 && \
     dpkg-buildpackage -us -uc && \
-    dpkg -i ${STAGE_DIR}/nvidia-peer-memory_1.1-0_all.deb
+    dpkg -i /tmp/nvidia-peer-memory_1.1-0_all.deb
 
 RUN mkdir -p /opt/oracle && \
     cd /opt/oracle && \
@@ -203,10 +201,6 @@ RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
-RUN cd /tmp && \
-    git clone --recursive https://github.com/bodono/scs-python.git  && \
-    cd scs-python && \
-    python setup.py install --scs --gpu
 RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
     cd numpy && \
     git checkout -b v${NUMPY_VERSION} && \
@@ -229,8 +223,12 @@ RUN cd /tmp && \
     echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
     echo "mkl_libs = mkl_rt" >> site.cfg && \
     echo "lapack_libs =" >> site.cfg && \
-    python3 -m pip install -U --no-cache-dir /tmp/numpy-1.18.5-cp37-cp37m-linux_x86_64.whl && \
+    python3 -m pip install -U --no-cache-dir /tmp/numpy-1.19.4-cp36-cp36m-linux_x86_64.whl && \
     python3 setup.py install 
+RUN cd /tmp && \
+    git clone --recursive https://github.com/bodono/scs-python.git  && \
+    cd scs-python && \
+    python setup.py install --scs --gpu
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
@@ -264,6 +262,7 @@ RUN echo "Install mecab-ko-dic" && \
 
 RUN python3 -m pip install pip --no-cache-dir \
     	    Cartopy==0.18.0 \
+	    nvidia-dlprof \
 	    notebook==6.0.3 
 
 WORKDIR /tmp
@@ -309,7 +308,7 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.19.2/cmake-3.19.2
     rm /tmp/cmake-install.sh
 
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.0"
+ENV OPENCV_VERSION="4.5.1"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -334,7 +333,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D WITH_V4L=ON \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.0/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.1/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
