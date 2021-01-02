@@ -178,8 +178,6 @@ RUN cd /tmp && \
 WORKDIR /tmp
 COPY ./requirements.txt /tmp
 RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
-    python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
-    python3 -m pip install --no-cache-dir -I sklearn && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install git-lfs
