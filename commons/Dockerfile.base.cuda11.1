@@ -18,10 +18,10 @@ ENV OPENMPI 4.0.5
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
-    LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
+    LIBRARY_PATH="/usr/local/cuda/lib64/stubs" \
     _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
+    PATH="/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
@@ -101,8 +101,6 @@ RUN rm -fr /var/lib/apt/lists/* && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
 
-# NCCL_DOWNLOAD_SUM=34000cbe6a0118bfd4ad898ebc5f59bf5d532bbf2453793891fa3f1621e25653
-# echo "$NCCL_DOWNLOAD_SUM  nccl_2.8.3-1+cuda11.1_x86_64.txz" | sha256sum -c - 
 RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.8/nccl_2.8.3-1+cuda11.1_x86_64.txz -O && \
     tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
     tar --no-same-owner --keep-old-files --lzma -xvf  nccl_${NCCL}-1+cuda11.1_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
@@ -125,20 +123,12 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
-#        libnvinfer-bin=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
 	libnvinfer-plugin7 \
         libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-WORKDIR /tmp
-#RUN mkdir -p /opt/intel/lib && \
-#    curl -fsSL https://anaconda.org/intel/mkl-static/${MKL_VERSION}/download/linux-64/mkl-static-${MKL_VERSION}-intel_${MKL_BUILD}.tar.bz2 | tar xjv && \
-#    mv lib/* /opt/intel/lib/ && \
-#    curl -fsSL https://anaconda.org/intel/mkl-include/${MKL_VERSION}/download/linux-64/mkl-include-${MKL_VERSION}-intel_${MKL_BUILD}.tar.bz2 | tar xjv && \
-#    mv include /opt/intel/
 
 # Add OpenCL ICD files for LightGBM
 RUN mkdir -p /etc/OpenCL/vendors && \
@@ -268,8 +258,7 @@ RUN python3 -m pip install pip --no-cache-dir \
 WORKDIR /tmp
 COPY ./requirements.txt /tmp
 RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
-
+    rm -f /tmp/requirements.txt
 
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
@@ -341,10 +330,10 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
       .. 2>&1 | tee cmake_messages.txt && \
     make -j$(nproc) && \
-    make install && \
-    cd /tmp && \
-    python3 -m pip install --no-cache-dir opencv-python && \
-    rm -fr opencv* 
+    make install 
+#RUN cd /tmp && \
+#    python3 -m pip install --no-cache-dir ./opencv-contrib-python*.whl && \
+#    rm -fr opencv* 
 
 # XGBoost
 RUN git clone  --recursive https://github.com/dmlc/xgboost && \
@@ -365,9 +354,8 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
 
- 
 # Install Open MPI
-RUN mkdir /tmp/openmpi && \
+RUN mkdir -p /tmp/openmpi && \
     cd /tmp/openmpi && \
     wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-${OPENMPI}.tar.gz && \
     tar zxf openmpi-${OPENMPI}.tar.gz && \
@@ -422,7 +410,7 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-#    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
+    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
 #    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
 #    jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
@@ -437,6 +425,7 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter lab build
 
 RUN apt autoclean && \
+    ln -s /usr/local/cuda-11.1/targets/x86_64-linux/lib/libcusolver.so.11 /usr/local/cuda-11.1/targets/x86_64-linux/lib/libcusolver.so.10 && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     python3 -m pip uninstall -y  tensorboard-plugin-wit && \
     rm -rf /var/lib/apt/lists/* && \	
