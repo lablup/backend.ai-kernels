@@ -72,7 +72,6 @@ RUN python3 -m pip install --no-cache-dir \
             nni==1.9 \
             mlflow==1.12.1 \
             scikit-nni==0.2.1
-
 	    
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "TensorFlow 2.4 on Python 3.6 & CUDA 11ᇂᇂᇂᇂ.1" && \
@@ -89,7 +88,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
-
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+      
 WORKDIR /home/work
 # vim: ft=dockerfile
