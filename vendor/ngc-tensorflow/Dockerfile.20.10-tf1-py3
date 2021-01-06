@@ -1,19 +1,16 @@
-FROM nvcr.io/nvidia/pytorch:20.11-py3
-# NVIDIA PyTorch with Python 3.6 (CONDA)
+FROM nvcr.io/nvidia/tensorflow:20.10-tf1-py3
+# NVIDIA DIGITS runs on Python 3.6
 
 RUN apt-get update && \
     apt-get install -y libsm6 libxext6 libxrender-dev mercurial
 
-
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvm/versions/node/v14.8.0/bin:/opt/conda/bin:/opt/cmake-3.14.6-Linux-x86_64/bin/:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
-
-RUN update-alternatives --install /opt/conda/bin/python python /opt/conda/bin/python3 2
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
@@ -114,6 +111,9 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     cd /tmp && \
     python3 -m pip install --no-cache-dir opencv-python && \
     rm -fr opencv* 
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip 
@@ -133,7 +133,7 @@ RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
 
 COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
 COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
+RUN python3 -m pip install --no-cache-dir \ 
     	    Cython==0.29.21 \
 	    tornado==6.0.4 \
 	    pystan==2.19.1.1 \
@@ -157,10 +157,10 @@ RUN cd /tmp && \
     python3 setup.py install 
 	    
 WORKDIR /tmp
-COPY ./requirements.txt /tmp
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir --ignore-installed -r requirements.txt && \
-    /opt/conda/bin/python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
+COPY ./requirements.20.08.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.20.08.txt && \
+    python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
+    rm -f /tmp/*.whl /tmp/requirements.20.08.txt
 
 # install git-lfs
 WORKDIR /tmp
@@ -193,19 +193,6 @@ RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
 # Configure OpenMPI to run good defaults:
 RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
-# Install Horovod, temporarily using CUDA stubs
-RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-    HOROVOD_CUDA_HOME=$CONDA_PREFIX HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL HOROVOD_NCCL_LINK=SHARED \
-    HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.20.2 && \
-    ldconfig
-
-RUN python3 -m pip install --no-cache-dir \
-    	    mpi4py==3.0.3 \
-	    nni==1.9 \
-	    mlflow==1.13 \
-	    scikit-nni==0.2.1
-
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
@@ -222,16 +209,13 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter lab build
 
 RUN apt autoclean && \
-    sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
-    python3 -m pip uninstall -y  tensorboard-plugin-wit && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
 
-RUN /opt/conda/bin/python3 -m ipykernel install \
-        --prefix=/opt/conda/ \
-        --display-name "PyTorch 1.7.1 (NGC 20.11/Python 3.6 Conda) on Backend.AI" && \
-    cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+# Install ipython kernelspec
+RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.6 (NGC 20.10 / TensorFlow 1.15) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
@@ -245,9 +229,8 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0.1 \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/opt/conda/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+      ai.backend.runtime-path="/usr/bin/python" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
 
-        
 WORKDIR /home/work
 # vim: ft=dockerfile
