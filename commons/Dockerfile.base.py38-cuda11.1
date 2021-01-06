@@ -9,14 +9,15 @@ ENV NCCL=2.8.3
 ENV NCCL_VERSION=2.8.3-1+cuda11.1
 ENV CUDNN_VERSION 8.0.5.43
 ENV MLNX_OFED_VERSION=5.1-2.3.7.1
+# Intel MKL 
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
-ENV NUMPY_VERSION 1.19.4
-ENV SCIPY_VERSION 1.5.4
-ENV OPENMPI 4.0.5
 # Python 3.8 is supported by Ubuntu Bionic out of the box
 ARG python=3.8
 ENV PYTHON_VERSION=${python}
+ENV NUMPY_VERSION 1.19.4
+ENV SCIPY_VERSION 1.5.4
+ENV OPENMPI 4.0.5
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
@@ -190,9 +191,6 @@ RUN python3 -m pip install --no-cache-dir \
 	    nvidia-pyindex==1.0.5 \
 	    matplotlib==3.3.3 
   
-#	    pystan==2.19.1.1 \
-#	    pycairo==1.12.0 \
-#	    python-language-server[all] \
 
 WORKDIR /tmp
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
