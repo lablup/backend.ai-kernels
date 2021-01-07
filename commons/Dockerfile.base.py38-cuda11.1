@@ -9,23 +9,22 @@ ENV NCCL=2.8.3
 ENV NCCL_VERSION=2.8.3-1+cuda11.1
 ENV CUDNN_VERSION 8.0.5.43
 ENV MLNX_OFED_VERSION=5.1-2.3.7.1
-# Intel MKL 
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
-# Python 3.8 is supported by Ubuntu Bionic out of the box
-ARG python=3.8
-ENV PYTHON_VERSION=${python}
 ENV NUMPY_VERSION 1.19.4
 ENV SCIPY_VERSION 1.5.4
 ENV OPENMPI 4.0.5
+# Python 3.8 is supported by Ubuntu Bionic out of the box
+ARG python=3.8
+ENV PYTHON_VERSION=${python}
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
     LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
     _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
-    PATH="/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64:/usr/include/x86_64-linux-gnu" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
@@ -39,7 +38,8 @@ RUN rm -fr /var/lib/apt/lists/* && \
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
-    add-apt-repository ppa:deadsnakes/ppa && \ 
+    add-apt-repository ppa:deadsnakes/ppa && \
+    add-apt-repository ppa:bashtop-monitor/bashtop && \
     wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
     apt-get update -y && \
     apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
@@ -50,6 +50,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	dkms \
         git \
         vim \
+	htop bashtop \
 	yasm \
         wget zip unzip \
   	openssh-client openssh-server \
@@ -67,11 +68,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libxext6 \
 	libxrender-dev \
 	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
-	libgdal-dev python3-gdal \
-        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
-        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev \
         libgeos-dev libgeos++-dev \
-	tesseract-ocr libtesseract-dev \
         pkg-config \
         zlib1g-dev \
 	mime-support \
@@ -191,7 +188,6 @@ RUN python3 -m pip install --no-cache-dir \
 	    tornado==6.1 \
 	    nvidia-pyindex==1.0.5 \
 	    matplotlib==3.3.3 
-  
 
 WORKDIR /tmp
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
@@ -220,7 +216,7 @@ RUN cd /tmp && \
     echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
     echo "mkl_libs = mkl_rt" >> site.cfg && \
     echo "lapack_libs =" >> site.cfg && \
-    python3 -m pip install -U --no-cache-dir /tmp/numpy-1.19.4-cp38-cp38-linux_x86_64.whl && \
+    python3 -m pip install -U --no-cache-dir /tmp/numpy-*.whl && \
     python3 setup.py install 
 RUN cd /tmp && \
     git clone --recursive https://github.com/bodono/scs-python.git  && \
@@ -241,7 +237,6 @@ RUN apt-get update && \
     make -j$(nproc) && \
     make check && \
     make install
-
 RUN echo "Install mecab-ko-dic" && \
     cd /tmp && \
     ldconfig && \
@@ -360,7 +355,6 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     make OPENCL_HEADERS=/usr/local/cuda-11.1/targets/x86_64-linux/include LIBOPENCL=/usr/local/cuda-11.1/targets/x86_64-linux/lib -j$(nproc) && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
-
  
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
@@ -418,9 +412,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-#    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-#    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
-#    jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
