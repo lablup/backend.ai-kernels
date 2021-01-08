@@ -20,6 +20,8 @@ ENV PYTHON_VERSION=${python}
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
+    CPLUS_INCLUDE_PATH=/usr/include/gdal \
+    C_INCLUDE_PATH=/usr/include/gdal \
     PYTHONUNBUFFERED=1 \
     LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
     _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
@@ -67,6 +69,9 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libsm6 \
 	libxext6 \
 	libxrender-dev \
+	libgdal-dev python3-gdal \
+        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev \
 	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
         libgeos-dev libgeos++-dev \
         pkg-config \
@@ -221,7 +226,7 @@ RUN cd /tmp && \
 RUN cd /tmp && \
     git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd scs-python && \
-    python setup.py install --scs --gpu
+    python3 setup.py install --scs --gpu
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
