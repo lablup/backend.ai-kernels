@@ -2,7 +2,7 @@ FROM nvcr.io/nvidia/tensorflow:20.12-tf2-py3
 # NVIDIA DIGITS runs on Python 3.6
 
 RUN apt-get update && \
-    apt-get install -y libsm6 libxext6 libxrender-dev
+    apt-get install -y libsm6 libxext6 libxrender-dev mercurial libopenblas-dev
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
@@ -43,7 +43,6 @@ RUN echo "Install mecab-ko-dic" && \
     cd /tmp && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
-
 
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
@@ -124,10 +123,6 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get install -y nodejs
 
 WORKDIR /tmp
-RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
-    cd OpenBLAS && \
-    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
-    make install
 RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
@@ -172,7 +167,25 @@ COPY ./service-defs /etc/backend.ai/service-defs
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.7.3/code-server-3.7.3-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.7.3-linux-amd64 /usr/local/lib/code-server-3.7.3 && \
     ln -s /usr/local/lib/code-server-3.7.3/bin/code-server /usr/local/bin/code-server
+# Install Open MPI
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.5.tar.gz && \
+    tar zxf openmpi-4.0.5.tar.gz && \
+    cd openmpi-4.0.5 && \
+    ./configure --enable-orterun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    rm -rf /tmp/openmpi*
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
 
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
