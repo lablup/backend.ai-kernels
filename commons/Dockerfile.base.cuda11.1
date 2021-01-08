@@ -358,13 +358,25 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
 
+# Install Open UCX
+WORKDIR /tmp
+RUN curl -fL https://github.com/openucx/ucx/archive/v1.9.0.tar.gz \
+    | tar -C /tmp/ucx -xz && \
+    cd ucx && \
+    bash ./autogen.sh && \
+    mkdir build && \
+    cd build && \
+    ../configure /usr/local/ucx && \
+    make -j $(nproc) && \
+    make install 
+
 # Install Open MPI
-RUN mkdir -p /tmp/openmpi && \
+RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
     wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-${OPENMPI}.tar.gz && \
     tar zxf openmpi-${OPENMPI}.tar.gz && \
     cd openmpi-${OPENMPI} && \
-    ./configure --enable-orterun-prefix-by-default && \
+    ./configure --enable-orterun-prefix-by-default --with-cuda --with-ucx=/usr/local/ucx --enable-mca-no-build=btl-uct && \
     make -j $(nproc) all && \
     make install && \
     ldconfig && \
