@@ -1,0 +1,5 @@
+{
+    "command": [
+        "/opt/tritonserver/bin/tritonserver", "-id", "tritonserver", "--model-repository", "/home/work/models"
+    ]
+}
