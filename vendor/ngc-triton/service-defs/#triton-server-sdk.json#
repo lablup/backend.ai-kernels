@@ -1,0 +1,5 @@
+{
+    "command": [
+        "/workspace/install/bin/", "-id", "tritonserver", "--model-repository", "/home/work/models"
+    ]
+}
