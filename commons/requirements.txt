@@ -84,7 +84,7 @@ hdf5storage==0.1.15
 HeapDict==1.0.1
 holidays==0.10.4
 hyperopt==0.1.2
-idna==3.1
+idna==2.10
 imageio==2.8.0
 imbalanced-learn==0.5.0
 importlib-metadata==1.5.0
