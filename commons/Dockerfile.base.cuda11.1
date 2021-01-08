@@ -14,9 +14,14 @@ ENV MKL_BUILD=279
 ENV NUMPY_VERSION 1.19.4
 ENV SCIPY_VERSION 1.5.4
 ENV OPENMPI 4.0.5
+# Python 2.7 or 3.6 is supported by Ubuntu Bionic out of the box
+ARG python=3.6
+ENV PYTHON_VERSION=${python}
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
+    CPLUS_INCLUDE_PATH=/usr/include/gdal \
+    C_INCLUDE_PATH=/usr/include/gdal \
     PYTHONUNBUFFERED=1 \
     LIBRARY_PATH="/usr/local/cuda/lib64/stubs" \
     _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
@@ -28,14 +33,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
-# Python 2.7 or 3.6 is supported by Ubuntu Bionic out of the box
-ARG python=3.6
-ENV PYTHON_VERSION=${python}
-
 RUN rm -fr /var/lib/apt/lists/* && \
     apt-get update -y && \
     apt-get install -y --no-install-recommends software-properties-common wget && \
     add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    add-apt-repository -y ppa:bashtop-monitor/bashtop && \
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
@@ -49,6 +52,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	dkms \
         git \
         vim \
+	htop bashtop \
 	yasm \
         wget zip unzip \
   	openssh-client openssh-server \
@@ -65,6 +69,9 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libsm6 \
 	libxext6 \
 	libxrender-dev \
+	libgdal-dev python3-gdal \
+        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev \
 	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
         libgeos-dev libgeos++-dev \
         pkg-config \
@@ -101,6 +108,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
 
+WORKDIR /tmp
 RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.8/nccl_2.8.3-1+cuda11.1_x86_64.txz -O && \
     tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
     tar --no-same-owner --keep-old-files --lzma -xvf  nccl_${NCCL}-1+cuda11.1_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
@@ -173,16 +181,16 @@ RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
+
+
+
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip 
+    python3 -m pip install --no-cache-dir -U setuptools pip==20.3.2 
 
 RUN python3 -m pip install --no-cache-dir \
     	    Cython==0.29.21 \
 	    tornado==6.1 \
-	    pystan==2.19.1.1 \
-	    pycairo==1.12.0 \
-	    python-language-server[all] \
 	    nvidia-pyindex==1.0.5 \
 	    matplotlib==3.3.3 
 
@@ -234,7 +242,6 @@ RUN apt-get update && \
     make -j$(nproc) && \
     make check && \
     make install
-
 RUN echo "Install mecab-ko-dic" && \
     cd /tmp && \
     ldconfig && \
@@ -331,9 +338,6 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       .. 2>&1 | tee cmake_messages.txt && \
     make -j$(nproc) && \
     make install 
-#RUN cd /tmp && \
-#    python3 -m pip install --no-cache-dir ./opencv-contrib-python*.whl && \
-#    rm -fr opencv* 
 
 # XGBoost
 RUN git clone  --recursive https://github.com/dmlc/xgboost && \
@@ -410,9 +414,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-#    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
-#    jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
