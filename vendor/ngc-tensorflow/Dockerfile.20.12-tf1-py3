@@ -2,8 +2,12 @@ FROM nvcr.io/nvidia/tensorflow:20.12-tf1-py3
 # NVIDIA DIGITS runs on Python 3.6
 
 RUN apt-get update && \
-    apt-get install -y libsm6 libxext6 libxrender-dev mercurial
-
+    apt-get install -y libsm6 libxext6 libxrender-dev mercurial libgdal-dev python3-gdal \
+    libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+    libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev
+  
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
@@ -123,16 +127,27 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get install -y nodejs
 
 WORKDIR /tmp
-RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=v0.3.13 git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
 RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
+RUN mkdir -p /opt/oracle && \
+    cd /opt/oracle && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends libaio1 default-libmysqlclient-dev && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+    unzip instantclient-basiclite-linuxx64.zip && \
+    rm -f instantclient-basiclite-linuxx64.zip && \
+    cd /opt/oracle/instantclient* && \
+    rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
+    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+    ldconfig
 
-COPY ./numpy-1.19.4-cp36-cp36m-manylinux2010_x86_64.whl /tmp
-COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
 RUN python3 -m pip install --no-cache-dir \ 
     	    Cython==0.29.21 \
 	    tornado==6.0.4 \
@@ -141,6 +156,12 @@ RUN python3 -m pip install --no-cache-dir \
 	    jupyter==1.0.0 \
 	    python-language-server[all] \	    
 	    matplotlib==3.3.3
+ENV NUMPY_VERSION 1.19.4
+RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
+    cd numpy && \
+    git checkout -b v${NUMPY_VERSION} && \
+    cp site.cfg.example site.cfg && \
+    python3 setup.py bdist_wheel -d /tmp 
 ENV SCIPY_VERSION 1.5.4
 # Install scipy
 RUN cd /tmp && \
@@ -149,16 +170,14 @@ RUN cd /tmp && \
     git checkout -b v${SCIPY_VERSION} && \  
     cp site.cfg.example site.cfg && \
     python3 -m pip install -U --no-cache-dir \
-        /tmp/numpy-1.19.4-cp36-cp36m-manylinux2010_x86_64.whl \
-    	/tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
+        /tmp/numpy-1.19.4-cp38-cp38-linux_x86_64.whl \
+	pandas==1.2.0 \
 	&& \
     python3 setup.py install 
 	    
 WORKDIR /tmp
 COPY ./requirements.txt /tmp
 RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
-    python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
-    python3 -m pip install --no-cache-dir -I sklearn && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install git-lfs

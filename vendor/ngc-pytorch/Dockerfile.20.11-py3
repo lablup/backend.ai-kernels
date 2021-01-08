@@ -203,6 +203,7 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
 	    nni==1.9 \
+	    mlflow==1.13 \
 	    scikit-nni==0.2.1
 
 RUN jupyter nbextensions_configurator enable && \
@@ -229,7 +230,7 @@ RUN apt autoclean && \
 
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "PyTorch 1.8 (NGC 20.11/Python 3.6 Conda) on Backend.AI" && \
+        --display-name "PyTorch 1.7.1 (NGC 20.11/Python 3.6 Conda) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
@@ -245,7 +246,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
 
         
 WORKDIR /home/work

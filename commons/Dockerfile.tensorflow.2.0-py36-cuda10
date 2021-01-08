@@ -3,11 +3,11 @@
 # ref: https://tensorflow.org
 
 # import python-binary
-FROM lablup/common-base:python3.6 as python-binary
+FROM lablup/common-base:python3.7-ubuntu18.046 as python-binary
 
 # Build target: lablup/common-tensorflow:2.0-py36-cuda10
 
-FROM nvidia/cuda:10.0-base-ubuntu16.04
+FROM nvidia/cuda:10.0-base-ubuntu18.04
 LABEL maintainer="Mario Cho <m.cho@lablup.com>"
 
 # The TensorFlow version
