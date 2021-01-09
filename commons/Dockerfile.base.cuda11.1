@@ -360,14 +360,14 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
 
 # Install Open UCX
 WORKDIR /tmp
-RUN curl -fL https://github.com/openucx/ucx/archive/v1.9.0.tar.gz \
-    | tar -C /tmp/ucx -xz && \
-    cd ucx && \
+RUN wget https://github.com/openucx/ucx/archive/v1.9.0.tar.gz && \
+    tar xvf v1.9.0.tar.gz && \
+    cd ucx-1.9.0 && \
     bash ./autogen.sh && \
     mkdir build && \
     cd build && \
-    ../configure /usr/local/ucx && \
-    make -j $(nproc) && \
+    ../configure --prefix=/usr/local/ucx && \
+    make -j$(nproc) && \
     make install 
 
 # Install Open MPI
