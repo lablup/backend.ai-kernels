@@ -26,7 +26,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
     _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
     LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
-    PATH="/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    PATH="/usr/local/mpi/bin:/usr/local/ucx:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
@@ -357,14 +357,26 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     make OPENCL_HEADERS=/usr/local/cuda-11.1/targets/x86_64-linux/include LIBOPENCL=/usr/local/cuda-11.1/targets/x86_64-linux/lib -j$(nproc) && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
- 
+
+# Install Open UCX
+WORKDIR /tmp
+RUN wget https://github.com/openucx/ucx/archive/v1.9.0.tar.gz && \
+    tar xvf v1.9.0.tar.gz && \
+    cd ucx-1.9.0 && \
+    bash ./autogen.sh && \
+    mkdir build && \
+    cd build && \
+    ../configure --prefix=/usr/local/ucx && \
+    make -j$(nproc) && \
+    make install 
+
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
     wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-${OPENMPI}.tar.gz && \
     tar zxf openmpi-${OPENMPI}.tar.gz && \
     cd openmpi-${OPENMPI} && \
-    ./configure --enable-orterun-prefix-by-default && \
+    ./configure --enable-orterun-prefix-by-default --with-cuda --with-ucx=/usr/local/ucx --enable-mca-no-build=btl-uct && \
     make -j $(nproc) all && \
     make install && \
     ldconfig && \
