@@ -9,14 +9,22 @@ RUN git clone https://github.com/kaldi-asr/kaldi.git /opt/kaldi && \
     cd /opt/kaldi/tools && \
     make -j $(nproc) && \
     cd /opt/kaldi/src && \
-    ./configure --shared --use-cuda && \
-    make depend -j $(nproc) && \
-    make -j $(nproc) -lcuda && \
-    find /opt/kaldi  -type f \( -name "*.o" -o -name "*.la" -o -name "*.a" \) -exec rm {} \; && \
+    ./configure --shared --use-cuda \
+	--cudatk-dir=/usr/local/cuda/ \
+	--mathlib=ATLAS \
+    	--cuda-arch="-gencode arch=compute_52,code=sm_52 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70 -gencode arch=compute_75,code=sm_75 -gencode arch=compute_80,code=sm_80" && \
+    make depend -j $(nproc) -lcuda -L /usr/local/cuda/lib64/stubs  && \
+    make -j $(nproc) -lcuda -L /usr/local/cuda/lib64/stubs
+RUN cd /opt/kaldi/src  && \
+    make ext -j $(nproc) -lcuda -L /usr/local/cuda/lib64/stubs  && \
+    ldconfig && \
+    find /opt/kaldi  -type f \( -name "*.o" -o -name "*.la" -o -name "*.a" \) -\
+exec rm {} \; && \
     rm -rf /opt/kaldi/.git
 
 # Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "Lablup Kaldi 21.01 on Python 3.8 (CUDA 11.1)" && \
+Run python3 -m ipykernel install --display-name "Lablup Kaldi 21.01 on Python 3\
+.8 (CUDA 11.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
@@ -30,7 +38,9 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:h\
+ttp:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard\
+:preopen:8080"
 
 WORKDIR /home/work
 # vim: ft=dockerfile
