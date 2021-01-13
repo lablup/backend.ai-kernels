@@ -46,9 +46,14 @@ RUN git clone https://github.com/kaldi-asr/kaldi.git /opt/kaldi && \
     cd /opt/kaldi/tools && \
     make -j $(nproc) && \
     cd /opt/kaldi/src && \
-    ./configure --shared --use-cuda && \
+    ./configure --shared --use-cuda \
+	--cudatk-dir=/usr/local/cuda/ \
+	--mathlib=ATLAS \
+    	--cuda-arch="-gencode arch=compute_52,code=sm_52 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70 -gencode arch=compute_75,code=sm_75 -gencode arch=compute_80,code=sm_80" && \
     make depend -j $(nproc) && \
-    make -j $(nproc) -lcuda -L /usr/local/cuda/lib64/stubs && \
+    make -j $(nproc) -lcuda -L /usr/local/cuda/lib64/stubs  && \
+    make -j $(nproc) ext -lcuda -L /usr/local/cuda/lib64/stubs  && \
+    ldconfig && \
     find /opt/kaldi  -type f \( -name "*.o" -o -name "*.la" -o -name "*.a" \) -exec rm {} \; && \
     rm -rf /opt/kaldi/.git
 
