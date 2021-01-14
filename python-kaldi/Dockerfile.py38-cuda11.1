@@ -3,9 +3,7 @@ FROM lablup/common-base:py38-cuda11.1
 # install kaldi
 WORKDIR /opt
 RUN apt update ; apt-get install -y sox subversion
-RUN git clone https://github.com/kaldi-asr/kaldi.git /opt/kaldi && \
-    cd /opt/kaldi && \
-    git checkout c013e2e && \
+RUN git clone https://github.com/hephaex/kaldi.git /opt/kaldi && \
     cd /opt/kaldi/tools && \
     make -j $(nproc) && \
     cd /opt/kaldi/src && \
@@ -13,19 +11,22 @@ RUN git clone https://github.com/kaldi-asr/kaldi.git /opt/kaldi && \
 	--cudatk-dir=/usr/local/cuda/ \
 	--mathlib=ATLAS \
     	--cuda-arch="-gencode arch=compute_52,code=sm_52 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70 -gencode arch=compute_75,code=sm_75 -gencode arch=compute_80,code=sm_80" && \
-    make depend -j $(nproc) -lcuda -L /usr/local/cuda/lib64/stubs  && \
-    make -j $(nproc) -lcuda -L /usr/local/cuda/lib64/stubs
+    make depend -j $(nproc) && \
+    make -j $(nproc) 
 RUN cd /opt/kaldi/src  && \
-    make ext -j $(nproc) -lcuda -L /usr/local/cuda/lib64/stubs  && \
+    make ext -j $(nproc) && \
     ldconfig && \
     find /opt/kaldi  -type f \( -name "*.o" -o -name "*.la" -o -name "*.a" \) -\
 exec rm {} \; && \
     rm -rf /opt/kaldi/.git
 
+RUN mkdir -p /workspace && \
+    chmod -R 777 /workspace
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "Lablup Kaldi 21.01 on Python 3\
 .8 (CUDA 11.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \

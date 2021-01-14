@@ -78,6 +78,7 @@ available_builds = [
     'tf-old', 'tf-current', 'tf-future',
     'caffe', 'pytorch',
     'cntk-builder','cntk',
+    'kaldi',
     'vendor-aws', 'vendor-ngc', 'vendor-freecad',
 ]
 
@@ -337,6 +338,9 @@ def main(build, list_builds, _auto_push):
         build_kernel('python-cntk', '2.6-py36-cuda9')
         build_kernel('python-cntk', '2.7-py36')
         build_kernel('python-cntk', '2.7-py36-cuda9')
+
+    if 'kaldi' in build:
+        build_kernel('python-kaldi', 'py38-cuda11.1')
 
     # AWS polly
     if 'vendor-aws' in build:
