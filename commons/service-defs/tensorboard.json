@@ -12,7 +12,6 @@
     "-m", "tensorboard.main",
     "--host", "0.0.0.0",
     "--port", "{ports[0]}",
-    "--debugger_port", "6064"
   ],
   "allowed_arguments": [
     "--logdir"
