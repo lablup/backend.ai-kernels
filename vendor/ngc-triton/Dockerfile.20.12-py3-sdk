@@ -2,10 +2,13 @@ FROM nvcr.io/nvidia/tritonserver:20.12-py3-sdk
 # NVIDIA Triton
 
 ENV PYTHONUNBUFFERED=1 \
-    PATH="/workspace/install/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    PATH="/workspace/install/bin:/opt/tritonserver/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     LIBRARY_PATH="/usr/local/cuda/lib64/stubs" \
     LD_LIBRARY_PATH="/workspace/install/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64" \
     LANG=C.UTF-8
+
+RUN apt update ; apt install ncurses-term -y && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 COPY ./service-defs /etc/backend.ai/service-defs
