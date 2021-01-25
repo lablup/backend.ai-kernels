@@ -10,7 +10,10 @@ ENV PYTHONUNBUFFERED=1 \
     PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
 COPY filebrowser_amd64 /usr/bin/filebrowser
-COPY filebrowser.db /etc/filebrowser.db
+RUN mkdir /etc/filebrowser
+COPY filebrowser.db /etc/filebrowser/filebrowser.db
+COPY config.json /etc/filebrowser/config.json
+COPY ./filebrowser_static /etc/filebrowser/resources
 #COPY bootstrap.sh /opt/container/bootstrap.sh
 
 # Backend.AI specifics

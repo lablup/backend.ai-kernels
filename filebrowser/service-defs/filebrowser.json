@@ -1,4 +1,16 @@
 {
+  "prestart": [
+    {
+      "action": "run_command",
+      "args": {
+        "command": [
+          "cp",
+          "/etc/filebrowser/filebrowser.db",
+          "/home/work/filebrowser.db"
+        ]
+      }
+    }
+  ],
   "command": [
     "/usr/bin/filebrowser",
     "--noauth",
