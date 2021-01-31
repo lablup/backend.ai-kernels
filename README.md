@@ -17,7 +17,8 @@ Here we list the latest versions of our supported kernel images.
 | TensorFlow              | `lablup/python-tensorflow` | 2.0.3   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.1.2   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.2.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
-| TensorFlow              | `lablup/python-tensorflow` | 2.3.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 2.3.2   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 2.4.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | PyTorch                 | `lablup/python-torch`      | 1.3     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.4     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.5     | O     | O\*   | O          |     |                   |
@@ -28,7 +29,9 @@ Here we list the latest versions of our supported kernel images.
 | MXnet                   | `lablup/python-mxnet`      | 1.4.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | MXnet                   | `lablup/python-mxnet`      | 1.5.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | MXnet                   | `lablup/python-mxnet`      | 1.6.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| MXnet                   | `lablup/python-mxnet`      | 1.7.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | All-in-one Environment  | `lablup/python-ff`         | 20.09   | O     | O\*   | O          |     |                   |
+| All-in-one Environment  | `lablup/python-ff`         | 21.01   | O     | O\*   | O          |     |                   |
 
 ### Warrented Images (NGC, Nvidia GPU Cloud)
 | Deep-Learning Framework | Image Name              | Version       | Batch | Query | Input Hook | TTY | Runtime Impl.     |
@@ -63,6 +66,8 @@ Here we list the latest versions of our supported kernel images.
 | NGC-TensorFlow          | `lablup/ngc-tensorflow` | 20.10-tf2-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-TensorFlow          | `lablup/ngc-tensorflow` | 20.11-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-TensorFlow          | `lablup/ngc-tensorflow` | 20.11-tf2-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 20.12-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 20.12-tf2-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.07-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.08-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.09-py3     | O     | O\*   | O          |     |                   |
@@ -78,6 +83,7 @@ Here we list the latest versions of our supported kernel images.
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 20.09-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 20.10-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 20.11-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 20.12-py3     | O     | O\*   | O          |     |                   |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.07-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.08-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.09-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
@@ -115,7 +121,7 @@ Here we list the latest versions of our supported kernel images.
  
 | base-mkl (Intel)      | base-cuda (Nvidia)             | base-TPU (Google)        | base-ROCm (AMD)           |
 |-----------------------|--------------------------------|--------------------------|---------------------------|
-| tensorflow-1.14-py36  | tensorflow-1.15-py36-cuda10    |	         	    |                           |
+| tensorflow-1.14-py36  | tensorflow-1.15-py36-cuda10    |	                	    |                           |
 | tensorflow-1.14-py36  | tensorflow-1.14-py36-cuda10    | tensorflow-1.14-py36-tpu | tensorflow-1.14-py36-rocm |
 | tensorflow-1.13-py36  | tensorflow-1.13-py36-cuda10    | tensorflow-1.13-py36-tpu |                           |
 | tensorflow-1.12-py36  | tensorflow-1.12-py36-cuda9     |                          |                           |
