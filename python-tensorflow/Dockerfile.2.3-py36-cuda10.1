@@ -1,4 +1,4 @@
-FROM lablup/common-base:py36-cuda10.1
+FROM lablup/common-base:cuda10.1
 
 ARG TF_BUILD_VERSION=r2.3
 # Install the most recent bazel release.
@@ -45,13 +45,16 @@ RUN python3 -m pip install --no-cache-dir \
 	    tensorflow-gan==2.0.0 \
 	    tensorflow-data-validation==0.23.0 \
 	    tensorflow-model-optimization==0.3.0 
-RUN python3 -m pip install --no-cache-dir --upgrade \
+RUN python3 -m pip install --no-cache-dir \
+#	    wcwidth==0.2.5 \
 	    jupyter-tensorboard==0.2.0 \
 	    tf-agents==0.5.0 \
-	    tf-slim==1.1.0 \
+	    tf-slim==1.1.0 
+RUN python3 -m pip install --no-cache-dir \
 	    tensorflow-plot==0.3.2 \
 	    tensorflow-lattice==2.0.5 \
-	    tensorflow-io==0.15.0  \
+	    tensorflow-io==0.15.0
+RUN python3 -m pip install --no-cache-dir \
 	    tfx==0.22.1 \
 	    tfx-bsl==0.22.1 
 RUN python3 -m pip install --no-cache-dir \
