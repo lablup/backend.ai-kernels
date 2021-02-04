@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 # Ubuntu 18.04 comes with Python 3.6
 
-ENV R_VERSION 4.0.2
+ENV R_VERSION 4.0.3
 
 RUN apt-get update && \
     apt-get install -y \
@@ -13,16 +13,17 @@ RUN apt-get update && \
         proj-bin libproj-dev \
         libgeos-dev libgeos++-dev \
         mime-support \
-	locales \
-	fonts-texgyre \
-	less \
-	vim-tiny \
-	liblapack3 \
+		locales \
+		fonts-texgyre \
+		less \
+		vim-tiny \
+		liblapack3 \
+		ncurses-term \
         gcc g++ gfortran && \
     apt-get autoclean && \
     rm -rf /var/lib/apt/lists/*
-
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+RUN ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs 
 
@@ -91,7 +92,7 @@ RUN Rscript -e "install.packages(c('rzmq','repr','IRkernel','IRdisplay'),type = 
     Rscript -e "install.packages(c('stm','stmCorrViz'))" && \
     Rscript -e "install.packages(c('jsonlite','jsonview','XML','xml2','xmlview'))" && \
     Rscript -e "install.packages(c('igraph'))"
-RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.0.2 On Backend.AI' , user = FALSE)" && \
+RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.0.3 On Backend.AI' , user = FALSE)" && \
     rm -rf /root/.local/share/jupyter && \
     jupyter kernelspec list && \
     cat /usr/local/share/jupyter/kernels/ir/kernel.json 
@@ -109,7 +110,7 @@ RUN jupyter nbextensions_configurator enable && \
 #    jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
 #    jupyter labextension install @jupyterlab/hdf5 
-    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+#    jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
 RUN ln -s /usr/lib/x86_64-linux-gnu/libffi.so.7 /usr/lib/x86_64-linux-gnu/libffi.so.6
 #RUN ln -s /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libssl.so.1.0.0
