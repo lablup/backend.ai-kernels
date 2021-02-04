@@ -222,7 +222,6 @@ pydot==1.4.1
 pydotplus==2.0.2
 pyflakes==2.1.1
 pygal==2.4.0
-pygame==1.9.5
 pyglet==1.5.0
 Pygments==2.5.2
 pyLDAvis==2.1.2
