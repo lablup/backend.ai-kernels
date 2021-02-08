@@ -260,9 +260,9 @@ RUN python3 -m pip install pip --no-cache-dir \
 	    notebook==6.0.3 
 
 WORKDIR /tmp
-COPY ./requirements.py38.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.py38.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.py38.txt
+COPY ./requirements.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
@@ -434,7 +434,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter lab build
 
 RUN apt autoclean && \
-    ln -s /usr/local/cuda-10.1/targets/x86_64-linux/lib/libcusolver.so.10 /usr/local/cuda-10.1/targets/x86_64-linux/lib/libcusolver.so.10 && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     python3 -m pip uninstall -y  tensorboard-plugin-wit && \
     rm -rf /var/lib/apt/lists/* && \	
