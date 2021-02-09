@@ -197,7 +197,7 @@ RUN apt autoclean && \
     rm -rf /tmp/*
 
 # Install ipython kernelspec
-RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.6 (NGC 20.12 / TensorFlow 2.3) on Backend.AI" && \
+RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.6 (NGC 20.11 / TensorFlow 2.3) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
