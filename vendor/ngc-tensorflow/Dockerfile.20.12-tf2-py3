@@ -189,7 +189,6 @@ RUN jupyter nbextensions_configurator enable && \
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
-    python3 -m pip uninstall -y  tensorboard-plugin-wit && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
