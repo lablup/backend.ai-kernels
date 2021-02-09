@@ -131,8 +131,8 @@ RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
 
-COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
-COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
+#COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
+#COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
     	    Cython==0.29.21 \
 	    tornado==6.0.4 \
@@ -149,8 +149,8 @@ RUN cd /tmp && \
     git checkout -b v${SCIPY_VERSION} && \  
     cp site.cfg.example site.cfg && \
     python3 -m pip install -U --no-cache-dir \
-        /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
-    	/tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
+#       /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
+#    	/tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
         scikit-learn \
 	hypothesis \
 	&& \
