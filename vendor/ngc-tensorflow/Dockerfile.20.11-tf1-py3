@@ -2,8 +2,12 @@ FROM nvcr.io/nvidia/tensorflow:20.11-tf1-py3
 # NVIDIA DIGITS runs on Python 3.6
 
 RUN apt-get update && \
-    apt-get install -y libsm6 libxext6 libxrender-dev mercurial
-
+    apt-get install -y libsm6 libxext6 libxrender-dev mercurial libgdal-dev python3-gdal \
+    libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+    libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev
+  
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
@@ -11,6 +15,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
@@ -74,7 +80,7 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     rm -rf /var/lib/apt/lists/
 
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.4.0"
+ENV OPENCV_VERSION="4.5.1"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -99,7 +105,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D WITH_V4L=ON \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.4.0/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.1/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
@@ -112,54 +118,49 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     python3 -m pip install --no-cache-dir opencv-python && \
     rm -fr opencv* 
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
-
-WORKDIR /tmp
-RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip 
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs
 
 WORKDIR /tmp
-RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=v0.3.13 git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
 RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
+RUN mkdir -p /opt/oracle && \
+    cd /opt/oracle && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends libaio1 default-libmysqlclient-dev && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+    unzip instantclient-basiclite-linuxx64.zip && \
+    rm -f instantclient-basiclite-linuxx64.zip && \
+    cd /opt/oracle/instantclient* && \
+    rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
+    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+    ldconfig
 
-COPY ./numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl /tmp
-COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
-RUN python3 -m pip install --no-cache-dir \ 
-    	    Cython==0.29.21 \
-	    tornado==6.0.4 \
-	    pystan==2.19.1.1 \
-	    pycairo==1.19.0 \
-	    jupyter \
-	    python-language-server[all] \	    
-	    matplotlib==3.1.1
-ENV SCIPY_VERSION 1.5.2
+WORKDIR /tmp
+RUN python3 -m pip install --no-cache-dir \
+        argon2_cffi==20.1.0
+COPY ./requirements.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
+ENV SCIPY_VERSION 1.6.0
 # Install scipy
 RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
     cd scipy && \
     git checkout -b v${SCIPY_VERSION} && \  
     cp site.cfg.example site.cfg && \
-    python3 -m pip install -U --no-cache-dir \
-        /tmp/numpy-1.18.5-cp36-cp36m-manylinux2010_x86_64.whl \
-    	/tmp/pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl \
-	&& \
-    python3 setup.py install 
+    pip uninstall -y typing && \
+    python3 -m pip install .
 	    
-WORKDIR /tmp
-COPY ./requirements.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
-    python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
-    python3 -m pip install --no-cache-dir -I sklearn && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install git-lfs
 WORKDIR /tmp
@@ -209,7 +210,6 @@ RUN jupyter nbextensions_configurator enable && \
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
-    python3 -m pip uninstall -y  tensorboard-plugin-wit && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
