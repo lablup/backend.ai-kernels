@@ -12,7 +12,7 @@ RUN apt-get update && \
         proj-bin libproj-dev \
         libgeos-dev libgeos++-dev \
         mime-support \
-        gcc g++ default-jdk iproute2 && \
+        gcc g++ && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
@@ -26,10 +26,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/
 
 ENV PYTHONUNBUFFERED=1 \
-    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/spark/bin:/opt/spark/sbin \
-    LANG=C.UTF-8 \
-    PYSPARK_PYTHON=/usr/bin/python3 \
-    SPARK_HOME=/opt/spark 
+    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LANG=C.UTF-8
 
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3.8 && \
     python3.8 -m pip install --no-cache-dir -U setuptools && \
@@ -47,7 +45,6 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3.8 && \
     python3.8 -m pip install --no-cache-dir ipython && \
     python3.8 -m pip install --no-cache-dir jupyter && \
     python3.8 -m pip install --no-cache-dir jupyterlab && \
-    python3.8 -m pip install --no-cache-dir pyspark && \ 
     rm -rf /root/.cache && \
     rm -f /tmp/*.whl
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 2
@@ -56,6 +53,22 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
 # Install ipython kernelspec
 RUN python3.8 -m ipykernel install --display-name "Python 3.8 on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+#setup spark dependency
+RUN apt-get update && \
+    apt-get install -y \
+        default-jdk iproute2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/
+
+ENV PATH=${PATH}:/opt/spark/bin:/opt/spark/sbin \
+    PYSPARK_PYTHON=/usr/bin/python3 \
+    SPARK_HOME=/opt/spark
+
+#install spark
+RUN python3.8 -m pip install --no-cache-dir pyspark && \
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
 
 RUN wget -P /home/work https://downloads.apache.org/spark/spark-3.0.1/spark-3.0.1-bin-hadoop2.7.tgz
 WORKDIR /home/work
