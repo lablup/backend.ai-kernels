@@ -31,56 +31,56 @@ RUN apt-get update -y && \
     apt-get update -y && \
     apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
         build-essential \
-	ca-certificates \
+	    ca-certificates \
         gcc g++ make \
-	gfortran \
-	dkms \
+	    gfortran \
+	    dkms \
         git \
         curl \
         vim \
-	yasm \
+	    yasm \
         wget zip unzip \
         software-properties-common \
-  	openssh-client openssh-server \
+  	    openssh-client openssh-server \
         libssl-dev \
         libmpdec2 \
-	pdsh curl net-tools \
-	iputils-ping \
+	    pdsh curl net-tools \
+	    iputils-ping \
         libcurl3-dev \
         libfreetype6-dev \
         libhdf5-serial-dev \
         libzmq3-dev \
         libjpeg-dev \
         libpng-dev \
-	libsm6 \
-	libxext6 \
-	libxrender-dev \
-	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
+	    libsm6 \
+	    libxext6 \
+	    libxrender-dev \
+	    libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
         libgeos-dev libgeos++-dev \
         pkg-config \
         zlib1g-dev \
-	mime-support \
-	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
+	    mime-support \
+	    proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
         python${PYTHON_VERSION} \
         python${PYTHON_VERSION}-dev \
-	libxml2-dev \
-	libxslt1-dev \
-	libasound2-dev \
-	libnuma-dev \
-	libjasper-dev \
+	    libxml2-dev \
+	    libxslt1-dev \
+	    libasound2-dev \
+	    libnuma-dev \
+	    libjasper-dev \
         libtiff-dev \
-	libavcodec-dev \
+	    libavcodec-dev \
         libavformat-dev \
-	libswscale-dev \
-	libxine2-dev \
-	libv4l-dev \
-	libboost-dev \
-	libboost-system-dev \
-	libboost-filesystem-dev \
-	xvfb \
-	fonts-nanum \
-	fonts-nanum-coding \
-	fonts-nanum-extra \
+	    libswscale-dev \
+	    libxine2-dev \
+	    libv4l-dev \
+	    libboost-dev \
+	    libboost-system-dev \
+	    libboost-filesystem-dev \
+	    xvfb \
+	    fonts-nanum \
+	    fonts-nanum-coding \
+	    fonts-nanum-extra \
 	&& \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
 
