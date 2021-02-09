@@ -1,5 +1,5 @@
 FROM nvcr.io/nvidia/tensorflow:20.12-tf1-py3
-# NVIDIA DIGITS runs on Python 3.6
+# NVIDIA DIGITS runs on Python 3.8
 
 RUN apt-get update && \
     apt-get install -y libsm6 libxext6 libxrender-dev mercurial libgdal-dev python3-gdal \
@@ -15,6 +15,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
+#WORKDIR /tmp
+#RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
+#    python3 -m pip install --no-cache-dir -U setuptools pip 
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
@@ -78,7 +84,7 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     rm -rf /var/lib/apt/lists/
 
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.0"
+ENV OPENCV_VERSION="4.5.1"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -103,7 +109,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D WITH_V4L=ON \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.0/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.1/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
@@ -116,11 +122,6 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     python3 -m pip install --no-cache-dir opencv-python && \
     rm -fr opencv* 
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
-
-WORKDIR /tmp
-RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip 
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
@@ -148,37 +149,22 @@ RUN mkdir -p /opt/oracle && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig
 
-RUN python3 -m pip install --no-cache-dir \ 
-    	    Cython==0.29.21 \
-	    tornado==6.0.4 \
-	    pystan==2.19.1.1 \
-	    pycairo==1.19.0 \
-	    jupyter==1.0.0 \
-	    python-language-server[all] \	    
-	    matplotlib==3.3.3
-ENV NUMPY_VERSION 1.19.4
-RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
-    cd numpy && \
-    git checkout -b v${NUMPY_VERSION} && \
-    cp site.cfg.example site.cfg && \
-    python3 setup.py bdist_wheel -d /tmp 
-ENV SCIPY_VERSION 1.5.4
+WORKDIR /tmp
+RUN python3 -m pip install --no-cache-dir \
+        argon2_cffi==20.1.0
+COPY ./requirements.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
+ENV SCIPY_VERSION 1.6.0
 # Install scipy
 RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
     cd scipy && \
     git checkout -b v${SCIPY_VERSION} && \  
     cp site.cfg.example site.cfg && \
-    python3 -m pip install -U --no-cache-dir \
-        /tmp/numpy-1.19.4-cp38-cp38-linux_x86_64.whl \
-	pandas==1.2.0 \
-	&& \
-    python3 setup.py install 
+    pip uninstall -y typing && \
+    python3 -m pip install .
 	    
-WORKDIR /tmp
-COPY ./requirements.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install git-lfs
 WORKDIR /tmp
@@ -234,7 +220,7 @@ RUN apt autoclean && \
     rm -rf /tmp/*
 
 # Install ipython kernelspec
-RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.6 (NGC 20.12 / TensorFlow 1.15) on Backend.AI" && \
+RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.8 (NGC 20.12 / TensorFlow 1.15) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
