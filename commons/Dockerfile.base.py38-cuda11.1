@@ -161,6 +161,7 @@ RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory
     dpkg-buildpackage -us -uc && \
     dpkg -i /tmp/nvidia-peer-memory_1.1-0_all.deb
 
+# Oracle client
 RUN mkdir -p /opt/oracle && \
     cd /opt/oracle && \
     apt-get clean && \
@@ -186,19 +187,15 @@ RUN rm /usr/bin/python /usr/bin/python3 && \
 
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip==20.3.2 
-
-RUN python3 -m pip install --no-cache-dir \
-    	    Cython==0.29.21 \
-	    tornado==6.1 \
-	    nvidia-pyindex==1.0.5 \
-	    matplotlib==3.3.3 
+    python3 -m pip install --no-cache-dir -U setuptools pip
 
 WORKDIR /tmp
+# OpenBlas
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
+# Numpy    
 RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
     cd numpy && \
     git checkout -b v${NUMPY_VERSION} && \
@@ -210,7 +207,7 @@ RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/nump
     echo "lapack_libs =" >> site.cfg && \
     python3 setup.py bdist_wheel -d /tmp 
 
-# Install scipy
+# Scipy
 RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
     cd scipy && \
@@ -256,11 +253,6 @@ RUN echo "Install mecab-ko-dic" && \
     cd /tmp && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
-
-RUN python3 -m pip install pip --no-cache-dir \
-    	    Cartopy==0.18.0 \
-	    nvidia-dlprof \
-	    notebook==6.0.3 
 
 WORKDIR /tmp
 COPY ./requirements.py38.txt /tmp
@@ -408,18 +400,20 @@ RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_confi
     echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
     mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
 
-# install git-lfs
+# Install git-lfs
 WORKDIR /tmp
 RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.1/git-lfs-linux-amd64-v2.13.1.tar.gz && \
     tar -zxf git-lfs-linux-amd64-v2.13.1.tar.gz && \
     bash install.sh && \
     rm -rf /tmp/*
 
+# Install VSCode
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.8.0/code-server-3.8.0-linux-amd64.tar.gz \
   | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.8.0-linux-amd64 /usr/local/lib/code-server-3.8.0 && \
     ln -s /usr/local/lib/code-server-3.8.0/bin/code-server /usr/local/bin/code-server
 
+# Install Jupyterlab extensions
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
@@ -428,7 +422,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
-#    jupyter labextension install @jupyterlab/hdf5 
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
     jupyter labextension install @pyviz/jupyterlab_pyviz && \
@@ -436,10 +429,10 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
 
+# Clean up
 RUN apt autoclean && \
     ln -s /usr/local/cuda-11.1/targets/x86_64-linux/lib/libcusolver.so.11 /usr/local/cuda-11.1/targets/x86_64-linux/lib/libcusolver.so.10 && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
-    python3 -m pip uninstall -y  tensorboard-plugin-wit && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
