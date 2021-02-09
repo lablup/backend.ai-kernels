@@ -2,8 +2,12 @@ FROM nvcr.io/nvidia/tensorflow:20.12-tf2-py3
 # NVIDIA DIGITS runs on Python 3.8
 
 RUN apt-get update && \
-    apt-get install -y libsm6 libxext6 libxrender-dev
-
+    apt-get install -y libsm6 libxext6 libxrender-dev mercurial libgdal-dev python3-gdal \
+    libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+    libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev
+  
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
@@ -13,10 +17,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
-
-#WORKDIR /tmp
-#RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-#    python3 -m pip install --no-cache-dir -U setuptools pip 
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
@@ -38,7 +38,7 @@ RUN apt-get update && \
 RUN echo "Install mecab-ko-dic" && \
     cd /tmp && \
     ldconfig && \
-    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gzv && \
+    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
     tar -zxvf mecab-ko-dic-2.1.1-20180720.tar.gz && \
     cd mecab-ko-dic-2.1.1-20180720 && \
     ./autogen.sh && \
@@ -147,6 +147,7 @@ RUN mkdir -p /opt/oracle && \
 
 WORKDIR /tmp
 RUN python3 -m pip install --no-cache-dir \
+        Cython==0.29.21 \
         argon2_cffi==20.1.0
 COPY ./requirements.txt /tmp
 RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
@@ -160,7 +161,7 @@ RUN cd /tmp && \
     cp site.cfg.example site.cfg && \
     pip uninstall -y typing && \
     python3 -m pip install .
-
+	    
 
 # install git-lfs
 WORKDIR /tmp
