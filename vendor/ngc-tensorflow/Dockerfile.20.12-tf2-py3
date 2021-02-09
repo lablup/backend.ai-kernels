@@ -38,7 +38,7 @@ RUN apt-get update && \
 RUN echo "Install mecab-ko-dic" && \
     cd /tmp && \
     ldconfig && \
-    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gzv && \
     tar -zxvf mecab-ko-dic-2.1.1-20180720.tar.gz && \
     cd mecab-ko-dic-2.1.1-20180720 && \
     ./autogen.sh && \
@@ -49,7 +49,6 @@ RUN echo "Install mecab-ko-dic" && \
     cd /tmp && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
-
 
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
@@ -132,18 +131,26 @@ RUN git clone -q --branch=v0.3.13 git://github.com/xianyi/OpenBLAS.git && \
 RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
+RUN mkdir -p /opt/oracle && \
+    cd /opt/oracle && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends libaio1 default-libmysqlclient-dev && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+    unzip instantclient-basiclite-linuxx64.zip && \
+    rm -f instantclient-basiclite-linuxx64.zip && \
+    cd /opt/oracle/instantclient* && \
+    rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
+    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+    ldconfig
 
+WORKDIR /tmp
 RUN python3 -m pip install --no-cache-dir \
-    	    argon2_cffi==20.1.0 \
-    	    Cython==0.29.21 \
-	    tornado==6.0.4 \
-	    pystan==2.19.1.1 \
-	    pycairo==1.19.0 \
-	    jupyter==1.0.0 \
-	    python-language-server[all] \
-	    numpy==1.20.1 \
-	    pandas==1.2.1 \
-	    matplotlib==3.3.3 
+        argon2_cffi==20.1.0
+COPY ./requirements.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
 ENV SCIPY_VERSION 1.6.0
 # Install scipy
 RUN cd /tmp && \
@@ -151,13 +158,9 @@ RUN cd /tmp && \
     cd scipy && \
     git checkout -b v${SCIPY_VERSION} && \  
     cp site.cfg.example site.cfg && \
-    python3 -m pip  install . 
+    pip uninstall -y typing && \
+    python3 -m pip install .
 
-WORKDIR /tmp
-COPY ./requirements.txt /tmp
-RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.txt && \
-    python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install git-lfs
 WORKDIR /tmp
@@ -170,7 +173,25 @@ COPY ./service-defs /etc/backend.ai/service-defs
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.7.3/code-server-3.7.3-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.7.3-linux-amd64 /usr/local/lib/code-server-3.7.3 && \
     ln -s /usr/local/lib/code-server-3.7.3/bin/code-server /usr/local/bin/code-server
+# Install Open MPI
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.5.tar.gz && \
+    tar zxf openmpi-4.0.5.tar.gz && \
+    cd openmpi-4.0.5 && \
+    ./configure --enable-orterun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    rm -rf /tmp/openmpi*
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
 
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
