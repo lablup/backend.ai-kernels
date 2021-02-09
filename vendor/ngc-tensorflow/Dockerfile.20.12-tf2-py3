@@ -1,8 +1,8 @@
 FROM nvcr.io/nvidia/tensorflow:20.12-tf2-py3
-# NVIDIA DIGITS runs on Python 3.6
+# NVIDIA DIGITS runs on Python 3.8
 
 RUN apt-get update && \
-    apt-get install -y libsm6 libxext6 libxrender-dev mercurial libopenblas-dev
+    apt-get install -y libsm6 libxext6 libxrender-dev
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
@@ -11,6 +11,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
+#WORKDIR /tmp
+#RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
+#    python3 -m pip install --no-cache-dir -U setuptools pip 
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
@@ -44,6 +50,7 @@ RUN echo "Install mecab-ko-dic" && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
 
+
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
@@ -74,7 +81,7 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     rm -rf /var/lib/apt/lists/
 
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.0"
+ENV OPENCV_VERSION="4.5.1"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -99,7 +106,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D WITH_V4L=ON \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.0/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.1/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
@@ -112,46 +119,39 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     python3 -m pip install --no-cache-dir opencv-python && \
     rm -fr opencv* 
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
-
-WORKDIR /tmp
-RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip 
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs
 
 WORKDIR /tmp
-RUN cd /tmp && \
-    git clone --recursive https://github.com/bodono/scs-python.git  && \
-    cd scs-python && \
-    python3 setup.py install --scs --gpu
+RUN git clone -q --branch=v0.3.13 git://github.com/xianyi/OpenBLAS.git && \
+    cd OpenBLAS && \
+    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
+    make install
+RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
+    cd /tmp/scs-python && \
+    python setup.py install --scs --gpu
 
-ENV NUMPY_VERSION 1.19.4
-ENV SCIPY_VERSION 1.5.4
-RUN python3 -m pip install --no-cache-dir \ 
+RUN python3 -m pip install --no-cache-dir \
+    	    argon2_cffi==20.1.0 \
     	    Cython==0.29.21 \
 	    tornado==6.0.4 \
 	    pystan==2.19.1.1 \
 	    pycairo==1.19.0 \
 	    jupyter==1.0.0 \
-	    python-language-server[all] \	    
+	    python-language-server[all] \
+	    numpy==1.20.1 \
+	    pandas==1.2.1 \
 	    matplotlib==3.3.3 
-RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
-    cd numpy && \
-    git checkout -b v${NUMPY_VERSION} && \
-    cp site.cfg.example site.cfg && \
-    python3 setup.py bdist_wheel -d /tmp 
-
+ENV SCIPY_VERSION 1.6.0
 # Install scipy
 RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
     cd scipy && \
     git checkout -b v${SCIPY_VERSION} && \  
     cp site.cfg.example site.cfg && \
-    python3 -m pip install -U --no-cache-dir /tmp/numpy-*.whl && \
-    python3 setup.py install 
+    python3 -m pip  install . 
 
 WORKDIR /tmp
 COPY ./requirements.txt /tmp
@@ -170,25 +170,7 @@ COPY ./service-defs /etc/backend.ai/service-defs
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.7.3/code-server-3.7.3-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.7.3-linux-amd64 /usr/local/lib/code-server-3.7.3 && \
     ln -s /usr/local/lib/code-server-3.7.3/bin/code-server /usr/local/bin/code-server
-# Install Open MPI
-RUN mkdir /tmp/openmpi && \
-    cd /tmp/openmpi && \
-    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.5.tar.gz && \
-    tar zxf openmpi-4.0.5.tar.gz && \
-    cd openmpi-4.0.5 && \
-    ./configure --enable-orterun-prefix-by-default && \
-    make -j $(nproc) all && \
-    make install && \
-    ldconfig && \
-    rm -rf /tmp/openmpi*
-# Create a wrapper for OpenMPI to allow running as root by default
-RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
-    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
-    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
-    chmod a+x /usr/local/bin/mpirun
 
-# Configure OpenMPI to run good defaults:
-RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
