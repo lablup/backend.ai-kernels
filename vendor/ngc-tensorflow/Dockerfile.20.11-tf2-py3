@@ -148,11 +148,12 @@ RUN mkdir -p /opt/oracle && \
 WORKDIR /tmp
 RUN python3 -m pip install --no-cache-dir \
         Cython==0.29.21 \
+	numpy==1.19.5 \
         argon2_cffi==20.1.0
-COPY ./requirements.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
-ENV SCIPY_VERSION 1.6.0
+COPY ./requirements.py36.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.py36.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.py36.txt
+ENV SCIPY_VERSION 1.5.4
 # Install scipy
 RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
