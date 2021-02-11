@@ -2,7 +2,24 @@ FROM lablup/common-base:py38-cuda11.1
 
 # install kaldi
 WORKDIR /opt
-RUN apt update ; apt-get install -y sox subversion
+RUN apt update && \
+    apt list --upgradable && \
+    apt-get install -y --no-install-recommends \
+        sox subversion \
+	patch wget rsync jq gnupg libtcmalloc-minimal4 \
+	libglib2.0-0 less libnl-route-3-200 libnl-3-dev \
+	libnl-route-3-dev libnuma-dev libnuma1 libpmi2-0-dev \
+        autoconf bc flac gawk \
+        libatlas3-base libtool \
+        libatlas-base-dev \
+	libasound-dev \
+	gstreamer1.0-pulseaudio \
+	gstreamer1.0-plugins-base \
+	gstreamer1.0-plugins-good \
+	gstreamer1.0-plugins-bad \
+	gstreamer1.0-plugins-ugly \
+	gstreamer1.0-tools \
+        zlib1g-dev 
 RUN git clone https://github.com/hephaex/kaldi.git /opt/kaldi && \
     cd /opt/kaldi/tools && \
     make -j $(nproc) && \
@@ -20,8 +37,60 @@ RUN cd /opt/kaldi/src  && \
 exec rm {} \; && \
     rm -rf /opt/kaldi/.git
 
+COPY srilm.tar.gz /opt/kaldi/tools/.
+RUN cd /opt/kaldi/tools && \
+    bash install_pfile_utils.sh && \
+    bash install_portaudio.sh && \
+    bash install_speex.sh && \
+    bash install_srilm.sh
 RUN mkdir -p /workspace && \
     chmod -R 777 /workspace
+
+# Install PyTorch and MXNet
+ENV PYTORCH_VERSION=1.7.1
+ENV TORCHVISION_VERSION=0.8.2
+ENV TORCHAUDIO_VERSION=0.7.2
+ENV TORCHTEXT_VERSION=0.8.1
+ENV TENSORBOARDX_VERSION=2.1
+ENV MXNET_VERSION=1.6.0
+
+RUN python3 -m pip uninstall -y torch && \
+    python3 -m pip install --no-cache-dir \
+    	https://download.pytorch.org/whl/cu110/torch-${PYTORCH_VERSION}%2Bcu110-cp38-cp38-linux_x86_64.whl \
+	https://download.pytorch.org/whl/cu110/torchvision-${TORCHVISION_VERSION}%2Bcu110-cp38-cp38-linux_x86_64.whl \
+        https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp38-cp38-linux_x86_64.whl \
+        https://download.pytorch.org/whl/torchtext-${TORCHTEXT_VERSION}-cp38-cp38-linux_x86_64.whl && \
+    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
+
+# torch2trt PyTorch to TensorRT converter which utilizes the TensorRT Python API
+WORKDIR /tmp
+RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt /tmp/torch2trt && \
+    cd /tmp/torch2trt && \
+    python3 setup.py install --plugins && \
+    rm -fr /tmp/torch2trt  
+
+RUN python3 -m pip install --extra-index-url \
+       https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 
+
+# Install Horovod, temporarily using CUDA stubs
+RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+    HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
+    HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
+    pip install --no-cache-dir horovod==0.21.1 && \
+    ldconfig
+
+RUN python3 -m pip install --no-cache-dir \
+    	    mpi4py==3.0.3 \
+            mlflow==1.12.1 \
+    	    tensorboard-plugin-wit>=1.6.0 \
+	    nni==1.9 \
+	    scikit-nni==0.2.1
+
+RUN apt autoclean && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "Lablup Kaldi 21.01 on Python 3\
 .8 (CUDA 11.1)" && \
