@@ -22,9 +22,9 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 RUN apt-get update && \
     apt-get install -y \
     	openjdk-8-jdk \
-	libasound2-dev \
-	gfortran \
-	automake \
+	    libasound2-dev \
+	    gfortran \
+	    automake \
 	&& \
     cd /tmp && \
     curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
@@ -53,28 +53,28 @@ RUN echo "Install mecab-ko-dic" && \
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
-	libgstreamer1.0-dev \
-	libgstreamer-plugins-base1.0-dev \
-	libgtk-3-dev \
+	    libgstreamer1.0-dev \
+	    libgstreamer-plugins-base1.0-dev \
+	    libgtk-3-dev \
         libtbb-dev \
-	libatlas-base-dev \
-	libdc1394-22-dev \
-	libxvidcore-dev \
-	libfaac-dev \
-	libmp3lame-dev \
-	libtheora-dev \
-	libvorbis-dev \
-	libxvidcore-dev \
-	libopencore-amrnb-dev libopencore-amrwb-dev \
-	libavresample-dev \
-	x264 \
-	libx264-dev \
-	v4l-utils \	
-	libprotobuf-dev protobuf-compiler \
-	libgoogle-glog-dev libgflags-dev \
-	libgphoto2-dev \
-	libeigen3-dev \
-	libhdf5-dev \	
+	    libatlas-base-dev \
+	    libdc1394-22-dev \
+	    libxvidcore-dev \
+	    libfaac-dev \
+	    libmp3lame-dev \
+	    libtheora-dev \
+	    libvorbis-dev \
+	    libxvidcore-dev \
+	    libopencore-amrnb-dev libopencore-amrwb-dev \
+	    libavresample-dev \
+	    x264 \
+	    libx264-dev \
+	    v4l-utils \	
+	    libprotobuf-dev protobuf-compiler \
+	    libgoogle-glog-dev libgflags-dev \
+	    libgphoto2-dev \
+	    libeigen3-dev \
+	    libhdf5-dev \	
     && \	
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
