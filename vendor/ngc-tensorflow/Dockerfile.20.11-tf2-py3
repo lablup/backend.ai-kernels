@@ -145,7 +145,6 @@ RUN mkdir -p /opt/oracle && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig
 
-<<<<<<< HEAD
 WORKDIR /tmp
 RUN python3 -m pip install --no-cache-dir \
         Cython==0.29.21 \
@@ -154,19 +153,6 @@ COPY ./requirements.txt /tmp
 RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 ENV SCIPY_VERSION 1.6.0
-=======
-COPY ./numpy-1.19.4-cp36-cp36m-manylinux2010_x86_64.whl /tmp
-COPY ./pandas-1.0.4+4.g29edbab4a-cp36-cp36m-linux_x86_64.whl /tmp
-RUN python3 -m pip install --no-cache-dir \ 
-    	Cython==0.29.21 \
-	    tornado==6.0.4 \
-	    pystan==2.19.1.1 \
-	    pycairo==1.19.0 \
-	    jupyter==1.0.0 \
-	    python-language-server[all] \	    
-	    matplotlib==3.3.3 
-ENV SCIPY_VERSION 1.5.4
->>>>>>> d801b6b148b8f90a23556bee15519d834a4404ba
 # Install scipy
 RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
@@ -175,7 +161,7 @@ RUN cd /tmp && \
     cp site.cfg.example site.cfg && \
     pip uninstall -y typing && \
     python3 -m pip install .
-	    
+
 
 # install git-lfs
 WORKDIR /tmp
