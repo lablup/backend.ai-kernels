@@ -268,6 +268,7 @@ testpath==0.4.4
 tf2onnx==1.5.5
 toml==0.10.0
 toolz==0.10.0
+tornado==6.1.0
 TPOT==0.11.1
 tqdm==4.43.0
 traitlets==4.3.3
