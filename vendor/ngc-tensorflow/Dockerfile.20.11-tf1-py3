@@ -146,21 +146,10 @@ RUN mkdir -p /opt/oracle && \
     ldconfig
 
 WORKDIR /tmp
-RUN python3 -m pip install --no-cache-dir \
-        argon2_cffi==20.1.0
+
 COPY ./requirements.py36.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.py36.txt && \
+RUN python3 -m pip install --no-cache-dir -r requirements.py36.txt --ignore-installed && \
     rm -f /tmp/*.whl /tmp/requirements.py36.txt
-ENV SCIPY_VERSION 1.5.4
-# Install scipy
-RUN cd /tmp && \
-    git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
-    cd scipy && \
-    git checkout -b v${SCIPY_VERSION} && \  
-    cp site.cfg.example site.cfg && \
-    pip uninstall -y typing && \
-    python3 -m pip install .
-	    
 
 # install git-lfs
 WORKDIR /tmp
@@ -196,19 +185,18 @@ RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
-    jupyter serverextension enable --py jupyterlab --sys-prefix && \
-    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
-    jupyter serverextension enable --py jupyter_lsp && \
-    jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-    jupyter labextension install jupyterlab-jupytext@1.2.2 && \
-    jupyter labextension install "@kiteco/jupyterlab-kite" && \
-    jupyter labextension install jupyterlab-flake8 && \
-    jupyter labextension install @pyviz/jupyterlab_pyviz && \
-    jupyter labextension install @bokeh/jupyter_bokeh && \
-    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter serverextension enable --py jupyter_lsp && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build && \
+    jupyter labextension install jupyterlab-jupytext@1.2.2 --no-build && \
+    jupyter labextension install @jupyterlab/toc --no-build && \
+    jupyter labextension install @kiteco/jupyterlab-kite --no-build && \
+    jupyter labextension install jupyterlab-flake8 --no-build && \
+    jupyter labextension install @pyviz/jupyterlab_pyviz --no-build && \
+    jupyter labextension install @bokeh/jupyter_bokeh --no-build && \
+    jupyter labextension install jupyterlab-nvdashboard --no-build && \
     jupyter lab build
 
 RUN apt autoclean && \
