@@ -91,6 +91,7 @@ RUN apt autoclean && \
     rm -rf /root/.cache && \
     rm -rf /tmp/*
 
+COPY ./service-defs /etc/backend.ai/service-defs
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "Lablup Kaldi 21.01 on Python 3\
 .8 (CUDA 11.1)" && \
