@@ -1,132 +1,11 @@
 FROM lablup/common-base:cuda10.1
 
-ARG TF_BUILD_VERSION=r2.3
-# Install the most recent bazel release.
-ENV BAZEL_VERSION 3.1.0
-
-# Set up Bazel.
-
-# Running bazel inside a `docker build` command causes trouble, cf:
-#   https://github.com/bazelbuild/bazel/issues/134
-# The easiest solution is to set up a bazelrc file forcing --batch.
-RUN echo "startup --batch" >>/etc/bazel.bazelrc
-# Similarly, we need to workaround sandboxing issues:
-#   https://github.com/bazelbuild/bazel/issues/418
-RUN echo "build --spawn_strategy=standalone --genrule_strategy=standalone" \
-    >>/etc/bazel.bazelrc
-
-WORKDIR /
-RUN mkdir /bazel && \
-    cd /bazel && \
-    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
-    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -o /bazel/LICENSE.txt https://raw.githubusercontent.com/bazelbuild/bazel/master/LICENSE && \
-    chmod +x bazel-*.sh && \
-    ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
-    cd / && \
-    rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
-
-
+WORKDIR /tmp
+COPY ./requirements.tf.txt /tmp
 RUN python3 -m pip install --no-cache-dir \
-    	    mesh-tensorflow==0.1.16 \
-	    cachetools==3.1.0 \
-	    tensorflow-transform==0.23.0 \
-	    tensorflow_model_analysis==0.23.0 \
-	    ngraph-tensorflow-bridge==0.18.0 \
-	    tensorflow-metadata==0.23.0 \
-	    tensorflow-datasets==3.2.0 \
-	    tensorflow_probability==0.10.1 \
-    	    tensorwatch==0.9.1 \
-	    tensorflow-hub==0.8.0 \
-	    tensorflow-addons==0.10.0 \
-	    tensorflow_text==2.3.0 \
-	    neural-structured-learning==1.1.0 \
-	    tensorflow_constrained_optimization \
-	    tensorflow-graphics-gpu==1.0.0 \
-	    tensorflow-gan==2.0.0 \
-	    tensorflow-data-validation==0.23.0 \
-	    tensorflow-model-optimization==0.3.0 
-RUN python3 -m pip install --no-cache-dir \
-#	    wcwidth==0.2.5 \
-	    jupyter-tensorboard==0.2.0 \
-	    tf-agents==0.5.0 \
-	    tf-slim==1.1.0 
-RUN python3 -m pip install --no-cache-dir \
-	    tensorflow-plot==0.3.2 \
-	    tensorflow-lattice==2.0.5 \
-	    tensorflow-io==0.15.0
-RUN python3 -m pip install --no-cache-dir \
-	    tfx==0.22.1 \
-	    tfx-bsl==0.22.1 
-RUN python3 -m pip install --no-cache-dir \
-	    tensorflow_ranking==0.3.1 \
-	    tensorflow-compression==1.3 \
-	    tensor2tensor==1.15.7 \
-	    jupyterlab-nvdashboard==0.3.1 
-
-# Download and build TensorFlow.
-WORKDIR /tensorflow
-
-# Download and build TensorFlow.
-# Enable checking out both tags and branches
-RUN export TAG_PREFIX="v" && \
-    echo ${TF_BUILD_VERSION} | grep -q ^${TAG_PREFIX}; \
-    if [ $? -eq 0 ]; then \
-        git clone --depth=1 https://github.com/tensorflow/tensorflow.git . && \
-        git fetch --tags && \
-        git checkout ${TF_BUILD_VERSION}; \
-   else \
-        git clone --depth=1 --branch=${TF_BUILD_VERSION} https://github.com/tensorflow/tensorflow.git . ; \
-    fi
-
-RUN yes "" | python3 configure.py
-RUN cp .bazelrc /root/.bazelrc
-
-ENV CI_BUILD_PYTHON ${PYTHON}
-ENV WHL_DIR=/tmp/pip3
-COPY .bazelrc /root/.mkl.bazelrc
-RUN echo "import /root/.mkl.bazelrc" >>/root/.bazelrc
-
-#ENV TF_NEED_TENSORRT=1
-ENV TF_CUDA_COMPUTE_CAPABILITIES sm_35,sm_37,sm_52,sm_60,sm_61,sm_70,sm_75,compute_70,compute_75,compute_80
-
-RUN tensorflow/tools/ci_build/builds/configured GPU  \
-      bazel --bazelrc=/root/.bazelrc build \
-        -c opt \
-        --copt=-msse4.1 \
-        --copt=-msse4.2 \
-	--copt=-mavx \
-	--copt=-mavx2 \
-	--copt=-mfma \
-	--copt=-mfpmath=both \ 
-	--copt=-O3 \
-	--copt=-Wformat \
-	--copt=-Wformat-security \
-	--copt=-fstack-protector \
-	--copt=-fPIC \
-	--copt=-fpic \
-	--config=opt \
-	--config=cuda \
-        --config=mkl \
-	--config=monolithic \
-        --config=gdr \ 
-        --config=verbs \
-#        --config=ngraph \
-        --config=numa \
-        --config=v2 \
-	--linkopt=-znoexecstack \
-	--linkopt=-zrelro \
-	--linkopt=-znow \
-	--linkopt=-fstack-protector \
-	--linkopt -ldl \
-        --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
-      -k //tensorflow/tools/pip_package:build_pip_package && \
-    bazel-bin/tensorflow/tools/pip_package/build_pip_package "${WHL_DIR}" && \
-    python3 -m pip --no-cache-dir install --upgrade "${WHL_DIR}"/tensorflow-*.whl 
-RUN python3 -m pip --no-cache-dir install \
-        tensorboard==2.3 && \
-    rm -rf /root/.cache
-
-# Clean up Bazel cache when done.
+        -r  requirements.tf.txt \
+	--ignore-installed && \
+    rm -f /tmp/requirements.tf.txt
 
 RUN python3 -m pip install --extra-index-url \
        https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 \
@@ -142,12 +21,7 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     python3 -m pip install --no-cache-dir horovod==0.21.1 && \
     ldconfig
 
-RUN python3 -m pip install --no-cache-dir \
-            mpi4py==3.0.3 \
-            nni==1.9 \
-            mlflow==1.12.1 \
-            scikit-nni==0.2.1
-
+    
 COPY ./service-defs /etc/backend.ai/service-defs
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "TensorFlow 2.3 on Python 3.6 & CUDA 10.1" && \
