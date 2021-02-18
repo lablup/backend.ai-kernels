@@ -1,5 +1,6 @@
 cachetools==3.1.0
-mesh-tensorflow==0.1.16 
+bokeh==1.3.2
+ mesh-tensorflow==0.1.16 
 ngraph-tensorflow-bridge==0.18.0
 tensorflow-metadata==0.23.0
 tensorflow-datasets==3.2.0
