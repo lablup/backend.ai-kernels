@@ -17,7 +17,7 @@ prompt-toolkit==3.0.16
 psutil==5.6.3
 pyrsistent==0.17.3
 scikit-nni==0.2.1
-tensorboard-plugin-wit==1.8.0
+tensorboard-plugin-wit==1.6.0
 tensorboard==2.3.0
 tensorflow==2.3.2
 tensorflow-addons==0.10.0
