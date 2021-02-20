@@ -1,26 +1,37 @@
 FROM lablup/common-base:cuda10.1
 
+RUN python3 -m pip uninstall --no-cache-dir -y \
+        absl-py tfx-bsl
+        tensorflow==2.4.0 tensorboard tensorflow-serving-api tensorflow-text
+RUN python3 -m pip install --no-cache-dir \
+        tfx-bsl==0.23.0 \
+	tfx==0.23.0 \
+        tensorflow==2.3.2 \
+	tensorboard==2.3.0 \
+	tensorflow-serving-api==2.3.0 \
+	tensorflow-text==2.3.0
+
 WORKDIR /tmp
 COPY ./requirements.tf.txt /tmp
-RUN python3 -m pip uninstall --no-cache-dir -y \
-        tensorflow tensorflow-serving tensorflow-text
-RUN python3 -m pip install --no-cache-dir \
+
+RUN  python3 -m pip install --no-cache-dir \
         -r  requirements.tf.txt \
 	--ignore-installed && \
+#     python3 -m pip install --no-cache-dir tensorboard==2.3.0 && \	
     rm -f /tmp/requirements.tf.txt
 
 RUN python3 -m pip install --extra-index-url \
-       https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 \
+     https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 \
        && \
     python3 -m pip install --extra-index-url \
-       https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
+     https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL HOROVOD_NCCL_LINK=SHARED \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1\
     HOROVOD_GPU=CUDA \
-    python3 -m pip install --no-cache-dir horovod==0.21.3 && \
+    python3 -m pip install --no-cache-dir horovod==0.19.5 && \
     ldconfig
 
     
