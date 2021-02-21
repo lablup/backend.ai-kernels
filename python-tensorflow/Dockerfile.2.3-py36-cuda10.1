@@ -1,13 +1,13 @@
 FROM lablup/common-base:cuda10.1
 
 RUN python3 -m pip uninstall --no-cache-dir -y \
-        absl-py tfx-bsl
+        absl-py \
         tensorflow==2.4.0 tensorboard tensorflow-serving-api tensorflow-text
 RUN python3 -m pip install --no-cache-dir \
         tfx-bsl==0.23.0 \
 	tfx==0.23.0 \
         tensorflow==2.3.2 \
-	tensorboard==2.3.0 \
+#	tensorboard==2.3.0 \
 	tensorflow-serving-api==2.3.0 \
 	tensorflow-text==2.3.0
 
