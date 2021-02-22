@@ -1,5 +1,5 @@
 FROM ubuntu:20.04
-# Ubuntu 18.04 comes with Python 3.6
+# Ubuntu 20.04
 
 ENV R_VERSION 4.0.3
 
@@ -13,12 +13,12 @@ RUN apt-get update && \
         proj-bin libproj-dev \
         libgeos-dev libgeos++-dev \
         mime-support \
-		locales \
-		fonts-texgyre \
-		less \
-		vim-tiny \
-		liblapack3 \
-		ncurses-term \
+	locales \
+	fonts-texgyre \
+	less \
+	vim-tiny \
+	liblapack3 \
+	ncurses-term \
         gcc g++ gfortran && \
     apt-get autoclean && \
     rm -rf /var/lib/apt/lists/*
@@ -33,9 +33,9 @@ ENV PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=en_US.UTF-8 \
     DEBIAN_FRONTEND=noninteractive
 
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-	&& locale-gen en_US.utf8 \
-	&& /usr/sbin/update-locale LANG=en_US.UTF-8 
+RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
+    locale-gen en_US.utf8 && \
+    /usr/sbin/update-locale LANG=en_US.UTF-8 
 
 RUN apt update && \
     apt install -y software-properties-common && \
@@ -103,17 +103,11 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-#    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-#    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
-#    jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
-#    jupyter serverextension enable --py jupyter_lsp && \
+    jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
-#    jupyter labextension install @jupyterlab/hdf5 
-#    jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
 RUN ln -s /usr/lib/x86_64-linux-gnu/libffi.so.7 /usr/lib/x86_64-linux-gnu/libffi.so.6
-#RUN ln -s /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libssl.so.1.0.0
 
 COPY ./service-defs /etc/backend.ai/service-defs
 
