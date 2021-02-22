@@ -74,10 +74,10 @@ RUN julia -e 'ENV["JUPYTER"]="jupyter"' && \
     julia -e 'ENV["JULIA_DEPOT_PATH"]="/opt/julia"' && \
     julia -e 'using Pkg; Pkg.add("IJulia");'
 
+RUN julia -e 'using Pkg; Pkg.add("Plots"); using Plots;'
 RUN julia -e 'using Pkg; Pkg.add("DataFrames");' && \
     julia -e 'using Pkg; Pkg.add("RDatasets");' && \
     julia -e 'using Pkg; Pkg.add("PyPlot");' && \
-    julia -e 'using Pkg; Pkg.add("Plots"); using Plots;' && \
     julia -e 'using Pkg; Pkg.add("CSV");' && \
     julia -e 'using Pkg; Pkg.add("Pandas"); using Pandas;'
 
