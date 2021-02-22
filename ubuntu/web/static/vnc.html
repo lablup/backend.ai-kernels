@@ -4,7 +4,7 @@
 
     <!--
     noVNC example: simple example using default UI
-    Copyright (C) 2019 The noVNC Authors
+    Copyright (C) 2018 The noVNC Authors
     noVNC is licensed under the MPL 2.0 (see LICENSE.txt)
     This file is licensed under the 2-Clause BSD license (see LICENSE.txt).
 
@@ -16,10 +16,6 @@
     <title>noVNC</title>
 
     <meta charset="utf-8">
-    
-    <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
-                Remove this if you use the .htaccess -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
     <!-- Icons (see app/images/icons/Makefile for what the sizes are for) -->
     <link rel="icon" sizes="16x16" type="image/png" href="novnc/app/images/icons/novnc-16x16.png">
@@ -61,7 +57,17 @@
     <!-- promise polyfills promises for IE11 -->
     <script src="novnc/vendor/promise.js"></script>
     <!-- ES2015/ES6 modules polyfill -->
-    <script nomodule src="novnc/vendor/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
+    <script type="module">
+        window._noVNC_has_module_support = true;
+    </script>
+    <script>
+        window.addEventListener("load", function() {
+            if (window._noVNC_has_module_support) return;
+            var loader = document.createElement("script");
+            loader.src = "novnc/vendor/browser-es-module-loader/dist/browser-es-module-loader.js";
+            document.head.appendChild(loader);
+        });
+    </script>
     <!-- actual script modules -->
     <script type="module" crossorigin="anonymous" src="novnc/app/ui.js"></script>
     <!-- end scripts -->
@@ -88,7 +94,7 @@
             <h1 class="noVNC_logo" translate="no"><span>no</span><br>VNC</h1>
 
             <!-- Drag/Pan the viewport -->
-            <input type="image" alt="Drag" src="novnc/app/images/drag.svg"
+            <input type="image" alt="viewport drag" src="novnc/app/images/drag.svg"
                 id="noVNC_view_drag_button" class="noVNC_button noVNC_hidden"
                 title="Move/Drag Viewport">
 
@@ -208,11 +214,6 @@
                         <div class="noVNC_expander">Advanced</div>
                         <div><ul>
                             <li>
-                                <label for="noVNC_setting_quality">Quality:</label>
-                                <input id="noVNC_setting_quality" type="range" min="0" max="9" value="6">
-                            </li>
-                            <li><hr></li>
-                            <li>
                                 <label for="noVNC_setting_repeaterID">Repeater ID:</label>
                                 <input id="noVNC_setting_repeaterID" type="text" value="">
                             </li>
@@ -246,7 +247,7 @@
                             </li>
                             <li><hr></li>
                             <li>
-                                <label><input id="noVNC_setting_show_dot" type="checkbox"> Show Dot when No Cursor</label>
+                                <label><input id="noVNC_setting_show_dot" type="checkbox" checked> Show Dot when No Cursor</label>
                             </li>
                             <li><hr></li>
                             <!-- Logging selection dropdown -->
@@ -257,11 +258,6 @@
                                 </label>
                             </li>
                         </ul></div>
-                    </li>
-                    <li class="noVNC_version_separator"><hr></li>
-                    <li class="noVNC_version_wrapper">
-                        <span>Version:</span>
-                        <span class="noVNC_version"></span>
                     </li>
                 </ul>
             </div>
@@ -294,18 +290,14 @@
 
     <!-- Password Dialog -->
     <div class="noVNC_center noVNC_connect_layer">
-    <div id="noVNC_credentials_dlg" class="noVNC_panel"><form>
+    <div id="noVNC_password_dlg" class="noVNC_panel"><form>
         <ul>
-            <li id="noVNC_username_block">
-                <label>Username:</label>
-                <input id="noVNC_username_input">
-            </li>
-            <li id="noVNC_password_block">
+            <li>
                 <label>Password:</label>
                 <input id="noVNC_password_input" type="password">
             </li>
             <li>
-                <input id="noVNC_credentials_button" type="submit" value="Send Credentials" class="noVNC_submit">
+                <input id="noVNC_password_button" type="submit" value="Send Password" class="noVNC_submit">
             </li>
         </ul>
     </form></div>
@@ -334,5 +326,25 @@
         <source src="novnc/app/sounds/bell.oga" type="audio/ogg">
         <source src="novnc/app/sounds/bell.mp3" type="audio/mpeg">
     </audio>
+    <script type="module">
+      import UI from './novnc/app/ui.js';
+      var f = function () {
+        if (!UI.rfb) {
+          setTimeout(f, 1000);
+        } else {
+          UI.rfb.addEventListener('connect', function(event) {
+            window.parent.postMessage(JSON.stringify({from: 'novnc', state: 'connected'}), '*');
+            // UI.rfb._display.defaultCursor();
+            // console.log(UI.connected)
+            // console.log(event);
+          });
+          UI.rfb.addEventListener('disconnect', function(event) {
+            window.parent.postMessage(JSON.stringify({from: 'novnc', state: 'disconnected'}), '*');
+          });
+          // console.log(UI.rfb._rfb_connection_state);
+        }
+      };
+      f();
+    </script>
  </body>
 </html>
