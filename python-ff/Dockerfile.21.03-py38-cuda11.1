@@ -1,0 +1,97 @@
+FROM lablup/common-base:py38-cuda11.1
+
+RUN python3 -m pip install --no-cache-dir --upgrade \
+	    -q git+https://github.com/google-research/tensorflow_constrained_optimization
+	    
+
+RUN python3 -m pip install --extra-index-url \
+       https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 \
+       && \
+    python3 -m pip install --extra-index-url \
+       https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
+
+# Install PyTorch and MXNet
+ENV PYTORCH_VERSION=1.7.1
+ENV TORCHVISION_VERSION=0.8.2
+ENV TORCHAUDIO_VERSION=0.7.2
+ENV TORCHTEXT_VERSION=0.8.1
+ENV TENSORBOARDX_VERSION=2.1
+ENV MXNET_VERSION=1.6.0
+
+RUN python3 -m pip uninstall -y torch && \
+    python3 -m pip install --no-cache-dir \
+    	https://download.pytorch.org/whl/cu110/torch-${PYTORCH_VERSION}%2Bcu110-cp38-cp38-linux_x86_64.whl \
+	https://download.pytorch.org/whl/cu110/torchvision-${TORCHVISION_VERSION}%2Bcu110-cp38-cp38-linux_x86_64.whl \
+        https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp38-cp38-linux_x86_64.whl \
+        https://download.pytorch.org/whl/torchtext-${TORCHTEXT_VERSION}-cp38-cp38-linux_x86_64.whl && \
+    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
+
+RUN python3 -m pip install --no-cache-dir mxnet mkl
+
+# Install Horovod, temporarily using CUDA stubs
+RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+    HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
+    HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
+    pip install --no-cache-dir horovod==0.21.1 && \
+    ldconfig
+
+RUN python3 -m pip install --no-cache-dir \
+    	    mpi4py==3.0.3 \
+            mlflow==1.12.1 \
+	    nni==1.9 \
+	    scikit-nni==0.2.1
+
+# install kaldi
+WORKDIR /opt
+
+RUN ln -sf /usr/include/x86_64-linux-gnu/atlas /usr/local/include/atlas && \
+    ln -sf /usr/include/x86_64-linux-gnu/cblas.h /usr/local/include/cblas.h && \
+    ln -sf /usr/include/x86_64-linux-gnu/clapack.h /usr/local/include/clapack.h && \
+    ln -sf /usr/lib/x86_64-linux-gnu/atlas /usr/local/lib/atlas
+
+RUN git clone https://github.com/hephaex/kaldi.git /opt/kaldi && \
+    cd /opt/kaldi/tools && \
+    make -j $(nproc) && \
+    cd /opt/kaldi/src && \
+    ./configure --shared --use-cuda \
+	--cudatk-dir=/usr/local/cuda/ \
+	--mathlib=ATLAS \
+    	--cuda-arch="-gencode arch=compute_52,code=sm_52 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70 -gencode arch=compute_75,code=sm_75 -gencode arch=compute_80,code=sm_80" && \
+    make depend -j $(nproc) && \
+    make -j $(nproc) 
+RUN cd /opt/kaldi/src  && \
+    make ext -j $(nproc) && \
+    ldconfig && \
+    find /opt/kaldi  -type f \( -name "*.o" -o -name "*.la" -o -name "*.a" \) -\
+exec rm {} \; && \
+    rm -rf /opt/kaldi/.git
+
+RUN mkdir -p /workspace && \
+    chmod -R 777 /workspace
+
+RUN apt autoclean && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+
+COPY ./service-defs /etc/backend.ai/service-defs
+
+# Install ipython kernelspec
+Run python3 -m ipykernel install --display-name "Lablup FF 21.03 on Python 3.8 (CUDA 11.1)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+
+WORKDIR /home/work
+# vim: ft=dockerfile
