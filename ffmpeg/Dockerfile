@@ -170,6 +170,6 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="256m" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/usr/local/bin/ffmpeg" \
+      ai.backend.runtime-path="/usr/local/bin/ffmpeg" 
 
 WORKDIR /home/work
