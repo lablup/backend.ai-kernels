@@ -4,10 +4,10 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES video,compute,utility
 
-ARG NASM_VER="2.14"
+ARG NASM_VER="2.15.05"
 ARG YASM_VER="1.3.0"
 ARG LAME_VER="3.100"
-ARG FFMPEG_VER="4.1.1"
+ARG FFMPEG_VER="4.3.2"
 
 # Install required Packages
 
@@ -161,14 +161,15 @@ RUN set -xe && \
     apt-get clean && \
     rm -rf /usr/local/ffmpeg_sources
 
+COPY ./service-defs /etc/backend.ai/service-defs
+
 #ENTRYPOINT ["/usr/local/bin/ffmpeg"]
 LABEL ai.backend.kernelspec="1" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="256m" \
-      ai.backend.runtime-type="c" \
+      ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/local/bin/ffmpeg" \
-      ai.backend.service-ports=""
 
 WORKDIR /home/work
