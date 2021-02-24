@@ -1,0 +1,9 @@
+{
+    "command": [
+        "{runtime_path}", "-m", "ffmpeg",
+	"-stats",
+	"-i", "{[0]}",
+	"-vcodec hevc_nvenc"
+	"{[0]}
+    ]
+}
