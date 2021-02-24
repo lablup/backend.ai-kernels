@@ -162,6 +162,7 @@ RUN set -xe && \
     rm -rf /usr/local/ffmpeg_sources
 
 COPY ./service-defs /etc/backend.ai/service-defs
+COPY ./policy.yml /etc/backend.ai/jail/policy.yml
 
 #ENTRYPOINT ["/usr/local/bin/ffmpeg"]
 LABEL ai.backend.kernelspec="1" \
