@@ -92,7 +92,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter lab build
 
 COPY ./service-defs /etc/backend.ai/service-defs
-RUN rm /etc/backend.ai/service-defs/rstudio.json
 COPY bootstrap_rocker2.sh /opt/container/bootstrap.sh
 COPY userconf_backendai.sh /rocker_scripts/userconf.sh
 COPY userconf_backendai.sh /etc/cont-init.d/userconf

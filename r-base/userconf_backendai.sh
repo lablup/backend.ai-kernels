@@ -15,7 +15,6 @@ bold=$(tput bold)
 normal=$(tput sgr0)
 
 if [[ ${DISABLE_AUTH,,} == "true" ]]
-
 then
 	mv /etc/rstudio/disable_auth_rserver.conf /etc/rstudio/rserver.conf
 	echo "USER=$USER" >> /etc/environment
@@ -49,23 +48,8 @@ if [ "$USERID" -lt 1000 ]
     fi
 fi
 
-if [ "$USERID" -ne 1000 ]
-## Configure user with a different USERID if requested.
-  then
-    echo "deleting user rstudio"
-    userdel rstudio
-    usermod -a -G staff $USER
-elif [ "$USER" != "rstudio" ]
-  then
-    ## cannot move home folder when it's a shared volume, have to copy and change permissions instead
-    cp -r /home/rstudio /home/$USER
-    ## RENAME the user
-    usermod -l $USER -d /home/$USER rstudio
-    groupmod -n $USER rstudio
-    usermod -a -G staff $USER
-    chown -R $USER:$USER /home/$USER
-    echo "USER is now $USER"
-fi
+#userdel rstudio
+usermod -a -G staff $USER
 
 if [ "$GROUPID" -ne 1000 ]
 ## Configure the primary GID (whether rstudio or $USER) with a different GROUPID if requested.
@@ -74,9 +58,6 @@ if [ "$GROUPID" -ne 1000 ]
     groupmod -g $GROUPID $(id $USER -g -n)
     echo "Primary group ID is now custom_group $GROUPID"
 fi
-
-## Add a password to user
-echo "$USER:$PASSWORD" | chpasswd
 
 # Use Env flag to know if user should be added to sudoers
 if [[ ${ROOT,,} == "true" ]]
