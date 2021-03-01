@@ -1,9 +1,7 @@
 {
     "command": [
-        "{runtime_path}", "-m", "ffmpeg",
+        "/usr/local/bin/ffmpeg",
 	"-stats",
-	"-i", "{[0]}",
-	"-vcodec hevc_nvenc"
-	"{[0]}
+	"-vcodec","hevc_nvenc"
     ]
 }
