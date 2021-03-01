@@ -195,6 +195,8 @@ RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
 # Configure OpenMPI to run good defaults:
 RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
