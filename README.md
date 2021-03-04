@@ -18,7 +18,7 @@ Here we list the latest versions of our supported kernel images.
 | TensorFlow              | `lablup/python-tensorflow` | 2.1.2   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.2.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.3.2   | O     | O\*   | O          |     | Bundled w/Keras 2 |
-| TensorFlow              | `lablup/python-tensorflow` | 2.4.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 2.4.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | PyTorch                 | `lablup/python-torch`      | 1.3     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.4     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.5     | O     | O\*   | O          |     |                   |
@@ -121,7 +121,7 @@ Here we list the latest versions of our supported kernel images.
  
 | base-mkl (Intel)      | base-cuda (Nvidia)             | base-TPU (Google)        | base-ROCm (AMD)           |
 |-----------------------|--------------------------------|--------------------------|---------------------------|
-| tensorflow-1.14-py36  | tensorflow-1.15-py36-cuda10    |	                	    |                           |
+| tensorflow-1.15-py36  | tensorflow-1.15-py36-cuda10    |	                	    |                           |
 | tensorflow-1.14-py36  | tensorflow-1.14-py36-cuda10    | tensorflow-1.14-py36-tpu | tensorflow-1.14-py36-rocm |
 | tensorflow-1.13-py36  | tensorflow-1.13-py36-cuda10    | tensorflow-1.13-py36-tpu |                           |
 | tensorflow-1.12-py36  | tensorflow-1.12-py36-cuda9     |                          |                           |
