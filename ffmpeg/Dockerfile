@@ -52,7 +52,6 @@ RUN set -xe && \
 WORKDIR /usr/local/ffmpeg_sources
 RUN set -xe && \
     git -C /usr/local/ffmpeg_sources/x264 pull 2> /dev/null || \
-#   git clone --depth 1 https://git.videolan.org/git/x264 && \
     git clone --depth 1 https://code.videolan.org/videolan/x264 && \
     cd /usr/local/ffmpeg_sources/x264 && \
     ./configure --enable-static --enable-pic && \
