@@ -155,21 +155,27 @@ RUN set -xe && \
     make -j$(nproc) && \
     make install
 
+# clean up
 WORKDIR /
 RUN set -xe && \
     apt-get clean && \
     rm -rf /usr/local/ffmpeg_sources
 
+# Backend.AI specifics
 COPY ./service-defs /etc/backend.ai/service-defs
 COPY ./policy.yml /etc/backend.ai/jail/policy.yml
 
 #ENTRYPOINT ["/usr/local/bin/ffmpeg"]
 LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="256m" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/usr/local/bin/ffmpeg" 
+      ai.backend.runtime-path="/usr/local/bin/ffmpeg" \
+      ai.backend.service-ports=""
 
 WORKDIR /home/work
