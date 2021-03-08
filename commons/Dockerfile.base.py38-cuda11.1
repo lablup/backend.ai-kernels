@@ -264,13 +264,13 @@ COPY ./requirements.py38.txt /tmp
 RUN python3 -m pip install --no-cache-dir -r requirements.py38.txt && \
     rm -f /tmp/*.whl /tmp/requirements.py38.txt
 
-# OpenCV
+# Install OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
 	libgstreamer1.0-dev \
 	libgstreamer-plugins-base1.0-dev \
 	libgtk-3-dev \
-        libtbb-dev \
+    libtbb-dev \
 	libatlas-base-dev \
 	libdc1394-22-dev \
 	libxvidcore-dev \
