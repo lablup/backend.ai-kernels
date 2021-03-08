@@ -189,10 +189,6 @@ RUN python3 -m pip install --no-cache-dir \
 	    tornado==6.1 \
 	    nvidia-pyindex==1.0.5 \
 	    matplotlib==3.3.3 
-  
-#	    pystan==2.19.1.1 \
-#	    pycairo==1.12.0 \
-#	    python-language-server[all] \
 
 WORKDIR /tmp
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
@@ -419,13 +415,9 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-#    git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && \
-#    jupyter nbextension enable /home/work/.jupyter/nbextension/vim_binding/vim_binding && \
-#    jupyter labextension install --no-build @lckr/jupyterlab_variableinspector && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
-#    jupyter labextension install @jupyterlab/hdf5 
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
     jupyter labextension install @pyviz/jupyterlab_pyviz && \
