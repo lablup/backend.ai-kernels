@@ -141,7 +141,7 @@ jupyterlab-git==0.23.3
 jupyterlab-github==2.0.0
 jupyterlab-nvdashboard==0.4.0
 #jupyterlab-zip==1.0.1
-jupyterlab-server==2.1.5
+jupyterlab-server==2.3.0
 jupyterlab_hdf==0.5.1
 jupyterthemes==0.20.0
 jupytext==1.10.1
