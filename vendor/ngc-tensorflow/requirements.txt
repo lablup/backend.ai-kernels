@@ -1,4 +1,4 @@
-bsl-py==0.9.0
+absl-py==0.9.0
 aiohttp==3.6.2
 aiozmq==0.9.0
 adanet==0.5.0
@@ -289,7 +289,7 @@ Send2Trash==1.5.0
 #sentencepiece==0.1.82
 setuptools-git==1.2
 Shapely==1.7.0
-simpervisor==0.3
+simpervisor==0.4
 simpleaudio==1.0.4
 simplejson==3.17.0
 six==1.15.0
