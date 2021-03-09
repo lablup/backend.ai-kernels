@@ -182,6 +182,7 @@ networkx==2.4
 #ngraph-onnx==0.24.0
 #ngraph-tensorflow-bridge==0.18.0
 nltk==3.2.5
+notebook==6.2.0
 numba==0.48.0
 numexpr==2.7.0
 numpy==1.20.1
