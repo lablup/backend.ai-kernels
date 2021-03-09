@@ -133,8 +133,7 @@ jupyter-latex-envs==1.4.6
 jupyter-nbextensions-configurator==0.4.1
 jupyter-server-proxy==1.6.0
 #jupyter-tensorboard==0.2.0
-#jupyterlab==3.0.7
-jupyterlab==3.0.9
+jupyterlab==2.2.9
 jupyterlabutils==0.10.0
 jupyterlab-launcher==0.13.1
 jupyterlab-git==0.23.3
