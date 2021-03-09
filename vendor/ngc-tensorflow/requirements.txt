@@ -20,7 +20,7 @@ bayesian-optimization==1.1.0
 beautifulsoup4==4.6.0
 black==19.10b0
 bleach==3.1.1
-bokeh==2.2.4
+bokeh==2.2.3
 boto==2.49.0
 boto3==1.9.209
 botocore==1.12.209
@@ -286,6 +286,7 @@ seaborn==0.10.0
 selenium==3.141.0
 Send2Trash==1.5.0
 #sentencepiece==0.1.82
+semver==2.0.2
 setuptools-git==1.2
 Shapely==1.7.0
 simpervisor==0.4
@@ -293,6 +294,7 @@ simpleaudio==1.0.4
 simplejson==3.17.0
 six==1.15.0
 smart-open==1.9.0
+smmap==3.0.4
 snowballstemmer==2.0.0
 sortedcontainers==2.1.0
 soynlp==0.0.493
