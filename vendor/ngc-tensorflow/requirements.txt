@@ -80,6 +80,7 @@ gensim==3.8.0
 geopandas==0.5.1
 geoplotlib==0.3.2
 gin_config==0.3.0
+gitdb==4.0.4
 google_api_core==1.23.0
 google-api-core[grpc]==1.23.0
 google_api_python_client==1.12.8
@@ -188,6 +189,7 @@ numexpr==2.7.0
 numpy==1.20.1
 oauthlib==3.1.0
 oauth2client==3.0.0
+oauthenticator==0.12.3
 onnx==1.8.1
 #onnx-plaidml==0.6.3
 opencv_python==4.5.1.48
