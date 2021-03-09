@@ -81,6 +81,7 @@ geopandas==0.5.1
 geoplotlib==0.3.2
 gin_config==0.3.0
 gitdb==4.0.4
+GitPython==3.1.13
 google_api_core==1.23.0
 google-api-core[grpc]==1.23.0
 google_api_python_client==1.12.8
@@ -170,11 +171,13 @@ mmdnn==0.3.1
 mne==0.20.5
 more-itertools==7.2.0
 mock==2.0.0
+monotonic==1.4
 msgpack==0.6.1
 msgpack-python==0.5.6
 multidict==4.7.5
 multiprocess==0.70.9
 munch==2.5.0
+meshio==4.3.9
 namedlist==1.7
 nbconvert==5.6.1
 nbformat==5.0.4
