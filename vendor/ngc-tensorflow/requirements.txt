@@ -5,6 +5,7 @@ adanet==0.5.0
 apache-beam==2.24.0
 apache-beam[gcp]==2.24.0
 appdirs==1.4.3
+anyio==2.1.0
 asgiref==3.3.0
 astor==0.8.1
 astroid==2.3.0
@@ -101,6 +102,7 @@ h5py==2.10.0
 hdf5storage==0.1.15
 HeapDict==1.0.1
 holidays==0.9.10
+httplib2==0.17.3
 hyperopt==0.1.2
 idna==2.9
 imageio==2.8.0
@@ -113,6 +115,7 @@ ipython==7.13.0
 ipython-genutils==0.2.0
 ipywidgets==7.5.1
 isort==4.3.21
+jaxlib==0.1.61
 jedi==0.17.0
 Jinja2==2.11.1
 jmespath==0.9.4
@@ -135,6 +138,7 @@ jupyter-kite<2.0.0
 jupyter-lsp==1.1.3
 jupyter-latex-envs==1.4.6
 jupyter-nbextensions-configurator==0.4.1
+jupyter_server==1.4.0
 jupyter-server-proxy==1.6.0
 #jupyter-tensorboard==0.2.0
 jupyterlab==2.2.9
@@ -154,9 +158,10 @@ jupytext==1.10.1
 Keras==2.2.4
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.2
-kss==1.3.1
 kiwisolver==1.1.0
 konlpy==0.5.2
+kss==1.3.1
+kubernetes==12.0.0
 lazy-object-proxy==1.4.3
 lesscpy==0.14.0
 librosa==0.6.3
@@ -167,9 +172,11 @@ lunardate==0.2.0
 lxml==4.5.0
 Mako==1.0.7
 Markdown==3.2.1
+markdown_it_py==0.6.2
 MarkupSafe==1.1.1
 matplotlib==3.3.3
 mccabe==0.6.1
+mdit_py_plugins==0.2.5
 mistune==0.8.4
 mlxtend==0.17.2
 mmdnn==0.3.1
