@@ -85,8 +85,8 @@ gin_config==0.3.0
 gitdb==4.0.4
 GitPython==3.1.13
 googleapis_common_protos==1.53.0
-google_api_core==1.23.0
-google-api-core[grpc]==1.23.0
+google_api_core==1.22.4
+google-api-core[grpc]==1.22.4
 google_api_python_client==1.12.8
 google-auth==1.21.1
 google_auth_httplib2==0.0.3
@@ -95,6 +95,7 @@ google_cloud_bigquery==1.28.0
 google_cloud_bigtable==1.2.1
 google-cloud-core==1.5.0
 google_cloud_datastore==1.15.2
+google_cloud_dlp==0.15.0
 google_cloud_pubsub==1.6.1
 google_cloud_vision==0.42.0
 google_cloud_spanner==1.19.0
