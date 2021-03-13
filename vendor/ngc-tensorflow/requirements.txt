@@ -246,7 +246,7 @@ py==1.8.0
 pyaml==19.12.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
-pyarrow==2.0.0
+pyarrow==0.17.0
 pycairo==1.19.0 
 pycocotools==2.0.0
 pycodestyle==2.5.0
@@ -336,13 +336,13 @@ termcolor==1.1.0
 terminado==0.8.3
 tensorflow_datasets==4.1.0
 tensorflow-estimator==2.4.0
-tensorflow_metadata==0.28.0
-tensorflow_model_analysis==0.28.0
+tensorflow_metadata==0.24.0
+tensorflow_model_analysis==0.24.0
 tensorflow_hub==0.11.0
 tensorflow_text==2.4.3
 test-generator==0.1.1
 testpath==0.4.4
-tfx-bsl==0.28.1
+tfx-bsl==0.24.0
 tf2onnx==1.5.5
 toml==0.10.0
 toolz==0.10.0
