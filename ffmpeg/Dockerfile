@@ -161,6 +161,10 @@ RUN set -xe && \
     apt-get clean && \
     rm -rf /usr/local/ffmpeg_sources
 
+# Stream transcoding
+COPY ./scripts/bootstrap.sh /opt/container/bootstrap.sh
+RUN  chmod +x /opt/container/bootstrap.sh
+
 # Backend.AI specifics
 COPY ./service-defs /etc/backend.ai/service-defs
 COPY ./policy.yml /etc/backend.ai/jail/policy.yml
