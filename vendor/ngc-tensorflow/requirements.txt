@@ -121,6 +121,7 @@ joblib==0.14.1
 json-tricks==3.14.0
 json5==0.9.2
 jsonschema==3.2.0
+jupyterhub==1.2.2
 jupyter-client==6.1.11
 jupyter-console==6.2.0
 jupyter-contrib-core==0.3.3
