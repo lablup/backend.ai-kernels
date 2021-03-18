@@ -171,7 +171,7 @@ pathspec==0.7.0
 patsy==0.5.1
 pexpect==4.8.0
 pickleshare==0.7.5
-Pillow==6.2.2
+Pillow==7.1.0
 plaidml==0.7.0
 plaidml-keras==0.7.0
 plotly==4.5.3

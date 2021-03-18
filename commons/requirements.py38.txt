@@ -180,7 +180,7 @@ patsy==0.5.1
 pbr==5.5.0
 pexpect==4.8.0
 pickleshare==0.7.5
-Pillow==6.2.2
+Pillow==7.1.0
 plaidml==0.7.0
 Splotly==4.5.3
 pluggy==0.12.0
