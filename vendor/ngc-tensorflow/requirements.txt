@@ -76,7 +76,7 @@ flake8==3.7.9
 folium==0.10.0
 funcy==1.13
 future==0.18.2
-gast==0.2.2
+gast==0.3.3
 gensim==3.8.0
 geopandas==0.5.1
 geoplotlib==0.3.2
@@ -309,6 +309,7 @@ statsmodels==0.11.1
 stopit==1.1.2
 tabulate==0.8.7
 tblib==1.6.0
+tensorflow==2.4.1
 tensorflow_datasets==4.1.0
 tensorflow_hub==0.10.0
 tensorflow_metadata==0.24.0
