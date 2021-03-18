@@ -12,6 +12,7 @@ Here we list the latest versions of our supported kernel images.
 
 | Deep-Learning Framework | Image Name                 | Version | Batch | Query | Input Hook | TTY | Runtime Impl.     |
 |-------------------------|----------------------------|---------|-------|-------|------------|-----|-------------------|
+| TensorFlow              | `lablup/python-tensorflow` | 1.13.0  | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 1.14.0  | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 1.15.4  | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.0.3   | O     | O\*   | O          |     | Bundled w/Keras 2 |
