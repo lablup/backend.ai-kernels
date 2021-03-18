@@ -89,7 +89,7 @@ Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.0
 kiwisolver==1.1.0
 lesscpy==0.14.0
-lxml==4.5.0
+lxml==4.6.2
 librosa==0.6.3
 llvmlite==0.29.0
 lunardate==0.2.0
