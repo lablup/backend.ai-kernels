@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
     _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
     LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu"\
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/minicondaenv/espnet/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/opt/conda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin" \
     LANG=C.UTF-8
 
 ENV CUDA_VERSION 11.0.3
@@ -70,8 +70,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-## FROM CUDA 11.0 base [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/base/Dockerfile] 
-
+## FROM CUDA 11.0 base 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gnupg2 curl ca-certificates && \
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - && \
@@ -90,8 +89,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
     echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
-## FROM CUDA 11.0 runtime [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/runtime/Dockerfile]
-
+## FROM CUDA 11.0 runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     	cuda-libraries-11-0=11.0.3-1 \
 	libnpp-11-0=11.1.0.245-1 \
@@ -103,8 +101,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-mark hold libcublas-11-0 libnccl2 && \
     rm -rf /var/lib/apt/lists/*
 
-## FROM CUDA 11.0 devel [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/devel/Dockerfile]
-
+## FROM CUDA 11.0 devel
 RUN apt-get update && apt-get install -y --no-install-recommends \
     	cuda-cudart-dev-11-0=11.0.221-1 \
 	cuda-command-line-tools-11-0=11.0.3-1 \
@@ -120,14 +117,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 ## FROM CUDA 11.0-CUDNN 8 devel
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libcudnn8=$CUDNN_VERSION-1+cuda11.0 \
         libcudnn8-dev=$CUDNN_VERSION-1+cuda11.0 && \
     apt-mark hold libcudnn8 && \
     rm -rf /var/lib/apt/lists/*
 
-
+# Install Conda
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh -O miniconda.sh && \
     mkdir -p /opt && \
     sh miniconda.sh -b -p /opt/conda && \
@@ -139,11 +135,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux
     find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
     /opt/conda/bin/conda clean -afy
 
-# Install Kaldi
-#RUN git clone https://github.com/kaldi-asr/kaldi
-
-WORKDIR /tmp
-# OpenBlas
+# Install OpenBlas
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
@@ -173,12 +165,9 @@ RUN mkdir /tmp/openmpi && \
     ldconfig && \
     rm -rf /tmp/openmpi*
 
-# Install OpenSSH for MPI to communicate between containers
-RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
-    mkdir -p /var/run/sshd
-
 # Allow OpenSSH to talk to containers without asking for confirmation
-RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
+RUN mkdir -p /var/run/sshd && \
+    cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
     echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
     mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
 
@@ -190,14 +179,6 @@ RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
 
 # Configure OpenMPI to run good defaults:
 RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
-
-# Install OpenSSH for MPI to communicate between containers
-RUN mkdir -p /var/run/sshd
-
-# Allow OpenSSH to talk to containers without asking for confirmation
-RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
-    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
-    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
 
 # Install git-lfs
 WORKDIR /tmp
@@ -212,6 +193,7 @@ RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.8.0/code-se
     mv /usr/local/lib/code-server-3.8.0-linux-amd64 /usr/local/lib/code-server-3.8.0 && \
     ln -s /usr/local/lib/code-server-3.8.0/bin/code-server /usr/local/bin/code-server
 
+# Install Kaldi
 RUN git clone https://github.com/hephaex/kaldi.git /opt/kaldi && \
     cd /opt/kaldi/tools && \
     ./extras/install_mkl.sh -sp debian intel-mkl-64bit-2019.2-057 && \
@@ -232,22 +214,8 @@ RUN git clone https://github.com/hephaex/kaldi.git /opt/kaldi && \
     find /opt/kaldi/src -name "*.o" -exec rm -f {} \;
 
 
-ENV CUDA_VER 11.0
-#WORKDIR /
-
-RUN git clone https://github.com/espnet/espnet /opt/espnet
-# IF using a local ESPNet repository, a temporary file containing the ESPnet git repo is copied over
-#ARG ESPNET_ARCHIVE=./espnet-local.tar
-#COPY  ${ESPNET_ARCHIVE} /espnet-local.tar
-
-
 # Download ESPnet
-#RUN echo "Getting ESPnet sources from local repository, in temporary file: " ${ESPNET_ARCHIVE}
-#RUN mkdir /espnet
-#RUN tar xf espnet-local.tar -C /espnet/
-
-#RUN cd espnet && \
-#    rm -rf docker egs test utils
+RUN git clone https://github.com/espnet/espnet /opt/espnet
 
 # Install espnet
 WORKDIR /opt/espnet/tools
@@ -276,7 +244,6 @@ RUN if [ -z "$( which nvcc )" ]; then \
     make KALDI=/opt/kaldi ${MY_OPTS}
 
 # Add extra libraries (VC/TTS)
-
 WORKDIR /opt/espnet/tools
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
         torch==1.7.1 parallel_wavegan && \
@@ -294,15 +261,8 @@ RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
 COPY ./service-defs /etc/backend.ai/service-defs
 RUN echo ". /opt/espnet/tools/activate_python.sh" >> /etc/profile
 
-RUN \
-#  mkdir -p /opt/espnet/egs/ljspeech/tts1/downloads && \
-#    cd /opt/espnet/egs/ljspeech/tts1/downloads && \
-#    wget http://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2 && \
-#    tar -vxf ./*.tar.bz2 && \
-#    rm ./*.tar.bz2 && \
-    chmod +x /opt/espnet/tools/activate_python.sh && \
+RUN chmod +x /opt/espnet/tools/activate_python.sh && \
     chmod -R 777 /opt/espnet 
-#    chmod -R 777 /opt/espnet/egs/ljspeech/tts1/downloads
 
 # Install ipython kernelspec
 Run /opt/conda/bin/python3 -m ipykernel install --display-name "A4003 (ESPNet, PyTorch 1.7.1 on Python 3.7 & CUDA 11.0)" && \
