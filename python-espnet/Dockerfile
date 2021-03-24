@@ -70,7 +70,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-## FROM CUDA 11.0 base 
+## FROM CUDA 11.0 base [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/base/Dockerfile] 
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gnupg2 curl ca-certificates && \
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - && \
@@ -89,7 +90,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
     echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
-## FROM CUDA 11.0 runtime
+## FROM CUDA 11.0 runtime [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/runtime/Dockerfile]
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     	cuda-libraries-11-0=11.0.3-1 \
 	libnpp-11-0=11.1.0.245-1 \
@@ -101,7 +103,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-mark hold libcublas-11-0 libnccl2 && \
     rm -rf /var/lib/apt/lists/*
 
-## FROM CUDA 11.0 devel
+## FROM CUDA 11.0 devel [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/devel/Dockerfile]
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     	cuda-cudart-dev-11-0=11.0.221-1 \
 	cuda-command-line-tools-11-0=11.0.3-1 \
@@ -117,13 +120,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 ## FROM CUDA 11.0-CUDNN 8 devel
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libcudnn8=$CUDNN_VERSION-1+cuda11.0 \
         libcudnn8-dev=$CUDNN_VERSION-1+cuda11.0 && \
     apt-mark hold libcudnn8 && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Conda
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh -O miniconda.sh && \
     mkdir -p /opt && \
     sh miniconda.sh -b -p /opt/conda && \
@@ -136,6 +139,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux
     /opt/conda/bin/conda clean -afy
 
 # Install OpenBlas
+WORKDIR /tmp
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
@@ -213,14 +217,12 @@ RUN git clone https://github.com/hephaex/kaldi.git /opt/kaldi && \
     find /opt/kaldi/src -name "*.o" -exec rm -f {} \; && \
     find /opt/kaldi/src -name "*.o" -exec rm -f {} \;
 
-
-# Download ESPnet
-RUN git clone https://github.com/espnet/espnet /opt/espnet
-
 # Install espnet
-WORKDIR /opt/espnet/tools
 ENV TH_VERSION 1.7.1
 ENV CUDA_VER 11.0
+RUN git clone https://github.com/espnet/espnet /opt/espnet
+WORKDIR /opt/espnet/tools
+
 # Replace nvidia-smi for nvcc because docker does not load nvidia-smi
 RUN if [ -z "$( which nvcc )" ]; then \
         echo "Build without CUDA" && \
@@ -258,15 +260,17 @@ RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
 	    jupyter==1.0.0 \
 	    python-language-server[all] 
 
+# Copy Backend.Ai multi-node support
+COPY runner-scripts/bootstrap.sh /opt/container/
 COPY ./service-defs /etc/backend.ai/service-defs
-RUN echo ". /opt/espnet/tools/activate_python.sh" >> /etc/profile
-
-RUN chmod +x /opt/espnet/tools/activate_python.sh && \
+RUN echo "source /opt/espnet/tools/activate_python.sh" >> /etc/profile && \
+    chmod +x /opt/espnet/tools/activate_python.sh && \
     chmod -R 777 /opt/espnet 
 
 # Install ipython kernelspec
 Run /opt/conda/bin/python3 -m ipykernel install --display-name "A4003 (ESPNet, PyTorch 1.7.1 on Python 3.7 & CUDA 11.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
@@ -279,7 +283,8 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,tensorboard:http:6006"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
+
 
 WORKDIR /home/work
 # vim: ft=dockerfile
