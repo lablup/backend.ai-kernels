@@ -71,27 +71,19 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 ## FROM CUDA 11.0 base [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/base/Dockerfile] 
-
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gnupg2 curl ca-certificates && \
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - && \
     echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/cuda.list && \
     echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list && \
     rm -rf /var/lib/apt/lists/*
-
-# For libraries in the cuda-compat-* package: https://docs.nvidia.com/cuda/eula/index.html#attachment-a
 RUN apt-get update && apt-get install -y --no-install-recommends \
         cuda-cudart-11-0=11.0.221-1 \
 	cuda-compat-11-0 && \
     ln -s cuda-11.0 /usr/local/cuda && \
     rm -rf /var/lib/apt/lists/*
-
-# Required for nvidia-docker v1
 RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
     echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-
-## FROM CUDA 11.0 runtime [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/runtime/Dockerfile]
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     	cuda-libraries-11-0=11.0.3-1 \
 	libnpp-11-0=11.1.0.245-1 \
@@ -102,9 +94,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& \
     apt-mark hold libcublas-11-0 libnccl2 && \
     rm -rf /var/lib/apt/lists/*
-
-## FROM CUDA 11.0 devel [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/devel/Dockerfile]
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     	cuda-cudart-dev-11-0=11.0.221-1 \
 	cuda-command-line-tools-11-0=11.0.3-1 \
@@ -118,15 +107,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& \
     apt-mark hold libcublas-dev-11-0 libnccl-dev &&  \
     rm -rf /var/lib/apt/lists/*
-
-## FROM CUDA 11.0-CUDNN 8 devel
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libcudnn8=$CUDNN_VERSION-1+cuda11.0 \
         libcudnn8-dev=$CUDNN_VERSION-1+cuda11.0 && \
     apt-mark hold libcudnn8 && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Conda 3.7
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh -O miniconda.sh && \
     mkdir -p /opt && \
     sh miniconda.sh -b -p /opt/conda && \
@@ -261,7 +248,7 @@ RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
 	    python-language-server[all] 
 
 # Copy Backend.Ai multi-node support
-COPY runner-scripts/bootstrap.sh /opt/container/
+COPY ./runner-scripts/bootstrap.sh /opt/container/
 COPY ./service-defs /etc/backend.ai/service-defs
 RUN echo "source /opt/espnet/tools/activate_python.sh" >> /etc/profile && \
     chmod +x /opt/espnet/tools/activate_python.sh && \
@@ -284,7 +271,6 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
-
 
 WORKDIR /home/work
 # vim: ft=dockerfile
