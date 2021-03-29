@@ -10,10 +10,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/opt/conda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin" \
     LANG=C.UTF-8
 
+ENV CUDA_VER 11.0
 ENV CUDA_VERSION 11.0.3
 ENV CUDA_PKG_VERSION 11-0=$CUDA_VERSION-1
 ENV NCCL_VERSION 2.8.4
 ENV CUDNN_VERSION 8.0.5.39
+ENV TH_VERSION 1.7.1
 LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
 
 # nvidia-container-runtime
@@ -69,8 +71,6 @@ RUN apt-get update && \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-## FROM CUDA 11.0 base [https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/11.0/base/Dockerfile] 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gnupg2 curl ca-certificates && \
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - && \
@@ -113,7 +113,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-mark hold libcudnn8 && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Conda 3.7
+# Install miniconda 3.7
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh -O miniconda.sh && \
     mkdir -p /opt && \
     sh miniconda.sh -b -p /opt/conda && \
@@ -205,8 +205,6 @@ RUN git clone https://github.com/hephaex/kaldi.git /opt/kaldi && \
     find /opt/kaldi/src -name "*.o" -exec rm -f {} \;
 
 # Install espnet
-ENV TH_VERSION 1.7.1
-ENV CUDA_VER 11.0
 RUN git clone https://github.com/espnet/espnet /opt/espnet
 WORKDIR /opt/espnet/tools
 
@@ -223,10 +221,6 @@ RUN if [ -z "$( which nvcc )" ]; then \
         MY_OPTS="CUDA_VERSION=${CUDA_VER}" && \
         . ./setup_cuda_env.sh /usr/local/cuda;  \
     fi; \ 
-    if [ "${CUDA_VER}" = "11.0" ]; then \
-        # warpctc is not supported from Pytorch 1.3.1
-        MY_OPTS="${MY_OPTS} TH_VERSION=1.7.1";  \
-    fi; \
     echo "Make with options ${MY_OPTS}" && \
     ln -s /opt/kaldi ./ && \
     ./setup_python.sh /opt/conda/bin/python3 && \
@@ -257,7 +251,6 @@ RUN echo "source /opt/espnet/tools/activate_python.sh" >> /etc/profile && \
 # Install ipython kernelspec
 Run /opt/conda/bin/python3 -m ipykernel install --display-name "A4003 (ESPNet, PyTorch 1.7.1 on Python 3.7 & CUDA 11.0)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
-
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
