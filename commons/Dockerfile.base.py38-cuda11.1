@@ -169,6 +169,13 @@ RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory
     dpkg-buildpackage -us -uc && \
     dpkg -i /tmp/nvidia-peer-memory_1.1-0_all.deb
 
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-Linux-x86_64.sh \
+         -q -O /tmp/cmake-install.sh && \
+    chmod u+x /tmp/cmake-install.sh && \
+    mkdir /usr/bin/cmake && \
+    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
+    rm /tmp/cmake-install.sh
+
 # Oracle client
 RUN mkdir -p /opt/oracle && \
     cd /opt/oracle && \
@@ -296,13 +303,6 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     && \	
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
-
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-Linux-x86_64.sh \
-         -q -O /tmp/cmake-install.sh && \
-    chmod u+x /tmp/cmake-install.sh && \
-    mkdir /usr/bin/cmake && \
-    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
-    rm /tmp/cmake-install.sh
 
 WORKDIR /tmp
 ENV OPENCV_VERSION="4.5.1"
