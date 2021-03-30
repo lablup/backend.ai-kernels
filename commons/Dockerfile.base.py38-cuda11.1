@@ -374,7 +374,7 @@ RUN wget https://github.com/openucx/ucx/archive/v1.10.0.tar.gz && \
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
-    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-${OPENMPI}.tar.gz && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-${OPENMPI}.tar.gz && \
     tar zxf openmpi-${OPENMPI}.tar.gz && \
     cd openmpi-${OPENMPI} && \
     ./configure --enable-orterun-prefix-by-default --with-cuda --with-ucx=/usr/local/ucx --enable-mca-no-build=btl-uct && \
