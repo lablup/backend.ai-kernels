@@ -3,6 +3,74 @@ FROM lablup/common-base:py38-cuda11.1
 RUN python3 -m pip install --no-cache-dir --upgrade \
 	    -q git+https://github.com/google-research/tensorflow_constrained_optimization
 	    
+RUN python3 -m pip install --no-cache-dir \
+      --use-feature=2020-resolver \
+        requests_oauthlib==1.2.0 \
+	neural-structured-learning==1.3.1 \
+	pydot==1.4.0 \
+	proto-plus==1.10.2
+RUN python3 -m pip install --no-cache-dir \
+      --use-feature=2020-resolver \
+	    tensorflow-transform==0.25.0 \
+	    tensorflow_model_analysis \
+	    tensorflow-datasets \
+	    tensorflow_probability==0.11.1 \ 
+	    tensorflow-addons==0.11.2 \
+	    neural-structured-learning==1.3.1 \
+	    tensorflow-model-optimization==0.5.0 \
+	    tfx==0.25.0 \
+	    tfx-bsl==0.25.0 \ 
+	    tf-agents==0.6.0  
+
+RUN python3 -m pip install --no-cache-dir \
+      --use-feature=2020-resolver \
+	    fastavro==1.2.0 \
+	    pymongo==3.11.2 \
+	    docker==4.4.1 \
+	    pbr==5.5.1 \
+	    mock==1.3.0 \
+	    proto-plus==1.13.0 \
+	    oauth2client==4.1.3 \
+	    future==0.18.1 \
+	    gin_config==0.4.0 \
+	    joblib==0.14.0 \
+	    libcst==0.3.14 
+
+RUN python3 -m pip install --no-cache-dir \
+      --use-feature=2020-resolver \
+	    google_cloud_spanner==1.19.0 \
+	    googleapis-common-protos==1.51.0 \
+	    google_cloud_videointelligence==1.15.0 \
+	    google_cloud_vision==0.42.0 \
+	    google_cloud_pubsub==1.6.0 \
+	    google_cloud_dlp==0.15.0 \
+	    google_cloud_datastore==1.15.2 \
+	    google_cloud_bigtable==1.6.0 \
+	    google_api_core==1.24.0 
+
+RUN python3 -m pip install --no-cache-dir \
+	    mesh-tensorflow==0.1.18 \
+            tensorflow-cloud==0.1.10 \
+            tensorflow-hub==0.9.0 
+
+RUN python3 -m pip install --no-cache-dir \
+	    -i https://pypi-nightly.tensorflow.org/simple tensorflow-data-validation
+RUN python3 -m pip install --no-cache-dir \
+	    tensorflow-graphics-gpu==1.0.0 \
+            tensorflow-io==0.17.0 \
+	    tensorflow_ranking==0.3.2 \
+	    tensorflow-plot==0.3.2 \
+	    tensorflow_text==2.4.1 \
+	    tensorflow-gan==2.0.0 
+RUN python3 -m pip uninstall --no-cache-dir -y \
+            tensorflow==2.3.0 \
+	    tensorflow-gpu==2.4.1 \
+	    tensorboard==2.3.0 \
+	    tensorboard-plugin-wit==1.7.0 && \
+    python3 -m pip install --no-cache-dir \
+            tensorflow-gpu==2.4.1 \
+	    tensorboard-plugin-wit==1.8.0 \
+	    tensorboard==2.4.0
 
 RUN python3 -m pip install --extra-index-url \
        https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 \
@@ -11,12 +79,12 @@ RUN python3 -m pip install --extra-index-url \
        https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
 
 # Install PyTorch and MXNet
-ENV PYTORCH_VERSION=1.7.1
-ENV TORCHVISION_VERSION=0.8.2
-ENV TORCHAUDIO_VERSION=0.7.2
-ENV TORCHTEXT_VERSION=0.8.1
+ENV PYTORCH_VERSION=1.8.1
+ENV TORCHVISION_VERSION=0.9.1
+ENV TORCHAUDIO_VERSION=0.8.1
+ENV TORCHTEXT_VERSION=0.9.1
 ENV TENSORBOARDX_VERSION=2.1
-ENV MXNET_VERSION=1.6.0
+ENV MXNET_VERSION=1.7.0
 
 RUN python3 -m pip uninstall -y torch && \
     python3 -m pip install --no-cache-dir \
@@ -32,13 +100,13 @@ RUN python3 -m pip install --no-cache-dir mxnet mkl
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.21.1 && \
+    pip install --no-cache-dir horovod==0.21.3 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	    mpi4py==3.0.3 \
-            mlflow==1.12.1 \
-	    nni==1.9 \
+            mlflow==1.15.0 \
+	    nni==2.1 \
 	    scikit-nni==0.2.1
 
 # install kaldi
@@ -75,6 +143,7 @@ RUN apt autoclean && \
     rm -rf /tmp/*
 
 COPY ./service-defs /etc/backend.ai/service-defs
+COPY runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
 
 # Install ipython kernelspec
 Run python3 -m ipykernel install --display-name "Lablup FF 21.03 on Python 3.8 (CUDA 11.1)" && \
