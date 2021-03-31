@@ -268,9 +268,9 @@ RUN echo "Install mecab-ko-dic" && \
     python3 -m pip install /tmp/mecab-python-0.996
 
 WORKDIR /tmp
-COPY ./requirements.py38.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.py38.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.py38.txt
+COPY ./requirements.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
