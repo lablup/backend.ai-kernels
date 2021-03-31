@@ -88,9 +88,11 @@ ENV MXNET_VERSION=1.7.0
 
 RUN python3 -m pip uninstall -y torch && \
     python3 -m pip install --no-cache-dir \
-    	https://download.pytorch.org/whl/cu110/torch-${PYTORCH_VERSION}%2Bcu110-cp38-cp38-linux_x86_64.whl \
-	https://download.pytorch.org/whl/cu110/torchvision-${TORCHVISION_VERSION}%2Bcu110-cp38-cp38-linux_x86_64.whl \
+        https://download.pytorch.org/whl/cu111/torch-${PYTORCH_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
+        https://download.pytorch.org/whl/cu111/torchvision-${TORCHVISION_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
         https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp38-cp38-linux_x86_64.whl \
+	https://download.pytorch.org/whl/cu111/torchcsprng-0.2.1%2Bcu111-cp38-cp38-linux_x86_64.whl \
+	https://download.pytorch.org/whl/torchserve-0.3.0-py2.py3-none-any.whl \
         https://download.pytorch.org/whl/torchtext-${TORCHTEXT_VERSION}-cp38-cp38-linux_x86_64.whl && \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
@@ -108,34 +110,6 @@ RUN python3 -m pip install --no-cache-dir \
             mlflow==1.15.0 \
 	    nni==2.1 \
 	    scikit-nni==0.2.1
-
-# install kaldi
-WORKDIR /opt
-
-RUN ln -sf /usr/include/x86_64-linux-gnu/atlas /usr/local/include/atlas && \
-    ln -sf /usr/include/x86_64-linux-gnu/cblas.h /usr/local/include/cblas.h && \
-    ln -sf /usr/include/x86_64-linux-gnu/clapack.h /usr/local/include/clapack.h && \
-    ln -sf /usr/lib/x86_64-linux-gnu/atlas /usr/local/lib/atlas
-
-RUN git clone https://github.com/hephaex/kaldi.git /opt/kaldi && \
-    cd /opt/kaldi/tools && \
-    make -j $(nproc) && \
-    cd /opt/kaldi/src && \
-    ./configure --shared --use-cuda \
-	--cudatk-dir=/usr/local/cuda/ \
-	--mathlib=ATLAS \
-    	--cuda-arch="-gencode arch=compute_52,code=sm_52 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70 -gencode arch=compute_75,code=sm_75 -gencode arch=compute_80,code=sm_80" && \
-    make depend -j $(nproc) && \
-    make -j $(nproc) 
-RUN cd /opt/kaldi/src  && \
-    make ext -j $(nproc) && \
-    ldconfig && \
-    find /opt/kaldi  -type f \( -name "*.o" -o -name "*.la" -o -name "*.a" \) -\
-exec rm {} \; && \
-    rm -rf /opt/kaldi/.git
-
-RUN mkdir -p /workspace && \
-    chmod -R 777 /workspace
 
 RUN apt autoclean && \
     rm -rf /var/lib/apt/lists/* && \	
