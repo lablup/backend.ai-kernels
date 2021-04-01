@@ -1,4 +1,4 @@
-2FROM nvidia/cuda:11.1-cudnn8-devel-ubuntu18.04
+FROM nvidia/cuda:11.1-cudnn8-devel-ubuntu18.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
 ARG CUDA=11.1
@@ -11,8 +11,8 @@ ENV CUDNN_VERSION 8.0.5.43
 ENV MLNX_OFED_VERSION=5.1-2.3.7.1
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
-ENV NUMPY_VERSION 1.20.2
-ENV SCIPY_VERSION 1.6.2
+ENV NUMPY_VERSION 1.19.5
+ENV SCIPY_VERSION 1.5.4
 ENV OPENMPI 4.1.0
 # Python 3.6 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
