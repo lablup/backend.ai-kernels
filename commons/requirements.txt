@@ -78,7 +78,7 @@ dopamine-rl==3.1.7
 dtreeviz==0.8.1
 easyProcess==0.3
 ecos==2.0.7.post1
-elegy==0.7.0
+#elegy==0.7.0
 entrypoints==0.3
 enum34==1.1.10
 ephem==3.7.6.0
