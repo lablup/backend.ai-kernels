@@ -296,7 +296,6 @@ pyVirtualDisplay==1.3.2
 pyWavelets==1.1.1
 pyYAML==5.3.1
 pyaml==19.12.0
-pyarrow==1.0.1
 pyasn1-modules==0.2.8
 pyasn1==0.4.8
 pycairo==1.19.0
