@@ -319,7 +319,7 @@ pymongo==3.11.0
 pynvml==8.0.4
 pyparsing==2.4.7
 pypng==0.0.20
-pyproj==2.5.0
+pyproj==3.0.1
 pyqt5==5.15.0
 pyrsistent==0.17.3
 pyshp==2.1.0
