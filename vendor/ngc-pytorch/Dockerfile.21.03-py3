@@ -135,7 +135,6 @@ RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
 	    pycairo==1.20.0 \
 	    jupyter==1.0.0 \
 	    typeguard==2.11.1 \
-	    tensorflow_datasets==4.1.0 \
 	    python-language-server[all] \	    
 	    matplotlib==3.4.1
 ENV SCIPY_VERSION 1.6.2
