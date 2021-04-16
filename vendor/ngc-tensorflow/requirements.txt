@@ -95,7 +95,7 @@ google_auth_httplib2==0.0.3
 google_cloud_bigquery==1.28.0
 google_cloud_bigtable==1.2.1
 graphviz==0.14
-grpcio==1.29.0
+grpcio==1.32.0
 gym==0.17.3
 h5py==2.10.0
 hdf5storage==0.1.15
