@@ -1,0 +1,167 @@
+ARG CUDNN_VERSION=8
+ARG CUDA_VERSION=11.1
+
+# FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu20.04
+FROM nvidia/cuda:${CUDA_VERSION}-cudnn${CUDNN_VERSION}-devel-ubuntu18.04
+# FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu18.04
+
+ARG PYTHON_VERSION=3.8
+ARG PYTORCH_VERSION=1.7
+ARG CONDA_VERSION=4.9.2
+
+SHELL ["/bin/bash", "-c"]
+
+ENV PATH="$PATH:/root/.local/bin"
+
+WORKDIR /opt
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        git \
+        wget \
+        curl \
+        unzip \
+        ca-certificates \
+        libopenmpi-dev \
+    && \
+
+# Install conda and python.
+# NOTE new Conda does not forward the exit status... https://github.com/conda/conda/issues/8385
+
+    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py38_${CONDA_VERSION}-Linux-x86_64.sh -O miniconda.sh && \
+    mkdir -p /opt && \
+    sh miniconda.sh -b -p /opt/conda && \
+    rm miniconda.sh && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate base" >> ~/.bashrc && \
+    find /opt/conda/ -follow -type f -name '*.a' -delete && \
+    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
+    /opt/conda/bin/conda clean -afy && \
+    
+    update-alternatives --install /opt/conda/bin/python python /opt/conda/bin/python3 2 && \
+
+    curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs && \
+
+    
+# Cleaning
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /root/.cache && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu:/opt/miniconda3/lib" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/opt/conda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:/opt/miniconda3/bin:$PATH" \
+    CUDA_TOOLKIT_ROOT_DIR="/usr/local/cuda" \
+    DEBIAN_FRONTEND=noninteractive \
+    MPLBACKEND=Svg \
+    PYTHONUNBUFFERED=1 \
+    LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
+    _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
+    LANG=C.UTF-8 \
+    MKL_THREADING_LAYER=GNU \
+    HOROVOD_GPU_OPERATIONS=NCCL \
+    HOROVOD_WITH_PYTORCH=1 \
+    HOROVOD_WITHOUT_TENSORFLOW=1 \
+    HOROVOD_WITHOUT_MXNET=1 \
+    HOROVOD_WITH_GLOO=1 \
+    HOROVOD_WITHOUT_MPI=1 \
+    # MAKEFLAGS="-j$(nproc)" \
+    MAKEFLAGS="-j1" \
+    TORCH_CUDA_ARCH_LIST="3.7;5.0;6.0;7.0;7.5;8.0" \
+    CONDA_ENV=lightning
+
+COPY environment.yml environment.yml
+
+# conda init
+RUN conda create -y --name $CONDA_ENV python=${PYTHON_VERSION} pytorch=${PYTORCH_VERSION} cudatoolkit=${CUDA_VERSION} -c pytorch -c pytorch-test -c pytorch-nightly && \
+    conda init bash && \
+    # NOTE: this requires that the channel is presented in the yaml before packages
+    # replace channel to nigtly if needed, fix PT version and remove Horovod as it will be installed later
+    python -c "import re ; fname = 'environment.yml' ; req = re.sub(r'- python[>=]+[\d\.]+', '# - python=${PYTHON_VERSION}', open(fname).read()) ; open(fname, 'w').write(req)" && \
+    python -c "import re ; fname = 'environment.yml' ; req = re.sub(r'- pytorch[>=]+[\d\.]+', '# - pytorch=${PYTORCH_VERSION}', open(fname).read()) ; open(fname, 'w').write(req)" && \
+    python -c "import re ; fname = 'environment.yml' ; req = re.sub(r'- horovod[>=]+[\d\.]+', '# - horovod', open(fname).read()) ; open(fname, 'w').write(req)" && \
+    python -c "fname = 'environment.yml' ; req = open(fname).readlines() ; open(fname, 'w').writelines([ln for ln in req if 'horovod' not in ln])" && \
+    cat environment.yml && \
+    conda env update --name $CONDA_ENV --file environment.yml && \
+    conda clean -ya && \
+    rm environment.yml
+
+ENV \
+    PATH /opt/miniconda3/envs/${CONDA_ENV}/bin:$PATH \
+    LD_LIBRARY_PATH="/opt/miniconda3/envs/${CONDA_ENV}/lib:$LD_LIBRARY_PATH" \
+    # if you want this environment to be the default one, uncomment the following line:
+    CONDA_DEFAULT_ENV=${CONDA_ENV}
+
+COPY ./extra.txt requirements-extra.txt
+COPY ./test.txt requirements-test.txt
+COPY ./adjust_versions.py requirements_adjust_versions.py
+
+RUN \
+    pip list | grep torch && \
+    python -c "import torch; print(torch.__version__)" && \
+    python requirements_adjust_versions.py requirements-extra.txt && \
+    # Install remaining requirements
+    pip install -r requirements-extra.txt --no-cache-dir && \
+    pip install -r requirements-test.txt --no-cache-dir && \
+    rm requirements*
+
+RUN \
+    # install DALI, needed for examples
+    pip install --extra-index-url https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda${CUDA_VERSION%%.*}0
+
+RUN \
+    # install NVIDIA AMP
+    git clone https://github.com/NVIDIA/apex && \
+    pip install --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./apex && \
+    rm -rf apex
+
+
+# install git-lfs
+WORKDIR /tmp
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.3/git-lfs-linux-amd64-v2.13.3.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.13.3.tar.gz && \
+    bash install.sh && \
+    rm -rf /tmp/*
+    
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.3/code-server-3.9.3-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-3.9.3-linux-amd64 /usr/local/lib/code-server-3.9.2 && \
+    ln -s /usr/local/lib/code-server-3.9.3/bin/code-server /usr/local/bin/code-server
+
+RUN /opt/conda/bin/python3 -m ipykernel install \
+        --prefix=/opt/conda/ \
+        --display-name "PyTorch 1.7 (Lightning/Python 3.8 Conda) on Backend.AI" && \
+    cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+
+COPY ./service-defs /etc/backend.ai/service-defs
+COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.accelerators="cuda" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+
+RUN \
+    # Show what we have
+    pip --version && \
+    conda info && \
+    pip list && \
+    python -c "import sys; assert sys.version[:3] == '$PYTHON_VERSION', sys.version" && \
+    python -c "import torch; assert torch.__version__[:3] == '$PYTORCH_VERSION', torch.__version__"
+
+
+WORKDIR /home/work
+# vim: ft=dockerfile
