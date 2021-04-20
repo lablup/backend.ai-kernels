@@ -5,6 +5,7 @@ FROM nvcr.io/nvidia/pytorch:21.02-py3
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
+    PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvm/versions/node/v14.8.0/bin:/opt/conda/bin:/opt/cmake-3.14.6-Linux-x86_64/bin/:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
@@ -120,7 +121,7 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get install -y nodejs
 
 WORKDIR /tmp
-RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=v0.3.14 git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
@@ -134,6 +135,7 @@ RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
 	    pystan==2.19.1.1 \
 	    pycairo==1.19.0 \
 	    jupyter==1.0.0 \
+	    typeguard==2.11.1 \
 	    python-language-server[all] \	    
 	    matplotlib==3.3.3
 ENV SCIPY_VERSION 1.6.1
@@ -154,7 +156,6 @@ RUN cd /tmp && \
 WORKDIR /tmp
 COPY ./requirements.txt /tmp
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir --ignore-installed -r requirements.txt && \
-    /opt/conda/bin/python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install git-lfs
@@ -164,7 +165,6 @@ RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.2/git-l
     bash install.sh && \
     rm -rf /tmp/*
 
-COPY ./service-defs /etc/backend.ai/service-defs
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.0/code-server-3.9.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.9.0-linux-amd64 /usr/local/lib/code-server-3.9.0 && \
     ln -s /usr/local/lib/code-server-3.9.0/bin/code-server /usr/local/bin/code-server
@@ -218,17 +218,19 @@ RUN jupyter nbextensions_configurator enable && \
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
-    python3 -m pip uninstall -y  tensorboard-plugin-wit && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
 
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "PyTorch 1.7 (NGC 21.02/Python 3.8 Conda) on Backend.AI" && \
+        --display-name "PyTorch 1.8 (NGC 21.02/Python 3.8 Conda) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
+COPY ./service-defs /etc/backend.ai/service-defs
+COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
+
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
