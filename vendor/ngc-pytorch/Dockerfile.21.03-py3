@@ -5,6 +5,7 @@ FROM nvcr.io/nvidia/pytorch:21.03-py3
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
+    PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvm/versions/node/v14.8.0/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
@@ -155,7 +156,6 @@ RUN cd /tmp && \
 WORKDIR /tmp
 COPY ./requirements.txt /tmp
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir --ignore-installed -r requirements.txt && \
-    /opt/conda/bin/python3 -m pip install --no-cache-dir tensorflow_model_analysis && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install git-lfs
@@ -167,7 +167,7 @@ RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.3/git-l
 
 COPY ./service-defs /etc/backend.ai/service-defs
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.3/code-server-3.9.3-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
-    mv /usr/local/lib/code-server-3.9.3-linux-amd64 /usr/local/lib/code-server-3.9.2 && \
+    mv /usr/local/lib/code-server-3.9.3-linux-amd64 /usr/local/lib/code-server-3.9.3 && \
     ln -s /usr/local/lib/code-server-3.9.3/bin/code-server /usr/local/bin/code-server
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
@@ -214,19 +214,17 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable toc2/main && \
     jupyter labextension install @pyviz/jupyterlab_pyviz && \
     jupyter labextension install @bokeh/jupyter_bokeh && \
-    jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
-    python3 -m pip uninstall -y  tensorboard-plugin-wit && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
 
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "PyTorch 1.8 (NGC 21.03/Python 3.8 Conda) on Backend.AI" && \
+        --display-name "PyTorch 1.9 (NGC 21.03/Python 3.8 Conda) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
