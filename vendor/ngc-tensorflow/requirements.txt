@@ -98,6 +98,7 @@ graphviz==0.14
 grpcio==1.32.0
 gym==0.17.3
 h5py==2.10.0
+hdfs==2.5.8
 hdf5storage==0.1.15
 heapDict==1.0.1
 holidays==0.9.10
