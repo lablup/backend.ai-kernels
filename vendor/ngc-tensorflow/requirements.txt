@@ -96,6 +96,7 @@ google_crc32c==1.1.1
 google_cloud_bigquery==1.28.0
 google_cloud_bigtable==1.2.1
 google_resumable_media==1.1.0
+google_cloud_videointelligence==1.16.0
 googleapis_common_protos==1.52.0
 graphviz==0.14
 greenlet==0.4.16
