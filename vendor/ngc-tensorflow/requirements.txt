@@ -7,6 +7,7 @@ apache-beam==2.24.0
 apache-beam[gcp]==2.24.0
 appdirs==1.4.3
 asgiref==3.3.0
+async_generator==1.9
 astor==0.8.1
 astroid==2.3.0
 async-timeout==3.0.1
@@ -83,7 +84,9 @@ geoplotlib==0.3.2
 gin_config==0.3.0
 gitPython==3.1.13
 gitdb==4.0.4
+googleapis-common-protos==1.51.0
 google-api-core[grpc]==1.23.0
+google_api_core==1.22.4
 google-auth-oauthlib==0.4.1
 google-auth==1.21.1
 google-cloud-core==1.5.0
@@ -95,6 +98,7 @@ google_auth_httplib2==0.0.3
 google_crc32c==1.1.1
 google_cloud_bigquery==1.28.0
 google_cloud_bigtable==1.2.1
+google_cloud_datastore==1.15.2
 google_cloud_dlp==0.15.0
 google_cloud_pubsub==1.6.1
 google_cloud_videointelligence==1.16.0
