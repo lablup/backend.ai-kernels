@@ -98,6 +98,7 @@ google_cloud_bigtable==1.2.1
 google_cloud_dlp==0.15.0
 google_cloud_pubsub==1.6.1
 google_cloud_videointelligence==1.16.0
+google_cloud_vision==0.42.0
 google_cloud_spanner==1.19.0
 google_resumable_media==1.1.0
 googleapis_common_protos==1.52.0
