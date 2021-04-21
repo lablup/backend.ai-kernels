@@ -84,7 +84,6 @@ geoplotlib==0.3.2
 gin_config==0.3.0
 gitPython==3.1.13
 gitdb==4.0.4
-googleapis-common-protos==1.51.0
 google-api-core[grpc]==1.23.0
 google_api_core==1.23.0
 google-auth-oauthlib==0.4.1
