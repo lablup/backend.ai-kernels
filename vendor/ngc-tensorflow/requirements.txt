@@ -91,7 +91,6 @@ google-auth==1.21.1
 google-cloud-core==1.5.0
 google-images-download==2.8.0
 google-pasta==0.2.0
-google_api_core==1.21.0
 google_api_python_client==1.12.8
 google_auth_httplib2==0.0.3
 google_crc32c==1.1.1
