@@ -99,7 +99,7 @@ google_cloud_bigtable==1.0.0
 google_cloud_datastore==1.7.1
 google_cloud_dlp==0.12.0
 google_cloud_pubsub==0.39.0
-google_cloud_videointelligence==1.16.0
+google_cloud_videointelligence==1.13.0
 google_cloud_vision==0.42.0
 google_cloud_spanner==1.13.0
 google_resumable_media==1.1.0
