@@ -95,7 +95,7 @@ google_api_python_client==1.12.8
 google_auth_httplib2==0.0.3
 google_crc32c==1.1.1
 google_cloud_bigquery==1.23.0
-google_cloud_bigtable==1.2.1
+google_cloud_bigtable==1.0.0
 google_cloud_datastore==1.7.1
 google_cloud_dlp==0.15.0
 google_cloud_pubsub==0.39.0
