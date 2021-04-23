@@ -98,7 +98,7 @@ google_cloud_bigquery==1.28.0
 google_cloud_bigtable==1.2.1
 google_cloud_datastore==1.7.1
 google_cloud_dlp==0.15.0
-google_cloud_pubsub==1.6.1
+google_cloud_pubsub==0.39.0
 google_cloud_videointelligence==1.16.0
 google_cloud_vision==0.42.0
 google_cloud_spanner==1.19.0
