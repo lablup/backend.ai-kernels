@@ -87,11 +87,11 @@ gitdb==4.0.4
 google_api_core==1.14.1
 google-api-core[grpc,grpcgcp]==1.14.1
 google-auth-oauthlib==0.4.1
-google-auth==1.14.1
+google-auth==1.16.0
 google-cloud-core==1.5.0
 google-images-download==2.8.0
 google-pasta==0.2.0
-google_api_python_client==1.12.8
+google_api_python_client==1.6.7
 google_auth_httplib2==0.0.3
 google_crc32c==1.1.1
 google_cloud_bigquery==1.23.0
@@ -102,7 +102,7 @@ google_cloud_pubsub==0.39.0
 google_cloud_videointelligence==1.13.0
 google_cloud_vision==0.42.0
 google_cloud_spanner==1.13.0
-google_resumable_media==1.1.0
+google_resumable_media==0.5.1
 googleapis_common_protos==1.52.0
 graphviz==0.14
 greenlet==0.4.16
