@@ -339,7 +339,7 @@ terminado==0.8.3
 test-generator==0.1.1
 testpath==0.4.4
 tf2onnx==1.5.5
-tfx-bsl==0.24.1
+tfx-bsl==0.23.0
 toml==0.10.0
 toolz==0.10.0
 tornado==6.1
