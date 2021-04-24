@@ -84,11 +84,11 @@ geoplotlib==0.3.2
 gin_config==0.3.0
 gitPython==3.1.13
 gitdb==4.0.4
-google_api_core==1.16.0
-google-api-core[grpc,grpcgcp]==1.16.0
+#google_api_core==1.16.0
+#google-api-core[grpc,grpcgcp]==1.16.0
 google-auth-oauthlib==0.4.1
 google-auth==1.18.0
-google-cloud-core==1.4.0
+google-cloud-core==1.3.0
 google-images-download==2.8.0
 google-pasta==0.2.0
 google_api_python_client==1.7.11
@@ -96,7 +96,7 @@ google_auth_httplib2==0.0.3
 google_crc32c==1.1.1
 google_cloud_bigquery==1.23.0
 google_cloud_bigtable==1.0.0
-google_cloud_datastore==2.0.1
+#google_cloud_datastore==2.0.1
 google_cloud_dlp==0.12.0
 google_cloud_pubsub==0.45.0
 google_cloud_videointelligence==1.13.0
