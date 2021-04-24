@@ -3,8 +3,8 @@ adanet==0.5.0
 aiohttp==3.6.2
 aiozmq==0.9.0
 anyio==2.1.0
-apache-beam==2.21.0
-apache-beam[gcp]==2.21.0
+#apache-beam==2.278.0
+#apache-beam[gcp]==2.27.0
 appdirs==1.4.3
 asgiref==3.3.0
 async_generator==1.9
@@ -87,8 +87,8 @@ gitdb==4.0.4
 google_api_core==1.14.1
 google-api-core[grpc,grpcgcp]==1.14.1
 google-auth-oauthlib==0.4.1
-google-auth==1.16.0
-google-cloud-core==1.3.0
+google-auth==1.18.0
+google-cloud-core==1.4.0
 google-images-download==2.8.0
 google-pasta==0.2.0
 google_api_python_client==1.6.7
@@ -96,7 +96,7 @@ google_auth_httplib2==0.0.3
 google_crc32c==1.1.1
 google_cloud_bigquery==1.23.0
 google_cloud_bigtable==1.0.0
-google_cloud_datastore==1.7.1
+google_cloud_datastore==2.0.1
 google_cloud_dlp==0.12.0
 google_cloud_pubsub==0.39.0
 google_cloud_videointelligence==1.13.0
