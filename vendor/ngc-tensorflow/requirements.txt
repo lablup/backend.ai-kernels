@@ -98,7 +98,7 @@ google_cloud_bigquery==1.23.0
 google_cloud_bigtable==1.0.0
 google_cloud_datastore==2.0.1
 google_cloud_dlp==0.12.0
-google_cloud_pubsub==0.39.0
+google_cloud_pubsub==0.45.0
 google_cloud_videointelligence==1.13.0
 google_cloud_vision==0.42.0
 google_cloud_spanner==1.13.0
@@ -328,11 +328,11 @@ statsmodels==0.11.1
 stopit==1.1.2
 tabulate==0.8.7
 tblib==1.6.0
-tensorflow==2.4.1
+#tensorflow==2.4.1
 tensorflow_datasets==4.1.0
 tensorflow_hub==0.10.0
 tensorflow_metadata==0.24.0
-tensorflow_model_analysis==0.24.0
+tensorflow_model_analysis==0.23.0
 tensorflow_text==2.4.3
 termcolor==1.1.0
 terminado==0.8.3
