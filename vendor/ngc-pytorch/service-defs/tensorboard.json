@@ -10,8 +10,7 @@
   "command": [
     "{runtime_path}",
     "-m", "tensorboard.main",
-    "--port", "{ports[0]}",
-    "--bind_all"
+    "--port", "{ports[0]}"
   ],
   "allowed_arguments": [
     "--logdir"
