@@ -2,16 +2,23 @@ FROM nvcr.io/nvidia/tensorflow:21.03-tf2-py3
 # NVIDIA DIGITS runs on Python 3.8
 
 RUN apt-get update && \
-    apt-get install -y libsm6 libxext6 libxrender-dev mercurial libgdal-dev python3-gdal \
-    libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
-    libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev
-  
-ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
-ENV C_INCLUDE_PATH=/usr/include/gdal
+    apt-get install -y --no-install-recommends \
+    	fonts-nanum \
+	fonts-nanum-coding \
+	fonts-nanum-extra \
+	htop \
+	ncurses-term \
+	libasound2-dev \
+        libsm6 libxext6 libxrender-dev mercurial libgdal-dev python3-gdal \
+        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev
+
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
-   PIP_IGNORE_INSTALLED=0 \
+    PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
+    CPLUS_INCLUDE_PATH=/usr/include/gdal \
+    C_INCLUDE_PATH=/usr/include/gdal \
     LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
@@ -22,10 +29,10 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
     apt-get install -y \
-    	openjdk-8-jdk \
-	libasound2-dev \
-	gfortran \
 	automake \
+	gfortran \
+	libasound2-dev \
+    	openjdk-8-jdk \
 	&& \
     cd /tmp && \
     curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
@@ -75,10 +82,7 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
 	libgoogle-glog-dev libgflags-dev \
 	libgphoto2-dev \
 	libeigen3-dev \
-	libhdf5-dev \	
-    && \	
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/
+	libhdf5-dev
 
 WORKDIR /tmp
 ENV OPENCV_VERSION="4.5.2"
@@ -94,7 +98,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D BUILD_opencv_java=OFF \
       -D WITH_CUDA=ON \
       -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.1 \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.2 \
       -D ENABLE_FAST_MATH=1 \
       -D CUDA_FAST_MATH=1 \
       -D WITH_CUBLAS=1 \
@@ -160,6 +164,10 @@ RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.2/git-l
     bash install.sh && \
     rm -rf /tmp/*
 
+WORKDIR /tmp
+RUN git clone https://github.com/aristocratos/bashtop.git && \
+    cd bashtop && \
+    make install
 
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.0/code-server-3.9.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.9.0-linux-amd64 /usr/local/lib/code-server-3.9.0 && \
@@ -207,9 +215,14 @@ RUN jupyter nbextensions_configurator enable && \
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
+
+# Copy Backend.Ai multi-node support
+COPY ./service-defs /etc/backend.ai/service-defs
+COPY runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
 
 # Install ipython kernelspec
 RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.8 (NGC 21.03 / TensorFlow 2.4) on Backend.AI" && \
@@ -217,7 +230,6 @@ RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.8 (NGC 21.03 
 
 # Backend.AI specifics
 COPY ./service-defs /etc/backend.ai/service-defs
-# Copy Backend.Ai multi-node support
 COPY runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
