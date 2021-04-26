@@ -41,7 +41,8 @@ RUN apt-get update && \
 	libgoogle-glog-dev libgflags-dev \
 	libgphoto2-dev \
 	libeigen3-dev \
-	libhdf5-dev \	
+	libhdf5-dev \
+	ncurses-term \
 	automake 
 
 
@@ -218,6 +219,7 @@ RUN jupyter nbextensions_configurator enable && \
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
