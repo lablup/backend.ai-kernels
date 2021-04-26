@@ -148,13 +148,13 @@ RUN python3 -m pip install --no-cache-dir --upgrade -r requirements.20.08.txt &&
 
 # install git-lfs
 WORKDIR /tmp
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.12.1/git-lfs-linux-amd64-v2.11.0.tar.gz && \
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.12.1/git-lfs-linux-amd64-v2.12.1.tar.gz && \
     tar -zxf git-lfs-linux-amd64-v2.12.1.tar.gz && \
     bash install.sh && \
     rm -rf /tmp/*
 
 COPY ./service-defs /etc/backend.ai/service-defs
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.7.3/code-server-3.4.1-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.7.3/code-server-3.7.3-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.7.3-linux-amd64 /usr/local/lib/code-server-3.7.3 && \
     ln -s /usr/local/lib/code-server-3.7.3/bin/code-server /usr/local/bin/code-server
 
