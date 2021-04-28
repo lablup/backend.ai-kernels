@@ -1,0 +1,212 @@
+FROM centos:8
+LABEL maintainer "Mario Cho <m.cho@lablup.com>"
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    MPLBACKEND=Svg \
+    PYTHONUNBUFFERED=1 \
+    LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
+    _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu"\
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/opt/conda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin" \
+    LANG=C.UTF-8
+
+ENV CUDA_VER 11.0
+ENV CUDA_VERSION 11.0.3
+ENV CUDA_PKG_VERSION 11-0=$CUDA_VERSION-1
+ENV NCCL_VERSION 2.9.6
+ENV CUDNN_VERSION 8.0.5.39
+ENV TH_VERSION 1.7.1
+LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
+
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+ENV NVIDIA_REQUIRE_CUDA "cuda>=11.0 brand=tesla,driver>=418,driver<419 brand=tesla,driver>=440,driver<441 driver>=450"
+ENV CUDA_HOME /usr/local/cuda
+
+RUN yum update -y && \
+    yum install -y \
+	fonts-nanum \
+	fonts-nanum-coding \
+	fonts-nanum-extra \
+	libasound-dev \
+	libcairo2-dev \
+	libgif-dev \
+	libjpeg-dev  \
+	liblapack-dev \
+	libnuma-dev \
+	libopenblas-dev \
+	libpmi2-0-dev \
+	nano \
+	numactl \
+	vim \
+  	openssh-client openssh-server \
+        apt-utils \
+        autoconf \
+        automake \
+        bc \
+        build-essential \
+        ca-certificates \
+        cmake \
+        curl \
+	debhelper dh-virtualenv \
+        ffmpeg \
+        flac \
+        gawk \
+        gfortran \
+        git \
+        libatlas-base-dev \
+        libatlas3-base libtool \
+        libsndfile1-dev \
+        libssl-dev \
+        libtool \
+        python2.7 \
+        python3 \
+        sox \
+        subversion \
+        unzip \
+        wget \
+        zip \
+        zlib1g-dev 
+
+RUN NVIDIA_GPGKEY_SUM=d1be581509378368edeec8c1eb2958702feedf3bc3d17011adbf24efacce4ab5 && \
+    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/7fa2af80.pub | sed '/^Version/d' > /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA && \
+    echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict -
+
+COPY cuda.repo /etc/yum.repos.d/cuda.repo
+COPY nvidia-ml.repo /etc/yum.repos.d/nvidia-ml.repo
+COPY NGC-DL-CONTAINER-LICENSE /
+
+RUN yum upgrade -y && yum install -y \
+        cuda-cudart-11-0-11.0.221-1 \
+        cuda-compat-11-0 \
+	&& \
+    ln -s cuda-11.0 /usr/local/cuda && \
+    echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
+    echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+
+RUN yum install -y \
+        cuda-libraries-11-0-11.0.3-1 \
+        cuda-nvtx-11-0-11.0.167-1 \
+        libnpp-11-0-11.1.0.245-1 \
+        libcublas-11-0-11.2.0.252-1 \
+        libnccl-2.9.6-1+cuda11.0 \
+        libnccl2=$NCCL_VERSION-1+cuda11.0 
+
+RUN yum install -y \ 
+        make \
+	cuda-command-line-tools-11-0-11.0.3-1 \
+	cuda-libraries-devel-11-0-11.0.3-1 \
+	cuda-minimal-build-11-0-11.0.3-1 \
+	cuda-cudart-devel-11-0-11.0.221-1 \
+	cuda-nvprof-11-0-11.0.221-1 \
+	cuda-nvml-devel-11-0-11.0.167-1 \
+	libcublas-devel-11-0-11.2.0.252-1 \
+	libnpp-devel-11-0-11.1.0.245-1 \
+	libnccl-devel-2.9.6-1+cuda11.0 \
+	libcusparse-dev-11-0=11.1.1.245-1 \
+        libcudnn8=$CUDNN_VERSION-1+cuda11.0 \
+        libcudnn8-dev=$CUDNN_VERSION-1+cuda11.0 
+
+# Install miniconda 3.7
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Linux-x86_64.sh -O miniconda.sh && \
+    mkdir -p /opt && \
+    sh miniconda.sh -b -p /opt/conda && \
+    rm miniconda.sh && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate base" >> ~/.bashrc && \
+    find /opt/conda/ -follow -type f -name '*.a' -delete && \
+    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
+    /opt/conda/bin/conda clean -afy
+
+# Install OpenBlas
+WORKDIR /tmp
+RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
+    cd OpenBLAS && \
+    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
+    make install
+
+# Install Open UCX
+WORKDIR /tmp
+RUN wget https://github.com/openucx/ucx/archive/v1.9.0.tar.gz && \
+    tar xvf v1.9.0.tar.gz && \
+    cd ucx-1.9.0 && \
+    bash ./autogen.sh && \
+    mkdir build && \
+    cd build && \
+    ../configure --prefix=/usr/local/ucx && \
+    make -j$(nproc) && \
+    make install 
+
+# Install Open MPI
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.0.tar.gz && \
+    tar zxf openmpi-4.1.0.tar.gz && \
+    cd openmpi-4.1.0 && \
+    ./configure --enable-orterun-prefix-by-default --with-cuda --with-ucx=/usr/local/ucx --enable-mca-no-build=btl-uct && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    rm -rf /tmp/openmpi*
+
+# Allow OpenSSH to talk to containers without asking for confirmation
+RUN mkdir -p /var/run/sshd && \
+    cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
+    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
+    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
+
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
+
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+
+# Install git-lfs
+WORKDIR /tmp
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.1/git-lfs-linux-amd64-v2.13.1.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.13.1.tar.gz && \
+    bash install.sh && \
+    rm -rf /tmp/*
+
+# Install VSCode
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.8.0/code-server-3.8.0-linux-amd64.tar.gz \
+  | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-3.8.0-linux-amd64 /usr/local/lib/code-server-3.8.0 && \
+    ln -s /usr/local/lib/code-server-3.8.0/bin/code-server /usr/local/bin/code-server
+
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
+    	    git+https://github.com/lanpa/tensorboardX \
+	    tornado==6.0.4 \
+	    pystan==2.19.1.1 \
+	    pycairo==1.19.0 \
+	    jupyter==1.0.0 \
+	    python-language-server[all] 
+
+# Copy Backend.Ai multi-node support
+COPY ./runner-scripts/bootstrap.sh /opt/container/
+COPY ./service-defs /etc/backend.ai/service-defs
+
+# Install ipython kernelspec
+Run /opt/conda/bin/python3 -m ipykernel install --display-name "Conda 3.8 on Python 3.8 & CUDA 11.0)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
+
+WORKDIR /home/work
+# vim: ft=dockerfile
