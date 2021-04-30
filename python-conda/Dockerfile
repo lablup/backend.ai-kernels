@@ -1,4 +1,4 @@
-FROM centos:8
+FROM centos:7
 LABEL maintainer "Mario Cho <m.cho@lablup.com>"
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -10,105 +10,129 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/opt/conda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin" \
     LANG=C.UTF-8
 
-ENV CUDA_VER 11.0
-ENV CUDA_VERSION 11.0.3
-ENV CUDA_PKG_VERSION 11-0=$CUDA_VERSION-1
-ENV NCCL_VERSION 2.9.6
-ENV CUDNN_VERSION 8.0.5.39
-ENV TH_VERSION 1.7.1
+ENV CUDA_VER 10.1
+ENV CUDA_VERSION 10.1.243
+ENV CUDA_PKG_VERSION 10-1-$CUDA_VERSION-1
+ENV NCCL_VERSION 2.8.4
+ENV CUDNN_VERSION 7.6.5.32
 LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
 
 # nvidia-container-runtime
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-ENV NVIDIA_REQUIRE_CUDA "cuda>=11.0 brand=tesla,driver>=418,driver<419 brand=tesla,driver>=440,driver<441 driver>=450"
+ENV NVIDIA_REQUIRE_CUDA "cuda>=10.1 brand=tesla,driver>=396,driver<397 brand=tesla,driver>=410,driver<411 brand=tesla,driver>=418,driver<419"
 ENV CUDA_HOME /usr/local/cuda
 
 RUN yum update -y && \
+    yum install -y epel-release && \
+#    yum install -y https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm && \
     yum install -y \
-	fonts-nanum \
-	fonts-nanum-coding \
-	fonts-nanum-extra \
-	libasound-dev \
-	libcairo2-dev \
-	libgif-dev \
-	libjpeg-dev  \
-	liblapack-dev \
-	libnuma-dev \
-	libopenblas-dev \
-	libpmi2-0-dev \
+        atlas-devel \
+	numactl-devel  \
+	alsa-lib \
+	cairo \
+	cairo-devel \
+	gcc-c++ \
+	giflib-devel \
+	lapack-devel \
+	libjpeg-turbo-devel  \
+	libtool \
+	make \
 	nano \
 	numactl \
+	numactl-libs \
+	openblas-devel \
+	openssh-server \
+	pmix-devel \
 	vim \
-  	openssh-client openssh-server \
-        apt-utils \
+  	openssh-clients \
         autoconf \
         automake \
         bc \
-        build-essential \
         ca-certificates \
         cmake \
         curl \
-	debhelper dh-virtualenv \
         ffmpeg \
         flac \
         gawk \
-        gfortran \
+        gcc-gfortran \
         git \
-        libatlas-base-dev \
-        libatlas3-base libtool \
-        libsndfile1-dev \
-        libssl-dev \
-        libtool \
-        python2.7 \
+        libsndfile-devel \
+        openssl-devel \
         python3 \
         sox \
         subversion \
         unzip \
         wget \
         zip \
-        zlib1g-dev 
+        zlib && \
+    curl -sL https://rpm.nodesource.com/setup_14.x | bash - && \
+    yum install -y nodejs
 
 RUN NVIDIA_GPGKEY_SUM=d1be581509378368edeec8c1eb2958702feedf3bc3d17011adbf24efacce4ab5 && \
-    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/7fa2af80.pub | sed '/^Version/d' > /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA && \
-    echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict -
+    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/7fa2af80.pub | sed '/^Version/d' > /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA && \
+    echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict  -
 
 COPY cuda.repo /etc/yum.repos.d/cuda.repo
 COPY nvidia-ml.repo /etc/yum.repos.d/nvidia-ml.repo
-COPY NGC-DL-CONTAINER-LICENSE /
+#COPY NGC-DL-CONTAINER-LICENSE /
 
 RUN yum upgrade -y && yum install -y \
-        cuda-cudart-11-0-11.0.221-1 \
-        cuda-compat-11-0 \
-	&& \
-    ln -s cuda-11.0 /usr/local/cuda && \
+    cuda-cudart-$CUDA_PKG_VERSION \
+    cuda-compat-10-1 && \
+    ln -s cuda-10.1 /usr/local/cuda && \
     echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
     echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
-RUN yum install -y \
-        cuda-libraries-11-0-11.0.3-1 \
-        cuda-nvtx-11-0-11.0.167-1 \
-        libnpp-11-0-11.1.0.245-1 \
-        libcublas-11-0-11.2.0.252-1 \
-        libnccl-2.9.6-1+cuda11.0 \
-        libnccl2=$NCCL_VERSION-1+cuda11.0 
 
-RUN yum install -y \ 
-        make \
-	cuda-command-line-tools-11-0-11.0.3-1 \
-	cuda-libraries-devel-11-0-11.0.3-1 \
-	cuda-minimal-build-11-0-11.0.3-1 \
-	cuda-cudart-devel-11-0-11.0.221-1 \
-	cuda-nvprof-11-0-11.0.221-1 \
-	cuda-nvml-devel-11-0-11.0.167-1 \
-	libcublas-devel-11-0-11.2.0.252-1 \
-	libnpp-devel-11-0-11.1.0.245-1 \
-	libnccl-devel-2.9.6-1+cuda11.0 \
-	libcusparse-dev-11-0=11.1.1.245-1 \
-        libcudnn8=$CUDNN_VERSION-1+cuda11.0 \
-        libcudnn8-dev=$CUDNN_VERSION-1+cuda11.0 
+# setopt flag prevents yum from auto upgrading. See https://gitlab.com/nvidia/container-images/cuda/-/issues/88
+RUN yum install --setopt=obsoletes=0 -y \
+    cuda-libraries-$CUDA_PKG_VERSION \
+    cuda-nvtx-$CUDA_PKG_VERSION \
+    cuda-npp-$CUDA_PKG_VERSION \
+    libcublas10-10.2.1.243-1 \
+    && yum clean all \
+    && rm -rf /var/cache/yum/*
 
-# Install miniconda 3.7
+RUN yum install -y yum-plugin-versionlock && yum versionlock libcublas10
+
+# setopt flag prevents yum from auto upgrading. See https://gitlab.com/nvidia/container-images/cuda/-/issues/88
+RUN yum install --setopt=obsoletes=0 -y \
+    make \
+    cuda-nvml-dev-$CUDA_PKG_VERSION \
+    cuda-command-line-tools-$CUDA_PKG_VERSION \
+    libcublas-devel-10.2.1.243-1 \
+    cuda-cudart-dev-$CUDA_PKG_VERSION \
+    cuda-libraries-dev-$CUDA_PKG_VERSION \
+    cuda-minimal-build-$CUDA_PKG_VERSION \
+    cuda-nvprof-$CUDA_PKG_VERSION \
+    cuda-npp-dev-$CUDA_PKG_VERSION \
+    && yum clean all \
+    && rm -rf /var/cache/yum/*
+
+RUN yum install -y yum-plugin-versionlock && yum versionlock libcublas10
+
+RUN yum install -y xz && NCCL_DOWNLOAD_SUM=bcff1cf98e4b24d7ca189577a9d909980d8df88075223d70dc4638e428c53f84 && \
+    curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.8/nccl_2.8.4-1+cuda10.1_x86_64.txz -O && \
+    echo "$NCCL_DOWNLOAD_SUM  nccl_2.8.4-1+cuda10.1_x86_64.txz" | sha256sum -c - && \
+    unxz nccl_2.8.4-1+cuda10.1_x86_64.txz && \
+    tar --no-same-owner --keep-old-files -xvf  nccl_2.8.4-1+cuda10.1_x86_64.tar -C /usr/local/cuda/include/ --strip-components=2 --wildcards '*/include/*' && \
+    tar --no-same-owner --keep-old-files -xvf  nccl_2.8.4-1+cuda10.1_x86_64.tar -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so' && \
+    rm -f nccl_2.8.4-1+cuda10.1_x86_64.tar && \
+    ldconfig
+
+
+# cuDNN license: https://developer.nvidia.com/cudnn/license_agreement
+RUN CUDNN_DOWNLOAD_SUM=7eaec8039a2c30ab0bc758d303588767693def6bf49b22485a2c00bf2e136cb3 && \
+    curl -fsSL http://developer.download.nvidia.com/compute/redist/cudnn/v7.6.5/cudnn-10.1-linux-x64-v7.6.5.32.tgz -O && \
+    echo "$CUDNN_DOWNLOAD_SUM  cudnn-10.1-linux-x64-v7.6.5.32.tgz" | sha256sum -c - && \
+    gunzip cudnn-10.1-linux-x64-v7.6.5.32.tgz && \
+    tar --no-same-owner -xf cudnn-10.1-linux-x64-v7.6.5.32.tar -C /usr/local --wildcards 'cuda/lib64/libcudnn.so.*' && \
+    rm cudnn-10.1-linux-x64-v7.6.5.32.tar && \
+    ldconfig
+
+
+# Install miniconda 3.8
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Linux-x86_64.sh -O miniconda.sh && \
     mkdir -p /opt && \
     sh miniconda.sh -b -p /opt/conda && \
@@ -179,20 +203,46 @@ RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.8.0/code-se
     mv /usr/local/lib/code-server-3.8.0-linux-amd64 /usr/local/lib/code-server-3.8.0 && \
     ln -s /usr/local/lib/code-server-3.8.0/bin/code-server /usr/local/bin/code-server
 
+RUN /opt/conda/bin/conda install \
+	    pytorch \
+	    torchvision \
+	    torchaudio \
+	    cudatoolkit=10.1 \
+	    -c pytorch \
+	    -c conda-forge
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
-    	    git+https://github.com/lanpa/tensorboardX \
-	    tornado==6.0.4 \
-	    pystan==2.19.1.1 \
-	    pycairo==1.19.0 \
+    	    Cython==0.29.22 \
+	    tornado==6.1 \
+	    pystan==3.0.1 \
+	    pycairo==1.20.0 \
+	    numpy==1.20.2 \
+	    tensorflow==2.3.2 \
+	    tensorboard==2.3.0 \
+	    scipy==1.6.3 \
+	    scikit-learn==0.24.2 \
 	    jupyter==1.0.0 \
-	    python-language-server[all] 
+	    typeguard==2.11.1 \
+	    python-language-server[all] \	    
+	    matplotlib==3.4.1
+	    
+WORKDIR /tmp
+COPY ./requirements.txt /tmp
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir --ignore-installed -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
+
+# Install Jupyterlab extensions
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter serverextension enable --py jupyter_lsp && \
+    jupyter nbextension enable execute_time/ExecuteTime && \
+    jupyter nbextension enable toc2/main
 
 # Copy Backend.Ai multi-node support
 COPY ./runner-scripts/bootstrap.sh /opt/container/
 COPY ./service-defs /etc/backend.ai/service-defs
-
 # Install ipython kernelspec
-Run /opt/conda/bin/python3 -m ipykernel install --display-name "Conda 3.8 on Python 3.8 & CUDA 11.0)" && \
+Run /opt/conda/bin/python3 -m ipykernel install --display-name "Conda python 3.8 on CUDA 10.1 & CentOS 7" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
@@ -206,7 +256,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
-      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,vscode:http:8180,tensorboard:http:6006"
 
 WORKDIR /home/work
 # vim: ft=dockerfile
