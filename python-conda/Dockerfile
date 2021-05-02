@@ -215,12 +215,11 @@ RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
 	    tornado==6.1 \
 	    pystan==3.0.1 \
 	    pycairo==1.20.0 \
-	    numpy==1.20.2 \
+	    numpy==1.19.2 \
 	    tensorflow==2.3.2 \
 	    tensorboard==2.3.0 \
-	    scipy==1.6.3 \
+	    scipy==1.5.3 \
 	    scikit-learn==0.24.2 \
-	    jupyter==1.0.0 \
 	    typeguard==2.11.1 \
 	    python-language-server[all] \	    
 	    matplotlib==3.4.1
@@ -234,9 +233,29 @@ RUN /opt/conda/bin/python3 -m pip install --no-cache-dir --ignore-installed -r r
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
+    jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main
+RUN jupyter labextension install \
+        @hokyjack/jupyterlab-monokai-plus \
+        @ryantam626/jupyterlab_code_formatter \
+        @jupyterlab/toc \
+        @axlair/jupyterlab_vim \
+	@pyviz/jupyterlab_pyviz && \
+        @bokeh/jupyter_bokeh && \
+    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+#    jupyter serverextension enable --py jupyterlab_code_formatter && \
+    jupyter lab build --dev-build=False --minimize=False
+WORKDIR /tmp
+RUN wget https://linux.kite.com/dls/linux/current && \
+    chmod 777 current && \
+    sed -i 's/"--no-launch"//g' current > /dev/null && \
+    ./current --install ./kite-installer
+
 
 # Copy Backend.Ai multi-node support
 COPY ./runner-scripts/bootstrap.sh /opt/container/
@@ -249,7 +268,7 @@ Run /opt/conda/bin/python3 -m ipykernel install --display-name "Conda python 3.8
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
-      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.base-distro="centos7.6" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
       ai.backend.resource.min.cuda.device=0 \
