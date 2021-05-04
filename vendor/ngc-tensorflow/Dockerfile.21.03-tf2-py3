@@ -198,6 +198,7 @@ RUN python3 -m pip install --no-cache-dir \
 # Configure OpenMPI to run good defaults:
 RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
+# Install Jupyterlab extensions
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
@@ -208,10 +209,8 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-    jupyter labextension install @pyviz/jupyterlab_pyviz && \
-    jupyter labextension install @bokeh/jupyter_bokeh && \
-    jupyter labextension install --no-build jupyterlab-nvdashboard && \
-    jupyter lab build
+    jupyter labextension install @jupyterlab/toc && \
+    jupyter lab build    
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
