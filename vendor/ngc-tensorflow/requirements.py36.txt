@@ -414,7 +414,7 @@ tomlkit==0.7.0
 toolz==0.10.0
 tornado==6.1
 tqdm==4.59.0
-traitlets==5.0.5
+traitlets==4.3.3
 tweepy==3.10.0
 typed-ast==1.4.3
 typeguard==2.11.1
