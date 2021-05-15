@@ -218,7 +218,7 @@ Keras-Preprocessing
 kiwisolver
 konlpy
 kss
-kubernetes=
+kubernetes
 lazy-object-proxy
 lesscpy
 librosa
@@ -264,7 +264,6 @@ notebook
 numba
 numexpr
 numpy
-nvtx-plugins
 oauth2client
 oauthenticator
 oauthlib
@@ -317,7 +316,7 @@ pyflakes==2.1.1
 pygal==2.4.0
 pyglet==1.5.0
 Pygments==2.5.2
-PyGObject==3.36.0
+#PyGObject==3.36.0
 pyLDAvis==2.1.2
 pylint==2.4.4
 pyls-black==0.4.4
