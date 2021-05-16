@@ -25,7 +25,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     NODE_OPTIONS="--max-old-space-size=4096" \
     LANG=C.UTF-8
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
+    python3 -m pip install -U setuptools pip
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
@@ -174,19 +175,11 @@ WORKDIR /tmp
 RUN python3 -m pip install --no-cache-dir \
         Cython==0.29.21 \
 	numpy==1.19.5 \
+	jupyterlab==2.3.1 \
         argon2_cffi==20.1.0
 COPY ./requirements.py36.txt /tmp
 RUN python3 -m pip install --no-cache-dir -r requirements.py36.txt && \
     rm -f /tmp/*.whl /tmp/requirements.py36.txt
-ENV SCIPY_VERSION 1.5.4
-# Install scipy
-RUN cd /tmp && \
-    git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
-    cd scipy && \
-    git checkout -b v${SCIPY_VERSION} && \  
-    cp site.cfg.example site.cfg && \
-    pip uninstall -y typing && \
-    python3 -m pip install .
 
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
@@ -222,14 +215,14 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build && \
-    jupyter labextension install jupyterlab-jupytext@1.2.2 --no-build && \
+    jupyter labextension install jupyterlab-jupytext --no-build && \
     jupyter labextension install @jupyterlab/toc --no-build && \
     jupyter labextension install @kiteco/jupyterlab-kite --no-build && \
-    jupyter labextension install jupyterlab-flake8 --no-build && \
-    jupyter labextension install @pyviz/jupyterlab_pyviz --no-build && \
+#    jupyter labextension install jupyterlab-flake8 --no-build && \
+#    jupyter labextension install @pyviz/jupyterlab_pyviz --no-build && \
     jupyter labextension install @bokeh/jupyter_bokeh --no-build && \
-    jupyter labextension install jupyterlab-nvdashboard --no-build && \
-    jupyter lab build
+#    jupyter labextension install jupyterlab-nvdashboard --no-build && \
+    jupyter lab build --dev-build=False --minimize=False
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
