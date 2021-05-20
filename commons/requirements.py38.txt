@@ -67,7 +67,7 @@ dash-renderer
 dash-table
 dask
 databricks-cli
-dbus-python
+#dbus-python
 deap
 decorator
 deepdish
@@ -97,7 +97,7 @@ evdev
 fastavro
 fasteners
 fastrlock
-fbprophet
+#fbprophet
 featuretools
 filelock
 Fiona
@@ -177,6 +177,7 @@ json5
 jsonpickle
 jsonschema
 jupyter
+jupyter_bokeh==2.0.4
 jupyter-client
 jupyter-console
 jupyter-contrib-core
@@ -194,7 +195,7 @@ jupyter-server==1.6.4
 jupyter-server-mathjax==0.2.2
 jupyter-server-proxy==1.6.0
 jupyter-telemetry==0.1.0
-jupyter-tensorboard==0.2.0
+#jupyter-tensorboard==0.2.0
 jupyterhub==1.4.0
 jupyterhub-jwtauthenticator==0.1
 jupyterhub-kubespawner==0.16.1
