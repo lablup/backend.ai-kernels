@@ -1,13 +1,13 @@
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
-ARG CUDA=10.1
-ARG LIBNVINFER=6.0.1-1
-ARG LIBNVINFER_MAJOR_VERSION=6
-ARG CUDNN=7.6.5.32-1
-ENV NCCL=2.6.4
-ENV NCCL_VERSION=2.6.4-1+cuda10.1
-ENV CUDNN_VERSION 7.6.5.32
+ARG CUDA=10.2
+ARG LIBNVINFER=7.2.3-1
+ARG LIBNVINFER_MAJOR_VERSION=7
+ARG CUDNN=8.0.5.32-1
+ENV NCCL=2.9.8
+ENV NCCL_VERSION=2.9.8-1+cuda10.2
+ENV CUDNN_VERSION 8.0.5.32
 ENV MLNX_OFED_VERSION=5.1-2.3.7.1
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
@@ -33,6 +33,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
+WORKDIR /tmp
 RUN rm -fr /var/lib/apt/lists/* && \
     apt-get update -y && \
     apt-get install -y --no-install-recommends software-properties-common wget && \
@@ -41,8 +42,14 @@ RUN rm -fr /var/lib/apt/lists/* && \
     add-apt-repository -y ppa:bashtop-monitor/bashtop && \
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin && \
+    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin && \
+    mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub && \
+    add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /" && \
     apt-get update -y && \
     apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
 	bashtop \
@@ -78,6 +85,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	make \
 	mime-support \
 	net-tools \
+	ncurses-term \
 	openssh-server \
 	pdsh \
 	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
@@ -107,6 +115,8 @@ RUN rm -fr /var/lib/apt/lists/* && \
         pkg-config \
         python${PYTHON_VERSION} \
         python${PYTHON_VERSION}-dev \
+	libnccl2=${NCCL_VERSION} \
+	libnccl-dev=${NCCL_VERSION} \
         vim \
         wget \
         zlib1g-dev && \
@@ -114,35 +124,27 @@ RUN rm -fr /var/lib/apt/lists/* && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
-    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
-
-WORKDIR /tmp
-RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.6/nccl_2.6.4-1+cuda10.1_x86_64.txz -O && \
-    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda10.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
-    tar --no-same-owner --keep-old-files --lzma -xvf  nccl_${NCCL}-1+cuda10.1_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
-    rm nccl_${NCCL}-1+cuda10.1_x86_64.txz && \
-    ldconfig 
-
-RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
+    ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
-    ldconfig
 
-# Install CUDA-10.1 + cuDNN 7.6.5
-RUN ln -s /usr/local/cuda-10.1 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.5 /usr/local/cuda/lib64/libcudnn.so && \
+# Install CUDA-10.2 + cuDNN 8.0.5
+    ln -s /usr/local/cuda-10.2 /usr/local/cuda && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.0.5 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get update -y && \
-    apt-get install -y nodejs
-
-RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
+	nodejs 
+
+WORKDIR /tmp
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
-	libnvinfer-plugin7 \
         libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
-        && \
+        libnvinfer-plugin${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -158,7 +160,7 @@ RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/M
     cd /tmp && \
     rm -rf /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64*
     
-# nvidia-peer
+# Nvidia-peer
 WORKDIR /tmp
 RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory && \
     cd /tmp/nv_peer_memory && \
@@ -318,7 +320,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D BUILD_opencv_java=OFF \
       -D WITH_CUDA=ON \
       -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.1 \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.2 \
       -D ENABLE_FAST_MATH=1 \
       -D CUDA_FAST_MATH=1 \
       -D WITH_CUBLAS=1 \
@@ -355,7 +357,7 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     git clone --recursive --branch stable --depth 1 https://github.com/microsoft/LightGBM && \
     cd LightGBM && mkdir build && cd build && \
     cmake -DUSE_GPU=1 -DOpenCL_LIBRARY=/usr/local/cuda/lib64/libOpenCL.so -DOpenCL_INCLUDE_DIR=/usr/local/cuda/include/ .. && \
-    make OPENCL_HEADERS=/usr/local/cuda-10.1/targets/x86_64-linux/include LIBOPENCL=/usr/local/cuda-10.1/targets/x86_64-linux/lib -j$(nproc) && \
+    make OPENCL_HEADERS=/usr/local/cuda-10.2/targets/x86_64-linux/include LIBOPENCL=/usr/local/cuda-10.2/targets/x86_64-linux/lib -j$(nproc) && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
 
@@ -424,14 +426,12 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-    jupyter labextension install @pyviz/jupyterlab_pyviz && \
-    jupyter labextension install @bokeh/jupyter_bokeh && \
-    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+    jupyter labextension install @jupyterlab/toc && \
+#    jupyter labextension install @bokeh/jupyter_bokeh && \
     jupyter lab build
 
 # Clean up
 RUN apt autoclean && \
-    ln -s /usr/local/cuda-10.1/targets/x86_64-linux/lib/libcusolver.so.11 /usr/local/cuda-10.1/targets/x86_64-linux/lib/libcusolver.so.10 && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     rm -rf /var/lib/apt/lists/* && \	
