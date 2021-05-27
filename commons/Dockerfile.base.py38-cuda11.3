@@ -2,7 +2,7 @@ FROM nvidia/cuda:11.3.0-cudnn8-devel-ubuntu20.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
 ARG CUDA=11.3
-ARG LIBNVINFER=8.0.0.3-1
+ARG LIBNVINFER=8.0.0-1
 ARG LIBNVINFER_MAJOR_VERSION=8
 ARG CUDNN=8.0.5.39-1
 ENV NCCL=2.9.9
@@ -137,13 +137,15 @@ RUN rm -fr /var/lib/apt/lists/* && \
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs
-
+  
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
 	libnvinfer-plugin8 \
         libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
+	python3-libnvinfer=${LIBNVINFER}+cuda${CUDA} \
+	python3-libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
