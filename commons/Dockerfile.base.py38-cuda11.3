@@ -1,12 +1,12 @@
-FROM nvidia/cuda:11.3.0-cudnn8-devel-ubuntu18.04
+FROM nvidia/cuda:11.3.0-cudnn8-devel-ubuntu20.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
 ARG CUDA=11.3
-ARG LIBNVINFER=7.2.3-1
-ARG LIBNVINFER_MAJOR_VERSION=7
+ARG LIBNVINFER=8.0.3-1
+ARG LIBNVINFER_MAJOR_VERSION=8
 ARG CUDNN=8.0.5.39-1
-ENV NCCL=2.8.4
-ENV NCCL_VERSION=2.8.4-1+cuda11.3
+ENV NCCL=2.9.9
+ENV NCCL_VERSION=2.9.9-1+cuda11.3
 ENV CUDNN_VERSION 8.0.5.43
 ENV MLNX_OFED_VERSION=5.1-2.3.7.1
 ENV MKL_VERSION=2021.2
@@ -33,6 +33,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
+WORKDIR /tmp
 RUN rm -fr /var/lib/apt/lists/* && \
     apt-get update -y && \
     apt-get install -y --no-install-recommends software-properties-common wget && \
@@ -43,6 +44,10 @@ RUN rm -fr /var/lib/apt/lists/* && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
+    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub && \
+    add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" && \
     apt-get update -y && \
     apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
 	bashtop \
@@ -55,7 +60,11 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	g++ \
 	gfortran \
 	htop \
-	intel-mkl intel-ipp intel-tbb intel-daal intel-mpi \
+	intel-mkl-2020.4-912 \
+	intel-ipp-2020.3-912 \
+	intel-tbb-2020.3-912 \
+	intel-daal-2020.3-912 \
+	intel-mpi-2019.9-912 \
 	iputils-ping \
 	libasound2-dev \
 	libavcodec-dev \
@@ -75,6 +84,8 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libxml2-dev \
 	libxrender-dev \
 	libxslt1-dev \
+	libnccl2=2.9.9-1+cuda11.3 \
+	libnccl-dev=2.9.9-1+cuda11.3 \
 	make \
 	mime-support \
 	net-tools \
@@ -114,21 +125,12 @@ RUN rm -fr /var/lib/apt/lists/* && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
-    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
-
-WORKDIR /tmp
-RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.8/nccl_2.8.4-1+cuda11.3_x86_64.txz -O && \
-    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.3_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
-    tar --no-same-owner --keep-old-files --lzma -xvf  nccl_${NCCL}-1+cuda11.3_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
-    rm nccl_${NCCL}-1+cuda11.3_x86_64.txz && \
-    ldconfig 
-
-RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
+    ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
-    ldconfig
 
 # Install CUDA-11.3 + cuDNN 8.0.5
-RUN ln -s /usr/local/cuda-11.3 /usr/local/cuda && \
+    ln -s /usr/local/cuda-11.3 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.0.5 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
@@ -140,7 +142,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
-	libnvinfer-plugin7 \
+	libnvinfer-plugin8 \
         libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
         && \
     apt-get clean && \
