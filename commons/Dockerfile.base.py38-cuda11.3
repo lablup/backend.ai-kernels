@@ -156,11 +156,11 @@ RUN mkdir -p /etc/OpenCL/vendors && \
 
 # OFED
 WORKDIR /tmp
-RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64.tgz | tar xzf - && \
-    cd /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64 && \
+RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu20.04-x86_64.tgz | tar xzf - && \
+    cd /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu20.04-x86_64 && \
     ./mlnxofedinstall --user-space-only --without-fw-update --all -q && \
     cd /tmp && \
-    rm -rf /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64*
+    rm -rf /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu20.04-x86_64*
     
 # nvidia-peer
 WORKDIR /tmp
