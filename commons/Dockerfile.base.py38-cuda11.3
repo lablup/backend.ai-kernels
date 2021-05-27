@@ -209,7 +209,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 
 WORKDIR /tmp
 # OpenBlas
-RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=904f9a267 git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
