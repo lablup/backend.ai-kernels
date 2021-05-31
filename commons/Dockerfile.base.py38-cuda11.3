@@ -209,7 +209,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 
 WORKDIR /tmp
 # OpenBlas
-RUN git clone -q --branch=904f9a267 git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=v0.3.15 git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
@@ -426,7 +426,7 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-    jupyter labextension install @pyviz/jupyterlab_pyviz && \
+#    jupyter labextension install @pyviz/jupyterlab_pyviz && \
     jupyter labextension install @bokeh/jupyter_bokeh && \
     jupyter labextension install --no-build jupyterlab-nvdashboard && \
     jupyter lab build
