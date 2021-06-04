@@ -266,7 +266,7 @@ RUN set -xe && \
 # OpenCV
 
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.1"
+ENV OPENCV_VERSION="4.5.2"
 RUN wget https://github.com/opencv/opencv/archive/refs/tags/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -289,9 +289,11 @@ RUN wget https://github.com/opencv/opencv/archive/refs/tags/${OPENCV_VERSION}.zi
       -D WITH_TBB=ON \
       -D WITH_EIGEN=ON \
       -D WITH_V4L=ON \
+      -D WITH_FFMPEG=ON \
+      -D WITH_GSTREAMER=ON \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.1/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.2/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
