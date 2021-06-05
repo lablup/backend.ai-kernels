@@ -101,8 +101,8 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libportmidi-dev \
 	libpq-dev \
 	libproj-dev \
-	libprotoc \
-	libprotobuf \
+#	libprotoc \
+#	libprotobuf \
 	libprotobuf-dev \
 	libsdl-dev \
 	libsdl-image1.2-dev \
@@ -167,7 +167,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	yasm \
   	openssh-client openssh-server \
         build-essential \
-        gcc g++ make \
+        gcc-6 g++-6 make \
         git subversion \
         zlib1g-dev \
 	&& \
@@ -456,7 +456,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D BUILD_opencv_java=OFF \
       -D BUILD_opencv_ml=ON \
       -D BUILD_opencv_objdetect=ON \
-      -D BUILD_opencv_photo=ON \
+#      -D BUILD_opencv_photo=ON \
       -D BUILD_opencv_python2=OFF \
       -D BUILD_opencv_python3=ON \
       -D BUILD_opencv_stitching=ON \
@@ -514,6 +514,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_IPP_A=OFF \
       -D WITH_JASPER=ON \
       -D WITH_JPEG=ON \
+      -D WITH_LAPACK=OFF \
       -D WITH_LIBV4L=ON \
       -D WITH_NVCUVID=ON \
       -D WITH_OPENCL=ON \
@@ -525,6 +526,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_OPENMP=OFF \
       -D WITH_OPENNI=OFF \
       -D WITH_PNG=ON \
+      -D WITH_PROTOBUF=ON \
       -D WITH_PTHREADS_PF=OFF \
       -D WITH_PVAPI=ON \
       -D WITH_QT=OFF \
@@ -538,11 +540,12 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_XIMEA=OFF \
       -D WITH_XINE=OFF \
       -D WITH_ZLIB=ON \
-#      -G Ninja \
-#      -D CMAKE_INSTALL_PREFIX=/usr/local \
-      .. 2>&1 | tee cmake_messages.txt && \
-    make -j$(nproc) && \
-    make install 
+      -G Ninja \
+      -D CMAKE_INSTALL_PREFIX=/usr/local \
+      .. 2>&1 | tee cmake_messages.txt 
+RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
+#make -j$(nproc) && \
+#    make install 
 
 
 WORKDIR /usr/local
