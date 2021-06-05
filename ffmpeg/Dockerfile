@@ -101,6 +101,8 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libportmidi-dev \
 	libpq-dev \
 	libproj-dev \
+	libprotoc \
+	libprotobuf \
 	libprotobuf-dev \
 	libsdl-dev \
 	libsdl-image1.2-dev \
@@ -146,18 +148,18 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	python${PYTHON_VERSION} \
 	python${PYTHON_VERSION}-dev \
 	python3-gdal \
-	python3-vtk7 \
+#	python3-vtk7 \
 	qt5-default \
 	qtbase5-dev \
 	rsync \
 	software-properties-common \
-	tcl-vtk7 \
+#	tcl-vtk7 \
 	tesseract-ocr \
 	tesseract-ocr-jpn \
 	texinfo \
 	v4l-utils \
 	vim \
-	vtk7 \
+#	vtk7 \
 	wget zip unzip \
 	x264 \
 	xvfb \
@@ -424,7 +426,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     unzip opencv-contrib.zip && \
     mkdir opencv-${OPENCV_VERSION}/cmake_binary 
 RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
-    CC=gcc-6 CXX=g++-6 cmake \
+    cmake \
       -D BUILD_DOCS=OFF \
       -D BUILD_NEW_PYTHON_SUPPORT=ON \
       -D BUILD_PERF_TESTS=OFF \
