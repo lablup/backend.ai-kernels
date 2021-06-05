@@ -13,6 +13,14 @@ ENV MKL_BUILD=279
 ENV NUMPY_VERSION 1.19.4
 ENV SCIPY_VERSION 1.5.4
 ENV OPENMPI 4.0.5
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES video,compute,utility
+
+ARG NASM_VER="2.15.05"
+ARG YASM_VER="1.3.0"
+ARG LAME_VER="3.100"
+ARG FFMPEG_VER="4.3.2"
+
 # Python 3.8 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
 ENV PYTHON_VERSION=${python}
@@ -101,8 +109,6 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libportmidi-dev \
 	libpq-dev \
 	libproj-dev \
-#	libprotoc \
-#	libprotobuf \
 	libprotobuf-dev \
 	libsdl-dev \
 	libsdl-image1.2-dev \
@@ -148,18 +154,15 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	python${PYTHON_VERSION} \
 	python${PYTHON_VERSION}-dev \
 	python3-gdal \
-#	python3-vtk7 \
 	qt5-default \
 	qtbase5-dev \
 	rsync \
 	software-properties-common \
-#	tcl-vtk7 \
 	tesseract-ocr \
 	tesseract-ocr-jpn \
 	texinfo \
 	v4l-utils \
 	vim \
-#	vtk7 \
 	wget zip unzip \
 	x264 \
 	xvfb \
@@ -259,138 +262,6 @@ RUN python3 -m pip install --no-cache-dir \
 	    tornado==6.1 \
 	    nvidia-pyindex==1.0.5 \
 	    matplotlib==3.3.3 
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES video,compute,utility
-
-ARG NASM_VER="2.15.05"
-ARG YASM_VER="1.3.0"
-ARG LAME_VER="3.100"
-ARG FFMPEG_VER="4.3.2"
-ARG python=3.8
-ENV PYTHON_VERSION=${python}
-
-ENV DEBIAN_FRONTEND=noninteractive \
-    MPLBACKEND=Svg \
-    PYTHONUNBUFFERED=1 \
-    LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
-    _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64" \
-    PATH="/usr/local/mpi/bin:/usr/local/ucx:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:" \
-    LANG=C.UTF-8
-
-# Set default shell to /bin/bash
-SHELL ["/bin/bash", "-cu"]
-
-
-RUN set -xe && \
-    apt-get update -y && \
-    apt-get install -y --no-install-recommends software-properties-common wget && \
-    add-apt-repository -y ppa:deadsnakes/ppa && \
-    apt-get update -y && \
-    apt-get install -y --no-install-recommends \
-	ca-certificates \
-	curl \
-	dkms \
-	fonts-nanum \
-	fonts-nanum-coding \
-	fonts-nanum-extra \
-	g++ \
-	gfortran \
-	htop \
-	iputils-ping \
-	libasound2-dev \
-	libavcodec-dev \
-	libboost-dev \
-	libboost-filesystem-dev \
-	libboost-system-dev \
-	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
-	libgdal-dev python3-gdal \
-	libnuma-dev \
-	libopenblas-dev liblapack-dev \
-	libsm6 \
-	libswscale-dev \
-	libv4l-dev \
-	libxext6 \
-	libxine2-dev \
-	libxml2-dev \
-	libxrender-dev \
-	libxslt1-dev \
-	make \
-	mime-support \
-	net-tools \
-	openssh-server \
-	pdsh \
-	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
-	subversion \
-	unzip \
-	xvfb \
-	xz-utils \
-	yasm \
-	zip \
-  	openssh-client \
-        build-essential \
-        gcc \
-        git \
-        libavformat-dev \
-        libcurl3-dev \
-        libfreetype6-dev \
-        libgeos-dev libgeos++-dev \
-        libhdf5-serial-dev \
-        libjpeg-dev \
-        libmpdec2 \
-        libpng-dev \
-        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
-        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev \
-        libssl-dev \
-        libtiff-dev \
-        libzmq3-dev \
-        pkg-config \
-        python${PYTHON_VERSION} \
-        python${PYTHON_VERSION}-dev \
-        vim \
-        wget \
-        zlib1g-dev \
-        wget build-essential automake autoconf git libtool libvorbis-dev \
-        libass-dev libfreetype6-dev libsdl2-dev libva-dev libvdpau-dev \
-        libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev \
-        mercurial libnuma-dev texinfo zlib1g-dev \
-        qtbase5-dev && \
-<<<<<<< HEAD
-    mkdir -p /usr/local/ffmpeg_sources
-=======
-    mkdir -p /usr/local/ffmpeg_sources && \
-    ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
-    mkdir -p /etc/OpenCL/vendors && \
-    echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icdn && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/
-
-WORKDIR /tmp
-RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.8/nccl_2.8.4-1+cuda11.1_x86_64.txz -O && \
-    tar --no-same-owner --keep-old-files --lzma -xvf nccl_2.8.4-1+cuda11.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
-    tar --no-same-owner --keep-old-files --lzma -xvf  nccl_2.8.4-1+cuda11.1_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
-    rm nccl_2.8.4-1+cuda11.1_x86_64.txz && \
-    ldconfig 
-
-RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
-    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
-    ldconfig
-
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-Linux-x86_64.sh \
-         -q -O /tmp/cmake-install.sh && \
-    chmod u+x /tmp/cmake-install.sh && \
-    mkdir /usr/bin/cmake && \
-    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
-    rm /tmp/cmake-install.sh
-
-RUN rm /usr/bin/python3 && \
-    ln -s /usr/bin/python3.8 /usr/bin/python3 && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
-
->>>>>>> 12c533965e707a0a9b16f3e1666046d3dc4ab880
 
 # Instaling NASM
 WORKDIR /usr/local/ffmpeg_sources
@@ -526,9 +397,7 @@ RUN set -xe && \
     make -j$(nproc) && \
     make install
 
-<<<<<<< HEAD
 RUN ln -s /usr/include/x86_64-linux-gnu/cudnn_v7.h /usr/local/cuda/include/cudnn.h 
-#    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7 /usr/local/cuda/lib 
 
 # OpenCV
 WORKDIR /tmp
@@ -569,7 +438,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D BUILD_opencv_java=OFF \
       -D BUILD_opencv_ml=ON \
       -D BUILD_opencv_objdetect=ON \
-#      -D BUILD_opencv_photo=ON \
+      -D BUILD_opencv_photo=ON \
       -D BUILD_opencv_python2=OFF \
       -D BUILD_opencv_python3=ON \
       -D BUILD_opencv_stitching=ON \
@@ -580,14 +449,13 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D BUILD_opencv_videostab=ON \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
-      -D CUDA_ARCH_BIN=7.5 \
+#      -D CUDA_ARCH_BIN=7.5 \
       -D CUDA_ARCH_PTX=7.5 \
       -D CUDA_BIN_PATH=/usr/local/cuda \
       -D CUDA_CUDA_LIBRARY=/usr/lib/x86_64-linux-gnu/stubs/libcuda.so \
       -D CUDA_FAST_MATH=ON \
       -D CUDA_HOST_COMPILER=/usr/bin/gcc-6 \
-      -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-#      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda \
+      -D CUDA_NVCC_FLAGS="-D_FORCE_INLINES --expt-relaxed-constexpr" \
       -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.1 \
       -D CUDNN_INCLUDE_DIR=/usr/local/cuda/include \
       -D CUDNN_LIBRARY=/usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.5 \
@@ -608,14 +476,12 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D PYTHON_LIBRARY=$(python3 -c "from distutils.sysconfig import get_config_var;from os.path import dirname,join ; print(join(dirname(get_config_var('LIBPC')),get_config_var('LDLIBRARY')))") \
       -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
       -D WITH_1394=OFF \
-#      -D WITH_1394=ON \
       -D WITH_CUBLAS=ON \
       -D WITH_CUDA=ON \
       -D WITH_CUDNN=ON \
       -D WITH_CUFFT=ON \
       -D WITH_EIGEN=ON \
       -D WITH_FFMPEG=ON \
-#      -D WITH_GDAL=OFF \
       -D WITH_GDAL=ON \
       -D WITH_GIGEAPI=ON \
       -D WITH_GPHOTO2=ON \
@@ -643,7 +509,6 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_PTHREADS_PF=OFF \
       -D WITH_PVAPI=ON \
       -D WITH_QT=OFF \
-#      -D WITH_QT=ON \
       -D WITH_TBB=ON \
       -D WITH_TIFF=ON \
       -D WITH_UNICAP=OFF \
@@ -653,59 +518,13 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_XIMEA=OFF \
       -D WITH_XINE=OFF \
       -D WITH_ZLIB=ON \
-      -G Ninja \
+#      -G Ninja \
       -D CMAKE_INSTALL_PREFIX=/usr/local \
       .. 2>&1 | tee cmake_messages.txt 
-RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
-#make -j$(nproc) && \
-#    make install 
+#RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
+RUN make -j$(nproc) && make install 
 
 
-WORKDIR /usr/local
-=======
-# OpenCV
-
-WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.2"
-RUN wget https://github.com/opencv/opencv/archive/refs/tags/${OPENCV_VERSION}.zip && \
-    wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
-    unzip ${OPENCV_VERSION}.zip && \
-    unzip opencv-contrib.zip && \
-    mkdir opencv-${OPENCV_VERSION}/cmake_binary && \
-    cd opencv-${OPENCV_VERSION}/cmake_binary && \
-    cmake \
-      -DCMAKE_BUILD_TYPE=RELEASE \
-      -D BUILD_TIFF=ON \
-      -D BUILD_opencv_java=OFF \
-      -D WITH_CUDA=ON \
-      -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.1 \
-      -D ENABLE_FAST_MATH=1 \
-      -D CUDA_FAST_MATH=1 \
-      -D WITH_CUBLAS=1 \
-      -D WITH_OPENGL=ON \
-      -D WITH_OPENCL=ON \
-      -D WITH_IPP=ON \
-      -D WITH_TBB=ON \
-      -D WITH_EIGEN=ON \
-      -D WITH_V4L=ON \
-      -D WITH_FFMPEG=ON \
-      -D WITH_GSTREAMER=ON \
-      -D BUILD_TESTS=OFF \
-      -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.2/modules" \
-      -D CMAKE_BUILD_TYPE=RELEASE \
-      -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
-      -D PYTHON_EXECUTABLE=$(which python3) \
-      -D PYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
-      -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
-      .. 2>&1 | tee cmake_messages.txt && \
-    make -j$(nproc) && \
-    make install 
-
-# clean up
-WORKDIR /
->>>>>>> 12c533965e707a0a9b16f3e1666046d3dc4ab880
 RUN set -xe && \
     apt update -y && \
     apt install sudo && \
