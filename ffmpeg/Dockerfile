@@ -402,6 +402,7 @@ RUN ln -s /usr/include/x86_64-linux-gnu/cudnn_v7.h /usr/local/cuda/include/cudnn
 # OpenCV
 WORKDIR /tmp
 ENV OPENCV_VERSION="4.5.2"
+COPY libnvcuvid.so.455.45.01 /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -494,7 +495,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_JASPER=ON \
       -D WITH_JPEG=ON \
       -D WITH_LAPACK=OFF \
-      -D WITH_LIBV4L=OFF \
+      -D WITH_LIBV4L=ON \
       -D WITH_NVCUVID=ON \
       -D WITH_OPENCL=ON \
       -D WITH_OPENCLAMDBLAS=OFF \
@@ -512,7 +513,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_TBB=ON \
       -D WITH_TIFF=ON \
       -D WITH_UNICAP=OFF \
-      -D WITH_V4L=OFF \
+      -D WITH_V4L=ON \
       -D WITH_VTK=ON \
       -D WITH_WEBP=ON \
       -D WITH_XIMEA=OFF \
@@ -523,7 +524,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       .. 2>&1 | tee cmake_messages.txt 
 RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
 #RUN make -j$(nproc) && make install 
-
+RUN rm /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1
 
 RUN set -xe && \
     apt update -y && \
