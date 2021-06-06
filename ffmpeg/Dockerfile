@@ -494,7 +494,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_JASPER=ON \
       -D WITH_JPEG=ON \
       -D WITH_LAPACK=OFF \
-      -D WITH_LIBV4L=ON \
+      -D WITH_LIBV4L=OFF \
       -D WITH_NVCUVID=ON \
       -D WITH_OPENCL=ON \
       -D WITH_OPENCLAMDBLAS=OFF \
@@ -512,17 +512,17 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_TBB=ON \
       -D WITH_TIFF=ON \
       -D WITH_UNICAP=OFF \
-      -D WITH_V4L=ON \
+      -D WITH_V4L=OFF \
       -D WITH_VTK=ON \
       -D WITH_WEBP=ON \
       -D WITH_XIMEA=OFF \
       -D WITH_XINE=OFF \
       -D WITH_ZLIB=ON \
-#      -G Ninja \
+      -G Ninja \
       -D CMAKE_INSTALL_PREFIX=/usr/local \
       .. 2>&1 | tee cmake_messages.txt 
-#RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
-RUN make -j$(nproc) && make install 
+RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
+#RUN make -j$(nproc) && make install 
 
 
 RUN set -xe && \
