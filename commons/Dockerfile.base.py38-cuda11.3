@@ -129,9 +129,9 @@ RUN rm -fr /var/lib/apt/lists/* && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
 
-# Install CUDA-11.3 + cuDNN 8.0.5
+# Install CUDA-11.3 + cuDNN 8.2.0
     ln -s /usr/local/cuda-11.3 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.0.5 /usr/local/cuda/lib64/libcudnn.so && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
@@ -278,7 +278,7 @@ RUN python3 -m pip install --no-cache-dir -r requirements.py38.txt && \
     rm -f /tmp/*.whl /tmp/requirements.py38.txt
 
 # OpenCV
-RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
+RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/videodev.h && \
    apt-get install -y \
 	libgstreamer1.0-dev \
 	libgstreamer-plugins-base1.0-dev \
@@ -315,37 +315,36 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     mkdir opencv-${OPENCV_VERSION}/cmake_binary && \
     cd opencv-${OPENCV_VERSION}/cmake_binary && \
     cmake \
-      -DCMAKE_BUILD_TYPE=RELEASE \
+      -D BUILD_PERF_TESTS=OFF \
+      -D BUILD_TESTS=OFF \
       -D BUILD_TIFF=ON \
       -D BUILD_opencv_java=OFF \
+      -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D CUDA_BIN_PATH=/usr/local/cuda \
       -D CUDA_CUDA_LIBRARY=/usr/lib/x86_64-linux-gnu/stubs/libcuda.so \
       -D CUDA_FAST_MATH=ON \
       -D CUDA_HOST_COMPILER=/usr/bin/gcc-6 \
       -D CUDA_NVCC_FLAGS="-D_FORCE_INLINES --expt-relaxed-constexpr" \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.1 \
-      -D CUDNN_INCLUDE_DIR=/usr/local/cuda/include \
-      -D CUDNN_LIBRARY=/usr/lib/x86_64-linux-gnu/libcudnn.so.8.0.5.39 \
-      -D ENABLE_AVX=ON \
-      -D WITH_CUDA=ON \
       -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
       -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.3 \
+      -D CUDNN_INCLUDE_DIR=/usr/local/cuda/include \
+      -D CUDNN_LIBRARY=/usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.0 \
+      -D ENABLE_AVX=ON \
       -D ENABLE_FAST_MATH=1 \
-      -D WITH_CUBLAS=1 \
-      -D WITH_OPENGL=ON \
-      -D WITH_OPENCL=ON \
-      -D WITH_IPP=ON \
-      -D WITH_TBB=ON \
-      -D WITH_EIGEN=ON \
-      -D WITH_V4L=ON \
-      -D BUILD_TESTS=OFF \
-      -D BUILD_PERF_TESTS=OFF \
       -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.2/modules" \
-      -D CMAKE_BUILD_TYPE=RELEASE \
-      -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
       -D PYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
       -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
+      -D WITH_CUBLAS=1 \
+      -D WITH_CUDA=ON \
+      -D WITH_EIGEN=ON \
+      -D WITH_IPP=ON \
+      -D WITH_OPENCL=ON \
+      -D WITH_OPENGL=ON \
+      -D WITH_TBB=ON \
+      -D WITH_V4L=ON \
       .. 2>&1 | tee cmake_messages.txt && \
     make -j$(nproc) && \
     make install 
