@@ -31,14 +31,14 @@ RUN python3 -m pip install --extra-index-url \
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
-    HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.21.3 && \
+    HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
+    pip install --no-cache-dir horovod==0.22.0 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	mpi4py==3.0.3 \
-        mlflow==1.15.0 \
-	nni==2.1 \
+        mlflow==1.17.0 \
+	nni==2.2 \
 	tensorboard-plugin-wit \
 	scikit-nni==0.2.1
 
