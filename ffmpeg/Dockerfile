@@ -32,7 +32,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
     _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64:/usr/local/lib" \
     PATH="/usr/local/mpi/bin:/usr/local/ucx:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM" \
     LANG=C.UTF-8
 
@@ -174,7 +174,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
         git subversion \
         zlib1g-dev \
 	&& \
-    ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
+    ln -s /usr/include/libv4l1-videodev.h /usr/include/videodev.h && \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
 
 WORKDIR /tmp
@@ -296,7 +296,7 @@ RUN set -xe && \
     git -C /usr/local/ffmpeg_sources/x264 pull 2> /dev/null || \
     git clone --depth 1 https://code.videolan.org/videolan/x264 && \
     cd /usr/local/ffmpeg_sources/x264 && \
-    ./configure --enable-static --enable-pic && \
+    ./configure --enable-shared --enable-pic && \
     make && \
     make install
 
@@ -306,7 +306,7 @@ RUN set -xe && \
     git clone https://github.com/videolan/x265 \
         /usr/local/ffmpeg_sources/x265 && \
     cd /usr/local/ffmpeg_sources/x265/build/linux && \
-    cmake -G "Unix Makefiles" -DENABLE_SHARED=off ../../source && \
+    cmake -G "Unix Makefiles" -DENABLE_SHARED=on ../../source && \
     make -j$(nproc) && \
     make install
 
@@ -376,18 +376,23 @@ RUN set -xe && \
         --pkg-config-flags="--static" \
 	--extra-libs="-lpthread -lm" \
 	--enable-gpl \
+	--enable-openssl \
+	--enable-libaom \
 	--enable-libass \
 	--enable-libnpp \
 	--enable-libfdk-aac \
 	--enable-libfreetype \
 	--enable-libmp3lame \
 	--enable-libopus \
+	--enable-libsvtav1 \
 	--enable-libvorbis \
-	--enable-libvpx \
+        --enable-libsnappy \
+        --enable-libvpx \
 	--enable-libx264 \
 	--enable-libx265 \
-	--enable-static \
+	--enable-shared \
 	--enable-cuda \
+	--enable-pic \
 	--enable-cuvid \
 	--enable-nvenc \
 	--enable-libnpp \
@@ -403,6 +408,7 @@ RUN ln -s /usr/include/x86_64-linux-gnu/cudnn_v7.h /usr/local/cuda/include/cudnn
 WORKDIR /tmp
 ENV OPENCV_VERSION="4.5.2"
 COPY libnvcuvid.so.455.45.01 /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1
+RUN ln -s /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 /usr/lib/libnvcuvid.so.1
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -448,6 +454,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D BUILD_opencv_video=ON \
       -D BUILD_opencv_videoio=ON \
       -D BUILD_opencv_videostab=ON \
+      -D BUILD_SHARED_LIBS=ON \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
 #      -D CUDA_ARCH_BIN=7.5 \
@@ -513,18 +520,18 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_TBB=ON \
       -D WITH_TIFF=ON \
       -D WITH_UNICAP=OFF \
-      -D WITH_V4L=ON \
-      -D WITH_VTK=ON \
+      -D WITH_V4L=OFF \
+      -D WITH_VTK=OFF \
       -D WITH_WEBP=ON \
       -D WITH_XIMEA=OFF \
       -D WITH_XINE=OFF \
       -D WITH_ZLIB=ON \
-#      -G Ninja \
+      -G Ninja \
       -D CMAKE_INSTALL_PREFIX=/usr/local \
       .. 2>&1 | tee cmake_messages.txt 
-#RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
-RUN cd /tmp/opencv-4.5.2/cmake_binary && make
-#-j$(nproc) && make install 
+RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
+#      cd /tmp/opencv-4.5.2/cmake_binary && \
+#      make -j$(nproc) && make install 
 RUN rm /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1
 
 RUN set -xe && \
