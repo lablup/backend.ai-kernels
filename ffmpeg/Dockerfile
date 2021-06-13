@@ -355,6 +355,17 @@ RUN set -xe && \
     make -j$(nproc) && \
     make install
 
+# SCT-AV1
+WORKDIR /usr/local/ffmpeg_sources
+RUN set -xe && \
+    git -C SVT-AV1 pull 2> /dev/null || \
+       git clone --depth=1 https://github.com/OpenVisualCloud/SVT-AV1 && \
+    cd SVT-AV1 && \
+    cd Build && \
+    cmake .. -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && \
+    make -j $(nproc) && \
+    make install
+
 # install nvidias codec API
 WORKDIR /usr/local/ffmpeg_sources
 RUN set -xe && \
@@ -384,7 +395,7 @@ RUN set -xe && \
 	--enable-libfreetype \
 	--enable-libmp3lame \
 	--enable-libopus \
-	--enable-libsvtav1 \
+	--enable-libsvtav1 \ 
 	--enable-libvorbis \
         --enable-libsnappy \
         --enable-libvpx \
