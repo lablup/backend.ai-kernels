@@ -52,6 +52,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	automake \
 	build-essential \
 	ca-certificates \
+	curl \
 	dkms \
 	fonts-nanum \
 	fonts-nanum-coding \
@@ -263,6 +264,9 @@ RUN python3 -m pip install --no-cache-dir \
 	    nvidia-pyindex==1.0.5 \
 	    matplotlib==3.3.3 
 
+# Install libtensorflow
+RUN curl -fsSL https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-2.4.1.tar.gz | tar -xzC /usr/local -f -
+
 # Instaling NASM
 WORKDIR /usr/local/ffmpeg_sources
 RUN set -xe && \
@@ -316,7 +320,7 @@ RUN set -xe && \
     git -C libvpx pull 2> /dev/null || \
     	git clone --depth 1 https://chromium.googlesource.com/webm/libvpx.git && \
     cd /usr/local/ffmpeg_sources/libvpx && \
-    ./configure --disable-examples --disable-unit-tests --enable-vp9-highbitdepth --as=yasm && \
+    ./configure --disable-examples --disable-unit-tests --enable-vp9-highbitdepth --as=yasm --enable-shared && \
     make -j$(nproc) && \
     make install
 
@@ -327,7 +331,7 @@ RUN set -xe && \
     	git clone --depth 1 https://github.com/mstorsjo/fdk-aac && \
     cd fdk-aac && \
     autoreconf -fiv && \
-    ./configure --disable-shared && \
+    ./configure --enable-shared && \
     make -j$(nproc) && \
     make install
 
@@ -340,7 +344,7 @@ RUN set -xe && \
     tar xzvf /usr/local/ffmpeg_sources/lame.tar.gz \
          -C /usr/local/ffmpeg_sources/lame --strip-components 1 && \
     cd /usr/local/ffmpeg_sources/lame && \
-    ./configure --disable-shared --enable-nasm && \
+    ./configure --enable-shared --enable-nasm && \
     make -j$(nproc) && \
     make install
 
@@ -351,19 +355,8 @@ RUN set -xe && \
     	git clone --depth 1 https://github.com/xiph/opus && \
     cd opus && \
     ./autogen.sh && \
-    ./configure --disable-shared && \
+    ./configure  --enable-shared && \
     make -j$(nproc) && \
-    make install
-
-# SCT-AV1
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    git -C SVT-AV1 pull 2> /dev/null || \
-       git clone --depth=1 https://github.com/OpenVisualCloud/SVT-AV1 && \
-    cd SVT-AV1 && \
-    cd Build && \
-    cmake .. -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && \
-    make -j $(nproc) && \
     make install
 
 # install nvidias codec API
@@ -384,34 +377,33 @@ RUN set -xe && \
          -C /usr/local/ffmpeg_sources/ffmpeg --strip-components 1 && \
     cd /usr/local/ffmpeg_sources/ffmpeg && \
     ./configure \
-        --pkg-config-flags="--static" \
 	--extra-libs="-lpthread -lm" \
 	--enable-gpl \
-	--enable-openssl \
-	--enable-libaom \
 	--enable-libass \
 	--enable-libnpp \
+	--enable-shared \
 	--enable-libfdk-aac \
 	--enable-libfreetype \
 	--enable-libmp3lame \
 	--enable-libopus \
-	--enable-libsvtav1 \ 
 	--enable-libvorbis \
-        --enable-libsnappy \
-        --enable-libvpx \
+	--enable-libvpx \
 	--enable-libx264 \
 	--enable-libx265 \
-	--enable-shared \
 	--enable-cuda \
-	--enable-pic \
 	--enable-cuvid \
 	--enable-nvenc \
 	--enable-libnpp \
+	--enable-shared \
+	--enable-pic \
+	--enable-indev=v4l2 \
+	--enable-libtensorflow \
 	--extra-cflags=-I/usr/local/cuda/include \
 	--extra-ldflags=-L/usr/local/cuda/lib64 \
 	--enable-nonfree && \
     make -j$(nproc) && \
-    make install
+    make install && \
+    ldconfig
 
 RUN ln -s /usr/include/x86_64-linux-gnu/cudnn_v7.h /usr/local/cuda/include/cudnn.h 
 
@@ -468,7 +460,6 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D BUILD_SHARED_LIBS=ON \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
-#      -D CUDA_ARCH_BIN=7.5 \
       -D CUDA_ARCH_PTX=7.5 \
       -D CUDA_BIN_PATH=/usr/local/cuda \
       -D CUDA_CUDA_LIBRARY=/usr/lib/x86_64-linux-gnu/stubs/libcuda.so \
@@ -541,21 +532,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D CMAKE_INSTALL_PREFIX=/usr/local \
       .. 2>&1 | tee cmake_messages.txt 
 RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
-#      cd /tmp/opencv-4.5.2/cmake_binary && \
-#      make -j$(nproc) && make install 
 RUN rm /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1
-
-RUN set -xe && \
-    apt update -y && \
-    apt install sudo && \
-    git clone https://github.com/CMU-Perceptual-Computing-Lab/openpose && \
-    cd /usr/local/openpose && \
-    bash ./scripts/ubuntu/install_deps.sh && \
-    mkdir -p /usr/local/openpose/build && \
-    cd /usr/local/openpose/build && \
-    cmake .. && \
-    make -j$(nproc) && \
-    make install
 
 
 # Stream transcoding
