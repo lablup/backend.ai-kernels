@@ -558,7 +558,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D CUDA_NVCC_FLAGS="-D_FORCE_INLINES --expt-relaxed-constexpr" \
       -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.3 \
       -D CUDNN_INCLUDE_DIR=/usr/local/cuda/include \
-      -D CUDNN_LIBRARY=/usr/lib/x86_64-linux-gnu/libcudnn.so \
+      -D CUDNN_LIBRARY=/usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.0 \
       -D ENABLE_AVX=ON \
       -D ENABLE_FAST_MATH=1 \
       -D HAVE_opencv_python3=ON \
