@@ -528,10 +528,10 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_XIMEA=OFF \
       -D WITH_XINE=OFF \
       -D WITH_ZLIB=ON \
-      -G Ninja \
+#      -G Ninja \
       -D CMAKE_INSTALL_PREFIX=/usr/local \
       .. 2>&1 | tee cmake_messages.txt 
-RUN cd /tmp/opencv-4.5.2/cmake_binary && ninja
+RUN cd /tmp/opencv-4.5.2/cmake_binary && make -j$(nproc) && make install 
 RUN rm /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1
 
 
