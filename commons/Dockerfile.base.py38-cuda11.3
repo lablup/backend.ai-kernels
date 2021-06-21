@@ -5,9 +5,10 @@ ARG CUDA=11.3
 ARG LIBNVINFER=8.0.0-1
 ARG LIBNVINFER_MAJOR_VERSION=8
 #ARG CUDNN=8.0.5.39-1
+#ENV CUDNN_VERSION 7.6.5.32
+ENV CUDNN_VERSION 8.20.0
 ENV NCCL=2.9.9
 ENV NCCL_VERSION=2.9.9-1+cuda11.3
-#ENV CUDNN_VERSION 8.0.5.43
 ENV MLNX_OFED_VERSION=5.1-2.3.7.1
 ENV MKL_VERSION=2021.2
 ENV MKL_BUILD=296
@@ -101,6 +102,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libgirepository1.0-dev \
 	libgoogle-glog-dev \
 	libgphoto2-dev \
+	libgnutls28-dev \
 	libgraphicsmagick1-dev \
 	libgstreamer-plugins-base1.0-dev \
 	libgstreamer1.0-dev \
@@ -134,6 +136,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libsdl2-dev \
 	libsm6 \
 	libsmpeg-dev \
+	libsnappy-dev \
 	libssl-dev \
 	libswscale-dev \
 	libtbb-dev \
@@ -189,8 +192,6 @@ RUN rm -fr /var/lib/apt/lists/* && \
         build-essential \
         gcc g++ make \
         git subversion \
-        vim \
-        wget \
         zlib1g-dev && \
     echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
@@ -203,6 +204,13 @@ RUN rm -fr /var/lib/apt/lists/* && \
 # Install CUDA-11.3 + cuDNN 8.2.0
     ln -s /usr/local/cuda-11.3 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.0 /usr/local/cuda/lib64/libcudnn.so && \
+    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_adv_train.so.8.2.0 /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_adv_train.so.8 && \
+    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_ops_infer.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_ops_infer.so.8 && \
+    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_cnn_train.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_cnn_train.so.8 && \
+    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_adv_infer.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_adv_infer.so.8 && \
+    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_ops_train.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_ops_train.so.8 && \
+    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_cnn_infer.so.8.2.0 /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_cnn_infer.so.8 && \
+    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn.so.8 && \
     ldconfig
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
@@ -452,6 +460,19 @@ RUN set -xe && \
     make -j$(nproc) && \
     make install
 
+# libsvtav1
+WORKDIR /usr/local/ffmpeg_sources
+RUN xet -xe && \
+    git -C SVT-AV1 pull 2> /dev/null || git clone https://gitlab.com/AOMediaCodec/SVT-AV1.git && \
+    mkdir -p SVT-AV1/build && \
+    cd SVT-AV1/build && \
+    cmake -G "Unix Makefiles" \
+        -DCMAKE_BUILD_TYPE=Release \
+	-DBUILD_DEC=OFF \
+	-DBUILD_SHARED_LIBS=OFF .. && \
+    make -j$(nproc) && \
+    make install
+
 # install nvidias codec API
 WORKDIR /usr/local/ffmpeg_sources
 RUN set -xe && \
@@ -471,6 +492,10 @@ RUN set -xe && \
     cd /usr/local/ffmpeg_sources/ffmpeg && \
     ./configure \
 	--extra-libs="-lpthread -lm" \
+	--enable-openssl \
+	--enable-libaom \
+	--enable-libsvtav1 \
+	--enable-libsnappy \
 	--enable-gpl \
 	--enable-libass \
 	--enable-libnpp \
@@ -491,8 +516,8 @@ RUN set -xe && \
 	--enable-pic \
 	--enable-indev=v4l2 \
 	--enable-libtensorflow \
-	--extra-cflags=-I/usr/local/cuda/include \
-	--extra-ldflags=-L/usr/local/cuda/lib64 \
+	--extra-cflags=-I/usr/local/cuda-11.3/include \
+	--extra-ldflags=-L/usr/local/cuda-11.3/lib64 \
 	--enable-nonfree && \
     make -j$(nproc) && \
     make install && \
@@ -558,7 +583,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D CUDA_NVCC_FLAGS="-D_FORCE_INLINES --expt-relaxed-constexpr" \
       -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.3 \
       -D CUDNN_INCLUDE_DIR=/usr/local/cuda/include \
-      -D CUDNN_LIBRARY=/usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.0 \
+      -D CUDNN_LIBRARY=/usr/local/cuda/lib64/libcudnn.so.8.2.0 \
       -D ENABLE_AVX=ON \
       -D ENABLE_FAST_MATH=1 \
       -D HAVE_opencv_python3=ON \
@@ -618,10 +643,11 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D WITH_XIMEA=OFF \
       -D WITH_XINE=OFF \
       -D WITH_ZLIB=ON \
-      -G Ninja \
+#      -G Ninja \
       -D CMAKE_INSTALL_PREFIX=/usr/local \
       .. 2>&1 | tee cmake_messages.txt && \
-      cd /tmp/opencv-4.5.2/cmake_binary && ninja
+#      ninja
+      cd /tmp/opencv-4.5.2/cmake_binary && make -j(nproc) && make install 
 
 # XGBoost
 RUN git clone  --recursive https://github.com/dmlc/xgboost && \
