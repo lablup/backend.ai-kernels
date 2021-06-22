@@ -1,27 +1,21 @@
-FROM nvidia/cuda:11.3.0-cudnn8-devel-ubuntu20.04
+FROM nvidia/cuda:11.3.0-cudnn8-devel-ubuntu18.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
 ARG CUDA=11.3
 ARG LIBNVINFER=8.0.0-1
 ARG LIBNVINFER_MAJOR_VERSION=8
-#ARG CUDNN=8.0.5.39-1
-#ENV CUDNN_VERSION 7.6.5.32
-ENV CUDNN_VERSION 8.20.0
-ENV NCCL=2.9.9
-ENV NCCL_VERSION=2.9.9-1+cuda11.3
+#ARG LIBNVINFER=7.2.3-1
+#ARG LIBNVINFER_MAJOR_VERSION=7
+ARG CUDNN=8.0.5.39-1
+ENV NCCL=2.8.4
+ENV NCCL_VERSION=2.8.4-1+cuda11.1
+ENV CUDNN_VERSION 8.0.5.43
 ENV MLNX_OFED_VERSION=5.1-2.3.7.1
-ENV MKL_VERSION=2021.2
-ENV MKL_BUILD=296
+ENV MKL_VERSION=2020.3
+ENV MKL_BUILD=279
 ENV NUMPY_VERSION 1.20.2
 ENV SCIPY_VERSION 1.6.2
-ENV OPENMPI 4.1.1
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES video,compute,utility
-
-ARG NASM_VER="2.15.05"
-ARG YASM_VER="1.3.0"
-ARG LAME_VER="3.100"
-ARG FFMPEG_VER="4.3.2"
+ENV OPENMPI 4.1.0
 # Python 3.8 is supported by Ubuntu Bionic out of the box
 ARG python=3.8
 ENV PYTHON_VERSION=${python}
@@ -41,204 +35,115 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
-WORKDIR /tmp
 RUN rm -fr /var/lib/apt/lists/* && \
     apt-get update -y && \
-    apt-get install -y --no-install-recommends build-essential software-properties-common wget && \
+    apt-get install -y --no-install-recommends software-properties-common wget && \
     add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     add-apt-repository -y ppa:bashtop-monitor/bashtop && \
-    add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
-    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
-    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub && \
-    add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" && \
     apt-get update -y && \
-    apt-get install -y --no-install-recommends --allow-change-held-packages \
-	autoconf \
-	autoconf-archive \
-	automake \
-	build-essential \
+    apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
+	bashtop \
 	ca-certificates \
 	curl \
 	dkms \
 	fonts-nanum \
 	fonts-nanum-coding \
 	fonts-nanum-extra \
-	freeglut3 \
-	freeglut3-dev \
+	g++ \
 	gfortran \
-	gir1.2-gtk-3.0 \
-	gphoto2 \
-	graphviz \
-	htop bashtop \
-	intel-daal-2020.3-912 \
-	intel-ipp-2020.3-912 \
-	intel-mkl-2020.4-912 \
-	intel-mpi-2019.9-912 \
-	intel-tbb-2020.3-912 \
+	htop \
+	intel-mkl-2020.3-111 intel-ipp-2020.2-108 intel-tbb-2020.3-108 intel-daal-2020.2-108 intel-mpi-2019.8-108 \
 	iputils-ping \
 	libasound2-dev \
-	libass-dev \
-	libatlas-base-dev \
 	libavcodec-dev \
-	libavformat-dev \
-	libavresample-dev \
-	libcairo2-dev \
-	libcanberra-gtk-module \
-	libcurl3-dev \
-	libdc1394-22 \
-	libdc1394-22-dev \
-	libeigen3-dev \
-	libfaac-dev \
-	libfreetype6-dev \
-	libgdal-dev \
-	libgeos-dev libgeos++-dev \
-	libgflags-dev \
-	libgirepository1.0-dev \
-	libgoogle-glog-dev \
-	libgphoto2-dev \
-	libgnutls28-dev \
-	libgraphicsmagick1-dev \
-	libgstreamer-plugins-base1.0-dev \
-	libgstreamer1.0-dev \
-	libgtk-3-dev \
-	libgtk2.0-dev \
-	libhdf5-dev \	
-	libhdf5-serial-dev \
+	libboost-dev \
+	libboost-filesystem-dev \
+	libboost-system-dev \
+	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
+	libgdal-dev python3-gdal \
 	libjasper-dev \
-	libjpeg-dev \
-	liblapack-dev \
-	liblapacke-dev \
-	libleptonica-dev \
-	libmp3lame-dev \
-	libmpdec2 \
-	libnccl-dev=2.9.9-1+cuda11.3 \
-	libnccl2=2.9.9-1+cuda11.3 \
 	libnuma-dev \
-	libogre-1.9-dev \
-	libopenblas-dev \ 
-	libopencore-amrnb-dev \
-	libopencore-amrwb-dev \
-	libpng-dev \
-	libportmidi-dev \
-	libpq-dev \
-	libproj-dev \
-	libprotobuf-dev \
-	libsdl-dev \
-	libsdl-image1.2-dev \
-	libsdl-mixer1.2-dev \
-	libsdl-ttf2.0-dev \
-	libsdl2-dev \
+	libopenblas-dev liblapack-dev \
 	libsm6 \
-	libsmpeg-dev \
-	libsnappy-dev \
-	libssl-dev \
 	libswscale-dev \
-	libtbb-dev \
-	libtbb2 \
-	libtesseract-dev \
-	libtheora-dev \
-	libtiff-dev \
-	libtiff5-dev \
-	libtool \
 	libv4l-dev \
-	libva-dev \
-	libvdpau-dev \
-	libvorbis-dev \
-	libx264-dev \
-	libxcb-shm0-dev \
-	libxcb-xfixes0-dev \
-	libxcb1-dev \
 	libxext6 \
-	libxi-dev \
 	libxine2-dev \
 	libxml2-dev \
-	libxmu-dev \
 	libxrender-dev \
 	libxslt1-dev \
-	libxvidcore-dev \
-	libzmq3-dev \
-	mercurial \
+	make \
 	mime-support \
-	ninja-build \
-	pbzip2 \
-	pdsh curl net-tools \
-	pkg-config \
-	proj-bin \
-	protobuf-compiler \
-	python3.8 \
-	python3.8-dev \
-	python3-gdal \
-	qt5-default \
-	qtbase5-dev \
-	rsync \
-	software-properties-common \
-	tesseract-ocr \
-	tesseract-ocr-jpn \
-	texinfo \
-	v4l-utils \
-	vim \
-	wget zip unzip \
-	x264 \
+	net-tools \
+	openssh-server \
+	pdsh \
+	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
+	subversion \
+	unzip \
 	xvfb \
 	xz-utils \
 	yasm \
-  	openssh-client openssh-server \
+	zip \
+  	openssh-client \
         build-essential \
-        gcc g++ make \
-        git subversion \
+        gcc \
+        git \
+        libavformat-dev \
+        libcurl3-dev \
+        libfreetype6-dev \
+        libgeos-dev libgeos++-dev \
+        libhdf5-serial-dev \
+        libjpeg-dev \
+        libmpdec2 \
+        libpng-dev \
+        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev \
+        libssl-dev \
+        libtiff-dev \
+        libzmq3-dev \
+        pkg-config \
+        python${PYTHON_VERSION} \
+        python${PYTHON_VERSION}-dev \
+        vim \
+        wget \
         zlib1g-dev && \
     echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
-    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
-    ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
-    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
-
-# Install CUDA-11.3 + cuDNN 8.2.0
-    ln -s /usr/local/cuda-11.3 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.0 /usr/local/cuda/lib64/libcudnn.so && \
-    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_adv_train.so.8.2.0 /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_adv_train.so.8 && \
-    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_ops_infer.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_ops_infer.so.8 && \
-    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_cnn_train.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_cnn_train.so.8 && \
-    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_adv_infer.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_adv_infer.so.8 && \
-    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_ops_train.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_ops_train.so.8 && \
-    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_cnn_infer.so.8.2.0 /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn_cnn_infer.so.8 && \
-    ln -sf /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn.so.8.2.0  /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcudnn.so.8 && \
-    ldconfig
-
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
-    apt-get update -y && \
-    apt-get install -y nodejs
-
-RUN if [[ "${PYTHON_VERSION}" == "3.8" ]]; then \
-        apt-get install -y python${PYTHON_VERSION}-distutils python-apt ; \
-    fi
-
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
+    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
 
 WORKDIR /tmp
-RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip && \
-    python3 -m pip install --no-cache-dir cython pybind11 && \
-    curl -fsSL https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-2.5.0.tar.gz | tar -xzC /usr/local -f -
+RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.8/nccl_2.8.4-1+cuda11.1_x86_64.txz -O && \
+    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
+    tar --no-same-owner --keep-old-files --lzma -xvf  nccl_${NCCL}-1+cuda11.1_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
+    rm nccl_${NCCL}-1+cuda11.1_x86_64.txz && \
+    ldconfig 
 
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
+    ldconfig
+
+# Install CUDA-11.1 + cuDNN 8.0.5
+RUN ln -s /usr/local/cuda-11.1 /usr/local/cuda && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.0.5 /usr/local/cuda/lib64/libcudnn.so && \
+    ldconfig
+
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
-	libnvinfer-plugin8 \
+	libnvinfer-plugin7 \
         libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
-	python3-libnvinfer=${LIBNVINFER}+cuda${CUDA} \
-	python3-libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -249,11 +154,11 @@ RUN mkdir -p /etc/OpenCL/vendors && \
 
 # OFED
 WORKDIR /tmp
-RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu20.04-x86_64.tgz | tar xzf - && \
-    cd /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu20.04-x86_64 && \
+RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64.tgz | tar xzf - && \
+    cd /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64 && \
     ./mlnxofedinstall --user-space-only --without-fw-update --all -q && \
     cd /tmp && \
-    rm -rf /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu20.04-x86_64*
+    rm -rf /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64*
     
 # nvidia-peer
 WORKDIR /tmp
@@ -265,15 +170,6 @@ RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory
     cd /tmp/nvidia-peer-memory-1.1 && \
     dpkg-buildpackage -us -uc && \
     dpkg -i /tmp/nvidia-peer-memory_1.1-0_all.deb
-
-RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends \
-        libboost-all-dev \
-	libboost-dev \
-	libboost-filesystem-dev \
-	libboost-python-dev \
-	libboost-system-dev \
-	libboost-thread-dev
 
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-Linux-x86_64.sh \
          -q -O /tmp/cmake-install.sh && \
@@ -297,10 +193,23 @@ RUN mkdir -p /opt/oracle && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig
 
+RUN if [[ "${PYTHON_VERSION}" == "3.8" ]]; then \
+        apt-get install -y python${PYTHON_VERSION}-distutils python-apt ; \
+    fi
+
+RUN rm /usr/bin/python /usr/bin/python3 && \
+    ln -s /usr/bin/python3.8 /usr/bin/python3 && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
+
+WORKDIR /tmp
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
+    python3 -m pip install --no-cache-dir -U setuptools pip && \
+    python3 -m pip install --no-cache-dir cython pybind11
 
 WORKDIR /tmp
 # OpenBlas
-RUN git clone -q --branch=v0.3.15 git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
@@ -368,166 +277,37 @@ COPY ./requirements.py38.txt /tmp
 RUN python3 -m pip install --no-cache-dir -r requirements.py38.txt && \
     rm -f /tmp/*.whl /tmp/requirements.py38.txt
 
-# Instaling NASM
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    wget -O /usr/local/ffmpeg_sources/nasm.tar.bz2 \
-    	 https://www.nasm.us/pub/nasm/releasebuilds/${NASM_VER}/nasm-${NASM_VER}.tar.bz2 && \
-    mkdir -p /usr/local/ffmpeg_sources/nasm && \
-    tar jxvf /usr/local/ffmpeg_sources/nasm.tar.bz2 \
-        -C /usr/local/ffmpeg_sources/nasm --strip-components 1 && \
-    cd /usr/local/ffmpeg_sources/nasm && \
-    ./autogen.sh && \
-    ./configure --prefix=/usr/local && \
-    make -j$(nproc) && \
-    make install
-
-# Installing YASM
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    wget -O /usr/local/ffmpeg_sources/yasm.tar.gz \
-    	 https://www.tortall.net/projects/yasm/releases/yasm-${YASM_VER}.tar.gz && \
-    mkdir -p /usr/local/ffmpeg_sources/yasm && \
-    tar xzvf /usr/local/ffmpeg_sources/yasm.tar.gz \
-        -C /usr/local/ffmpeg_sources/yasm --strip-components 1 && \
-    cd /usr/local/ffmpeg_sources/yasm && \
-    ./configure --prefix=/usr/local && \
-    make -j$(nproc) && \
-    make install
-
-# libx264
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    git -C /usr/local/ffmpeg_sources/x264 pull 2> /dev/null || \
-    git clone --depth 1 https://code.videolan.org/videolan/x264 && \
-    cd /usr/local/ffmpeg_sources/x264 && \
-    ./configure --enable-shared --enable-pic && \
-    make && \
-    make install
-
-# libx265
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    git clone https://github.com/videolan/x265 \
-        /usr/local/ffmpeg_sources/x265 && \
-    cd /usr/local/ffmpeg_sources/x265/build/linux && \
-    cmake -G "Unix Makefiles" -DENABLE_SHARED=on ../../source && \
-    make -j$(nproc) && \
-    make install
-
-# libvpx
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    git -C libvpx pull 2> /dev/null || \
-    	git clone --depth 1 https://chromium.googlesource.com/webm/libvpx.git && \
-    cd /usr/local/ffmpeg_sources/libvpx && \
-    ./configure --disable-examples --disable-unit-tests --enable-vp9-highbitdepth --as=yasm --enable-shared && \
-    make -j$(nproc) && \
-    make install
-
-# libfdk-aac
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    git -C fdk-aac pull 2> /dev/null || \
-    	git clone --depth 1 https://github.com/mstorsjo/fdk-aac && \
-    cd fdk-aac && \
-    autoreconf -fiv && \
-    ./configure --enable-shared && \
-    make -j$(nproc) && \
-    make install
-
-# libmp3lame
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    wget -O /usr/local/ffmpeg_sources/lame.tar.gz \
-         https://downloads.sourceforge.net/project/lame/lame/${LAME_VER}/lame-${LAME_VER}.tar.gz && \
-    mkdir -p /usr/local/ffmpeg_sources/lame && \
-    tar xzvf /usr/local/ffmpeg_sources/lame.tar.gz \
-         -C /usr/local/ffmpeg_sources/lame --strip-components 1 && \
-    cd /usr/local/ffmpeg_sources/lame && \
-    ./configure --enable-shared --enable-nasm && \
-    make -j$(nproc) && \
-    make install
-
-# install libopus 
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    git -C opus pull 2> /dev/null || \
-    	git clone --depth 1 https://github.com/xiph/opus && \
-    cd opus && \
-    ./autogen.sh && \
-    ./configure  --enable-shared && \
-    make -j$(nproc) && \
-    make install
-
-# libsvtav1
-WORKDIR /usr/local/ffmpeg_sources
-RUN xet -xe && \
-    git -C SVT-AV1 pull 2> /dev/null || git clone https://gitlab.com/AOMediaCodec/SVT-AV1.git && \
-    mkdir -p SVT-AV1/build && \
-    cd SVT-AV1/build && \
-    cmake -G "Unix Makefiles" \
-        -DCMAKE_BUILD_TYPE=Release \
-	-DBUILD_DEC=OFF \
-	-DBUILD_SHARED_LIBS=OFF .. && \
-    make -j$(nproc) && \
-    make install
-
-# install nvidias codec API
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    git -C nv-codec-headers pull 2> /dev/null || \
-        git clone https://github.com/FFmpeg/nv-codec-headers && \
-    cd nv-codec-headers && \
-    make -j$(nproc) && \
-    make install
-
-WORKDIR /usr/local/ffmpeg_sources
-RUN set -xe && \
-    wget -O /usr/local/ffmpeg_sources/ffmpeg.tar.bz2 \
-         https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VER}.tar.bz2 && \
-    mkdir -p /usr/local/ffmpeg_sources/ffmpeg && \
-    tar jxvf /usr/local/ffmpeg_sources/ffmpeg.tar.bz2 \
-         -C /usr/local/ffmpeg_sources/ffmpeg --strip-components 1 && \
-    cd /usr/local/ffmpeg_sources/ffmpeg && \
-    ./configure \
-	--extra-libs="-lpthread -lm" \
-	--enable-openssl \
-	--enable-libaom \
-	--enable-libsvtav1 \
-	--enable-libsnappy \
-	--enable-gpl \
-	--enable-libass \
-	--enable-libnpp \
-	--enable-shared \
-	--enable-libfdk-aac \
-	--enable-libfreetype \
-	--enable-libmp3lame \
-	--enable-libopus \
-	--enable-libvorbis \
-	--enable-libvpx \
-	--enable-libx264 \
-	--enable-libx265 \
-	--enable-cuda \
-	--enable-cuvid \
-	--enable-nvenc \
-	--enable-libnpp \
-	--enable-shared \
-	--enable-pic \
-	--enable-indev=v4l2 \
-	--enable-libtensorflow \
-	--extra-cflags=-I/usr/local/cuda-11.3/include \
-	--extra-ldflags=-L/usr/local/cuda-11.3/lib64 \
-	--enable-nonfree && \
-    make -j$(nproc) && \
-    make install && \
-    ldconfig
-
-RUN ln -s /usr/include/x86_64-linux-gnu/cudnn_v8.h /usr/local/cuda/include/cudnn.h 
-
 # OpenCV
+RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
+   apt-get install -y \
+	libgstreamer1.0-dev \
+	libgstreamer-plugins-base1.0-dev \
+	libgtk-3-dev \
+        libtbb-dev \
+	libatlas-base-dev \
+	libdc1394-22-dev \
+	libxvidcore-dev \
+	libfaac-dev \
+	libmp3lame-dev \
+	libtheora-dev \
+	libvorbis-dev \
+	libxvidcore-dev \
+	libopencore-amrnb-dev libopencore-amrwb-dev \
+	libavresample-dev \
+	x264 \
+	libx264-dev \
+	v4l-utils \	
+	libprotobuf-dev protobuf-compiler \
+	libgoogle-glog-dev libgflags-dev \
+	libgphoto2-dev \
+	libeigen3-dev \
+	libhdf5-dev \	
+    && \	
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/
+
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.2"
+ENV OPENCV_VERSION="4.5.1"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -535,119 +315,32 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     mkdir opencv-${OPENCV_VERSION}/cmake_binary && \
     cd opencv-${OPENCV_VERSION}/cmake_binary && \
     cmake \
-      -D BUILD_DOCS=OFF \
-      -D BUILD_NEW_PYTHON_SUPPORT=ON \
-      -D BUILD_PERF_TESTS=OFF \
-      -D BUILD_PERF_TESTS=OFF \
-      -D BUILD_TESTS=OFF \
+      -DCMAKE_BUILD_TYPE=RELEASE \
       -D BUILD_TIFF=ON \
-      -D BUILD_opencv_apps=ON \
-      -D BUILD_opencv_calib3d=ON \
-      -D BUILD_opencv_core=ON \
-      -D BUILD_opencv_cudaarithm=ON \
-      -D BUILD_opencv_cudabgsegm=ON \
-      -D BUILD_opencv_cudacodec=ON \
-      -D BUILD_opencv_cudafeatures2d=ON \
-      -D BUILD_opencv_cudafilters=ON \
-      -D BUILD_opencv_cudaimgproc=ON \
-      -D BUILD_opencv_cudalegacy=ON \
-      -D BUILD_opencv_cudaobjdetect=ON \
-      -D BUILD_opencv_cudaoptflow=ON \
-      -D BUILD_opencv_cudastereo=ON \
-      -D BUILD_opencv_cudawarping=ON \
-      -D BUILD_opencv_cudev=ON \
-      -D BUILD_opencv_features2d=ON \
-      -D BUILD_opencv_flann=ON \
-      -D BUILD_opencv_highgui=ON \
-      -D BUILD_opencv_imgcodecs=ON \
-      -D BUILD_opencv_imgproc=ON \
       -D BUILD_opencv_java=OFF \
-      -D BUILD_opencv_ml=ON \
-      -D BUILD_opencv_objdetect=ON \
-      -D BUILD_opencv_photo=ON \
-      -D BUILD_opencv_python2=OFF \
-      -D BUILD_opencv_python3=ON \
-      -D BUILD_opencv_stitching=ON \
-      -D BUILD_opencv_superres=ON \
-      -D BUILD_opencv_ts=ON \
-      -D BUILD_opencv_video=ON \
-      -D BUILD_opencv_videoio=ON \
-      -D BUILD_opencv_videostab=ON \
-      -D BUILD_SHARED_LIBS=ON \
+      -D WITH_CUDA=ON \
+      -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.3 \
+      -D ENABLE_FAST_MATH=1 \
+      -D CUDA_FAST_MATH=1 \
+      -D WITH_CUBLAS=1 \
+      -D WITH_OPENGL=ON \
+      -D WITH_OPENCL=ON \
+      -D WITH_IPP=ON \
+      -D WITH_TBB=ON \
+      -D WITH_EIGEN=ON \
+      -D WITH_V4L=ON \
+      -D BUILD_TESTS=OFF \
+      -D BUILD_PERF_TESTS=OFF \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.1/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
-      -D CUDA_BIN_PATH=/usr/local/cuda \
-      -D CUDA_CUDA_LIBRARY=/usr/lib/x86_64-linux-gnu/stubs/libcuda.so \
-      -D CUDA_FAST_MATH=ON \
-      -D CUDA_HOST_COMPILER=/usr/bin/gcc \
-      -D CUDA_NVCC_FLAGS="-D_FORCE_INLINES --expt-relaxed-constexpr" \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.3 \
-      -D CUDNN_INCLUDE_DIR=/usr/local/cuda/include \
-      -D CUDNN_LIBRARY=/usr/local/cuda/lib64/libcudnn.so.8.2.0 \
-      -D ENABLE_AVX=ON \
-      -D ENABLE_FAST_MATH=1 \
-      -D HAVE_opencv_python3=ON \
-      -D INSTALL_C_EXAMPLES=OFF \
-      -D INSTALL_PYTHON_EXAMPLES=OFF \
-      -D OPENCV_DNN_CUDA=ON \
-      -D OPENCV_ENABLE_NONFREE=ON \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.2/modules" \
-      -D OPENCV_GENERATE_PKGCONFIG=ON \
-      -D OPENCV_SKIP_PYTHON_LOADER=ON \
-      -D PYTHON_DEFAULT_EXECUTABLE=python3 \
       -D PYTHON_EXECUTABLE=$(which python3) \
-      -D PYTHON_INCLUDE_DIR2=$(python3 -c "from os.path import dirname; from distutils.sysconfig import get_config_h_filename; print(dirname(get_config_h_filename()))") \
       -D PYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
-      -D PYTHON_LIBRARY=$(python3 -c "from distutils.sysconfig import get_config_var;from os.path import dirname,join ; print(join(dirname(get_config_var('LIBPC')),get_config_var('LDLIBRARY')))") \
       -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
-      -D WITH_1394=OFF \
-      -D WITH_CUBLAS=ON \
-      -D WITH_CUDA=ON \
-      -D WITH_CUDNN=ON \
-      -D WITH_CUFFT=ON \
-      -D WITH_EIGEN=ON \
-      -D WITH_FFMPEG=ON \
-      -D WITH_GDAL=ON \
-      -D WITH_GIGEAPI=ON \
-      -D WITH_GPHOTO2=ON \
-      -D WITH_GSTREAMER=ON \
-      -D WITH_GTK=ON \
-      -D WITH_IMGCODEC=ON \
-      -D WITH_INTELPERC=OFF \
-      -D WITH_IPP=ON \
-      -D WITH_IPP_A=OFF \
-      -D WITH_JASPER=ON \
-      -D WITH_JPEG=ON \
-      -D WITH_LAPACK=OFF \
-      -D WITH_LIBV4L=OFF \
-      -D WITH_NVCUVID=ON \
-      -D WITH_OPENCL=ON \
-      -D WITH_OPENCLAMDBLAS=OFF \
-      -D WITH_OPENCLAMDFFT=OFF \
-      -D WITH_OPENCL_SVM=OFF \
-      -D WITH_OPENEXR=ON \
-      -D WITH_OPENGL=ON \
-      -D WITH_OPENMP=OFF \
-      -D WITH_OPENNI=OFF \
-      -D WITH_PNG=ON \
-      -D WITH_PROTOBUF=ON \
-      -D WITH_PTHREADS_PF=OFF \
-      -D WITH_PVAPI=ON \
-      -D WITH_QT=OFF \
-      -D WITH_TBB=ON \
-      -D WITH_TIFF=ON \
-      -D WITH_UNICAP=OFF \
-      -D WITH_V4L=OFF \
-      -D WITH_VTK=OFF \
-      -D WITH_WEBP=ON \
-      -D WITH_XIMEA=OFF \
-      -D WITH_XINE=OFF \
-      -D WITH_ZLIB=ON \
-#      -G Ninja \
-      -D CMAKE_INSTALL_PREFIX=/usr/local \
       .. 2>&1 | tee cmake_messages.txt && \
-#      ninja
-      cd /tmp/opencv-4.5.2/cmake_binary && make -j(nproc) && make install 
+    make -j$(nproc) && \
+    make install 
 
 # XGBoost
 RUN git clone  --recursive https://github.com/dmlc/xgboost && \
@@ -717,10 +410,10 @@ RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.3/git-l
     rm -rf /tmp/*
 
 # Install VSCode
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.10.2/code-server-3.10.2-linux-amd64.tar.gz \
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.2/code-server-3.9.2-linux-amd64.tar.gz \
   | tar -C /usr/local/lib -xz && \
-    mv /usr/local/lib/code-server-3.10.2-linux-amd64 /usr/local/lib/code-server-3.10.2 && \
-    ln -s /usr/local/lib/code-server-3.10.2/bin/code-server /usr/local/bin/code-server
+    mv /usr/local/lib/code-server-3.9.2-linux-amd64 /usr/local/lib/code-server-3.9.2 && \
+    ln -s /usr/local/lib/code-server-3.9.2/bin/code-server /usr/local/bin/code-server
 
 # Install Jupyterlab extensions
 RUN jupyter nbextensions_configurator enable && \
@@ -733,12 +426,15 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-    jupyter labextension install @jupyterlab/toc && \
-    jupyter lab build    
+#    jupyter labextension install @pyviz/jupyterlab_pyviz && \
+#    jupyter labextension install @bokeh/jupyter_bokeh && \
+#    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+    jupyter lab build
 
+# Clean up
 RUN apt autoclean && \
+    ln -s /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcusolver.so.11 /usr/local/cuda-11.3/targets/x86_64-linux/lib/libcusolver.so.10 && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
-    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
