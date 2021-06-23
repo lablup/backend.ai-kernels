@@ -15,7 +15,13 @@ RUN python3 -m pip uninstall -y torch && \
         https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp38-cp38-linux_x86_64.whl \
 	https://download.pytorch.org/whl/cu111/torchcsprng-0.2.1%2Bcu111-cp38-cp38-linux_x86_64.whl \
 	https://download.pytorch.org/whl/torchserve-0.3.0-py2.py3-none-any.whl \
-        https://download.pytorch.org/whl/torchtext-${TORCHTEXT_VERSION}-cp38-cp38-linux_x86_64.whl && \
+        https://download.pytorch.org/whl/torchtext-${TORCHTEXT_VERSION}-cp38-cp38-linux_x86_64.whl \
+	jsonargparse \
+	torchmetrics \
+	pyDeprecate \
+	fsspec[http]>=2021.05.0 \
+	PyYAML>=5.1 \
+	pytorch-lightning && \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
 # torch2trt PyTorch to TensorRT converter which utilizes the TensorRT Python API
