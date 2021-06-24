@@ -21,6 +21,8 @@ RUN python3 -m pip uninstall -y torch && \
 	pyDeprecate \
 	fsspec[http]>=2021.05.0 \
 	PyYAML>=5.1 \
+	pretrainedmodels \
+	cnn-finetune \
 	pytorch-lightning && \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
