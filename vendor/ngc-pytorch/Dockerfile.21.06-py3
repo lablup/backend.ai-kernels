@@ -5,13 +5,14 @@ FROM nvcr.io/nvidia/pytorch:21.06-py3
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
-    PIP_IGNORE_INSTALLED=0 \
-    PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvm/versions/node/v14.8.0/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
-    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
+    PYTHONUNBUFFERED=1 \
+    LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
+    _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
+    PATH="/usr/local/nvm/versions/node/v14.8.0/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/ucx:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
 RUN apt-get update && \
@@ -134,17 +135,39 @@ RUN cd /tmp && \
 	pytorch-lightning \
 	&& \
     python3 setup.py install 
-	    
-WORKDIR /tmp
-COPY ./requirements.txt /tmp
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir --ignore-installed -r requirements.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # OpenCV
+RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
+   apt-get install -y \
+	libgstreamer1.0-dev \
+	libgstreamer-plugins-base1.0-dev \
+	libgtk-3-dev \
+        libtbb-dev \
+	libatlas-base-dev \
+	libdc1394-22-dev \
+	libxvidcore-dev \
+	libfaac-dev \
+	libmp3lame-dev \
+	libtheora-dev \
+	libvorbis-dev \
+	libxvidcore-dev \
+	libopencore-amrnb-dev libopencore-amrwb-dev \
+	libavresample-dev \
+	x264 \
+	libx264-dev \
+	v4l-utils \	
+	libprotobuf-dev protobuf-compiler \
+	libgoogle-glog-dev libgflags-dev \
+	libgphoto2-dev \
+	libeigen3-dev \
+	libhdf5-dev \	
+    && \	
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/
+
 WORKDIR /tmp
 ENV OPENCV_VERSION="4.5.2"
-RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
-    wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
     unzip opencv-contrib.zip && \
@@ -176,10 +199,14 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
       -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
       .. 2>&1 | tee cmake_messages.txt && \
     make -j$(nproc) && \
-    make install && \
-    cd /tmp && \
-    python3 -m pip install --no-cache-dir opencv-python && \
-    rm -fr opencv* 
+    make install  && \
+    python3 -m pip install --no-cache-dir opencv-python
+
+WORKDIR /tmp
+COPY ./requirements.txt /tmp
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir --ignore-installed -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
+
 
 # install git-lfs
 WORKDIR /tmp
@@ -193,9 +220,9 @@ RUN git clone https://github.com/aristocratos/bashtop.git && \
     cd bashtop && \
     make install
 
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.3/code-server-3.9.3-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
-    mv /usr/local/lib/code-server-3.9.3-linux-amd64 /usr/local/lib/code-server-3.9.3 && \
-    ln -s /usr/local/lib/code-server-3.9.3/bin/code-server /usr/local/bin/code-server
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.10.2/code-server-3.10.2-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-3.10.2-linux-amd64 /usr/local/lib/code-server-3.10.2 && \
+    ln -s /usr/local/lib/code-server-3.10.2/bin/code-server /usr/local/bin/code-server
 
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
