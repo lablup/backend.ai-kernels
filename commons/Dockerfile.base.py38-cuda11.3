@@ -272,11 +272,6 @@ RUN echo "Install mecab-ko-dic" && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
 
-WORKDIR /tmp
-COPY ./requirements.py38.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.py38.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.py38.txt
-
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
@@ -342,6 +337,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     make -j$(nproc) && \
     make install 
 
+
 # XGBoost
 RUN git clone  --recursive https://github.com/dmlc/xgboost && \
     cd xgboost && \
@@ -372,6 +368,12 @@ RUN wget https://github.com/openucx/ucx/archive/v1.10.0.tar.gz && \
     ../configure --prefix=/usr/local/ucx && \
     make -j$(nproc) && \
     make install 
+
+WORKDIR /tmp
+COPY ./requirements.py38.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.py38.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.py38.txt
+
 
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
@@ -410,10 +412,10 @@ RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.3/git-l
     rm -rf /tmp/*
 
 # Install VSCode
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.2/code-server-3.9.2-linux-amd64.tar.gz \
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.10.2/code-server-3.10.2-linux-amd64.tar.gz \
   | tar -C /usr/local/lib -xz && \
-    mv /usr/local/lib/code-server-3.9.2-linux-amd64 /usr/local/lib/code-server-3.9.2 && \
-    ln -s /usr/local/lib/code-server-3.9.2/bin/code-server /usr/local/bin/code-server
+    mv /usr/local/lib/code-server-3.10.2-linux-amd64 /usr/local/lib/code-server-3.10.2 && \
+    ln -s /usr/local/lib/code-server-3.10.2/bin/code-server /usr/local/bin/code-server
 
 # Install Jupyterlab extensions
 RUN jupyter nbextensions_configurator enable && \
