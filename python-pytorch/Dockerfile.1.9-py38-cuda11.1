@@ -1,21 +1,21 @@
 FROM lablup/common-base:py38-cuda11.1
 
 # Install PyTorch
-ENV PYTORCH_VERSION=1.8.1
-ENV TORCHVISION_VERSION=0.9.1
-ENV TORCHAUDIO_VERSION=0.8.1
-ENV TORCHTEXT_VERSION=0.9.1
+ENV PYTORCH_VERSION=1.9.0
+ENV TORCHVISION_VERSION=0.10.0
+ENV TORCHAUDIO_VERSION=0.9.0
+ENV TORCHTEXT_VERSION=0.10.0
 ENV TENSORBOARDX_VERSION=2.1
-ENV MXNET_VERSION=1.7.0
 
 RUN python3 -m pip uninstall -y torch && \
+    python3 -m pip install -U pip==21.1.2 setuptools==57.0.0 && \
     python3 -m pip install --no-cache-dir \
-        https://download.pytorch.org/whl/cu111/torch-${PYTORCH_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
-        https://download.pytorch.org/whl/cu111/torchvision-${TORCHVISION_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
-        https://download.pytorch.org/whl/torchaudio-${TORCHAUDIO_VERSION}-cp38-cp38-linux_x86_64.whl \
-	https://download.pytorch.org/whl/cu111/torchcsprng-0.2.1%2Bcu111-cp38-cp38-linux_x86_64.whl \
-	https://download.pytorch.org/whl/torchserve-0.3.0-py2.py3-none-any.whl \
-        https://download.pytorch.org/whl/torchtext-${TORCHTEXT_VERSION}-cp38-cp38-linux_x86_64.whl \
+        http://download.pytorch.org/whl/cu111/torch-${PYTORCH_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
+        http://download.pytorch.org/whl/cu111/torchvision-${TORCHVISION_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
+	torchaudio==${TORCHAUDIO_VERSION} \
+	torchserve \
+        torchtext==${TORCHTEXT_VERSION} \
+#	torchcsprng \
 	jsonargparse \
 	torchmetrics \
 	pyDeprecate \
@@ -23,8 +23,9 @@ RUN python3 -m pip uninstall -y torch && \
 	PyYAML>=5.1 \
 	pretrainedmodels \
 	cnn-finetune \
-	pytorch-lightning && \
-    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
+	keras4torch \
+	pytorch-lightning 
+#    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
 # torch2trt PyTorch to TensorRT converter which utilizes the TensorRT Python API
 WORKDIR /tmp
@@ -40,13 +41,13 @@ RUN python3 -m pip install --extra-index-url \
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.22.0 && \
+    pip install --no-cache-dir horovod==0.22.1 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	mpi4py==3.0.3 \
-        mlflow==1.17.0 \
-	nni==2.2 \
+        mlflow==1.18.0 \
+	nni==2.3 \
 	tensorboard-plugin-wit \
 	scikit-nni==0.2.1
 
@@ -59,7 +60,7 @@ COPY ./service-defs /etc/backend.ai/service-defs
 COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
 
 # Install ipython kernelspec
-Run python3 -m ipykernel install --display-name "PyTorch 1.8.1 on Python 3.8 (CUDA 11.1)" && \
+Run python3 -m ipykernel install --display-name "PyTorch 1.9.0 on Python 3.8 (CUDA 11.1)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics

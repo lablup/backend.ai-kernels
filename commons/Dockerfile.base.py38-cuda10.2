@@ -1,21 +1,21 @@
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
-ARG CUDA=10.1
-ARG LIBNVINFER=6.0.1-1
-ARG LIBNVINFER_MAJOR_VERSION=6
-ARG CUDNN=7.6.5.32-1
-ENV NCCL=2.8.3
-ENV NCCL_VERSION=2.8.3-1+cuda10.1
-ENV CUDNN_VERSION 7.6.5.32
+ARG CUDA=10.2
+ARG LIBNVINFER=7.2.3-1
+ARG LIBNVINFER_MAJOR_VERSION=7
+ARG CUDNN=8.0.5.32-1
+ENV NCCL=2.9.8
+ENV NCCL_VERSION=2.9.8-1+cuda10.2
+ENV CUDNN_VERSION 8.0.5.32
 ENV MLNX_OFED_VERSION=5.1-2.3.7.1
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
-ENV NUMPY_VERSION 1.19.4
-ENV SCIPY_VERSION 1.5.4
-ENV OPENMPI 4.0.5
+ENV NUMPY_VERSION 1.20.2
+ENV SCIPY_VERSION 1.6.2
+ENV OPENMPI 4.1.0
 # Python 3.8 is supported by Ubuntu Bionic out of the box
-ARG python=3.6
+ARG python=3.8
 ENV PYTHON_VERSION=${python}
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -33,6 +33,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
+WORKDIR /tmp
 RUN rm -fr /var/lib/apt/lists/* && \
     apt-get update -y && \
     apt-get install -y --no-install-recommends software-properties-common wget && \
@@ -41,94 +42,103 @@ RUN rm -fr /var/lib/apt/lists/* && \
     add-apt-repository -y ppa:bashtop-monitor/bashtop && \
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin && \
+    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin && \
+    mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub && \
+    add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /" && \
     apt-get update -y && \
     apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
-        build-essential \
+	bashtop \
 	ca-certificates \
-        gcc g++ make \
-	gfortran \
+	curl \
 	dkms \
-        git subversion \
-        vim \
-	htop bashtop \
-	yasm \
-        wget zip unzip \
-  	openssh-client openssh-server \
-        libssl-dev \
-        libmpdec2 \
-	pdsh curl net-tools \
-	iputils-ping \
-        libcurl3-dev \
-        libfreetype6-dev \
-        libhdf5-serial-dev \
-        libzmq3-dev \
-        libjpeg-dev \
-        libpng-dev \
-	libsm6 \
-	libxext6 \
-	libxrender-dev \
-	libgdal-dev python3-gdal \
-        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
-        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev \
-	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
-        libgeos-dev libgeos++-dev \
-        pkg-config \
-        zlib1g-dev \
-	mime-support \
-	intel-mkl-2020.3-111 intel-ipp-2020.2-108 intel-tbb-2020.3-108 intel-daal-2020.2-108 intel-mpi-2019.8-108 \
-	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
-        python${PYTHON_VERSION} \
-        python${PYTHON_VERSION}-dev \
-	libxml2-dev \
-	libxslt1-dev \
-	libasound2-dev \
-	libnuma-dev \
-	libjasper-dev \
-        libtiff-dev \
-	libavcodec-dev \
-        libavformat-dev \
-	libswscale-dev \
-	libxine2-dev \
-	libv4l-dev \
-	libboost-dev \
-	libboost-system-dev \
-	libboost-filesystem-dev \
-	libopenblas-dev liblapack-dev \
-	xvfb \
-	xz-utils \
 	fonts-nanum \
 	fonts-nanum-coding \
 	fonts-nanum-extra \
-	&& \
+	g++ \
+	gfortran \
+	htop \
+	intel-mkl-2020.3-111 intel-ipp-2020.2-108 intel-tbb-2020.3-108 intel-daal-2020.2-108 intel-mpi-2019.8-108 \
+	iputils-ping \
+	libasound2-dev \
+	libavcodec-dev \
+	libboost-dev \
+	libboost-filesystem-dev \
+	libboost-system-dev \
+	libcairo2-dev libgirepository1.0-dev pkg-config gir1.2-gtk-3.0 \
+	libgdal-dev python3-gdal \
+	libjasper-dev \
+	libnuma-dev \
+	libopenblas-dev liblapack-dev \
+	libsm6 \
+	libswscale-dev \
+	libv4l-dev \
+	libxext6 \
+	libxine2-dev \
+	libxml2-dev \
+	libxrender-dev \
+	libxslt1-dev \
+	make \
+	mime-support \
+	net-tools \
+	ncurses-term \
+	openssh-server \
+	pdsh \
+	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
+	subversion \
+	unzip \
+	xvfb \
+	xz-utils \
+	yasm \
+	zip \
+  	openssh-client \
+        build-essential \
+        gcc \
+        git \
+        libavformat-dev \
+        libcurl3-dev \
+        libfreetype6-dev \
+        libgeos-dev libgeos++-dev \
+        libhdf5-serial-dev \
+        libjpeg-dev \
+        libmpdec2 \
+        libpng-dev \
+        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev \
+        libssl-dev \
+        libtiff-dev \
+        libzmq3-dev \
+        pkg-config \
+        python${PYTHON_VERSION} \
+        python${PYTHON_VERSION}-dev \
+	libnccl2=${NCCL_VERSION} \
+	libnccl-dev=${NCCL_VERSION} \
+        vim \
+        wget \
+        zlib1g-dev && \
     echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
-    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
+    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
+    ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
+
+# Install CUDA-10.2 + cuDNN 8.0.5
+    ln -s /usr/local/cuda-10.2 /usr/local/cuda && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.0.5 /usr/local/cuda/lib64/libcudnn.so && \
+    ldconfig
+
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+	nodejs 
 
 WORKDIR /tmp
-RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.8/nccl_2.8.3-1+cuda10.1_x86_64.txz -O && \
-    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda10.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
-    tar --no-same-owner --keep-old-files --lzma -xvf  nccl_${NCCL}-1+cuda10.1_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
-    rm nccl_${NCCL}-1+cuda10.1_x86_64.txz && \
-    ldconfig 
-
-RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
-    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
-    ldconfig
-
-# Install CUDA-10.1 + cuDNN 7.6.5
-RUN ln -s /usr/local/cuda-10.1 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.5 /usr/local/cuda/lib64/libcudnn.so && \
-    rm -rf /var/lib/apt/lists/* && \
-    ldconfig
-
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get update -y && \
-    apt-get install -y nodejs
-
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
@@ -150,7 +160,7 @@ RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/M
     cd /tmp && \
     rm -rf /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64*
     
-# nvidia-peer
+# Nvidia-peer
 WORKDIR /tmp
 RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory && \
     cd /tmp/nv_peer_memory && \
@@ -161,6 +171,14 @@ RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory
     dpkg-buildpackage -us -uc && \
     dpkg -i /tmp/nvidia-peer-memory_1.1-0_all.deb
 
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-Linux-x86_64.sh \
+         -q -O /tmp/cmake-install.sh && \
+    chmod u+x /tmp/cmake-install.sh && \
+    mkdir /usr/bin/cmake && \
+    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
+    rm /tmp/cmake-install.sh
+
+# Oracle client
 RUN mkdir -p /opt/oracle && \
     cd /opt/oracle && \
     apt-get clean && \
@@ -175,27 +193,27 @@ RUN mkdir -p /opt/oracle && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig
 
-RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
+RUN if [[ "${PYTHON_VERSION}" == "3.8" ]]; then \
         apt-get install -y python${PYTHON_VERSION}-distutils python-apt ; \
     fi
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+RUN rm /usr/bin/python /usr/bin/python3 && \
+    ln -s /usr/bin/python3.8 /usr/bin/python3 && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
 
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip==20.3.2 
-
-RUN python3 -m pip install --no-cache-dir \
-    	    Cython==0.29.21 \
-	    tornado==6.1 \
-	    nvidia-pyindex==1.0.5 \
-	    matplotlib==3.3.3 
+    python3 -m pip install --no-cache-dir -U setuptools pip && \
+    python3 -m pip install --no-cache-dir cython pybind11 python-lsp-server
 
 WORKDIR /tmp
+# OpenBlas
 RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
+# Numpy    
 RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
     cd numpy && \
     git checkout -b v${NUMPY_VERSION} && \
@@ -207,7 +225,7 @@ RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/nump
     echo "lapack_libs =" >> site.cfg && \
     python3 setup.py bdist_wheel -d /tmp 
 
-# Install scipy
+# Scipy
 RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
     cd scipy && \
@@ -254,15 +272,10 @@ RUN echo "Install mecab-ko-dic" && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
 
-RUN python3 -m pip install pip --no-cache-dir \
-    	    Cartopy==0.18.0 \
-	    nvidia-dlprof \
-	    notebook==6.0.3 
-
 WORKDIR /tmp
-COPY ./requirements.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
+COPY ./requirements.py38.txt /tmp
+RUN python3 -m pip install --no-cache-dir -r requirements.py38.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.py38.txt
 
 # OpenCV
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
@@ -293,15 +306,8 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.19.2/cmake-3.19.2-Linux-x86_64.sh \
-         -q -O /tmp/cmake-install.sh && \
-    chmod u+x /tmp/cmake-install.sh && \
-    mkdir /usr/bin/cmake && \
-    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
-    rm /tmp/cmake-install.sh
-
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.1"
+ENV OPENCV_VERSION="4.5.2"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -314,7 +320,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D BUILD_opencv_java=OFF \
       -D WITH_CUDA=ON \
       -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.1 \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.2 \
       -D ENABLE_FAST_MATH=1 \
       -D CUDA_FAST_MATH=1 \
       -D WITH_CUBLAS=1 \
@@ -326,7 +332,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D WITH_V4L=ON \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.1/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.2/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
@@ -351,15 +357,15 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     git clone --recursive --branch stable --depth 1 https://github.com/microsoft/LightGBM && \
     cd LightGBM && mkdir build && cd build && \
     cmake -DUSE_GPU=1 -DOpenCL_LIBRARY=/usr/local/cuda/lib64/libOpenCL.so -DOpenCL_INCLUDE_DIR=/usr/local/cuda/include/ .. && \
-    make OPENCL_HEADERS=/usr/local/cuda-10.1/targets/x86_64-linux/include LIBOPENCL=/usr/local/cuda-10.1/targets/x86_64-linux/lib -j$(nproc) && \
+    make OPENCL_HEADERS=/usr/local/cuda-10.2/targets/x86_64-linux/include LIBOPENCL=/usr/local/cuda-10.2/targets/x86_64-linux/lib -j$(nproc) && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
 
 # Install Open UCX
 WORKDIR /tmp
-RUN wget https://github.com/openucx/ucx/archive/v1.9.0.tar.gz && \
-    tar xvf v1.9.0.tar.gz && \
-    cd ucx-1.9.0 && \
+RUN wget https://github.com/openucx/ucx/archive/v1.10.0.tar.gz && \
+    tar xvf v1.10.0.tar.gz && \
+    cd ucx-1.10.0 && \
     bash ./autogen.sh && \
     mkdir build && \
     cd build && \
@@ -370,7 +376,7 @@ RUN wget https://github.com/openucx/ucx/archive/v1.9.0.tar.gz && \
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
-    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-${OPENMPI}.tar.gz && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-${OPENMPI}.tar.gz && \
     tar zxf openmpi-${OPENMPI}.tar.gz && \
     cd openmpi-${OPENMPI} && \
     ./configure --enable-orterun-prefix-by-default --with-cuda --with-ucx=/usr/local/ucx --enable-mca-no-build=btl-uct && \
@@ -380,11 +386,10 @@ RUN mkdir /tmp/openmpi && \
     rm -rf /tmp/openmpi*
 
 # Install OpenSSH for MPI to communicate between containers
-RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
-    mkdir -p /var/run/sshd
 
 # Allow OpenSSH to talk to containers without asking for confirmation
-RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
+RUN mkdir -p /var/run/sshd && \
+    cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
     echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
     mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
 
@@ -397,26 +402,20 @@ RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
 # Configure OpenMPI to run good defaults:
 RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
-# Install OpenSSH for MPI to communicate between containers
-RUN mkdir -p /var/run/sshd
-
-# Allow OpenSSH to talk to containers without asking for confirmation
-RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
-    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
-    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
-
-# install git-lfs
+# Install git-lfs
 WORKDIR /tmp
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.1/git-lfs-linux-amd64-v2.13.1.tar.gz && \
-    tar -zxf git-lfs-linux-amd64-v2.13.1.tar.gz && \
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.3/git-lfs-linux-amd64-v2.13.3.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.13.3.tar.gz && \
     bash install.sh && \
     rm -rf /tmp/*
 
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.8.0/code-server-3.8.0-linux-amd64.tar.gz \
+# Install VSCode
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.2/code-server-3.9.2-linux-amd64.tar.gz \
   | tar -C /usr/local/lib -xz && \
-    mv /usr/local/lib/code-server-3.8.0-linux-amd64 /usr/local/lib/code-server-3.8.0 && \
-    ln -s /usr/local/lib/code-server-3.8.0/bin/code-server /usr/local/bin/code-server
+    mv /usr/local/lib/code-server-3.9.2-linux-amd64 /usr/local/lib/code-server-3.9.2 && \
+    ln -s /usr/local/lib/code-server-3.9.2/bin/code-server /usr/local/bin/code-server
 
+# Install Jupyterlab extensions
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
@@ -425,17 +424,16 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
-#    jupyter labextension install @jupyterlab/hdf5 
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-    jupyter labextension install @pyviz/jupyterlab_pyviz && \
-    jupyter labextension install @bokeh/jupyter_bokeh && \
-    jupyter labextension install --no-build jupyterlab-nvdashboard && \
+    jupyter labextension install @jupyterlab/toc && \
+#    jupyter labextension install @bokeh/jupyter_bokeh && \
     jupyter lab build
 
+# Clean up
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
-    python3 -m pip uninstall -y  tensorboard-plugin-wit && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
