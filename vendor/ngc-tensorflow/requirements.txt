@@ -434,7 +434,7 @@ websocket-client==0.59.0
 websockets==9.0.1
 Werkzeug==1.0.0
 widgetsnbextension==3.5.1
-wrapt==1.11.2
+wrapt
 yapf==0.29.0
 yarl==1.4.2
 zict==1.0.0
