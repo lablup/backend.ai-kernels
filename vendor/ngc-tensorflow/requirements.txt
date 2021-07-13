@@ -104,7 +104,7 @@ fire==0.4.0
 flake8==3.7.9
 Flask==1.1.2
 Flask-Compress==1.9.0
-flatbuffers
+flatbuffers==2.0
 folium==0.10.0
 funcy==1.13
 future
