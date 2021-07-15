@@ -174,7 +174,7 @@ json-tricks==3.14.0
 json5==0.9.2
 jsonpickle==1.5.2
 jsonschema==3.2.0
-jupyter==1.0.0
+jupyter
 jupyter-client==6.1.11
 jupyter-console==6.2.0
 jupyter-contrib-core==0.3.3
