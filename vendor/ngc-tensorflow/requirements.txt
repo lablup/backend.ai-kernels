@@ -376,7 +376,7 @@ scikit-image==0.16.2
 scikit-learn
 scikit-nni
 scikit-optimize
-scikit-plot
+scikit_plot==0.3.5
 scikit-surprise
 scooby==0.5.5
 scs==2.1.3
