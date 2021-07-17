@@ -375,7 +375,7 @@ schema==0.7.1
 scikit-image==0.16.2
 scikit-learn
 scikit-nni
-scikit-optimize
+scikit_optimize==0.8.0
 scikit_plot==0.3.5
 scikit-surprise==1.1.0
 scooby==0.5.5
@@ -433,6 +433,7 @@ webencodings==0.5.1
 websocket-client==0.59.0
 websockets==9.0.1
 Werkzeug==1.0.0
+wheel==0.36.2
 widgetsnbextension==3.5.1
 wrapt
 yapf==0.29.0
