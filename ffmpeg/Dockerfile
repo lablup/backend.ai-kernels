@@ -170,10 +170,10 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	xz-utils \
 	yasm \
   	openssh-client openssh-server \
-        build-essential \
-        gcc-6 g++-6 make \
-        git subversion \
-        zlib1g-dev \
+    build-essential \
+    gcc-6 g++-6 make \
+    git subversion \
+    zlib1g-dev \
 	&& \
     ln -s /usr/include/libv4l1-videodev.h /usr/include/videodev.h && \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
@@ -227,11 +227,11 @@ RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         libboost-all-dev \
-	libboost-dev \
-	libboost-filesystem-dev \
-	libboost-python-dev \
-	libboost-system-dev \
-	libboost-thread-dev
+	    libboost-dev \
+	    libboost-filesystem-dev \
+    	libboost-python-dev \
+	    libboost-system-dev \
+	    libboost-thread-dev
 
 RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
         apt-get install -y python${PYTHON_VERSION}-distutils python-apt ; \
@@ -260,9 +260,9 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 
 RUN python3 -m pip install --no-cache-dir \
     	    Cython==0.29.21 \
-	    tornado==6.1 \
-	    nvidia-pyindex==1.0.5 \
-	    matplotlib==3.3.3 
+	        tornado==6.1 \
+	        nvidia-pyindex==1.0.5 \
+	        matplotlib==3.3.3 
 
 # Install libtensorflow
 RUN curl -fsSL https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-2.4.1.tar.gz | tar -xzC /usr/local -f -
@@ -528,7 +528,6 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D WITH_XIMEA=OFF \
       -D WITH_XINE=OFF \
       -D WITH_ZLIB=ON \
-#      -G Ninja \
       -D CMAKE_INSTALL_PREFIX=/usr/local \
       .. 2>&1 | tee cmake_messages.txt 
 RUN cd /tmp/opencv-4.5.2/cmake_binary && make -j$(nproc) && make install 
