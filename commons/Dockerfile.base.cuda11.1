@@ -52,6 +52,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	fonts-nanum \
 	fonts-nanum-coding \
 	fonts-nanum-extra \
+    gcc \
 	g++ \
 	gfortran \
 	htop \
@@ -88,28 +89,27 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	yasm \
 	zip \
   	openssh-client \
-        build-essential \
-        gcc \
-        git \
-        libavformat-dev \
-        libcurl3-dev \
-        libfreetype6-dev \
-        libgeos-dev libgeos++-dev \
-        libhdf5-serial-dev \
-        libjpeg-dev \
-        libmpdec2 \
-        libpng-dev \
-        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
-        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev \
-        libssl-dev \
-        libtiff-dev \
-        libzmq3-dev \
-        pkg-config \
-        python${PYTHON_VERSION} \
-        python${PYTHON_VERSION}-dev \
-        vim \
-        wget \
-        zlib1g-dev && \
+    build-essential \
+    git \
+    libavformat-dev \
+    libcurl3-dev \
+    libfreetype6-dev \
+    libgeos-dev libgeos++-dev \
+    libhdf5-serial-dev \
+    libjpeg-dev \
+    libmpdec2 \
+    libpng-dev \
+    libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+    libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev \
+    libssl-dev \
+    libtiff-dev \
+    libzmq3-dev \
+    pkg-config \
+    python${PYTHON_VERSION} \
+    python${PYTHON_VERSION}-dev \
+    vim \
+    wget \
+    zlib1g-dev && \
     echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
@@ -190,10 +190,6 @@ RUN mkdir -p /opt/oracle && \
     rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig
-
-RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
-        apt-get install -y python${PYTHON_VERSION}-distutils python-apt ; \
-    fi
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 
 
@@ -278,7 +274,7 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
 	libgstreamer1.0-dev \
 	libgstreamer-plugins-base1.0-dev \
 	libgtk-3-dev \
-        libtbb-dev \
+    libtbb-dev \
 	libatlas-base-dev \
 	libdc1394-22-dev \
 	libxvidcore-dev \
