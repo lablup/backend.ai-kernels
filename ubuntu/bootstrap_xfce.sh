@@ -70,5 +70,5 @@ chown -R $LOCAL_USER_ID:$LOCAL_GROUP_ID /home/work
 #/opt/kernel/su-exec $LOCAL_USER_ID:$LOCAL_GROUP_ID /usr/bin/vncserver -geometry 1600x1200
 
 #echo ">> VNC server is started."
-
+/etc/init.d/xrdp restart
 supervisord -c /etc/supervisor/supervisord.conf

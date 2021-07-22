@@ -102,6 +102,16 @@ RUN apt update \
     && apt autoclean -y \
     && apt autoremove -y \
     && rm -rf /var/lib/apt/lists/*
+#RUN sed -i.bak '/fi/a #xrdp multiple users configuration \n xfce-session \n' /etc/xrdp/startwm.sh # Disable when using MATE
+
+####### MATE
+
+RUN apt update \
+	&& apt install mate-core mate-desktop-environment mate-notification-daemon \
+    && apt autoclean -y \
+    && apt autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+RUN sed -i.bak '/fi/a #xrdp multiple users configuration \n mate-session \n' /etc/xrdp/startwm.sh
 
 ####### Last setup
 
@@ -123,7 +133,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.preferred.shmem="512m" \
       ai.backend.base-distro="ubuntu18.04" \
       ai.backend.runtime-type="app" \
-      ai.backend.service-ports="xfce:http:80,vnc:http:5900,xrdp:http:3389"
+      ai.backend.service-ports="xfce:http:80,vnc:http:5900,xrdp:preopen:3389"
 
 COPY ./service-defs /etc/backend.ai/service-defs
 COPY policy.yml /etc/backend.ai/jail/policy.yml
