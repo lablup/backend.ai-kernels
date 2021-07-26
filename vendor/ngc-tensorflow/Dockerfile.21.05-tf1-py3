@@ -25,7 +25,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
+    python3 -m pip install -U setuptools pip
 
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
