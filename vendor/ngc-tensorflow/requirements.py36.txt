@@ -222,6 +222,7 @@ kubernetes
 lazy-object-proxy
 lesscpy
 librosa
+libcst==0.3.18
 lightgbm
 lime
 llvmlite
