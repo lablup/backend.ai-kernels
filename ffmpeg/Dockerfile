@@ -168,7 +168,6 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	x264 \
 	xvfb \
 	xz-utils \
-	yasm \
   	openssh-client openssh-server \
     build-essential \
     gcc-6 g++-6 make \
@@ -285,7 +284,7 @@ RUN set -xe && \
 # Installing YASM
 WORKDIR /usr/local/ffmpeg_sources
 RUN set -xe && \
-    wget -O /usr/local/ffmpeg_sources/yasm.tar.gz \
+    wget -O --no-check-certificate /usr/local/ffmpeg_sources/yasm.tar.gz \
     	 https://www.tortall.net/projects/yasm/releases/yasm-${YASM_VER}.tar.gz && \
     mkdir -p /usr/local/ffmpeg_sources/yasm && \
     tar xzvf /usr/local/ffmpeg_sources/yasm.tar.gz \
