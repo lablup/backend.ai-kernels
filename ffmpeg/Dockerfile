@@ -284,7 +284,7 @@ RUN set -xe && \
 # Installing YASM
 WORKDIR /usr/local/ffmpeg_sources
 RUN set -xe && \
-    wget -O --no-check-certificate /usr/local/ffmpeg_sources/yasm.tar.gz \
+    wget --no-check-certificate -O /usr/local/ffmpeg_sources/yasm.tar.gz \
     	 https://www.tortall.net/projects/yasm/releases/yasm-${YASM_VER}.tar.gz && \
     mkdir -p /usr/local/ffmpeg_sources/yasm && \
     tar xzvf /usr/local/ffmpeg_sources/yasm.tar.gz \
@@ -411,9 +411,8 @@ RUN ln -s /usr/include/x86_64-linux-gnu/cudnn_v7.h /usr/local/cuda/include/cudnn
 
 # OpenCV
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.2"
-COPY libnvcuvid.so.455.45.01 /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1
-RUN ln -s /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 /usr/lib/libnvcuvid.so.1
+ENV OPENCV_VERSION="4.5.3"
+#RUN ln -s /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 /usr/lib/libnvcuvid.so.1
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -478,7 +477,7 @@ RUN cd /tmp/opencv-${OPENCV_VERSION}/cmake_binary && \
       -D INSTALL_PYTHON_EXAMPLES=OFF \
       -D OPENCV_DNN_CUDA=ON \
       -D OPENCV_ENABLE_NONFREE=ON \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.2/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.3/modules" \
       -D OPENCV_GENERATE_PKGCONFIG=ON \
       -D OPENCV_SKIP_PYTHON_LOADER=ON \
       -D PYTHON_DEFAULT_EXECUTABLE=python3 \
