@@ -5,8 +5,8 @@ ARG CUDA=10.1
 ARG LIBNVINFER=6.0.1-1
 ARG LIBNVINFER_MAJOR_VERSION=6
 ENV CUDNN_VERSION=7.6.5.32
-ENV NCCL=2.7.8
-ENV NCCL_VERSION=2.7.8-1+cuda10.1
+ENV NCCL=2.8.3
+ENV NCCL_VERSION=2.8.3-1+cuda10.1
 ENV MLNX_OFED_VERSION=5.1-2.3.7.1
 ENV MKL_VERSION=2020.3
 ENV MKL_BUILD=279
@@ -19,7 +19,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES video,compute,utility
 ARG NASM_VER="2.15.05"
 ARG YASM_VER="1.3.0"
 ARG LAME_VER="3.100"
-ARG FFMPEG_VER="4.3.2"
+ARG FFMPEG_VER="4.4"
 
 # Python 3.8 is supported by Ubuntu Bionic out of the box
 ARG python=3.6
@@ -179,8 +179,9 @@ RUN rm -fr /var/lib/apt/lists/* && \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
 
 WORKDIR /tmp
-COPY nccl_2.7.8-1+cuda10.1_x86_64.txz .
-RUN tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda10.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
+WORKDIR /tmp
+RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.8/nccl_2.8.3-1+cuda10.1_x86_64.txz -O && \
+    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda10.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
     tar --no-same-owner --keep-old-files --lzma -xvf  nccl_${NCCL}-1+cuda10.1_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
     rm nccl_${NCCL}-1+cuda10.1_x86_64.txz && \
     ldconfig 
