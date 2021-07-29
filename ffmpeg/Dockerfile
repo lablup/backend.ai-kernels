@@ -366,7 +366,8 @@ RUN set -xe && \
         git clone https://github.com/FFmpeg/nv-codec-headers && \
     cd nv-codec-headers && \
     make -j$(nproc) && \
-    make install
+    make install 
+
 
 WORKDIR /usr/local/ffmpeg_sources
 RUN set -xe && \
@@ -392,15 +393,16 @@ RUN set -xe && \
 	--enable-libx265 \
 	--enable-cuda \
 	--enable-cuvid \
+        --enable-cuda-sdk \
 	--enable-nvenc \
+	--enable-nonfree \
 	--enable-libnpp \
-	--enable-shared \
 	--enable-pic \
 	--enable-indev=v4l2 \
 	--enable-libtensorflow \
 	--extra-cflags=-I/usr/local/cuda/include \
 	--extra-ldflags=-L/usr/local/cuda/lib64 \
-	--enable-nonfree && \
+	&& \
     make -j$(nproc) && \
     make install && \
     ldconfig
