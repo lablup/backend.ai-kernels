@@ -262,6 +262,7 @@ nest-asyncio
 netifaces
 networkx
 nltk
+nose
 notebook
 numba
 numexpr
