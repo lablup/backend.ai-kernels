@@ -167,6 +167,7 @@ ipywidgets
 iso8601
 isort
 itsdangerous
+jax
 jaxlib
 jedi
 Jinja2
