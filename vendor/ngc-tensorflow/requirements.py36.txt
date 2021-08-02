@@ -43,6 +43,7 @@ certifi
 certipy
 cffi
 chardet
+chex
 Click
 click-plugins
 cligj
@@ -279,6 +280,7 @@ pandocfilters==1.4.2
 parso==0.7.0
 pathspec==0.7.0
 patsy==0.5.1
+partd
 pbr==5.5.0
 pexpect==4.8.0
 pickleshare==0.7.5
