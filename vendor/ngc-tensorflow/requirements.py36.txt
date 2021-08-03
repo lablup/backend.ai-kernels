@@ -103,6 +103,7 @@ featuretools
 filelock
 Fiona
 fire
+flax
 flake8
 Flask
 Flask-Compress
