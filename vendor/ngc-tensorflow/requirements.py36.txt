@@ -79,6 +79,7 @@ descartes
 dill
 distributed
 dm-haiku
+dm_tree
 docker
 docopt
 docutils
