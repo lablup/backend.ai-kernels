@@ -108,6 +108,7 @@ Flask
 Flask-Compress
 flatbuffers
 folium
+fsspec
 funcy
 future
 gast
