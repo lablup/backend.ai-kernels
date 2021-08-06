@@ -121,7 +121,7 @@ geoplotlib
 gin-config
 gitdb
 GitPython
-google-api-core
+google_api_core==1.31.0
 google-api-python-client
 google-apitools
 google-auth
@@ -274,7 +274,6 @@ numpy
 oauth2client
 oauthenticator
 oauthlib
-opencv-python
 opt-einsum==3.2.0
 osqp==0.5.0
 packaging==20.3
@@ -282,6 +281,7 @@ pamela==1.0.0
 pandas==1.1.5
 pandasgui==0.2.7
 pandocfilters==1.4.2
+partd==1.1.0
 parso==0.7.0
 pathspec==0.7.0
 patsy==0.5.1
