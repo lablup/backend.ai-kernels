@@ -1,0 +1,24 @@
+FROM cr.backend.ai/testing/julia:1.5-ubuntu20.04
+
+#add IJulia package to make Julia kernel available in jupyter
+ENV JULIA_DEPOT_PATH /opt/julia
+ENV JULIA_PROJECT ""
+
+RUN julia -e 'using Pkg; Pkg.add("Flux"); using Flux;'
+COPY kernel.011.json /usr/local/share/jupyter/kernels/julia-1.5/kernel.json
+COPY logo-32x32.png /usr/local/share/jupyter/kernels/julia-1.5/logo-32x32.png
+COPY logo-64x64.png /usr/local/share/jupyter/kernels/julia-1.5/logo-64x64.png
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.base-distro="ubuntu20.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8070,jupyterlab:http:8090"
+ENV JULIA_DEPOT_PATH /home/work/.julia:/opt/julia
+ENV JULIA_PROJECT /home/work/.julia
+# vim: ft=dockerfile
