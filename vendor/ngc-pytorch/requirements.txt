@@ -129,7 +129,7 @@ jupyter-lsp==1.2.0
 jupyter-latex-envs==1.4.6
 jupyter-nbextensions-configurator==0.4.1
 jupyter-server-proxy==1.2.0
-jupyterlab==3.0.16
+jupyterlab
 jupyterlabutils
 jupyterlab-git
 jupyterlab-github==2.0.0

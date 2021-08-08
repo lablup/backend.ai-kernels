@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/pytorch:21.06-py3
+FROM nvcr.io/nvidia/pytorch:21.07-py3
 # NVIDIA PyTorch with Python 3.8 (CONDA)
 
 
@@ -197,8 +197,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-#    jupyter labextension install @pyviz/jupyterlab_pyviz && \
-#    jupyter labextension install @bokeh/jupyter_bokeh && \
     jupyter lab build
 
 RUN apt autoclean && \
@@ -210,7 +208,7 @@ RUN apt autoclean && \
 
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "PyTorch 1.9 (NGC 21.06/Python 3.8 Conda) on Backend.AI" && \
+        --display-name "PyTorch 1.10 (NGC 21.07/Python 3.8 Conda) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics

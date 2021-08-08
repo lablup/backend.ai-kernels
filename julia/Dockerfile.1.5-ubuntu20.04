@@ -86,7 +86,7 @@ RUN julia -e 'using IJulia' && \
     chmod -R 755 /opt/julia/compiled
 SHELL ["/bin/sh", "-c"]
 # Install ipython kernelspec
-COPY kernel.json /usr/local/share/jupyter/kernels/julia-1.5/kernel.json
+COPY kernel.1.5.json /usr/local/share/jupyter/kernels/julia-1.5/kernel.json
 COPY logo-32x32.png /usr/local/share/jupyter/kernels/julia-1.5/logo-32x32.png
 COPY logo-64x64.png /usr/local/share/jupyter/kernels/julia-1.5/logo-64x64.png
 
