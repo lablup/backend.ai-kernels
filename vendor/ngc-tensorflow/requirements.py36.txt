@@ -272,7 +272,7 @@ numba
 numexpr
 numpy
 oauth2client
-oauthenticator
+oauthenticator-0.12.1
 oauthlib==3.1.0
 opt-einsum==3.2.0
 osqp==0.5.0
