@@ -446,5 +446,5 @@ widgetsnbextension==3.5.1
 wrapt==1.11.2
 yapf==0.29.0
 yarl==1.4.2
-zict
+zict==1.0.0
 zipp==3.4.2
