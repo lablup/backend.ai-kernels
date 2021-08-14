@@ -476,7 +476,6 @@ uvloop==0.14.0
 vecstack==0.4.0
 versioneer==0.18
 vtk==9.0.1
-wcwidth==0.1.8
 wcwidth==0.2.5
 webencodings==0.5.1
 websocket-client==0.59.0
