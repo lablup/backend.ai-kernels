@@ -8,9 +8,12 @@ RUN apt-get update && \
 	fonts-nanum-extra \
 	htop \
 	ncurses-term \
+	libfontconfig1-dev \
 	libasound2-dev \
         libsm6 libxext6 libxrender-dev mercurial libgdal-dev python3-gdal \
         libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
+	libfreetype6-dev libjpeg-dev libpng-dev libarmadillo-dev \
+	libgeotiff-dev libhdf4-alt-dev libhdf5-dev libnetcdf-dev libtiff-dev \
         libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev
   
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -28,6 +31,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
     python3 -m pip install -U setuptools pip
 
+    
 # install NLP packages *mecab-ko & khai*
 RUN apt-get update && \
     apt-get install -y \
@@ -121,7 +125,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     make -j$(nproc) && \
     make install && \
     cd /tmp && \
-    python3 -m pip install --no-cache-dir opencv-python && \
+    python3 -m pip install --no-cache-dir opencv-python==4.5.2.54 && \
     rm -fr opencv* 
 
 
