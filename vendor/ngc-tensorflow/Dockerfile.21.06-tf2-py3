@@ -153,8 +153,8 @@ RUN mkdir -p /opt/oracle && \
 WORKDIR /tmp
 COPY ./requirements.txt /tmp
 RUN python3 -m pip install -U setuptools pip && \
-    python3 -m pip install --no-cache-dir Cython python-lsp-server && \
-    python3 -m pip install --no-cache-dir -r requirements.txt && \
+    python3 -m pip install --no-cache-dir Cython python-lsp-server 
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install bashtop
