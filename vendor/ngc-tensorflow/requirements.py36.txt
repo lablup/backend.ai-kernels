@@ -1,4 +1,3 @@
-#-e /usr/local/lib/python3.8/dist-packages
 Babel
 Brotli
 Click
@@ -197,27 +196,25 @@ imageio
 imbalanced-learn
 importlib-metadata
 importlib-resources
-iniconfig==1.1.1
+iniconfig
 ipykernel
-ipykernel==5.5.3
 ipyparallel
 ipython
-ipython-genutils==0.2.0
-ipython==7.22.0
+ipython-genutils
+ipython
 ipywidgets
 iso8601
 isort
 itsdangerous
-itsdangerous==1.1.0
 jax
 jaxlib
-jedi==0.18.0
+jedi
 jmespath
-joblib==0.17.0
+joblib
 json-tricks
-json5==0.9.5
+json5
 jsonpickle
-jsonschema==3.2.0
+jsonschema
 jupyter
 jupyter-client
 jupyter-console
@@ -267,10 +264,10 @@ llvmlite
 lunardate
 lxml
 maproxy
-markdown-it-py==0.6.2
+markdown-it-py
 matplotlib
 mccabe
-mdit-py-plugins==0.2.6
+mdit-py-plugins
 meshio
 mimeparse
 mistune
@@ -306,7 +303,7 @@ nvidia-dali-cuda110==1.0.0
 nvidia-dali-tf-plugin-cuda110==1.0.0
 #nvidia-tensorboard @ file:///nvidia/opt/tensorboard_install/nvidia_tensorboard-1.15.0%2Bnv21.04-py3-none-any.whl
 #nvidia-tensorboard-plugin-dlprof @ file:///nvidia/opt/tensorboard_install/nvidia_tensorboard_plugin_dlprof-1.2.0-py3-none-any.whl
-nvtx-plugins==0.1.8
+nvtx-plugins
 oauth2client==4.1.2
 oauthenticator==0.12.1
 oauthlib==3.1.0
