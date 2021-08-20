@@ -63,7 +63,7 @@ avro-python3
 backcall
 bayesian-optimization
 beautifulsoup4==4.9.1
-black
+black==21.6b0
 bleach==3.3.0
 bokeh==2.3.0
 #boto
