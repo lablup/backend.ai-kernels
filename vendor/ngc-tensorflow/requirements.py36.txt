@@ -70,8 +70,8 @@ boltons
 #boto
 #boto3
 botocore
-branca
-cachetools
+branca==0.4.1
+cachetools==4.1.1
 catboost==0.25
 category_encoders==2.1.0
 certifi==2020.11.8
