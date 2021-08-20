@@ -61,7 +61,7 @@ audioread
 autopep8
 avro-python3
 backcall
-bayesian-optimization
+bayesian_optimization==1.0.3
 beautifulsoup4==4.9.1
 black==21.6b0
 bleach==3.3.0
@@ -78,7 +78,7 @@ certifi==2020.11.8
 certipy==0.1.2
 cffi==1.14.4
 chardet==4.0.0
-chex
+chex==0.0.7
 click-plugins
 click
 cligj
