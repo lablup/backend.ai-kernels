@@ -72,10 +72,10 @@ boltons
 botocore
 branca
 cachetools
-catboost
+catboost==0.25
 category_encoders==2.1.0
-certifi
-certipy
+certifi==2020.11.8
+certipy==0.1.2
 cffi==1.14.4
 chardet
 chex
