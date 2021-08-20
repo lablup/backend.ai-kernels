@@ -57,8 +57,8 @@ async-timeout
 atlas
 atomicwrites
 attrs
-audioread
-autopep8
+audioread==2.1.7
+autopep8==1.4.4
 avro-python3
 backcall
 bayesian_optimization==1.0.3
@@ -78,7 +78,7 @@ certifi==2020.11.8
 certipy==0.1.2
 cffi==1.14.4
 chardet==4.0.0
-chex==0.0.7
+chex
 click-plugins
 click
 cligj
