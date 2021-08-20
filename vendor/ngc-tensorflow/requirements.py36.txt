@@ -76,7 +76,7 @@ catboost
 category_encoders==2.1.0
 certifi
 certipy
-cffi
+cffi==1.14.4
 chardet
 chex
 click-plugins
