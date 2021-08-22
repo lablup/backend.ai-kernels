@@ -29,11 +29,11 @@ PyYAML
 Pygments
 PythonWebHDFS
 QtPy
-SQLAlchemy
-Send2Trash
-Shapely
-SimpleITK
-SoundFile
+SQLAlchemy==1.4.22
+Send2Trash==1.8.0
+Shapely==1.7.1
+SimpleITK==2.1.0
+SoundFile==0.10.3.post1
 Werkzeug
 absl-py==0.13.0
 adanet==0.9.0
