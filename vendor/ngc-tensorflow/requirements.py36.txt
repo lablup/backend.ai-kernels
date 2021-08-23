@@ -4,8 +4,8 @@ Click
 Cython
 EasyProcess
 Fiona
-Flask-Compress
-Flask
+Flask_Compress==1.10.0
+Flask==2.0.1
 GDAL==3.3.1
 GitPython==3.1.14
 HeapDict==0.1.5
