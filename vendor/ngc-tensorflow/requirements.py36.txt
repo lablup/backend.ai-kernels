@@ -6,7 +6,7 @@ EasyProcess
 Fiona
 Flask-Compress
 Flask
-GDAL
+GDAL==3.3.1
 GitPython==3.1.14
 HeapDict==0.1.5
 JPype1==1.2.1
