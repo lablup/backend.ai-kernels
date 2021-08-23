@@ -1,9 +1,9 @@
-Babel
-Brotli
-Click
+Babel==2.9.1
+Brotli==1.0.9
+Click==8.0.1
 Cython
-EasyProcess
-Fiona
+EasyProcess==0.3
+Fiona==1.8.19
 Flask_Compress==1.10.0
 Flask==2.0.1
 GDAL==3.3.1
