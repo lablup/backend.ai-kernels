@@ -155,7 +155,7 @@ networkx==2.4
 ngraph-core==0.26.0
 ngraph-onnx==0.24.0
 ngraph-tensorflow-bridge==0.18.0
-nltk==3.2.5
+nltk==3.4.5
 numba==0.48.0
 numexpr==2.7.0
 oauthlib==3.1.0
