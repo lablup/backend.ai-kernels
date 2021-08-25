@@ -169,6 +169,7 @@ jupyterlab-launcher==0.13.1
 jupyterlab-nvdashboard==0.4.0
 jupyterlab-pygments==0.1.2
 jupyterlab-server==1.2.0
+jupyterlab-translate==0.1.1
 jupyterlabutils==0.10.0
 jupyterthemes==0.20.0
 jupytext==1.10.1
