@@ -98,7 +98,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D BUILD_opencv_java=OFF \
       -D WITH_CUDA=ON \
       -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.2 \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.3 \
       -D ENABLE_FAST_MATH=1 \
       -D CUDA_FAST_MATH=1 \
       -D WITH_CUBLAS=1 \
@@ -165,22 +165,22 @@ RUN git clone https://github.com/aristocratos/bashtop.git && \
 
 # install git-lfs
 WORKDIR /tmp
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.2/git-lfs-linux-amd64-v2.13.2.tar.gz && \
-    tar -zxf git-lfs-linux-amd64-v2.13.2.tar.gz && \
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v2.13.3/git-lfs-linux-amd64-v2.13.3.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v2.13.3.tar.gz && \
     bash install.sh && \
     rm -rf /tmp/*
 
 # install code-server
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.0/code-server-3.9.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
-    mv /usr/local/lib/code-server-3.9.0-linux-amd64 /usr/local/lib/code-server-3.9.0 && \
-    ln -s /usr/local/lib/code-server-3.9.0/bin/code-server /usr/local/bin/code-server
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.11.1/code-server-3.11.1-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-3.11.1-linux-amd64 /usr/local/lib/code-server-3.11.1 && \
+    ln -s /usr/local/lib/code-server-3.11.1/bin/code-server /usr/local/bin/code-server
 
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
-    wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-4.0.5.tar.gz && \
-    tar zxf openmpi-4.0.5.tar.gz && \
-    cd openmpi-4.0.5 && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz && \
+    tar zxf openmpi-4.1.1.tar.gz && \
+    cd openmpi-4.1.1 && \
     ./configure --enable-orterun-prefix-by-default && \
     make -j $(nproc) all && \
     make install && \
@@ -193,9 +193,9 @@ RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
     chmod a+x /usr/local/bin/mpirun
 
 RUN python3 -m pip install --no-cache-dir \
-    	    mpi4py==3.0.3 \
-	    nni==2.0 \
-	    mlflow==1.14.1 \
+    	    mpi4py==3.1.1 \
+	    nni==2.4 \
+	    mlflow==1.19.0 \
 	    scikit-nni==0.2.1
 
 # Configure OpenMPI to run good defaults:
