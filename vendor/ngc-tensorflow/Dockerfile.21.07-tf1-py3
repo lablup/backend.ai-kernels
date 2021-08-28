@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/tensorflow:21.05-tf1-py3
+FROM nvcr.io/nvidia/tensorflow:21.07-tf1-py3
 # NVIDIA DIGITS runs on Python 3.8
 
 RUN apt-get update && \
@@ -85,7 +85,7 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
 	libhdf5-dev
 
 WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.2"
+ENV OPENCV_VERSION="4.5.3"
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -98,7 +98,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D BUILD_opencv_java=OFF \
       -D WITH_CUDA=ON \
       -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.2 \
+      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.4 \
       -D ENABLE_FAST_MATH=1 \
       -D CUDA_FAST_MATH=1 \
       -D WITH_CUBLAS=1 \
@@ -110,7 +110,7 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
       -D WITH_V4L=ON \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.2/modules" \
+      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.3/modules" \
       -D CMAKE_BUILD_TYPE=RELEASE \
       -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
       -D PYTHON_EXECUTABLE=$(which python3) \
@@ -216,7 +216,7 @@ COPY ./service-defs-tf1 /etc/backend.ai/service-defs
 COPY runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
 
 # Install ipython kernelspec
-RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.8 (NGC 21.05 / TensorFlow 1.15) on Backend.AI" && \
+RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.8 (NGC 21.07 / TensorFlow 1.15) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
