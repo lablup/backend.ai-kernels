@@ -1,5 +1,6 @@
 FROM lablup/common-base:py38-cuda11.3
 
+RUN python3 -m pip install -U pip setuptools
 RUN python3 -m pip install --no-cache-dir --upgrade \
 	    -q git+https://github.com/google-research/tensorflow_constrained_optimization
 	    
@@ -69,10 +70,12 @@ RUN python3 -m pip uninstall -y numpy scipy && \
 	    tensorboard numpy scipy
 	    
 RUN python3 -m pip install --extra-index-url \
-       https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 \
+        https://developer.download.nvidia.com/compute/redist \
+	--upgrade nvidia-dali-cuda110 \
        && \
     python3 -m pip install --extra-index-url \
-       https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda100
+        https://developer.download.nvidia.com/compute/redist \
+	--upgrade nvidia-dali-tf-plugin-cuda110 
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
