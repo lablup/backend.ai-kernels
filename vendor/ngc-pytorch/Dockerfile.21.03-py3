@@ -48,6 +48,9 @@ RUN apt-get update && \
 	libxrender-dev \
 	libxvidcore-dev \
 	mercurial \
+	net-tools \
+	debhelper \
+	dkms \
 	ncurses-term \
 	protobuf-compiler \
 	v4l-utils \	
@@ -58,6 +61,29 @@ RUN apt-get update && \
 
 
 RUN update-alternatives --install /opt/conda/bin/python python /opt/conda/bin/python3 2
+
+# Install Open UCX
+WORKDIR /tmp
+RUN wget https://github.com/openucx/ucx/archive/v1.10.0.tar.gz && \
+    tar xvf v1.10.0.tar.gz && \
+    cd ucx-1.10.0 && \
+    bash ./autogen.sh && \
+    mkdir build && \
+    cd build && \
+    ../configure --prefix=/usr/local/ucx && \
+    make -j$(nproc) && \
+    make install 
+
+# nvidia-peer
+WORKDIR /tmp
+RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory && \
+    cd /tmp/nv_peer_memory && \
+    ./build_module.sh && \
+    cd /tmp && \
+    tar xzf /tmp/nvidia-peer-memory_1.1.orig.tar.gz && \
+    cd /tmp/nvidia-peer-memory-1.1 && \
+    dpkg-buildpackage -us -uc && \
+    dpkg -i /tmp/nvidia-peer-memory_1.1-0_all.deb
 
 WORKDIR /tmp
 # install NLP packages *mecab-ko & khai*
