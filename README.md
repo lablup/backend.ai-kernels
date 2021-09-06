@@ -19,7 +19,9 @@ Here we list the latest versions of our supported kernel images.
 | TensorFlow              | `lablup/python-tensorflow` | 2.1.2   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.2.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.3.2   | O     | O\*   | O          |     | Bundled w/Keras 2 |
-| TensorFlow              | `lablup/python-tensorflow` | 2.4.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 2.4.3   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 2.5.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 2.6.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | PyTorch                 | `lablup/python-torch`      | 1.3     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.4     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.5     | O     | O\*   | O          |     |                   |
