@@ -12,23 +12,14 @@ Here we list the latest versions of our supported kernel images.
 
 | Deep-Learning Framework | Image Name                 | Version | Batch | Query | Input Hook | TTY | Runtime Impl.     |
 |-------------------------|----------------------------|---------|-------|-------|------------|-----|-------------------|
-| TensorFlow              | `lablup/python-tensorflow` | 1.13.0  | O     | O\*   | O          |     | Bundled w/Keras 2 |
-| TensorFlow              | `lablup/python-tensorflow` | 1.14.0  | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 1.15.4  | O     | O\*   | O          |     | Bundled w/Keras 2 |
-| TensorFlow              | `lablup/python-tensorflow` | 2.0.3   | O     | O\*   | O          |     | Bundled w/Keras 2 |
-| TensorFlow              | `lablup/python-tensorflow` | 2.1.2   | O     | O\*   | O          |     | Bundled w/Keras 2 |
-| TensorFlow              | `lablup/python-tensorflow` | 2.2.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
-| TensorFlow              | `lablup/python-tensorflow` | 2.3.2   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.4.3   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.5.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.6.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
-| PyTorch                 | `lablup/python-torch`      | 1.3     | O     | O\*   | O          |     |                   |
-| PyTorch                 | `lablup/python-torch`      | 1.4     | O     | O\*   | O          |     |                   |
-| PyTorch                 | `lablup/python-torch`      | 1.5     | O     | O\*   | O          |     |                   |
-| PyTorch                 | `lablup/python-torch`      | 1.6     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.7     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.8     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.9     | O     | O\*   | O          |     |                   |
+| PyTorch                 | `lablup/python-torch`      | 1.10    | O     | O\*   | O          |     |                   |
 | CNTK                    | `lablup/python-cntk`       | 2.6     | O     | O\*   | O          |     |                   |
 | CNTK                    | `lablup/python-cntk`       | 2.7     | O     | O\*   | O          |     |                   |
 | MXnet                   | `lablup/python-mxnet`      | 1.4.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
@@ -75,6 +66,8 @@ Here we list the latest versions of our supported kernel images.
 | NGC-TensorFlow          | `lablup/ngc-tensorflow` | 20.12-tf2-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-TensorFlow          | `lablup/ngc-tensorflow` | 21.03-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-TensorFlow          | `lablup/ngc-tensorflow` | 21.03-tf2-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 21.07-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 21.07-tf2-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.07-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.08-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.09-py3     | O     | O\*   | O          |     |                   |
@@ -91,6 +84,8 @@ Here we list the latest versions of our supported kernel images.
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 20.10-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 20.11-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 20.12-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.03-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.07-py3     | O     | O\*   | O          |     |                   |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.07-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.08-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.09-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
