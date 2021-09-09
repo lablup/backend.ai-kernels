@@ -28,6 +28,8 @@ Here we list the latest versions of our supported kernel images.
 | MXnet                   | `lablup/python-mxnet`      | 1.7.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | All-in-one Environment  | `lablup/python-ff`         | 20.09   | O     | O\*   | O          |     |                   |
 | All-in-one Environment  | `lablup/python-ff`         | 21.01   | O     | O\*   | O          |     |                   |
+| All-in-one Environment  | `lablup/python-ff`         | 21.03   | O     | O\*   | O          |     |                   |
+| All-in-one Environment  | `lablup/python-ff`         | 21.08   | O     | O\*   | O          |     |                   |
 
 ### Warrented Images (NGC, Nvidia GPU Cloud)
 | Deep-Learning Framework | Image Name              | Version       | Batch | Query | Input Hook | TTY | Runtime Impl.     |
@@ -85,7 +87,11 @@ Here we list the latest versions of our supported kernel images.
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 20.11-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 20.12-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.03-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.04-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.05-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.06-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.07-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.08-py3     | O     | O\*   | O          |     |                   |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.07-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.08-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.09-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
