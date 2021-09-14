@@ -1,8 +1,6 @@
 FROM nvcr.io/nvidia/pytorch:21.03-py3
 # NVIDIA PyTorch with Python 3.8 (CONDA)
 
-
-
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
@@ -55,10 +53,9 @@ RUN apt-get update && \
 	protobuf-compiler \
 	v4l-utils \	
 	x264 \
-       	openjdk-8-jdk \
-        libsm6 \
-        libtbb-dev 
-
+    openjdk-8-jdk \
+    libsm6 \
+    libtbb-dev 
 
 RUN update-alternatives --install /opt/conda/bin/python python /opt/conda/bin/python3 2
 
@@ -73,17 +70,6 @@ RUN wget https://github.com/openucx/ucx/archive/v1.10.0.tar.gz && \
     ../configure --prefix=/usr/local/ucx && \
     make -j$(nproc) && \
     make install 
-
-# nvidia-peer
-WORKDIR /tmp
-RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory && \
-    cd /tmp/nv_peer_memory && \
-    ./build_module.sh && \
-    cd /tmp && \
-    tar xzf /tmp/nvidia-peer-memory_1.1.orig.tar.gz && \
-    cd /tmp/nvidia-peer-memory-1.1 && \
-    dpkg-buildpackage -us -uc && \
-    dpkg -i /tmp/nvidia-peer-memory_1.1-0_all.deb
 
 WORKDIR /tmp
 # install NLP packages *mecab-ko & khai*
@@ -110,46 +96,6 @@ RUN echo "Install mecab-ko-dic" && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
 
-# OpenCV
-WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.2"
-RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
-    wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
-    wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
-    unzip ${OPENCV_VERSION}.zip && \
-    unzip opencv-contrib.zip && \
-    mkdir opencv-${OPENCV_VERSION}/cmake_binary && \
-    cd opencv-${OPENCV_VERSION}/cmake_binary && \
-    cmake \
-      -DCMAKE_BUILD_TYPE=RELEASE \
-      -D BUILD_TIFF=ON \
-      -D BUILD_opencv_java=OFF \
-      -D WITH_CUDA=ON \
-      -D CUDA_NVCC_FLAGS=--expt-relaxed-constexpr \
-      -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.2 \
-      -D ENABLE_FAST_MATH=1 \
-      -D CUDA_FAST_MATH=1 \
-      -D WITH_CUBLAS=1 \
-      -D WITH_OPENGL=ON \
-      -D WITH_OPENCL=ON \
-      -D WITH_IPP=ON \
-      -D WITH_TBB=ON \
-      -D WITH_EIGEN=ON \
-      -D WITH_V4L=ON \
-      -D BUILD_TESTS=OFF \
-      -D BUILD_PERF_TESTS=OFF \
-      -D OPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-4.5.2/modules" \
-      -D CMAKE_BUILD_TYPE=RELEASE \
-      -D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
-      -D PYTHON_EXECUTABLE=$(which python3) \
-      -D PYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
-      -D PYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
-      .. 2>&1 | tee cmake_messages.txt && \
-    make -j$(nproc) && \
-    make install && \
-    cd /tmp && \
-    python3 -m pip install --no-cache-dir opencv-python && \
-    rm -fr opencv* 
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir -U setuptools pip 
@@ -168,7 +114,7 @@ RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     python setup.py install --scs --gpu
 
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
-    	    Cython==0.29.22 \
+    	Cython==0.29.22 \
 	    tornado==6.1 \
 	    pystan==3.0.1 \
 	    pycairo==1.20.0 \
@@ -186,7 +132,7 @@ RUN cd /tmp && \
     python3 -m pip install -U --no-cache-dir \
 	numpy==1.20.2 \
 	pandas==1.2.4 \
-        scikit-learn==0.24.1 \
+    scikit-learn==0.24.1 \
 	hypothesis==6.8.5 \
 	python-lsp-server \
 	&& \
@@ -256,8 +202,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-#    jupyter labextension install @pyviz/jupyterlab_pyviz && \
-#    jupyter labextension install @bokeh/jupyter_bokeh && \
     jupyter lab build
 
 RUN apt autoclean && \
