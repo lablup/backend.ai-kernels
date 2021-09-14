@@ -113,6 +113,8 @@ RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
 
+RUN /opt/conda/bin/conda install -c conda-forge opencv ffmpeg 
+
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
     	Cython==0.29.22 \
 	    tornado==6.1 \
