@@ -1,8 +1,6 @@
 FROM nvcr.io/nvidia/pytorch:21.04-py3
 # NVIDIA PyTorch with Python 3.8 (CONDA)
 
-
-
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
@@ -52,9 +50,9 @@ RUN apt-get update && \
 	protobuf-compiler \
 	v4l-utils \	
 	x264 \
-       	openjdk-8-jdk \
-        libsm6 \
-        libtbb-dev 
+    openjdk-8-jdk \
+    libsm6 \
+    libtbb-dev 
 
 # Install CUDA-11.3 + cuDNN 8.2.0
 RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.0 /usr/local/cuda/lib64/libcudnn.so && \
@@ -109,7 +107,7 @@ RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
 RUN /opt/conda/bin/conda install -c conda-forge opencv ffmpeg 
 
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
-    	    Cython==0.29.22 \
+    	Cython==0.29.22 \
 	    tornado==6.1 \
 	    pystan==3.0.1 \
 	    pycairo==1.20.0 \
@@ -127,7 +125,7 @@ RUN cd /tmp && \
     python3 -m pip install -U --no-cache-dir \
 	numpy==1.20.2 \
 	pandas==1.2.4 \
-        scikit-learn==0.24.1 \
+    scikit-learn==0.24.1 \
 	hypothesis==6.8.5 \
 	python-lsp-server \
 	&& \
@@ -165,6 +163,7 @@ RUN mkdir /tmp/openmpi && \
     make install && \
     ldconfig && \
     rm -rf /tmp/openmpi*
+
 # Create a wrapper for OpenMPI to allow running as root by default
 RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
     echo '#!/bin/bash' > /usr/local/bin/mpirun && \
@@ -182,7 +181,7 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
-    	    mpi4py==3.0.3 \
+    	mpi4py==3.0.3 \
 	    nni==2.1 \
 	    mlflow==1.15.0 \
 	    scikit-nni==0.1.1
