@@ -26,6 +26,7 @@ Here we list the latest versions of our supported kernel images.
 | MXnet                   | `lablup/python-mxnet`      | 1.5.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | MXnet                   | `lablup/python-mxnet`      | 1.6.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | MXnet                   | `lablup/python-mxnet`      | 1.7.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| MXnet                   | `lablup/python-mxnet`      | 1.8.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | All-in-one Environment  | `lablup/python-ff`         | 20.09   | O     | O\*   | O          |     |                   |
 | All-in-one Environment  | `lablup/python-ff`         | 21.01   | O     | O\*   | O          |     |                   |
 | All-in-one Environment  | `lablup/python-ff`         | 21.03   | O     | O\*   | O          |     |                   |
