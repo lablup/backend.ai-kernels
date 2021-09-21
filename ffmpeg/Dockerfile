@@ -212,18 +212,6 @@ RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/M
     cd /tmp && \
     rm -rf /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64*
 
-
-# nvidia-peer
-WORKDIR /tmp
-RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory && \
-    cd /tmp/nv_peer_memory && \
-    ./build_module.sh && \
-    cd /tmp && \
-    tar xzf /tmp/nvidia-peer-memory_1.1.orig.tar.gz && \
-    cd /tmp/nvidia-peer-memory-1.1 && \
-    dpkg-buildpackage -us -uc && \
-    dpkg -i /tmp/nvidia-peer-memory_1.1-0_all.deb
-
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         libboost-all-dev \
@@ -242,15 +230,12 @@ RUN if [[ "${PYTHON_VERSION}" == "3.6" ]]; then \
 RUN mkdir -p /etc/OpenCL/vendors && \
     echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
 
-
-
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.3/cmake-3.20.3-Linux-x86_64.sh \
          -q -O /tmp/cmake-install.sh && \
     chmod u+x /tmp/cmake-install.sh && \
     mkdir /usr/bin/cmake && \
     /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
     rm /tmp/cmake-install.sh
-
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
@@ -265,7 +250,7 @@ RUN python3 -m pip install --no-cache-dir \
 	        matplotlib==3.3.3 
 
 # Install libtensorflow
-RUN curl -fsSL https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-2.4.1.tar.gz | tar -xzC /usr/local -f -
+RUN curl -fsSL https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-2.5.0.tar.gz | tar -xzC /usr/local -f -
 
 # Instaling NASM
 WORKDIR /usr/local/ffmpeg_sources
@@ -393,7 +378,7 @@ RUN set -xe && \
 	--enable-libx265 \
 	--enable-cuda \
 	--enable-cuvid \
-        --enable-cuda-sdk \
+    --enable-cuda-sdk \
 	--enable-nvenc \
 	--enable-nonfree \
 	--enable-libnpp \
