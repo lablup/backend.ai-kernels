@@ -159,17 +159,6 @@ RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/M
     ./mlnxofedinstall --user-space-only --without-fw-update --all -q && \
     cd /tmp && \
     rm -rf /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64*
-    
-# Nvidia-peer
-WORKDIR /tmp
-RUN git clone https://github.com/Mellanox/nv_peer_memory.git /tmp/nv_peer_memory && \
-    cd /tmp/nv_peer_memory && \
-    ./build_module.sh && \
-    cd /tmp && \
-    tar xzf /tmp/nvidia-peer-memory_1.1.orig.tar.gz && \
-    cd /tmp/nvidia-peer-memory-1.1 && \
-    dpkg-buildpackage -us -uc && \
-    dpkg -i /tmp/nvidia-peer-memory_1.1-0_all.deb
 
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-Linux-x86_64.sh \
          -q -O /tmp/cmake-install.sh && \
