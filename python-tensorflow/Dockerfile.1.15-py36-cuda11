@@ -108,6 +108,10 @@ RUN python3 -m pip install --no-cache-dir \
 Run python3 -m ipykernel install --display-name "TensorFlow 1.15 on Python 3.6 (CPU, MKL)" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
+# Copy Backend.Ai multi-node support
+COPY ./service-defs-tf1 /etc/backend.ai/service-defs
+COPY runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
+
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
