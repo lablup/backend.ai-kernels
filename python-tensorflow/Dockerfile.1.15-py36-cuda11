@@ -63,29 +63,28 @@ RUN tensorflow/tools/ci_build/builds/configured CPU  \
         -c opt \
         --copt=-msse4.1 \
         --copt=-msse4.2 \
-	--copt=-mavx \
-	--copt=-mavx2 \
-	--copt=-mfma \
-	--copt=-mfpmath=both \ 
-	--copt=-O3 \
-	--copt=-Wformat \
-	--copt=-Wformat-security \
-	--copt=-fstack-protector \
-	--copt=-fPIC \
-	--copt=-fpic \
-	--config=opt \
-	--config=cuda \
+	    --copt=-mavx \
+	    --copt=-mavx2 \
+	    --copt=-mfma \
+    	--copt=-mfpmath=both \ 
+	    --copt=-O3 \
+	    --copt=-Wformat \
+	    --copt=-Wformat-security \
+	    --copt=-fstack-protector \
+	    --copt=-fPIC \
+	    --copt=-fpic \
+	    --config=opt \
+	    --config=cuda \
         --config=mkl \
-	--config=monolithic \
+	    --config=monolithic \
         --config=gdr \ 
         --config=verbs \
-#        --config=ngraph \
         --config=numa \
         --config=v1 \
-	--linkopt=-znoexecstack \
-	--linkopt=-zrelro \
-	--linkopt=-znow \
-	--linkopt=-fstack-protector \
+    	--linkopt=-znoexecstack \
+	    --linkopt=-zrelro \
+	    --linkopt=-znow \
+	    --linkopt=-fstack-protector \
         --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
       -k //tensorflow/tools/pip_package:build_pip_package && \
     bazel-bin/tensorflow/tools/pip_package/build_pip_package "${WHL_DIR}" && \
@@ -101,7 +100,7 @@ RUN HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
-    	    mpi4py==3.0.3 \
+    	mpi4py==3.0.3 \
 	    nni==1.6 \
 	    scikit-nni==0.2.1
 
