@@ -394,6 +394,16 @@ RUN set -xe && \
 
 RUN ln -s /usr/include/x86_64-linux-gnu/cudnn_v7.h /usr/local/cuda/include/cudnn.h 
 
+# nvtop install
+WORKDIR /tmp
+RUN git clone https://github.com/Syllo/nvtop.git && \
+    mkdir -p nvtop/build && \
+    cd /tmp/nvtop/build && \
+    cmake .. && \
+    cmake .. -DNVML_RETRIEVE_HEADER_ONLINE=True && \
+    make -j$(nproc) &&
+    make install
+    
 # OpenCV
 WORKDIR /tmp
 ENV OPENCV_VERSION="4.5.3"
