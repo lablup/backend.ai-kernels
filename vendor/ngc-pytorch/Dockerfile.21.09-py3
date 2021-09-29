@@ -66,7 +66,7 @@ RUN git clone https://github.com/Syllo/nvtop.git && \
     cd /tmp/nvtop/build && \
     cmake .. && \
     cmake .. -DNVML_RETRIEVE_HEADER_ONLINE=True && \
-    make -j$(nproc) &&
+    make -j$(nproc) && \
     make install
     
 RUN update-alternatives --install /opt/conda/bin/python python /opt/conda/bin/python3 2
