@@ -4,11 +4,11 @@ FROM nvcr.io/nvidia/tensorflow:21.09-tf2-py3
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     	fonts-nanum \
-	fonts-nanum-coding \
-	fonts-nanum-extra \
-	htop \
-	ncurses-term \
-	libasound2-dev \
+	    fonts-nanum-coding \
+	    fonts-nanum-extra \
+	    htop \
+	    ncurses-term \
+	    libasound2-dev \
         libsm6 libxext6 libxrender-dev mercurial libgdal-dev python3-gdal \
         libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
         libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev
@@ -70,34 +70,33 @@ RUN git clone https://github.com/Syllo/nvtop.git && \
     make install
 
 # OpenCV
+ENV OPENCV_VERSION="4.5.3"
+WORKDIR /tmp
 RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
    apt-get install -y \
 	    libgstreamer1.0-dev \
 	    libgstreamer-plugins-base1.0-dev \
 	    libgtk-3-dev \
-      libtbb-dev \
-	libatlas-base-dev \
-	libdc1394-22-dev \
-	libxvidcore-dev \
-	libfaac-dev \
-	libmp3lame-dev \
-	libtheora-dev \
-	libvorbis-dev \
-	libxvidcore-dev \
-	libopencore-amrnb-dev libopencore-amrwb-dev \
-	libavresample-dev \
-	x264 \
-	libx264-dev \
-	v4l-utils \	
-	libprotobuf-dev protobuf-compiler \
-	libgoogle-glog-dev libgflags-dev \
-	libgphoto2-dev \
-	libeigen3-dev \
-	libhdf5-dev
-
-WORKDIR /tmp
-ENV OPENCV_VERSION="4.5.3"
-RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+        libtbb-dev \
+	    libatlas-base-dev \
+	    libdc1394-22-dev \
+	    libxvidcore-dev \
+	    libfaac-dev \
+	    libmp3lame-dev \
+	    libtheora-dev \
+	    libvorbis-dev \
+	    libxvidcore-dev \
+	    libopencore-amrnb-dev libopencore-amrwb-dev \
+	    libavresample-dev \
+	    x264 \
+	    libx264-dev \
+	    v4l-utils \	
+	    libprotobuf-dev protobuf-compiler \
+	    libgoogle-glog-dev libgflags-dev \
+	    libgphoto2-dev \
+	    libeigen3-dev \
+	    libhdf5-dev && \
+    wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
     unzip opencv-contrib.zip && \
@@ -133,7 +132,6 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     cd /tmp && \
     python3 -m pip install --no-cache-dir opencv-python && \
     rm -fr opencv* 
-
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get update -y && \
@@ -203,7 +201,7 @@ RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
     chmod a+x /usr/local/bin/mpirun
 
 RUN python3 -m pip install --no-cache-dir \
-    	    mpi4py==3.1.1 \
+    	mpi4py==3.1.1 \
 	    nni==2.4 \
 	    mlflow==1.20.2 \
 	    scikit-nni==0.2.1
