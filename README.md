@@ -139,6 +139,10 @@ Here we list the latest versions of our supported kernel images.
  
 | base-mkl (Intel)      | base-cuda (Nvidia)             | base-TPU (Google)        | base-ROCm (AMD)           |
 |-----------------------|--------------------------------|--------------------------|---------------------------|
+| tensorflow-2.3-py36   | tensorflow-2.3-py38-cuda10     |	                	    |                           |
+| tensorflow-2.2-py36   | tensorflow-2.2-py36-cuda10     |                          |                           |
+| tensorflow-2.1-py36   | tensorflow-2.1-py36-cuda10     |	                	    |                           |
+| tensorflow-2.0-py36   | tensorflow-2.0-py36-cuda10     |                          |                           |
 | tensorflow-1.15-py36  | tensorflow-1.15-py36-cuda10    |	                	    |                           |
 | tensorflow-1.14-py36  | tensorflow-1.14-py36-cuda10    | tensorflow-1.14-py36-tpu | tensorflow-1.14-py36-rocm |
 | tensorflow-1.13-py36  | tensorflow-1.13-py36-cuda10    | tensorflow-1.13-py36-tpu |                           |
