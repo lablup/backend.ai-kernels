@@ -1,8 +1,6 @@
 FROM nvcr.io/nvidia/pytorch:21.07-py3
 # NVIDIA PyTorch with Python 3.8 (CONDA)
 
-
-
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
@@ -22,6 +20,7 @@ RUN apt-get update && \
 	fonts-nanum-extra \
 	gfortran \
 	htop \
+	ffmpeg \
 	libasound2-dev \
 	libatlas-base-dev \
 	libavresample-dev \
@@ -61,6 +60,15 @@ RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.0 /usr/local/cuda/lib64/libc
     rm -rf /var/lib/apt/lists/* && \
     ldconfig
 
+# nvtop install
+WORKDIR /tmp
+RUN git clone https://github.com/Syllo/nvtop.git && \
+    mkdir -p nvtop/build && \
+    cd /tmp/nvtop/build && \
+    cmake .. && \
+    cmake .. -DNVML_RETRIEVE_HEADER_ONLINE=True && \
+    make -j$(nproc) && \
+    make install
 
 RUN update-alternatives --install /opt/conda/bin/python python /opt/conda/bin/python3 2
 
@@ -228,6 +236,8 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
-        
+  
+RUN python3 -m spacy download en_core_web_sm && \
+    python3 -m spacy project clone pipelines/tagger_parser_predicted_annotations
 WORKDIR /home/work
 # vim: ft=dockerfile
