@@ -32,7 +32,7 @@ category-encoders==2.0.0
 certifi==2019.11.28
 cffi==1.14.0
 chardet==3.0.4
-Click==8.0.1
+Click==7.1.2
 click-plugins==1.1.1
 cligj==0.5.0
 cloudpickle==1.5.0
@@ -64,6 +64,7 @@ elegy==0.1.5
 entrypoints==0.3
 ephem==3.7.6.0
 enum34==1.1.8
+factor-analyzer
 fasteners==0.15
 fastavro==0.21.4
 fastrlock==0.4
@@ -181,6 +182,7 @@ pandas==1.1.5
 pandasgui==0.2.7
 pandocfilters==1.4.2
 parso==0.7.0
+path==16.2.0
 pathspec==0.7.0
 patsy==0.5.1
 pbr==5.5.0
@@ -200,6 +202,7 @@ prompt-toolkit==3.0.3
 protobuf==3.12.2
 psutil==5.7.0
 ptyprocess==0.6.0
+pulp==2.5.1
 py==1.8.0
 pyaml==19.12.0
 pyasn1==0.4.8
@@ -311,6 +314,7 @@ webencodings==0.5.1
 Werkzeug==1.0.0
 widgetsnbextension==3.5.1
 wrapt==1.11.2
+xgboost
 yapf==0.29.0
 yarl==1.4.2
 zict==1.0.0
