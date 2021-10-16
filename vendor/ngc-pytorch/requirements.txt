@@ -96,7 +96,7 @@ gym==0.17.3
 h5py==2.10.0
 hdf5storage==0.1.15
 HeapDict==1.0.1
-holidays==0.9.10
+holidays==0.11.3.1
 hyperopt==0.1.2
 idna==2.9
 imageio==2.8.0
