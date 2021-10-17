@@ -156,6 +156,7 @@ Mako==1.0.7
 Markdown==3.2.1
 MarkupSafe==1.1.1
 mccabe==0.6.1
+metadata
 mistune==0.8.4
 mlxtend==0.17.2
 mmdnn==0.3.1
