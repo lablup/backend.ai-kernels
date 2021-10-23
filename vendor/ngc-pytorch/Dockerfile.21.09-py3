@@ -133,6 +133,7 @@ RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
     cd scipy && \
     git checkout -b v${SCIPY_VERSION} && \  
+    git submodule update --init && \
     cp site.cfg.example site.cfg && \
     python3 -m pip install -U --no-cache-dir \
 	numpy==1.21.2 \
@@ -161,7 +162,7 @@ RUN git clone https://github.com/aristocratos/bashtop.git && \
     cd bashtop && \
     make install
 
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.12.0/code-server-3.1ᆻ2.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.12.0/code-server-3.12.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.12.0-linux-amd64 /usr/local/lib/code-server-3.12.0 && \
     ln -s /usr/local/lib/code-server-3.12.0/bin/code-server /usr/local/bin/code-server
 
@@ -189,7 +190,7 @@ RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_CUDA_HOME=$CONDA_PREFIX HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL HOROVOD_NCCL_LINK=SHARED \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.2ᆻ2.1 && \
+    pip install --no-cache-dir horovod==0.22.1 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
