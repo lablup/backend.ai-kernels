@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvm/versions/node/v14.17.6/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    PATH="/usr/local/nvm/versions/node/v14.8.0/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
@@ -18,6 +18,7 @@ RUN apt-get update && \
 	fonts-nanum \
 	fonts-nanum-coding \
 	fonts-nanum-extra \
+	pdsh \
 	gfortran \
 	htop \
 	ffmpeg \
@@ -136,8 +137,9 @@ RUN cd /tmp && \
     python3 -m pip install -U --no-cache-dir \
 	numpy==1.21.2 \
 	pandas==1.3.3 \
+	pythran \
         scikit-learn==1.0 \
-	hypothesis==6.23.0 \
+	hypothesis==6.23.2 \
 	python-lsp-server \
 	&& \
     python3 setup.py install 
@@ -238,7 +240,5 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
 
-RUN python3 -m spacy download en_core_web_sm && \
-    python -m spacy project clone pipelines/tagger_parser_predicted_annotations
 WORKDIR /home/work
 # vim: ft=dockerfile
