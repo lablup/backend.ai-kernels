@@ -118,7 +118,7 @@ RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
 RUN /opt/conda/bin/conda install -c conda-forge opencv ffmpeg spacy
 
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
-	    pystan==3.3tornado.0 \
+	    pystan==3.3.0 \
 	    pycairo==1.20.1 \
 	    typeguard==2.12.1 \
 	    python-language-server[all] \
