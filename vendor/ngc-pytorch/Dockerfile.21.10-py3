@@ -56,8 +56,8 @@ RUN apt-get update && \
     libsm6 \
     libtbb-dev 
 
-# Install CUDA-11.3 + cuDNN 8.2.0
-RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.0 /usr/local/cuda/lib64/libcudnn.so && \
+# Install CUDA-11.4 + cuDNN 8.2.0
+RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.4 /usr/local/cuda/lib64/libcudnn.so && \
     rm -rf /var/lib/apt/lists/* && \
     ldconfig
 
@@ -118,24 +118,13 @@ RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
 RUN /opt/conda/bin/conda install -c conda-forge opencv ffmpeg spacy
 
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
-            Cython==0.29.24 \
-	    tornado==6.1 \
 	    pystan==3.3tornado.0 \
 	    pycairo==1.20.1 \
-	    jupyter==1.0.0 \
 	    typeguard==2.12.1 \
 	    python-language-server[all] \
 	    pythran \
 	    matplotlib==3.4.3
-ENV SCIPY_VERSION 1.7.1
-# Install scipy
-RUN cd /tmp && \
-    git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
-    cd scipy && \
-    git checkout -b v${SCIPY_VERSION} && \  
-    git submodule update --init && \
-    cp site.cfg.example site.cfg && \
-    python3 -m pip install -U --no-cache-dir \
+RUN python3 -m pip install -U --no-cache-dir \
 	numpy==1.21.4 \
 	pandas==1.3.4 \
 	pythran \
@@ -146,7 +135,7 @@ RUN cd /tmp && \
     python3 setup.py install 
 	    
 WORKDIR /tmp
-COPY ./requirements.txt /tmp
+COPY ./requirements.21.10.txt /tmp/requirements.txt
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir --ignore-installed -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
@@ -235,7 +224,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
       ai.backend.resource.min.cuda.device=1 \
-      ai.backend.resource.min.cuda.shares=0.1 \
+      ai.backend.resource.min.cuda.shares=0 \
       ai.backend.base-distro="ubuntu16.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/opt/conda/bin/python3" \
