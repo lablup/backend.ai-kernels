@@ -6,7 +6,7 @@ albumentations==1.1.0
 alembic==1.4.1
 ansi2html==1.6.0
 anyio==2.2.0
-apache-beam==2.24.0
+apache-beam==2.ᆸᆸ34.0
 appdirs==1.4.3
 argo-workflows==3.6.1
 astor==0.8.1
