@@ -381,7 +381,7 @@ typing==3.7.4.3
 ujson
 update-checker==0.16
 uritemplate==3.0.1
-urllib3==1.25.8
+urllib3
 uvicorn==0.14.0
 vecstack==0.4.0
 versioneer==0.18
