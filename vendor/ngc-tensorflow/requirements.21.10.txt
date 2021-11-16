@@ -339,7 +339,6 @@ scikit-learn==1.0.1
 scikit-optimize==0.9.0
 scikit-plot==0.3.7
 scikit-surprise==1.1.1
-scikit_learn==0.24.1
 scikit_optimize==0.8.0
 scikit_plot==0.3.5
 scooby==0.5.5
