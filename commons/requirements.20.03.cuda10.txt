@@ -103,7 +103,7 @@ jupyter-js-widgets-nbextension==0.0.2.dev0
 jupyter-latex-envs==1.4.6
 jupyter-nbextensions-configurator==0.4.1
 jupyter-server-proxy==1.2.0
-jupyterlab==2.0.0
+jupyterlab==2.2.10
 jupyterlab-nvdashboard==0.2.0
 jupyterlab-server==1.0.7
 jupyterthemes==0.20.0
