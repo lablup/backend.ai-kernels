@@ -6,7 +6,7 @@ albumentations==1.1.0
 alembic==1.4.1
 ansi2html==1.6.0
 anyio
-apache-beam==ᆻ2.25.0
+apache-beam==2.34.0
 appdirs==1.4.3
 argo-workflows==3.6.1
 astor==0.8.1
@@ -142,8 +142,8 @@ hdf5storage==0.1.15
 hdfs==2.6.0
 heapDict==1.0.1
 holidays>=0.11.3.1
-#httplib2==0.17.4
-httplib2==0.20.2
+httplib2==0.17.4
+#httplib2==0.20.2
 hyperopt==0.1.2
 hypothesis==6.24.2 
 imageio==2.8.0
@@ -240,7 +240,7 @@ networkx==2.4
 numba==0.49.0
 numexpr
 numexpr==2.7.0
-numpy==1.21.4 
+numpy==1.20.3 
 oauth2client==3.0.0
 oauthenticator==0.13.0
 oauthlib==3.1.0
@@ -253,7 +253,7 @@ path==16.2.0
 pathspec==0.7.0
 patsy==0.5.1
 pbr==5.5.0
-pillow==7.1.0
+pillow==8.4.0
 plaidml-keras==0.7.0
 plaidml==0.7.0
 plotly==4.5.3
