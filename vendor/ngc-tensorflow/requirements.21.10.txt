@@ -6,7 +6,7 @@ albumentations==1.1.0
 alembic==1.4.1
 ansi2html==1.6.0
 anyio
-apache-beam
+apache-beam==ᆻ2.25.0
 appdirs==1.4.3
 argo-workflows==3.6.1
 astor==0.8.1
@@ -68,6 +68,7 @@ defusedxml==0.6.0
 deprecation==2.1.0
 descartes==1.1.0
 dill==0.3.1.1
+#dill
 distributed==2.11.0
 dm-haiku==0.0.1
 docker==5.0.0
@@ -141,7 +142,8 @@ hdf5storage==0.1.15
 hdfs==2.6.0
 heapDict==1.0.1
 holidays>=0.11.3.1
-httplib2==0.17.4
+#httplib2==0.17.4
+httplib2==0.20.2
 hyperopt==0.1.2
 hypothesis==6.24.2 
 imageio==2.8.0
@@ -220,7 +222,8 @@ mlxtend==0.17.2
 mmcv-full
 mmdnn==0.3.1
 mne==0.20.5
-mock==3.0.5
+#mock==3.0.5
+mock
 monotonic==1.6
 more-itertools==7.2.0
 msgpack-python==0.5.6
