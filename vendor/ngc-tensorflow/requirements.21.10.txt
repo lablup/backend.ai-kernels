@@ -25,7 +25,8 @@ benepar==0.2.0
 black==19.10b0
 bokeh==2.3.2
 boltons==20.2.1
-boto3==1.9.209
+boto3<1.18.0 and >=1.15.0
+# boto3==1.9.209
 boto==2.49.0
 botocore==1.12.209
 branca==0.4.0
