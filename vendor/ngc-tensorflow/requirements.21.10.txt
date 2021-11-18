@@ -5,7 +5,7 @@ albumentations==1.1.0
 alembic==1.7.5
 ansi2html==1.6.0
 anyio
-apache-airflow[celery,devel,postgres,redis,s3,ssh]
+apache-airflow[celery,devel,postgres,redis,s3,ssh]==2.2.2
 apache-beam==2.34.0
 appdirs==1.4.3
 argo-workflows==3.6.1
