@@ -1,10 +1,11 @@
-adanet==0.9.0
+#adanet==0.9.0
 aiohttp==3.8.0
 aiozmq==0.9.0
 albumentations==1.1.0
-alembic==1.4.1
+alembic==1.7.5
 ansi2html==1.6.0
 anyio
+apache-airflow[celery,devel,postgres,redis,s3,ssh]
 apache-beam==2.34.0
 appdirs==1.4.3
 argo-workflows==3.6.1
@@ -172,7 +173,7 @@ jupyter==1.0.0
 jupyter_bokeh==2.0.4
 jupyterhub-jwtauthenticator==0.1
 jupyterhub-kubespawner==0.16.1
-jupyterhub==1.4.0
+jupyterhub
 jupyterhubutils==0.25.0
 jupyterlab-code-formatter==1.4.10
 jupyterlab-git
@@ -183,6 +184,8 @@ jupyterlab-lsp==3.6.0
 jupyterlab-nvdashboard==0.5.0
 jupyterlabutils
 jupyterthemes==0.20.0
+keras
+keras-models
 kiwisolver==1.1.0
 konlpy==0.5.2
 kss==3.3.1.1
@@ -202,7 +205,7 @@ matplotlib==3.4.3
 mccabe==0.6.1
 meshio==4.4.2
 mimeparse==0.1.3
-mlflow==1.14.1
+mlflow
 mlxtend==0.17.2
 mmcv-full
 mmdnn==0.3.1
@@ -234,7 +237,7 @@ pathspec==0.7.0
 patsy==0.5.1
 pbr==5.5.0
 pillow==8.4.0
-plaidml-keras==0.7.0
+#plaidml-keras==0.7.0
 plaidml==0.7.0
 plotly==4.5.3
 pluggy==0.12.0
@@ -286,7 +289,7 @@ python-json-logger==2.0.1
 python-jsonrpc-server==0.4.0
 python-language-server[all] 
 python-lsp-server
-python-slugify==5.0.0
+python-slugify==4.0.1
 python-speech-features==0.6
 python-xlib==0.29
 pythonWebHDFS==0.2.3
@@ -309,6 +312,7 @@ sacrebleu==1.3.6
 sacred==0.8.1
 schema==0.7.1
 scikit-image>=0.17.2
+scikit-keras
 scikit-learn==1.0.1 
 scikit-optimize==0.9.0
 scikit-plot==0.3.7
