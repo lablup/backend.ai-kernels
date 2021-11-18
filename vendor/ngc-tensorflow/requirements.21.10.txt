@@ -76,7 +76,7 @@ easyProcess==0.3
 easydict
 ecdsa==0.14.1
 ecos==2.0.7.post1
-elegy==0.1.5
+elegy==0.8.1
 eliot-tree==21.0.0
 eliot==1.13.0
 enum34==1.1.8
