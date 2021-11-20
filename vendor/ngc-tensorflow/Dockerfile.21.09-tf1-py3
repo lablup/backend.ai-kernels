@@ -1,75 +1,120 @@
 FROM nvcr.io/nvidia/tensorflow:21.09-tf1-py3
 # NVIDIA DIGITS runs on Python 3.8
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    	fonts-nanum \
-	fonts-nanum-coding \
-	fonts-nanum-extra \
-	htop \
-	net-tools \
-	libtool \
-	dkms \
-	ncurses-term \
-	libasound2-dev \
-	librdmacm-dev \
-	librdmacm1 \
-        libsm6 libxext6 libxrender-dev mercurial libgdal-dev python3-gdal \
-        libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
-        libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev
-  
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
-    PYTHONUNBUFFERED=1 \
     PIP_IGNORE_INSTALLED=0 \
+    PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
+    PATH="/usr/local/nvm/versions/node/v16.6.1/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
-    TF_ENABLE_DEPRECATION_WARNINGS=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
-    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
-
-# OpenCV
-RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
-   apt-get install -y \
-	libgstreamer1.0-dev \
-	libgstreamer-plugins-base1.0-dev \
-	libgtk-3-dev \
-        libtbb-dev \
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+    ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+	automake \
+	default-libmysqlclient-dev \
+	ffmpeg \
+	fonts-nanum \
+	fonts-nanum-coding \
+	fonts-nanum-extra \
+	gfortran \
+	gir1.2-gtk-3.0 \
+	htop \
+	libaio1 \
+	libasound2-dev \
 	libatlas-base-dev \
+	libavformat-dev \
+	libavresample-dev \
+	libcairo2-dev \
 	libdc1394-22-dev \
-	libxvidcore-dev \
+	libeigen3-dev \
 	libfaac-dev \
+	libgdal-dev \
+	libgflags-dev \
+	libgoogle-glog-dev \
+	libgirepository1.0-dev \
+	libgphoto2-dev \
+	libgstreamer-plugins-base1.0-dev \
+	libgstreamer1.0-dev \
+	libgtk-3-dev \
+	libhdf5-dev \	
 	libmp3lame-dev \
+	libopenblas-dev \
+	libopencore-amrnb-dev \
+	libopencore-amrwb-dev \
+	libportmidi-dev \
+	libprotobuf-dev \
+	libsdl-dev \
+	libsdl-image1.2-dev \
+	libsdl-mixer1.2-dev \
+	libsdl-ttf2.0-dev \
+	libsm6 \
+	libswscale-dev \
+	libtbb-dev \
 	libtheora-dev \
 	libvorbis-dev \
-	libxvidcore-dev \
-	libopencore-amrnb-dev libopencore-amrwb-dev \
-	libavresample-dev \
-	x264 \
 	libx264-dev \
+	libxext6 \
+	libxrender-dev \
+	libxvidcore-dev \
+	mercurial \
+	libncurses-dev \
+	ncurses-term \
+	nodejs \
+	nvtop \
+	pdsh \
+	protobuf-compiler \
+        libsmpeg-dev \
+        openjdk-8-jdk \
+        python3-gdal \
 	v4l-utils \	
-	libprotobuf-dev protobuf-compiler \
-	libgoogle-glog-dev libgflags-dev \
-	libgphoto2-dev \
-	libeigen3-dev \
-	libhdf5-dev
+	x264 
 
-# nvtop install
-WORKDIR /tmp
-RUN git clone https://github.com/Syllo/nvtop.git && \
-    mkdir -p nvtop/build && \
-    cd /tmp/nvtop/build && \
-    cmake .. && \
-    cmake .. -DNVML_RETRIEVE_HEADER_ONLINE=True && \
-    make -j$(nproc) &&
-    make install
+RUN mkdir -p /opt/oracle && \
+    cd /opt/oracle && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+    unzip instantclient-basiclite-linuxx64.zip && \
+    rm -f instantclient-basiclite-linuxx64.zip && \
+    cd /opt/oracle/instantclient* && \
+    rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
+    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+    ldconfig
 
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
+    python3 -m pip install -U setuptools pip 
+
+# install NLP packages *mecab-ko & khai*
 WORKDIR /tmp
+RUN curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
+    tar zxfv mecab-0.996-ko-0.9.2.tar.gz && \
+    cd mecab-0.996-ko-0.9.2 && \
+    ./configure && \
+    make -j$(nproc) && \
+    make check && \
+    make install && \
+    echo "Install mecab-ko-dic" && \
+    cd /tmp && \
+    ldconfig && \
+    curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    tar -zxvf mecab-ko-dic-2.1.1-20180720.tar.gz && \
+    cd mecab-ko-dic-2.1.1-20180720 && \
+    ./autogen.sh && \
+    ./configure && \
+    make -j$(nproc) && \
+    sh -c 'echo "dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic" > /usr/local/etc/mecabrc' && \
+    make install && \
+    cd /tmp && \
+    git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
+    python3 -m pip install /tmp/mecab-python-0.996
+
+# OpenCV
 ENV OPENCV_VERSION="4.5.3"
+WORKDIR /tmp
 RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     wget -O opencv-contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip ${OPENCV_VERSION}.zip && \
@@ -107,32 +152,15 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     python3 -m pip install --no-cache-dir opencv-python && \
     rm -fr opencv* 
 
-
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
-    apt-get update -y && \
-    apt-get install -y nodejs
-
 WORKDIR /tmp
-RUN git clone -q --branch=v0.3.17 git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=v0.3.18 git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
 RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
-RUN mkdir -p /opt/oracle && \
-    cd /opt/oracle && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get update -y && \
-    apt-get install -y --no-install-recommends libaio1 default-libmysqlclient-dev && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
-    unzip instantclient-basiclite-linuxx64.zip && \
-    rm -f instantclient-basiclite-linuxx64.zip && \
-    cd /opt/oracle/instantclient* && \
-    rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
-    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
-    ldconfig
+
 
 WORKDIR /tmp
 COPY ./requirements.py36.txt /tmp
@@ -151,7 +179,7 @@ RUN git clone https://github.com/aristocratos/bashtop.git && \
     cd bashtop && \
     make install
 
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.12.0/code-server-3.1ᆻ2.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.12.0/code-server-3.12.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-3.12.0-linux-amd64 /usr/local/lib/code-server-3.12.0 && \
     ln -s /usr/local/lib/code-server-3.12.0/bin/code-server /usr/local/bin/code-server
 
