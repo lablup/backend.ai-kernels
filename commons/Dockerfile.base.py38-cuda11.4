@@ -56,8 +56,6 @@ RUN rm -fr /var/lib/apt/lists/* && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
     apt-get update -y && \
-    apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
-RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	automake \
 	bashtop \
@@ -162,7 +160,7 @@ RUN apt-get update && \
 	unzip \
 	v4l-utils \	
 	vim \
-	x264 
+	x264 \
 	xvfb \
 	xz-utils \
 	yasm \
@@ -175,9 +173,9 @@ RUN apt-get update && \
     find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
 
 WORKDIR /tmp
-RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.8/nccl_2.11.4-1+cuda11.4_x86_64.txz -O && \
-    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.1_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
-    tar --no-same-owner --keep-old-files --lzma -xvf  nccl_${NCCL}-1+cuda11.1_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
+RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.11/nccl_2.11.4-1+cuda11.4_x86_64.txz -O && \
+    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.4_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
+    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.4_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
     rm nccl_${NCCL}-1+cuda11.4_x86_64.txz && \
     ldconfig 
 
