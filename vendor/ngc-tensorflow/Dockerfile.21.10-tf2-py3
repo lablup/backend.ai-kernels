@@ -23,18 +23,21 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
 	fonts-nanum-coding \
 	fonts-nanum-extra \
 	gfortran \
+	gir1.2-gtk-3.0 \
 	htop \
 	libaio1 \
 	libasound2-dev \
 	libatlas-base-dev \
 	libavformat-dev \
 	libavresample-dev \
+	libcairo2-dev \
 	libdc1394-22-dev \
 	libeigen3-dev \
 	libfaac-dev \
 	libgdal-dev \
 	libgflags-dev \
 	libgoogle-glog-dev \
+	libgirepository1.0-dev \
 	libgphoto2-dev \
 	libgstreamer-plugins-base1.0-dev \
 	libgstreamer1.0-dev \
