@@ -2,8 +2,8 @@ FROM nvidia/cuda:11.4.2-cudnn8-devel-ubuntu20.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
 ARG CUDA=11.4
-ENV CUDA_VERSION=11.4.2
-ARG LIBNVINFER=8.0.0-1
+ENV CUDA_VERSION=11.4.3
+ARG LIBNVINFER=8.2.0-1
 ARG LIBNVINFER_MAJOR_VERSION=8
 ARG CUDNN=8.2.4.15-1
 ENV CUDNN_VERSION 8.2.4.15
@@ -148,7 +148,6 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	openssh-server \
 	pdsh \
 	pkg-config \
-	pkg-config \
 	proj-bin \
 	protobuf-compiler \
 	python-apt \
@@ -191,8 +190,17 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
         libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
-	libnvinfer-plugin7 \
-        libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
+	libnvparsers8=${LIBNVINFER}+cuda${CUDA} \
+	libnvinfer-plugin8=${LIBNVINFER}+cuda${CUDA} \
+	libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
+	libnvonnxparsers-dev=${LIBNVINFER}+cuda${CUDA} \
+	libnvparsers-dev=${LIBNVINFER}+cuda${CUDA} \
+	libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
+	python3-libnvinfer=${LIBNVINFER}+cuda${CUDA} \
+	uff-converter-tf \
+	onnx-graphsurgeon \
+        && \
+    apt-mark hold libnvinfer8 libnvonnxparsers8 libnvparsers8 libnvinfer-plugin8 libnvinfer-dev libnvonnxparsers-dev libnvparsers-dev libnvinfer-plugin-dev python3-libnvinfer \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
