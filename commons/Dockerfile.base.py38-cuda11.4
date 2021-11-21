@@ -184,8 +184,7 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     ldconfig
 
 # Install CUDA-11.4 + cuDNN 8.2.4.15-1
-RUN ln -s /usr/local/cuda-11.4 /usr/local/cuda && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.4 /usr/local/cuda/lib64/libcudnn.so && \
+RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.4 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
 
 RUN apt-get update && \
