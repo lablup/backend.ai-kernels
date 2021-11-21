@@ -44,6 +44,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Set default shell to /bin/bash
 SHELL ["/bin/bash", "-cu"]
 
+WORKDIR /tmp
 RUN rm -fr /var/lib/apt/lists/* && \
     apt-get update -y && \
     apt-get install -y --no-install-recommends software-properties-common wget curl && \
@@ -51,6 +52,9 @@ RUN rm -fr /var/lib/apt/lists/* && \
     add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     add-apt-repository -y ppa:bashtop-monitor/bashtop && \
+    wget https://developer.download.nvidia.com/compute/cuda/11.4.2/local_installers/cuda-repo-wsl-ubuntu-11-4-local_11.4.2-1_amd64.deb && \
+    dpkg -i cuda-repo-wsl-ubuntu-11-4-local_11.4.0-1_amd64.deb && \
+    apt-key add /var/cuda-repo-wsl-ubuntu-11-4-local/7fa2af80.pub && \
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
@@ -165,26 +169,25 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	yasm \
 	zip \
         zlib1g-dev && \
+# install nccl	
+    curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.11/nccl_2.11.4-1+cuda11.4_x86_64.txz -O && \
+    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.4_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
+    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.4_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
+    rm nccl_${NCCL}-1+cuda11.4_x86_64.txz && \
+    ldconfig  && \
+    ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
+    ldconfig && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.4 /usr/local/cuda/lib64/libcudnn.so && \
+    ldconfig && \
     echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
     echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
-    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete
-
-WORKDIR /tmp
-RUN curl -fsSL https://developer.download.nvidia.com/compute/redist/nccl/v2.11/nccl_2.11.4-1+cuda11.4_x86_64.txz -O && \
-    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.4_x86_64.txz -C /usr/local/cuda/lib64/ --strip-components=2 --wildcards '*/lib/libnccl.so.*' && \
-    tar --no-same-owner --keep-old-files --lzma -xvf nccl_${NCCL}-1+cuda11.4_x86_64.txz -C /usr/lib/pkgconfig/ --strip-components=3 --wildcards '*/lib/pkgconfig/*' && \
-    rm nccl_${NCCL}-1+cuda11.4_x86_64.txz && \
-    ldconfig 
-
-RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
-    echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
-    ldconfig
-
-# Install CUDA-11.4 + cuDNN 8.2.4.15-1
-RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.4 /usr/local/cuda/lib64/libcudnn.so && \
-    ldconfig
+    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
+# Add OpenCL ICD files for LightGBM
+    mkdir -p /etc/OpenCL/vendors && \
+    echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -205,11 +208,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Add OpenCL ICD files for LightGBM
-RUN mkdir -p /etc/OpenCL/vendors && \
-    echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
-
-# OFED
+# Install OFED
 WORKDIR /tmp
 RUN wget -q -O - https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.1-2.3.7.1/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64.tgz | tar xzf - && \
     cd /tmp/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-ubuntu18.04-x86_64 && \
@@ -304,20 +303,15 @@ RUN cd /tmp && \
     python3 setup.py install --scs --gpu
 
 # install NLP packages *mecab-ko & khai*
-RUN apt-get update && \
-    apt-get install -y \
-    	openjdk-8-jdk \
-	automake \
-	&& \
-    cd /tmp && \
-    curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
+WORKDIR /tmp
+RUN curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
     tar zxfv mecab-0.996-ko-0.9.2.tar.gz && \
     cd mecab-0.996-ko-0.9.2 && \
     ./configure && \
     make -j$(nproc) && \
     make check && \
-    make install
-RUN echo "Install mecab-ko-dic" && \
+    make install && \
+    echo "Install mecab-ko-dic" && \
     cd /tmp && \
     ldconfig && \
     curl -LO https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.1.1-20180720.tar.gz && \
