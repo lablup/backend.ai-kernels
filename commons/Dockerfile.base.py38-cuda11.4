@@ -34,7 +34,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
     _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
-    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
+    LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/lib/x86_64-linux-gnu:/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
     PATH="/usr/local/nvm/versions/node/v16.6.1/bin:/usr/local/mpi/bin:/usr/local/ucx:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
@@ -52,9 +52,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
     add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     add-apt-repository -y ppa:bashtop-monitor/bashtop && \
-    wget https://developer.download.nvidia.com/compute/cuda/11.4.2/local_installers/cuda-repo-wsl-ubuntu-11-4-local_11.4.2-1_amd64.deb && \
-    dpkg -i cuda-repo-wsl-ubuntu-11-4-local_11.4.0-1_amd64.deb && \
-    apt-key add /var/cuda-repo-wsl-ubuntu-11-4-local/7fa2af80.pub && \
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub &&\
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
     rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
@@ -65,7 +63,10 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	bashtop \
 	build-essential \
 	ca-certificates \
+	devscripts \
 	dkms \
+	dh-make \
+	fakeroot \
 	ffmpeg \
 	fonts-nanum \
 	fonts-nanum-coding \
@@ -79,6 +80,7 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	htop \
 	intel-mkl-2020.3-111 intel-ipp-2020.2-108 intel-tbb-2020.3-108 intel-daal-2020.2-108 intel-mpi-2019.8-108 \
 	iputils-ping \
+	lintian \
 	libasound2-dev \
 	libatlas-base-dev \
 	libavcodec-dev \
@@ -106,6 +108,15 @@ RUN rm -fr /var/lib/apt/lists/* && \
 	libgtk-3-dev \
 	libhdf5-dev \	
 	libhdf5-serial-dev \
+        libnvinfer8=${LIBNVINFER}+cuda${CUDA} \
+	libnvonnxparsers8=${LIBNVINFER}+cuda${CUDA} \
+	libnvparsers8=${LIBNVINFER}+cuda${CUDA} \
+	libnvinfer-plugin8=${LIBNVINFER}+cuda${CUDA} \
+        libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
+	libnvonnxparsers-dev=${LIBNVINFER}+cuda${CUDA} \
+	libnvparsers-dev=${LIBNVINFER}+cuda${CUDA} \
+	libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
+        python3-libnvinfer=${LIBNVINFER}+cuda${CUDA} \
 	libjasper-dev \
 	libjpeg-dev \
 	liblapack-dev \
@@ -188,25 +199,6 @@ RUN rm -fr /var/lib/apt/lists/* && \
 # Add OpenCL ICD files for LightGBM
     mkdir -p /etc/OpenCL/vendors && \
     echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-	libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
-        libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
-	libnvparsers8=${LIBNVINFER}+cuda${CUDA} \
-	libnvinfer-plugin8=${LIBNVINFER}+cuda${CUDA} \
-	libnvinfer-dev=${LIBNVINFER}+cuda${CUDA} \
-	libnvonnxparsers-dev=${LIBNVINFER}+cuda${CUDA} \
-	libnvparsers-dev=${LIBNVINFER}+cuda${CUDA} \
-	libnvinfer-plugin-dev=${LIBNVINFER}+cuda${CUDA} \
-	python3-libnvinfer=${LIBNVINFER}+cuda${CUDA} \
-	uff-converter-tf \
-	onnx-graphsurgeon \
-        && \
-    apt-mark hold libnvinfer8 libnvonnxparsers8 libnvparsers8 libnvinfer-plugin8 libnvinfer-dev libnvonnxparsers-dev libnvparsers-dev libnvinfer-plugin-dev python3-libnvinfer \
-        && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 # Install OFED
 WORKDIR /tmp
