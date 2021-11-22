@@ -249,18 +249,19 @@ RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.12.0/code-s
     mv /usr/local/lib/code-server-3.12.0-linux-amd64 /usr/local/lib/code-server-3.12.0 && \
     ln -s /usr/local/lib/code-server-3.12.0/bin/code-server /usr/local/bin/code-server
 
-RUN rm /usr/bin/python /usr/bin/python3 && \
+RUN rm /usr/bin/python3 && \
     ln -s /usr/bin/python3.8 /usr/bin/python3 && \
+    ln -s /usr/bin/python3.8 /usr/bin/python && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
 
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip 
+    python3 -m pip install --no-cache-dir -U setuptools pip Cython pybind11
 
 # OpenBlas
 WORKDIR /tmp
-RUN git clone -q --branch=master git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=v0.3.18 git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
