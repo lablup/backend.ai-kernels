@@ -160,7 +160,7 @@ jupyter
 jupyter-console==6.2.0
 jupyter-contrib-core==0.3.3
 jupyter-contrib-nbextensions==0.5.1
-jupyter-client==7.0.6
+jupyter-client==6.1.12
 jupyter-dash==0.4.0
 jupyter-highlight-selected-word==0.2.0
 jupyter-js-widgets-nbextension==0.0.2.dev0
