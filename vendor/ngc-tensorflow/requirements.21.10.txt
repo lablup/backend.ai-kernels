@@ -131,7 +131,7 @@ graphviz==0.14
 greenlet==1.0.0
 grpc-google-iam-v1==0.12.3
 grpcio-gcp==0.2.2
-gym==0.17.3
+gym==0.21.0
 hdf5storage==0.1.15
 hdfs==2.6.0
 heapDict==1.0.1
