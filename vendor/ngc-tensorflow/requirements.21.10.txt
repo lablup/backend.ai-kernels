@@ -26,7 +26,7 @@ bokeh==2.3.2
 boltons==20.2.1
 boto3<1.18.0
 boto==2.49.0
-botocore==1.12.209
+botocore==1.23.10
 branca==0.4.0
 brotli==1.0.9
 catboost==0.22
