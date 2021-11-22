@@ -5,11 +5,11 @@ alembic==1.7.5
 ansi2html==1.6.0
 anyio
 #apache-airflow[celery,devel,postgres,redis,s3,ssh]==1.10.6
-apache-beam==2.34.0
+#apache-beam==2.34.0
 appdirs==1.4.3
 argo-workflows==3.6.1
 astor==0.8.1
-astroid==2.8.5
+astroid==2.9.0
 astropy==4.2.1
 async-timeout==4.0.0
 atlas==0.27.0
@@ -253,7 +253,6 @@ ptyprocess==0.7.0
 pulp==2.5.1
 py-cpuinfo==5.0.0
 py==1.8.2
-pycparser==2.20
 pyGObject==3.36.0
 pyLDAvis==2.1.2
 pyOpenSSL==19.1.0
@@ -268,7 +267,7 @@ pyarrow==0.17.0
 pycairo==1.20.1 
 pycocotools==2.0.2
 pycodestyle==2.5.0
-pycparser==2.19
+pycparser==2.20
 pydocstyle==5.0.2
 pydot==1.4.1
 pydotplus==2.0.2
