@@ -16,6 +16,7 @@ Here we list the latest versions of our supported kernel images.
 | TensorFlow              | `lablup/python-tensorflow` | 2.4.3   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.5.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | TensorFlow              | `lablup/python-tensorflow` | 2.6.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| TensorFlow              | `lablup/python-tensorflow` | 2.7.0   | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | PyTorch                 | `lablup/python-torch`      | 1.7     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.8     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.9     | O     | O\*   | O          |     |                   |
@@ -31,6 +32,7 @@ Here we list the latest versions of our supported kernel images.
 | All-in-one Environment  | `lablup/python-ff`         | 21.01   | O     | O\*   | O          |     |                   |
 | All-in-one Environment  | `lablup/python-ff`         | 21.03   | O     | O\*   | O          |     |                   |
 | All-in-one Environment  | `lablup/python-ff`         | 21.08   | O     | O\*   | O          |     |                   |
+| All-in-one Environment  | `lablup/python-ff`         | 21.09   | O     | O\*   | O          |     |                   |
 
 ### Warrented Images (NGC, Nvidia GPU Cloud)
 | Deep-Learning Framework | Image Name              | Version       | Batch | Query | Input Hook | TTY | Runtime Impl.     |
