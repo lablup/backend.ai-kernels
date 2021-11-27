@@ -210,7 +210,7 @@ lightgbm==3.0.0
 lime==0.1.1.37
 llvmlite==0.31.0
 lunardate==0.2.0
-lxml==4.5.0
+lxml==4.6.3
 mako==1.0.7
 maproxy==0.0.12
 markdown==3.3
