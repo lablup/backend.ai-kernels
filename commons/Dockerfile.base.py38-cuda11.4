@@ -257,7 +257,7 @@ RUN rm /usr/bin/python3 && \
 
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip Cython pybind11
+    python3 -m pip install --no-cache-dir -U setuptools pip Cython pybind11 pythran
 
 # OpenBlas
 WORKDIR /tmp
@@ -269,6 +269,7 @@ RUN git clone -q --branch=v0.3.18 git://github.com/xianyi/OpenBLAS.git && \
 RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
     cd numpy && \
     git checkout -b v${NUMPY_VERSION} && \
+    git submodule update --init && \
     cp site.cfg.example site.cfg && \
     echo "[mkl]" >> site.cfg && \
     echo "include_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include/" >> site.cfg && \
