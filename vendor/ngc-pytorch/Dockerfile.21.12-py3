@@ -1,5 +1,5 @@
 FROM nvcr.io/nvidia/pytorch:21.12-py3
-# NVIDIA PyTorch with Python 3.8 (CONDA)
+# NVIDIA NGC PyTorch with Python 3.8 (CONDA)
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
@@ -50,7 +50,7 @@ RUN apt-get update && \
 	libtbb-dev \
 	mercurial \
 	ncurses-term \
-        openjdk-8-jdk \
+    openjdk-8-jdk \
 	pdsh \
 	protobuf-compiler \
 	v4l-utils \	
@@ -106,8 +106,8 @@ WORKDIR /tmp
 RUN git clone -q --branch=v0.3.18 git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
-    make install
-RUN git clone --recursive https://github.com/bodono/scs-python.git  && \
+    make install && \
+    git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
 
@@ -144,15 +144,15 @@ RUN mkdir /tmp/openmpi && \
     make -j $(nproc) all && \
     make install && \
     ldconfig && \
-    rm -rf /tmp/openmpi*
+    rm -rf /tmp/openmpi* && \
 # Create a wrapper for OpenMPI to allow running as root by default
-RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
     echo '#!/bin/bash' > /usr/local/bin/mpirun && \
     echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
-    chmod a+x /usr/local/bin/mpirun
+    chmod a+x /usr/local/bin/mpirun && \
 
 # Configure OpenMPI to run good defaults:
-RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
@@ -162,7 +162,7 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
-    	    mpi4py==3.1.2 \
+    	mpi4py==3.1.2 \
 	    nni==2.5 \
 	    mlflow==1.21.0 \
 	    scikit-nni==0.2.1
