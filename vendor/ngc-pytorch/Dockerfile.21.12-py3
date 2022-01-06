@@ -107,6 +107,7 @@ RUN git clone -q --branch=v0.3.18 git://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install && \
+    cd /tmp && \
     git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
@@ -188,7 +189,7 @@ RUN apt autoclean && \
 
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "PyTorch 1.10 (NGC 21.12/Python 3.8 Conda) on Backend.AI" && \
+        --display-name "PyTorch 1.11 (NGC 21.12/Python 3.8 Conda) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
