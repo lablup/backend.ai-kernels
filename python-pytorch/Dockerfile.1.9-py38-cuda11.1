@@ -29,7 +29,7 @@ RUN python3 -m pip uninstall -y torch && \
 
 # torch2trt PyTorch to TensorRT converter which utilizes the TensorRT Python API
 WORKDIR /tmp
-RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt /tmp/torch2trt && \
+RUN git clone --branch=v0.3.0 https://github.com/NVIDIA-AI-IOT/torch2trt /tmp/torch2trt && \
     cd /tmp/torch2trt && \
     python3 setup.py install --plugins && \
     rm -fr /tmp/torch2trt  
