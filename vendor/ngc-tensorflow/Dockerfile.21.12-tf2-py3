@@ -178,16 +178,16 @@ RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.0.2/git-lf
     bash install.sh && \
     rm -rf /tmp/*
 
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.12.0/code-server-3.12.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
-    mv /usr/local/lib/code-server-3.12.0-linux-amd64 /usr/local/lib/code-server-3.12.0 && \
-    ln -s /usr/local/lib/code-server-3.12.0/bin/code-server /usr/local/bin/code-server
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.0.1/code-server-4.0.1-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-4.0.1-linux-amd64 /usr/local/lib/code-server-4.0.1 && \
+    ln -s /usr/local/lib/code-server-4.0.1/bin/code-server /usr/local/bin/code-server
 
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
-    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz && \
-    tar zxf openmpi-4.1.1.tar.gz && \
-    cd openmpi-4.1.1 && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.2.tar.gz && \
+    tar zxf openmpi-4.1.2.tar.gz && \
+    cd openmpi-4.1.2 && \
     ./configure --enable-orterun-prefix-by-default && \
     make -j $(nproc) all && \
     make install && \
