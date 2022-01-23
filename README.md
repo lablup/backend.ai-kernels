@@ -21,6 +21,7 @@ Here we list the latest versions of our supported kernel images.
 | PyTorch                 | `lablup/python-torch`      | 1.8     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.9     | O     | O\*   | O          |     |                   |
 | PyTorch                 | `lablup/python-torch`      | 1.10    | O     | O\*   | O          |     |                   |
+| PyTorch                 | `lablup/python-torch`      | 1.11    | O     | O\*   | O          |     |                   |
 | CNTK                    | `lablup/python-cntk`       | 2.6     | O     | O\*   | O          |     |                   |
 | CNTK                    | `lablup/python-cntk`       | 2.7     | O     | O\*   | O          |     |                   |
 | MXnet                   | `lablup/python-mxnet`      | 1.4.1   | O     | O\*   | O          |     | Bundled w/Keras 2 |
