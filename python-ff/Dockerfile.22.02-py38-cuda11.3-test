@@ -1,0 +1,92 @@
+FROM lablup/common-base:py38-cuda11.3
+
+# Install TensorFlow
+ENV TENSORFLOW_VERSION=2.7.1
+ENV TFX_VERSION=1.6.0
+ENV TFX_BSL_VERSION=1.6.0
+ENV TF_SERVING_API_VERSION=2.7.0
+ENV TF_TEXT_VERSION=2.7.3
+ENV TENSORBOARD_VERSION=2.7.0
+
+RUN python3 -m pip uninstall -y numpy scipy && \
+    python3 -m pip install --no-cache-dir \
+        tfx-bsl==${TFX_BSL_VERSION} \
+	tfx==${TFX_VERSION} \
+	numpy scipy scikit-learn \
+        tensorflow==${TENSORFLOW_VERSION} \
+	tensorboard==${TENSORBOARD_VERSION} \
+	tensorflow-serving-api==${TF_SERVING_API_VERSION} \
+	tensorflow-text==${TF_TEXT_VERSION}
+
+RUN python3 -m pip install --extra-index-url \
+     https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda110==1.10.0 \
+       && \
+    python3 -m pip install --extra-index-url \
+     https://developer.download.nvidia.com/compute/redist nvidia-dali-tf-plugin-cuda110==1.10.0
+
+# Install PyTorch and MXNet
+ENV PYTORCH_VERSION=1.10.2
+ENV TORCHVISION_VERSION=0.11.3
+ENV TORCHAUDIO_VERSION=0.10.2
+ENV TORCHTEXT_VERSION=0.11.2
+ENV TENSORBOARDX_VERSION=2.4
+ENV MXNET_VERSION=1.9.0
+ENV PYTORCH_CUDA_VERSION=cu113
+
+RUN python3 -m pip uninstall -y torch && \
+    python3 -m pip install --no-cache-dir \
+        https://download.pytorch.org/whl/${PYTORCH_CUDA_VERSION}/torch-${PYTORCH_VERSION}%2B${PYTORCH_CUDA_VERSION}-cp38-cp38-linux_x86_64.whl \
+        https://download.pytorch.org/whl/${PYTORCH_CUDA_VERSION}/torchvision-${TORCHVISION_VERSION}%2B${PYTORCH_CUDA_VERSION}-cp38-cp38-linux_x86_64.whl \
+        https://download.pytorch.org/whl/${PYTORCH_CUDA_VERSION}/torchaudio-${TORCHAUDIO_VERSION}%2B${PYTORCH_CUDA_VERSION}-cp38-cp38-linux_x86_64.whl \
+	    #https://download.pytorch.org/whl/${PYTORCH_CUDA_VERSION}/torchcsprng-0.2.1%2B${PYTORCH_CUDA_VERSION}-cp38-cp38-linux_x86_64.whl \
+	    https://download.pytorch.org/whl/torchserve-0.3.0-py2.py3-none-any.whl \
+        https://download.pytorch.org/whl/torchtext-${TORCHTEXT_VERSION}-cp38-cp38-linux_x86_64.whl && \
+    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
+
+RUN python3 -m pip install --no-cache-dir mxnet==${MXNET_VERSION} mkl
+
+ENV HOROVOD_VERSION=0.23.0
+# Install Horovod, temporarily using CUDA stubs
+RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+    HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
+    HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
+    pip install --no-cache-dir horovod==${HOROVOD_VERSION} && \
+    ldconfig
+
+ENV MLFLOW_VERSION=1.23.1
+ENV MPI4PY_VERSION=3.1.3
+ENV NNI_VERSION=2.6
+
+RUN python3 -m pip install --no-cache-dir \
+    	    mpi4py==${MPI4PY_VERSION} \
+            mlflow==${MLFLOW_VERSION} \
+	    nni==${NNI_VERSION} \
+	    scikit-nni==0.2.1
+
+RUN apt autoclean && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+
+COPY ./service-defs /etc/backend.ai/service-defs
+COPY runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
+
+# Install ipython kernelspec
+Run python3 -m ipykernel install --display-name "Lablup FF 22.02 on Python 3.8 (CUDA 11.3)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu18.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+
+WORKDIR /home/work
+# vim: ft=dockerfile
