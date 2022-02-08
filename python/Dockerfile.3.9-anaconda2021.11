@@ -1,0 +1,60 @@
+FROM continuumio/anaconda3:2021.11
+# Anaconda 2021.11 comes with Python 3.9
+
+RUN apt-get update && \
+    apt-get install -y \
+        ca-certificates \
+        wget curl git-core \
+        vim-tiny zip unzip \
+        libssl-dev \
+        proj-bin libproj-dev \
+        libgeos-dev libgeos++-dev \
+        mime-support \
+        gcc g++ && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/
+
+ENV PYTHONUNBUFFERED=1 \
+    PATH=/opt/conda/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
+    LANG=C.UTF-8
+
+RUN conda install matplotlib bokeh && \
+    conda install pyproj cartopy && \
+    conda install seaborn && \
+    conda install h5py && \
+    conda install jupyterlab && \
+    conda install pillow
+
+# Install ipython kernelspec
+RUN /opt/conda/bin/python -m ipykernel install \
+        --prefix=/opt/conda/ \
+        --display-name "Python 3.9 (Anaconda 2021.12) on Backend.AI" && \
+    cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+
+# Install git-lfs
+WORKDIR /tmp
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.0.2/git-lfs-linux-amd64-v3.0.2.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v3.0.2.tar.gz && \
+    bash install.sh && \
+    rm -rf /tmp/*
+
+# Install VSCode
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.0.2/code-server-4.0.2-linux-amd64.tar.gz \
+  | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-4.0.2-linux-amd64 /usr/local/lib/code-server-4.0.2 && \
+    ln -s /usr/local/lib/code-server-4.0.2/bin/code-server /usr/local/bin/code-server
+
+# Backend.AI specifics
+COPY ./service-defs /etc/backend.ai/service-defs
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/conda/bin/python" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,vscode:http:8180,jupyterlab:http:8090"
+
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+# vim: ft=dockerfile
