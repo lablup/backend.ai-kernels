@@ -29,6 +29,7 @@ ENV PYTHONUNBUFFERED=1 \
     PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
 
+# Cartopy>=0.20 requires proj>=8.0.0 but it will ship on Ubuntu 22.04.
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3.10 && \
     python3.10 -m pip install --upgrade pip && \
     python3.10 -m pip install --no-cache-dir -U setuptools && \
@@ -36,7 +37,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3.10 && \
     python3.10 -m pip install --no-cache-dir Cython && \
     python3.10 -m pip install --no-cache-dir matplotlib bokeh && \
     python3.10 -m pip install --no-cache-dir versioneer && \
-    python3.10 -m pip install --no-cache-dir pyproj Cartopy && \
+    python3.10 -m pip install --no-cache-dir pyproj cartopy==0.19.0.post1 && \
     python3.10 -m pip install --no-cache-dir pandas && \
     python3.10 -m pip install --no-cache-dir seaborn && \
     python3.10 -m pip install --no-cache-dir pillow && \
@@ -56,6 +57,7 @@ RUN python3.10 -m ipykernel install --display-name "Python 3.10 on Backend.AI" &
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
+COPY ./service-defs /etc/backend.ai/service-defs
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
