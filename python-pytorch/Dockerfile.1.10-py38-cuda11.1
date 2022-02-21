@@ -1,21 +1,25 @@
 FROM lablup/common-base:py38-cuda11.1
 
 # Install PyTorch
-ENV PYTORCH_VERSION=1.10.0
-ENV TORCHVISION_VERSION=0.10.0
-ENV TORCHAUDIO_VERSION=0.10.0
-ENV TORCHTEXT_VERSION=0.10.0
+ENV PYTORCH_VERSION=1.10.1
+ENV TORCHVISION_VERSION=0.11.1
+ENV TORCHAUDIO_VERSION=0.10.1
+ENV TORCHTEXT_VERSION=0.11.0
 ENV TENSORBOARDX_VERSION=2.4.1
 
-RUN python3 -m pip uninstall -y torch && \
+RUN python3 -m pip uninstall -y torch tensorboardx && \
     python3 -m pip install -U pip==22.0.3 setuptools==60.9.3 && \
+    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION} && \
     python3 -m pip install --no-cache-dir \
-        http://download.pytorch.org/whl/cu111/torch-${PYTORCH_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
-        http://download.pytorch.org/whl/cu111/torchvision-${TORCHVISION_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
-	torchaudio==${TORCHAUDIO_VERSION} \
+        http://download.pytorch.org/whl/cu111/torch-${PYTORCH_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl && \
+#	http://download.pytorch.org/whl/cu111/torchvision-${TORCHVISION_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
+    python3 -m pip install --no-cache-dir \
+	torchvision \
+	torchaudio \
+#	http://download.pytorch.org/whl/cu111/torchaudio-${TORCHAUDIO_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
+	torchtext \
 	torchserve \
-        torchtext==${TORCHTEXT_VERSION} \
-#	torchcsprng \
+	torchcsprng \
 	jsonargparse \
 	torchmetrics \
 	pyDeprecate \
@@ -25,7 +29,6 @@ RUN python3 -m pip uninstall -y torch && \
 	cnn-finetune \
 	keras4torch \
 	pytorch-lightning 
-#    python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION}
 
 # torch2trt PyTorch to TensorRT converter which utilizes the TensorRT Python API
 WORKDIR /tmp
@@ -41,7 +44,7 @@ RUN python3 -m pip install --extra-index-url \
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.22.1 && \
+    pip install --no-cache-dir horovod==0.23.0 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
