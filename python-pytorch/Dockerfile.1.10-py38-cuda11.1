@@ -12,11 +12,9 @@ RUN python3 -m pip uninstall -y torch tensorboardx && \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION} && \
     python3 -m pip install --no-cache-dir \
         http://download.pytorch.org/whl/cu111/torch-${PYTORCH_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl && \
-#	http://download.pytorch.org/whl/cu111/torchvision-${TORCHVISION_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
     python3 -m pip install --no-cache-dir \
 	torchvision \
 	torchaudio \
-#	http://download.pytorch.org/whl/cu111/torchaudio-${TORCHAUDIO_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl \
 	torchtext \
 	torchserve \
 	torchcsprng \
@@ -48,9 +46,9 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
-    	mpi4py==3.0.3 \
-        mlflow==1.18.0 \
-	nni==2.3 \
+    	mpi4py==3.1.3 \
+        mlflow==1.23.1 \
+	nni==2.6.1 \
 	tensorboard-plugin-wit \
 	scikit-nni==0.2.1
 
