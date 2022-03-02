@@ -3,7 +3,7 @@ astor==0.8.0
 attrs==19.1.0
 audioread==2.1.8
 backcall==0.1.0
-bleach==3.1.0
+bleach==3.3.0
 cloudpickle==1.2.2
 cupy==6.4.0
 cycler==0.10.0

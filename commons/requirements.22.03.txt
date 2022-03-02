@@ -73,7 +73,7 @@ beautifulsoup4==4.6.0
 beniget==0.3.0
 biwrap==0.1.6
 black==21.12b0
-bleach==4.1.0
+bleach==3.3.0
 bokeh==1.4.0
 boltons==21.0.0
 boto3==1.9.209
