@@ -20,7 +20,7 @@ autopep8==1.5
 avro-python3==1.9.2.1
 azure-core==1.8.2
 azure-storage-blob==12.5.0
-babel==2.8.0
+babel==2.9.1
 backcall==0.2.0
 bayesian-optimization==1.1.0
 beautifulsoup4==4.6.0
