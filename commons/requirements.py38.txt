@@ -317,7 +317,7 @@ pyerfa==1.7.3
 pyflakes==2.1.1
 pygal==2.4.0
 pyglet==1.5.0
-Pygments==2.5.2
+Pygments==2.7.4
 #PyGObject==3.36.0
 pyLDAvis==2.1.2
 pylint==2.4.4

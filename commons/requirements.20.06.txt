@@ -188,7 +188,7 @@ pyflakes==2.1.1
 pygal==2.4.0
 pygame==1.9.6
 pyglet==1.5.0
-Pygments==2.5.2
+Pygments==2.7.4
 #PyGObject==3.34.0
 pyLDAvis==2.1.2
 pylint==2.4.4

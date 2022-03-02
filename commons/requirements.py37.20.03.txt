@@ -133,7 +133,7 @@ pycocotools==2.0.0
 pydot==1.4.1
 pydotplus==2.0.2
 pygame==1.9.6
-Pygments==2.5.2
+Pygments==2.7.4
 pygobject==3.34.0
 pymongo==3.10.1
 pyparsing==2.4.6
