@@ -444,7 +444,7 @@ rfc3986==1.4.0
 rich==10.16.2
 rope==0.16.0
 rouge-score==0.0.4
-rsa==4.8
+rsa==4.7
 ruamel.yaml.clib==0.2.6
 ruamel.yaml==0.17.21
 s3transfer==0.2.1
