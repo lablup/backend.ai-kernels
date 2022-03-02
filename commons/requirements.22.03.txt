@@ -292,7 +292,7 @@ lightgbm==3.0.0
 lime==0.1.1.37
 llvmlite==0.31.0
 lunardate==0.2.0
-lxml==4.8.0
+lxml==4.6.5
 maproxy==0.0.12
 markdown-it-py==1.1.0
 matplotlib-inline==0.1.3
