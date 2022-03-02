@@ -218,7 +218,7 @@ importlib-resources==5.4.0
 ipykernel==6.9.1
 ipyparallel==6.2.4
 ipython-genutils==0.2.0
-ipython==7.31.1
+ipython==7.16.3
 ipywidgets==7.6.5
 iso8601==1.0.2
 isodate==0.6.0
