@@ -20,7 +20,7 @@ Shapely==1.7.0
 SoundFile==0.10.3.post1
 Sphinx==4.4.0
 Werkzeug==2.0.3
-absl-py==1.0.0
+absl-py==0.15.0
 adanet==0.9.0
 aiohttp==3.8.0
 aiozmq==0.9.0
