@@ -47,7 +47,7 @@ bleach==4.1.0
 bokeh==2.3.2
 boto3==1.9.209
 boto==2.49.0
-botocore==1.12.209
+botocore==1.24.13
 branca==0.4.0
 cachetools==5.0.0
 catboost==0.22
@@ -65,7 +65,7 @@ colour==0.1.5
 conda-build==3.21.8
 contextlib2==0.5.5
 convertdate==2.3.2
-coverage==6.3.1
+coverage==4.5.4
 cupy==9.5.0
 cvxpy==1.1.15
 cycler==0.11.0
