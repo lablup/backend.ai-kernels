@@ -79,7 +79,7 @@ descartes==1.1.0
 dill==0.3.1.1
 distributed==2.11.0
 docopt==0.6.0
-docutils==0.17.1
+docutils==0.15.2
 dopamine_rl==3.0.1
 dtreeviz==0.8.1
 easydict
