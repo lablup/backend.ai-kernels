@@ -103,7 +103,7 @@ contextlib2==0.5.5
 convertdate==2.3.2
 coverage==4.5.4
 crcmod==1.7
-cryptography==36.0.1
+cryptography==3.3.2
 cupy==10.1.0
 cvxpy==1.1.18
 cx-Oracle==8.0.1
