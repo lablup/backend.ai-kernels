@@ -95,7 +95,7 @@ flask==1.1.2
 folium==0.10.0
 funcy==1.13
 gast==0.4.0
-gDAL==3.0.4
+gDAL==3.4.1
 gensim==3.8.0
 geopandas==0.5.1
 gin_config==0.3.0
