@@ -176,13 +176,13 @@ jupyterhub-jwtauthenticator==0.1
 jupyterhub-kubespawner==0.16.1
 jupyterhub
 jupyterhubutils==0.25.0
+jupyterlab==2.3.2
 jupyterlab-code-formatter==1.4.10
 jupyterlab-git
 jupyterlab-github==2.0.0
 jupyterlab-hdf==0.5.1
 jupyterlab-launcher==0.13.1
 jupyterlab-lsp==3.6.0
-#jupyterlab-nvdashboard==0.5.0
 jupyterlabutils==0.10.0
 jupyterthemes==0.20.0
 keras
