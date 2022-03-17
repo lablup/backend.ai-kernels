@@ -5,11 +5,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvm/versions/node/v16.14.0/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda-11.6/include:/usr/include/x86_64-linux-gnu:$LD_LIBRARY_PATH" \
+    PATH="/usr/local/nvm/versions/node/v16.6.1/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/cuda-11.6/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab:$PATH" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
+    CPATH=/usr/local/cuda-10.1/targets/x86_64-linux/include:$CPATH \
     LANG=C.UTF-8
 
 RUN apt-get update && \
@@ -57,9 +58,17 @@ RUN apt-get update && \
 	x264 
 
 # Install CUDA + cuDNN 
-RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.2.4 /usr/local/cuda/lib64/libcudnn.so && \
+RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.3.2 /usr/local/cuda/lib64/libcudnn.so && \
     rm -rf /var/lib/apt/lists/* && \
     ldconfig
+
+# Install cmake
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-Linux-x86_64.sh \
+         -q -O /tmp/cmake-install.sh && \
+    chmod u+x /tmp/cmake-install.sh && \
+    mkdir /usr/bin/cmake && \
+    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
+    rm /tmp/cmake-install.sh
 
 # nvtop install
 WORKDIR /tmp
@@ -98,7 +107,7 @@ RUN echo "Install mecab-ko-dic" && \
     git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git && \
     python3 -m pip install /tmp/mecab-python-0.996
 
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get update -y && \
     apt-get install -y nodejs
 
@@ -157,10 +166,11 @@ RUN mkdir /tmp/openmpi && \
     echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 # Install Horovod, temporarily using CUDA stubs
-RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+RUN cp /usr/local/cuda-11.6/bin/nvcc /bin/nvcc && \
+#    ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_CUDA_HOME=$CONDA_PREFIX HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL HOROVOD_NCCL_LINK=SHARED \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.23.0 && \
+    pip install --no-cache-dir horovod==0.24.1 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
