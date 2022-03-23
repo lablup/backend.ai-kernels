@@ -1,0 +1,69 @@
+FROM lablup/common-base:py38-cuda11.3
+# py38-cuda11.3 is based on Ubuntu 18.04
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# Install jupyter & Julia
+ARG JULIA_VERSION
+ENV JULIA_VERSION ${JULIA_VERSION:-1.7.2}
+ENV JULIA_PATH "/usr/local/julia"
+ENV PATH $JULIA_PATH:$JULIA_PATH/bin:$PATH
+    
+RUN dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        amd64) tarArch='x86_64'; dirArch='x64';; \
+        armhf) tarArch='arm'; dirArch='arm';; \
+        i386) tarArch='i686'; dirArch='x86';; \
+        *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding Julia binary release"; exit 1 ;; \
+    esac; \
+    \
+    curl -fL -o julia.tar.gz     "https://julialang-s3.julialang.org/bin/linux/${dirArch}/${JULIA_VERSION%[.-]*}/julia-${JULIA_VERSION}-linux-${tarArch}.tar.gz"; \
+    \
+    mkdir "$JULIA_PATH"; \
+    tar -xzf julia.tar.gz -C "$JULIA_PATH" --strip-components 1; \
+    rm julia.tar.gz
+
+#add IJulia package to make Julia kernel available in jupyter
+ENV JULIA_PKG_LOC /opt/julia
+ENV JULIA_LOAD_PATH :/opt/julia
+ENV JULIA_DEPOT_PATH /opt/julia
+RUN mkdir ${JULIA_PKG_LOC}
+RUN julia -e 'ENV["JUPYTER"]="jupyter"' && \
+    julia -e 'ENV["PYTHON"]="python3"' && \
+    julia -e 'ENV["JULIA_DEPOT_PATH"]="/opt/julia"' && \
+    julia -e 'using Pkg; Pkg.add("IJulia");'
+
+RUN julia -e 'using Pkg; Pkg.add("Plots"); using Plots;'
+RUN julia -e 'using Pkg; Pkg.add("DataFrames");' && \
+    julia -e 'using Pkg; Pkg.add("RDatasets");' && \
+    julia -e 'using Pkg; Pkg.add("PyPlot");' && \
+    julia -e 'using Pkg; Pkg.add("CSV");' && \
+    julia -e 'using Pkg; Pkg.add("Pandas"); using Pandas;' && \
+    julia -e 'using Pkg; Pkg.add("CUDA"); using CUDA;'
+
+SHELL ["/bin/bash", "-c"]
+RUN julia -e 'using IJulia' && \
+    chmod -R 755 /opt/julia/compiled
+SHELL ["/bin/sh", "-c"]
+# Install ipython kernelspec
+COPY kernel.1.7.cuda113.json /usr/local/share/jupyter/kernels/julia-1.7/kernel.json
+COPY logo-32x32.png /usr/local/share/jupyter/kernels/julia-1.7/logo-32x32.png
+COPY logo-64x64.png /usr/local/share/jupyter/kernels/julia-1.7/logo-64x64.png
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.base-distro="ubuntu20.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8070,jupyterlab:http:8090"
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+ENV JULIA_DEPOT_PATH /home/work/.julia:/opt/julia
+ENV JULIA_PROJECT /home/work/.julia
+# vim: ft=dockerfile
+
