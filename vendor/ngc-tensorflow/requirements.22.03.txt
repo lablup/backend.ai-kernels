@@ -214,7 +214,6 @@ matplotlib==3.4.3
 mccabe==0.6.1
 meshio==4.4.2
 mimeparse==0.1.3
-mlflow
 mlxtend==0.17.2
 mmcv-full
 mmdnn==0.3.1
