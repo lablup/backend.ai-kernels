@@ -68,9 +68,9 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
 	nodejs \
 	pdsh \
 	protobuf-compiler \
-        libsmpeg-dev \
-        openjdk-8-jdk \
-        python3-gdal \
+    libsmpeg-dev \
+    openjdk-8-jdk \
+    python3-gdal \
 	v4l-utils \	
 	x264 
 
@@ -192,22 +192,20 @@ RUN mkdir /tmp/openmpi && \
     make -j $(nproc) all && \
     make install && \
     ldconfig && \
-    rm -rf /tmp/openmpi*
+    rm -rf /tmp/openmpi* && \
 # Create a wrapper for OpenMPI to allow running as root by default
-RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
     echo '#!/bin/bash' > /usr/local/bin/mpirun && \
     echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
-    chmod a+x /usr/local/bin/mpirun
-
+    chmod a+x /usr/local/bin/mpirun && \
 # Configure OpenMPI to run good defaults:
-RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 RUN python3 -m pip install --no-cache-dir \
-    	    mpi4py==3.1.3 \
+    	mpi4py==3.1.3 \
 	    nni==2.6.1 \
 	    mlflow==1.24.0 \
 	    scikit-nni==0.2.1
-
 
 # Install Jupyterlab extensions
 RUN jupyter nbextensions_configurator enable && \
@@ -236,7 +234,7 @@ RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.8 (NGC 22.03 
 
 # Backend.AI specifics
 COPY ./service-defs /etc/backend.ai/service-defs
-COPY runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
+COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
