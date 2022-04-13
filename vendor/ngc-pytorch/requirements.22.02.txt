@@ -14,7 +14,6 @@ Shapely==1.7.0
 SoundFile==0.10.3.post1
 Sphinx==4.4.0
 Werkzeug==2.0.3
-
 adanet==0.9.0
 aiohttp==3.8.0
 aiozmq==0.9.0
@@ -53,7 +52,7 @@ dill==0.3.1.1
 docopt==0.6.0
 dopamine_rl==3.0.1
 dtreeviz==0.8.1
-easydict
+easydict==1.9
 ecos==2.0.7.post1
 elegy==0.1.5
 enum34==1.1.8
@@ -101,7 +100,7 @@ jupyter-nbextensions-configurator==0.4.1
 jupyter-server-proxy==1.2.0
 jupyter==1.0.0
 jupyter_bokeh==2.0.4
-jupyterlab-git
+jupyterlab-git==0.36.0
 jupyterlab-github==2.0.0
 jupyterlab-lsp==3.6.0
 jupyterlab==3.3.0
@@ -160,6 +159,7 @@ pydotplus==2.0.2
 pygal==2.4.0
 pygame==2.0.1
 pyglet==1.5.0
+Pygments==2.11.2
 pylint==2.4.4
 pyls-black==0.4.4
 pymongo==3.10.1
@@ -167,12 +167,12 @@ pyparsing==2.4.6
 pyproj==2.5.0
 pyqt5==5.15.0
 pyrsistent==0.18.1
-pyshp
+pyshp==2.2.0
 pystan==3.3.0 
 python-dateutil==2.8.2
 python-jsonrpc-server==0.4.0
-python-language-server[all] 
-python-lsp-server
+python-language-server[all]==0.29.3 
+python-lsp-server==1.4.1
 python-speech-features==0.6
 pythran==0.11.0 
 pyvista==0.24.3
@@ -209,7 +209,7 @@ test-generator==0.1.1
 transformers==4.11.3
 tweepy==3.8.0
 typing==3.7.4.1
-ujson
+ujson==5.2.0
 update-checker==0.16
 vecstack==0.4.0
 versioneer==0.18
