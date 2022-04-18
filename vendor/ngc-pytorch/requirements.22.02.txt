@@ -1,3 +1,17 @@
+
+nbformat==5.2.0
+jupyter_server==1.15.5
+flake8==4.0.0
+black==21.11b1
+jupyter_client==6.1.11
+nbconvert==6.4.3
+anyio==3.4.0
+jupyterhub==2.2.1
+alembic==1.7.6
+certipy==0.1.2
+argo_workflows==3.6.0
+asgiref==3.4.1
+Jinja2==2.11.2
 jupyterhub_kubespawner==0.15.0
 entrypoints==0.4
 jsonschema==4.4.0
