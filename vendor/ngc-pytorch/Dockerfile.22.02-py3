@@ -112,7 +112,7 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get install -y nodejs
 
 WORKDIR /tmp
-RUN git clone -q --branch=v0.3.20 git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install && \
