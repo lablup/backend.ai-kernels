@@ -134,7 +134,7 @@ RUN /opt/conda/bin/conda install -c conda-forge opencv ffmpeg spacy \
 
 WORKDIR /tmp
 COPY ./requirements.22.02.txt /tmp/requirements.txt
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt && \
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -Ur requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 # install git-lfs
