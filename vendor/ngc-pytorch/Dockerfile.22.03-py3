@@ -6,29 +6,17 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda-11.6/include:/usr/include/x86_64-linux-gnu:$LD_LIBRARY_PATH" \
-<<<<<<< HEAD
-    PATH="/usr/local/nvm/versions/node/v16.6.1/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/cuda-11.6/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab:$PATH" \
-    mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
-    CPLUS_INCLUDE_PATH=/usr/include/gdal \
-    C_INCLUDE_PATH=/usr/include/gdal \
-    CPATH=/usr/local/cuda-11.6/targets/x86_64-linux/include:$CPATH \
-=======
     PATH="/usr/local/nvm/versions/node/v16.6.1/bin:/opt/conda/lib/python3.8/site-packages/torch_tensorrt/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
-#    CPATH=/usr/local/cuda-10.1/targets/x86_64-linux/include:$CPATH \
->>>>>>> 428b8f2fe85b44c569e7749658a1f56e4b7778b3
     LANG=C.UTF-8
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	automake \
-<<<<<<< HEAD
-=======
 	bzip2 \
 	cabextract \
->>>>>>> 428b8f2fe85b44c569e7749658a1f56e4b7778b3
 	ffmpeg \
 	fonts-nanum \
 	fonts-nanum-coding \
@@ -48,15 +36,10 @@ RUN apt-get update && \
 	libgstreamer-plugins-base1.0-dev \
 	libgstreamer1.0-dev \
 	libgtk-3-dev \
-<<<<<<< HEAD
-	libhdf5-dev \	
-	libmp3lame-dev \
-=======
 	libhdf5-dev \
 	libjemalloc-dev \
 	libmp3lame-dev \
 	libncurses-dev \
->>>>>>> 428b8f2fe85b44c569e7749658a1f56e4b7778b3
 	libopenblas-dev \
 	libopencore-amrnb-dev \
 	libopencore-amrwb-dev \
@@ -71,13 +54,9 @@ RUN apt-get update && \
 	libtbb-dev \
 	mercurial \
 	ncurses-term \
-<<<<<<< HEAD
-    openjdk-8-jdk \
-=======
         openjdk-8-jdk \
 	pbzip2 \
 	pv \
->>>>>>> 428b8f2fe85b44c569e7749658a1f56e4b7778b3
 	pdsh \
 	protobuf-compiler \
 	v4l-utils \	
@@ -138,11 +117,7 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get install -y nodejs
 
 WORKDIR /tmp
-<<<<<<< HEAD
-RUN git clone -q --branch=v0.3.20 git://github.com/xianyi/OpenBLAS.git && \
-=======
 RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
->>>>>>> 428b8f2fe85b44c569e7749658a1f56e4b7778b3
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install && \
@@ -151,15 +126,7 @@ RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
 
-<<<<<<< HEAD
 RUN /opt/conda/bin/conda install opencv ffmpeg spacy 
-=======
-<<<<<<< HEAD
-RUN /opt/conda/bin/conda install -c conda-forge opencv ffmpeg spacy
-=======
-RUN /opt/conda/bin/conda install -cᅧ conda-forge opencv ffmpeg spacy 
->>>>>>> 428b8f2fe85b44c569e7749658a1f56e4b7778b3
->>>>>>> 6a6593ec74e88d0a437b40681438d777201cafec
 
 WORKDIR /tmp
 COPY ./requirements.22.03.txt /tmp/requirements.txt
@@ -204,32 +171,18 @@ RUN mkdir /tmp/openmpi && \
     echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 # Install Horovod, temporarily using CUDA stubs
-<<<<<<< HEAD
-RUN cp /usr/local/cuda-11.6/bin/nvcc /bin/nvcc && \
-#    ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-    HOROVOD_CUDA_HOME=$CONDA_PREFIX HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL HOROVOD_NCCL_LINK=SHARED \
-    HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.24.1 && \
-=======
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-#    cp /usr/local/cuda-11.6/bin/nvcc /bin/nvcc && \
-#    ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_CUDA_HOME=$CONDA_PREFIX HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL HOROVOD_NCCL_LINK=SHARED \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
     pip install --no-cache-dir horovod==0.24.2 && \
->>>>>>> 428b8f2fe85b44c569e7749658a1f56e4b7778b3
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	mpi4py==3.1.2 \
-	    nni==2.5 \
-	    mlflow==1.21.0 \
-	    scikit-nni==0.2.1
+	nni==2.5 \
+	mlflow==1.21.0 \
+	scikit-nni==0.2.1
 
-<<<<<<< HEAD
-=======
-RUN rm /usr/local/bin/node 
->>>>>>> 428b8f2fe85b44c569e7749658a1f56e4b7778b3
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
