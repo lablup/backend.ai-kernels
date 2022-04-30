@@ -12,6 +12,7 @@ aiozmq==0.9.0
 albumentations==1.1.0
 alembic==1.7.6
 anyio==3.4.0
+appdirs==1.4.3
 argo_workflows==3.6.0
 asgiref==3.4.1
 astor==0.8.1
@@ -84,6 +85,7 @@ gym==0.17.3
 h5py==2.10.0
 hdf5storage==0.1.15
 holidays>=0.11.3.1
+httplib2==0.20.1
 huggingface_hub==0.4.0
 hyperopt==0.1.2
 idna==3.2
