@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/tritonserver:20.12-py3
+FROM nvcr.io/nvidia/tritonserver:21.12-py3
 # NVIDIA Triton
 
 ENV PYTHONUNBUFFERED=1 \
