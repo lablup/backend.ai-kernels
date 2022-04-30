@@ -127,7 +127,7 @@ RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
 
-RUN /opt/conda/bin/conda install -cᅧ conda-forge opencv ffmpeg spacy 
+RUN /opt/conda/bin/conda install opencv ffmpeg spacy 
 
 WORKDIR /tmp
 COPY ./requirements.22.03.txt /tmp/requirements.txt
