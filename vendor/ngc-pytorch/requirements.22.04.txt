@@ -143,7 +143,7 @@ multiprocess==0.70.9
 munch==2.5.0
 namedlist==1.7
 nbclassic==0.3.6
-bclient==0.5.13
+nbclient==0.5.13
 nbdime==3.1.0
 nest_asyncio==1.5.5
 networkx==2.8
