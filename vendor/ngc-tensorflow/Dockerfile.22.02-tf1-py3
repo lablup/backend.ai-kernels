@@ -202,12 +202,12 @@ RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
 # Configure OpenMPI to run good defaults:
 RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
-RUN rm /usr/local/bin/node
-RUN jupyter nbextensions_configurator enable && \
+RUN pip install jupyter_nbextensions_configurator && \
+    jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
-    jupyter serverextension enable --py jupyter_lsp && \
+#    jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp@2.1.4 && \
