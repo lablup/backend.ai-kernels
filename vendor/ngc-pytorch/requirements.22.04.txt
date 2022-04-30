@@ -143,6 +143,7 @@ multiprocess==0.70.9
 munch==2.5.0
 namedlist==1.7
 nbclassic==0.3.6
+bclient==0.5.13
 nbdime==3.1.0
 nest_asyncio==1.5.5
 networkx==2.8
@@ -151,6 +152,7 @@ notebook==6.4.11
 nltk==3.6.7
 numexpr==2.7.0
 numpy==1.22.3
+oauthlib==3.2.0
 oauth2client==3.0.0
 oauthenticator==0.12.1
 opencv-python==4.5.5
