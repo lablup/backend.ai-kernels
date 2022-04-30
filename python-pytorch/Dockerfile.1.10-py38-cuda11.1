@@ -1,4 +1,4 @@
-FROM lablup/common-base:py38-cuda11.1
+FROM lablup/common-base:py38-cuda11.3
 
 # Install PyTorch
 ENV PYTORCH_VERSION=1.10.1
@@ -7,15 +7,19 @@ ENV TORCHAUDIO_VERSION=0.10.1
 ENV TORCHTEXT_VERSION=0.11.0
 ENV TENSORBOARDX_VERSION=2.4.1
 
+WORKDIR /tmp
 RUN python3 -m pip uninstall -y torch tensorboardx && \
     python3 -m pip install -U pip==22.0.3 setuptools==60.9.3 && \
     python3 -m pip install --no-cache-dir tensorboardX==${TENSORBOARDX_VERSION} && \
     python3 -m pip install --no-cache-dir \
-        http://download.pytorch.org/whl/cu111/torch-${PYTORCH_VERSION}%2Bcu111-cp38-cp38-linux_x86_64.whl && \
+        http://download.pytorch.org/whl/cu113/torch-${PYTORCH_VERSION}%2Bcu113-cp38-cp38-linux_x86_64.whl && \
     python3 -m pip install --no-cache-dir \
-	torchvision \
-	torchaudio \
-	torchtext \
+        http://download.pytorch.org/whl/cu113/torchvision-0.11.2%2Bcu113-cp38-cp38-linux_x86_64.whl && \
+    python3 -m pip install --no-cache-dir \
+	http://download.pytorch.org/whl/cu113/torchaudio-0.10.1%2Bcu113-cp38-cp38-linux_x86_64.whl && \
+    python3 -m pip install --no-cache-dir \
+	http://download.pytorch.org/whl/torchtext-0.11.1-cp38-cp38-linux_x86_64.whl && \
+    python3 -m pip install --no-cache-dir \
 	torchserve \
 	torchcsprng \
 	jsonargparse \
@@ -26,7 +30,7 @@ RUN python3 -m pip uninstall -y torch tensorboardx && \
 	pretrainedmodels \
 	cnn-finetune \
 	keras4torch \
-	pytorch-lightning 
+	pytorch-lightning
 
 # torch2trt PyTorch to TensorRT converter which utilizes the TensorRT Python API
 WORKDIR /tmp
@@ -37,6 +41,7 @@ RUN git clone --branch=v0.3.0 https://github.com/NVIDIA-AI-IOT/torch2trt /tmp/to
 
 RUN python3 -m pip install --extra-index-url \
        https://developer.download.nvidia.com/compute/redist nvidia-dali-cuda100 
+
 
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
