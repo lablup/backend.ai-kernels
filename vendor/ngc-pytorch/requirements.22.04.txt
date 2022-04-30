@@ -52,7 +52,7 @@ deepmerge==0.1.0
 descartes==1.1.0
 dill==0.3.1.1
 docopt==0.6.0
-docutils==0.15.1
+docutils==0.15.2
 dopamine_rl==3.0.1
 dtreeviz==0.8.1
 easydict==1.9
