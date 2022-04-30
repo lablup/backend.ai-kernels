@@ -127,9 +127,7 @@ RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
 
-RUN /opt/conda/bin/conda install -c conda-forge opencv ffmpeg spacy \
-    			 jupyter_client=7.1.0 jupyter_server=1.13.1 \
-			 traitlets>=5.0 --force-reinstall
+RUN /opt/conda/bin/conda install -c conda-forge opencv ffmpeg spacy 
 
 
 WORKDIR /tmp
