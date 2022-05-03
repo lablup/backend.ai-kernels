@@ -8,7 +8,7 @@ lz4==3.1.9
 jupyterhubutils==0.25.0
 absl_py==0.11.0
 importlib_metadata==4.11.1
-jupyterlab_server==2.12.0
+jupyterlab_server==2.8.2
 jupyter_packaging==0.11.1
 jupyterlab==3.2.6
 matplotlib==3.5.1
