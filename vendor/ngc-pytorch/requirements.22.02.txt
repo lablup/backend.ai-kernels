@@ -1,3 +1,4 @@
+importlib_metadata==4.11.1
 jinja2==2.11.3
 factor_analyzer==0.3.2
 holidays>=0.11.3.1
@@ -202,7 +203,7 @@ multidict==4.7.5
 multiprocess==0.70.9
 munch==2.5.0
 namedlist==1.7
-nbconvert==6.5.0
+nbconvert==6.2.0
 nbclassic==0.3.6
 nbclient==0.5.13
 nbdime==3.1.0
