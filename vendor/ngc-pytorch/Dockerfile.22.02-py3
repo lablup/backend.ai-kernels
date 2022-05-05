@@ -6,11 +6,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda-11.6/include:/usr/include/x86_64-linux-gnu:$LD_LIBRARY_PATH" \
-    PATH="/usr/local/nvm/versions/node/v16.6.1/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/cuda-11.6/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab:$PATH" \
+    PATH="/usr/local/nvm/versions/node/v16.6.1/bin:/opt/conda/lib/python3.8/site-packages/torch_tensorrt/bin:/opt/conda/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
-    CPATH=/usr/local/cuda-10.1/targets/x86_64-linux/include:$CPATH \
     LANG=C.UTF-8
 
 RUN apt-get update && \
@@ -127,13 +126,7 @@ RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
     cd /tmp/scs-python && \
     python setup.py install --scs --gpu
 
-RUN /opt/conda/bin/conda install -c conda-forge opencv ffmpeg spacy 
-
-
-WORKDIR /tmp
-COPY ./requirements.22.02.txt /tmp/requirements.txt
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -Ur requirements.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
+RUN /opt/conda/bin/conda install opencv ffmpeg spacy 
 
 # install git-lfs
 WORKDIR /tmp
@@ -168,25 +161,34 @@ RUN mkdir /tmp/openmpi && \
     echo '#!/bin/bash' > /usr/local/bin/mpirun && \
     echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
     chmod a+x /usr/local/bin/mpirun && \
-
 # Configure OpenMPI to run good defaults:
     echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
+WORKDIR /tmp
+COPY ./requirements.22.04.txt /tmp/requirements.txt
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
+
 # Install Horovod, temporarily using CUDA stubs
-RUN cp /usr/local/cuda-11.6/bin/nvcc /bin/nvcc && \
-#    ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-    HOROVOD_CUDA_HOME=$CONDA_PREFIX HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL HOROVOD_NCCL_LINK=SHARED \
+RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda-11.6/include:/usr/include/x86_64-linux-gnu:/usr/include:$LD_LIBRARY_PATH" \
+    HOROVOD_NCCL_LINK=SHARED \
+    HOROVOD_WITH_MPI=1 \
+    HOROVOD_GPU_ALLREDUCE=NCCL \
+    NCCL_LIBRARY=/usr/include \
+    HOROVOD_NCCL_INCLUDE=/usr/include \
+    HOROVOD_NCCL_LIB=/lib/x86_64-linux-gnu \
+    HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.24.1 && \
+    pip install --no-cache-dir horovod==0.24.2 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	mpi4py==3.1.2 \
-	    nni==2.5 \
-	    mlflow==1.21.0 \
-	    scikit-nni==0.2.1
+	nni==2.5 \
+	mlflow==1.21.0 \
+	scikit-nni==0.2.1
 
-RUN rm /usr/local/bin/node 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
@@ -194,7 +196,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
-    jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
     jupyter lab build
