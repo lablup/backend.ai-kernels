@@ -128,11 +128,6 @@ RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
 
 RUN /opt/conda/bin/conda install opencv ffmpeg spacy 
 
-WORKDIR /tmp
-COPY ./requirements.22.03.txt /tmp/requirements.txt
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
-
 # install git-lfs
 WORKDIR /tmp
 RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.0.2/git-lfs-linux-amd64-v3.0.2.tar.gz && \
@@ -166,16 +161,31 @@ RUN mkdir /tmp/openmpi && \
     echo '#!/bin/bash' > /usr/local/bin/mpirun && \
     echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
     chmod a+x /usr/local/bin/mpirun && \
-
 # Configure OpenMPI to run good defaults:
     echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
+WORKDIR /tmp
+COPY ./requirements.22.04.txt /tmp/requirements.txt
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
+COPY ./requirements.22.04.1.txt /tmp/requirements.txt
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
+
 # Install Horovod, temporarily using CUDA stubs
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-    HOROVOD_CUDA_HOME=$CONDA_PREFIX HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL HOROVOD_NCCL_LINK=SHARED \
+    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda-11.6/include:/usr/include/x86_64-linux-gnu:/usr/include:$LD_LIBRARY_PATH" \
+    HOROVOD_NCCL_LINK=SHARED \
+    HOROVOD_WITH_MPI=1 \
+    HOROVOD_GPU_ALLREDUCE=NCCL \
+    NCCL_LIBRARY=/usr/include \
+    HOROVOD_NCCL_INCLUDE=/usr/include \
+    HOROVOD_NCCL_LIB=/lib/x86_64-linux-gnu \
+    HOROVOD_GPU_BROADCAST=NCCL \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
     pip install --no-cache-dir horovod==0.24.2 && \
     ldconfig
+
 
 RUN python3 -m pip install --no-cache-dir \
     	mpi4py==3.1.2 \
@@ -190,7 +200,6 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
-    jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
     jupyter lab build
@@ -204,7 +213,7 @@ RUN apt autoclean && \
 
 RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
-        --display-name "PyTorch 1.11 (NGC 22.03/Python 3.8 Conda) on Backend.AI" && \
+        --display-name "PyTorch 1.12 (NGC 22.03/Python 3.8 Conda) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
