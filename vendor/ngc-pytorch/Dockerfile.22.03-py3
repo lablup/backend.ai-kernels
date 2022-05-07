@@ -165,10 +165,7 @@ RUN mkdir /tmp/openmpi && \
     echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 WORKDIR /tmp
-COPY ./requirements.22.04.txt /tmp/requirements.txt
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.txt
-COPY ./requirements.22.04.1.txt /tmp/requirements.txt
+COPY ./requirements.22.03.txt /tmp/requirements.txt
 RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
