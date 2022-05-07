@@ -310,7 +310,7 @@ jupyter_server_mathjax==0.2.4
 jupyterhub==2.2.1
 jupyterhub_kubespawner==0.15.0
 jupyterhubutils==0.25.0
-jupyterlab-lsp==3.6.0
+jupyterlab-lsp==2.1.4
 jupyterlab==2.3.2
 jupyterlab_hdf==0.3.0
 jupyterlab_server==1.2.0
