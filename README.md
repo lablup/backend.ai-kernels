@@ -97,6 +97,8 @@ Here we list the latest versions of our supported kernel images.
 | NGC-TensorFlow          | `lablup/ngc-tensorflow` | 22.02-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-TensorFlow          | `lablup/ngc-tensorflow` | 22.03-tf2-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-TensorFlow          | `lablup/ngc-tensorflow` | 22.03-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 22.04-tf2-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
+| NGC-TensorFlow          | `lablup/ngc-tensorflow` | 22.04-tf1-py3 | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.07-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.08-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 19.09-py3     | O     | O\*   | O          |     |                   |
