@@ -497,7 +497,7 @@ tensorflow-datasets-ko==0.2.3
 tensorflow-datasets==4.5.2
 tensorflow-estimator==2.7.0
 tensorflow-gan==2.1.0
-tensorflow-gpu==2.7.1
+tensorflow-gpu==2.6.4
 tensorflow-graphics-gpu==1.0.0
 tensorflow-hub==0.12.0
 tensorflow-io-gcs-filesystem==0.24.0
