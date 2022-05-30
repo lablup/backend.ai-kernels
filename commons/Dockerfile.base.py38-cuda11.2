@@ -238,8 +238,8 @@ RUN mkdir -p /opt/oracle && \
 
 # install git-lfs
 WORKDIR /tmp
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.2.0/git-lfs-linux-amd64-v3.2.0.tar.gz && \
-    tar -zxf git-lfs-linux-amd64-v3.2.0.tar.gz && \
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.0.2/git-lfs-linux-amd64-v3.0.2.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v3.0.2.tar.gz && \
     bash install.sh && \
     rm -rf /tmp/*
 
@@ -262,7 +262,7 @@ RUN wget https://github.com/openucx/ucx/archive/v1.12.1.tar.gz && \
     make install 
 
 # OpenBlas
-RUN git clone -q --branch=v0.3.20 git://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
@@ -271,19 +271,12 @@ RUN git clone -q --branch=v0.3.20 git://github.com/xianyi/OpenBLAS.git && \
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
 #    rm -r /usr/bin/python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools pip && \
+    python3 -m pip install --no-cache-dir -U setuptools "pip < 22" && \
     python3 -m pip install --no-cache-dir cython pybind11 pythran && \
 #    ln -s /usr/bin/python3.8 /usr/bin/python3 && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
 
-RUN python3 -m pip install --extra-index-url \
-        https://developer.download.nvidia.com/compute/redist \
-	--upgrade nvidia-dali-cuda110 \
-       && \
-    python3 -m pip install --extra-index-url \
-        https://developer.download.nvidia.com/compute/redist \
-	--upgrade nvidia-dali-tf-plugin-cuda110 
 
 # XGBoost
 RUN git clone  --recursive https://github.com/dmlc/xgboost && \
@@ -304,6 +297,7 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
 
+ENV NUMPY_VERSION=1.17.4
 # Numpy    
 RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
     cd numpy && \
@@ -317,6 +311,7 @@ RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/nump
     echo "lapack_libs =" >> site.cfg && \
     python3 setup.py bdist_wheel -d /tmp 
 
+ENV SCIPY_VERSION=1.6.0
 # Scipy
 RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
@@ -361,9 +356,9 @@ RUN curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9
     python3 -m pip install /tmp/mecab-python-0.996
 
 WORKDIR /tmp
-COPY ./requirements.py38.txt /tmp
-RUN python3 -m pip install --no-cache-dir -r requirements.py38.txt && \
-    rm -f /tmp/*.whl /tmp/requirements.py38.txt
+COPY ./requirements.22.06.txt /tmp/requirements.txt 
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
+    rm -f /tmp/*.whl /tmp/requirements.txt
 
 # OpenCV
 WORKDIR /tmp
@@ -402,6 +397,14 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
       .. 2>&1 | tee cmake_messages.txt && \
     make -j$(nproc) && \
     make install 
+
+RUN python3 -m pip install --extra-index-url \
+        https://developer.download.nvidia.com/compute/redist \
+	--upgrade nvidia-dali-cuda110 \
+       && \
+    python3 -m pip install --extra-index-url \
+        https://developer.download.nvidia.com/compute/redist \
+	--upgrade nvidia-dali-tf-plugin-cuda110 
 
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
