@@ -3,18 +3,11 @@ MAINTAINER Mario Cho "m.cho@lablup.com"
 
 ARG CUDA=11.2
 ARG CUDNN=8.1.1.33-1
-# Python 3.8 is supported by Ubuntu Bionic out of the box
-ARG python=3.8
 ENV CUDNN_VERSION 8.1.1.33 
 ENV NCCL=2.8.4 
 ENV NCCL_VERSION=2.8.4-1 
 ENV MLNX_OFED_VERSION=5.4-2.4.1.3 
-ENV PYTHON_VERSION=${python} 
 ENV OPENMPI 4.1.2 
-ENV NUMPY_VERSION 1.22.4 
-ENV SCIPY_VERSION 1.8.1
-ENV MKL_VERSION=2020.3 
-ENV MKL_BUILD=279 
 # configure for enviroments    
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Asia/Seoul \
@@ -24,7 +17,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
     _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
     LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/lib/x86_64-linux-gnu:/usr/include/x86_64-linux-gnu:/usr/local/lib" \
-    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/mpi/bin:/usr/local/ucx:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM" \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/mpi/bin:/usr/local/ucx:/opt/conda/bin:/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM" \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
@@ -41,15 +34,11 @@ SHELL ["/bin/bash", "-cu"]
 
 WORKDIR /tmp
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends software-properties-common wget && \
+    apt-get install -y --no-install-recommends software-properties-common wget curl && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     add-apt-repository -y ppa:bashtop-monitor/bashtop && \
-    wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
-    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
-    rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
-    wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list && \
     apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub && \
     apt-get update -y && \ 
     apt-get install -y --no-install-recommends \
@@ -77,7 +66,6 @@ RUN apt-get update -y && \
 	git \
 	graphviz \
 	htop \
-	intel-mkl-2020.3-111 intel-ipp-2020.2-108 intel-tbb-2020.3-108 intel-daal-2020.2-108 intel-mpi-2019.8-108 \
 	iputils-ping \
 	libasound2-dev \
 	libatlas-base-dev \
@@ -92,6 +80,7 @@ RUN apt-get update -y && \
 	libdc1394-22-dev \
 	libeigen3-dev \
 	libfaac-dev \
+	libfftw3-dev \
 	libfreetype6-dev \
 	libfuse2 \
 	libgdal-dev \
@@ -157,6 +146,7 @@ RUN apt-get update -y && \
 	mpich \
 	ncurses-term \
 	net-tools \
+	nodejs \
 	openjdk-8-jdk \
 	openssh-client \
 	openssh-server \
@@ -165,11 +155,7 @@ RUN apt-get update -y && \
 	pkg-config \
 	proj-bin \
 	protobuf-compiler \
-	python${PYTHON_VERSION} \
-	python${PYTHON_VERSION}-dev \
-	python${PYTHON_VERSION}-distutils \
 	python-apt \
-	python3-gdal \
 	subversion \
 	swig \
 	tk \
@@ -194,17 +180,28 @@ RUN apt-get update -y && \
     echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
     ldconfig && \
 # Add OpenCL ICD files for LightGBM
+    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
     mkdir -p /etc/OpenCL/vendors && \
     echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd && \
     ldconfig && \
-    echo "/opt/intel/daal/lib/intel64" >> /etc/ls.so.conf && \
-    echo "/opt/intel/ipp/lib/intel64" >> /etc/ls.so.conf && \
-    echo "/opt/intel/lib/intel64" >> /etc/ls.so.conf && \
-    echo "/opt/intel/mkl/lib/intel64" >> /etc/ls.so.conf && \
-    find /usr/local/cuda-${CUDA}/lib64/ -type f -name 'lib*_static.a' -not -name 'libcudart_static.a' -delete && \
-# Add OpenCL ICD files for LightGBM
-    mkdir -p /etc/OpenCL/vendors && \
-    echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
+    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    /bin/bash /tmp/miniconda.sh -b -p /opt/conda && \
+    rm /tmp/miniconda.sh && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> /root/.bashrc && \
+    echo "conda activate base" >> /root/.bashrc && \
+    curl -L "https://github.com/krallin/tini/releases/download/v0.19.0/tini_0.19.0.deb" > tini.deb && \
+    dpkg -i tini.deb && \
+    rm tini.deb && \
+    /opt/conda/bin/conda config --add channels conda-forge && \
+    /opt/conda/bin/conda config --add channels bioconda && \
+    /opt/conda/bin/conda config --add channels intel && \
+    /opt/conda/bin/conda config --add envs_dirs /home/work/.conda && \
+    /opt/conda/bin/conda update --prefix /opt/conda conda && \
+    /opt/conda/bin/conda install -c intel mkl intelpython3_core && \
+    /opt/conda/bin/conda install pip && \
+    /opt/conda/bin/python -m pip install --no-cache-dir -U "setuptools <58" 
+    
 
 # OFED
 WORKDIR /tmp
@@ -267,17 +264,6 @@ RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
 
-# install python
-WORKDIR /tmp
-RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
-#    rm -r /usr/bin/python3 && \
-    python3 -m pip install --no-cache-dir -U setuptools "pip < 22" && \
-    python3 -m pip install --no-cache-dir cython pybind11 pythran && \
-#    ln -s /usr/bin/python3.8 /usr/bin/python3 && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
-
-
 # XGBoost
 RUN git clone  --recursive https://github.com/dmlc/xgboost && \
     cd xgboost && \
@@ -297,7 +283,11 @@ RUN cd /usr/local/src && mkdir lightgbm && cd lightgbm && \
     cd /usr/local/src/lightgbm/LightGBM/python-package && \
     python3 setup.py install --precompile
 
-ENV NUMPY_VERSION=1.17.4
+ENV NUMPY_VERSION 1.22.4 
+ENV SCIPY_VERSION 1.8.1
+ENV MKL_VERSION=2020.3 
+ENV MKL_BUILD=279 
+
 # Numpy    
 RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/numpy.git numpy && \
     cd numpy && \
@@ -305,13 +295,12 @@ RUN git clone --branch=v${NUMPY_VERSION} --depth=1 https://github.com/numpy/nump
     git submodule update --init && \
     cp site.cfg.example site.cfg && \
     echo "[mkl]" >> site.cfg && \
-    echo "include_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include/" >> site.cfg && \
+    echo "include_dirs = /opt/2020.3.279/linux/mkl/include/" >> site.cfg && \
     echo "library_dirs = /opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" >> site.cfg && \
     echo "mkl_libs = mkl_rt" >> site.cfg && \
     echo "lapack_libs =" >> site.cfg && \
     python3 setup.py bdist_wheel -d /tmp 
 
-ENV SCIPY_VERSION=1.6.0
 # Scipy
 RUN cd /tmp && \
     git clone --branch=v${SCIPY_VERSION} --depth=1 https://github.com/scipy/scipy.git scipy && \
@@ -430,13 +419,13 @@ RUN mkdir /tmp/openmpi && \
     chmod a+x /usr/local/bin/mpirun && \
     ln -s /usr/local/lib/libmpi.so.40.30.2 /usr/local/lib/libmpi.so.12 && \
 # Configure OpenMPI to run good defaults:
-    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf && \
-    MPICC=/usr/lib64/openmpi/bin/mpicc python3 -m pip install mpi4py && \
-    python3 -m pip install "jax[cuda11_cudnn805]" -f https://storage.googleapis.com/jax-releases/jax_releases.html && \
-    CUDA_ROOT=/usr/local/cuda python3 -m pip install mpi4jax \
-            nni==1.9 \
-            mlflow==1.12.1 \
-            scikit-nni==0.2.1
+    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf 
+RUN MPICC=/usr/lib64/openmpi/bin/mpicc python3 -m pip install mpi4py && \
+    python3 -m pip install "jax[cuda11_cudnn805]" -f https://storage.googleapis.com/jax-releases/jax_releases.html 
+RUN CUDA_ROOT=/usr/local/cuda python3 -m pip install mpi4jax 
+#            nni==1.9 \
+#            mlflow==1.12.1 \
+#            scikit-nni==0.2.1
 
 RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_NCCL_LINK=SHARED \
