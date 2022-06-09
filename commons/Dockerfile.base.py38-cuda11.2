@@ -36,6 +36,8 @@ WORKDIR /tmp
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends software-properties-common wget curl && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+    curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | tee /usr/share/keyrings/yarnkey.gpg >/dev/null && \
+    echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list && \
     add-apt-repository -y "deb http://security.ubuntu.com/ubuntu xenial-security main" && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     add-apt-repository -y ppa:bashtop-monitor/bashtop && \
@@ -199,7 +201,7 @@ RUN apt-get update -y && \
     /opt/conda/bin/conda config --add channels intel && \
     /opt/conda/bin/conda config --add envs_dirs /home/work/.conda && \
     /opt/conda/bin/conda update --prefix /opt/conda conda && \
-    /opt/conda/bin/conda install -c intel intelpython3_core blas=*=*mkl 
+    /opt/conda/bin/conda install -c intel intelpython3_core blas=*=*mkl
     
 # OFED
 WORKDIR /tmp
@@ -349,14 +351,6 @@ RUN ln -s /usr/include/libv4l1-videodev.h /usr/include/linux/videodev.h && \
     make -j$(nproc) && \
     make install 
 
-RUN python3 -m pip install --extra-index-url \
-        https://developer.download.nvidia.com/compute/redist \
-	--upgrade nvidia-dali-cuda110 \
-       && \
-    python3 -m pip install --extra-index-url \
-        https://developer.download.nvidia.com/compute/redist \
-	--upgrade nvidia-dali-tf-plugin-cuda110 
-
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
@@ -389,6 +383,14 @@ WORKDIR /tmp
 COPY ./requirements.22.06.txt /tmp/requirements.txt 
 RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirements.txt
+
+RUN python3 -m pip install --extra-index-url \
+        https://developer.download.nvidia.com/compute/redist \
+	--upgrade nvidia-dali-cuda110 \
+       && \
+    python3 -m pip install --extra-index-url \
+        https://developer.download.nvidia.com/compute/redist \
+	--upgrade nvidia-dali-tf-plugin-cuda110 
 
 RUN CUDA_ROOT=/usr/local/cuda python3 -m pip install mpi4jax scikit-nni==0.2.1 mlflow==1.12.1 nni==1.9 
 
