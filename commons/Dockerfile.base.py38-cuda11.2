@@ -382,6 +382,7 @@ RUN MPICC=/usr/lib64/openmpi/bin/mpicc python3 -m pip install mpi4py && \
 WORKDIR /tmp
 COPY ./requirements.22.06.txt /tmp/requirements.txt 
 RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
+    python3 -m pip install --no-cache-dir torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu112 && \
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 RUN python3 -m pip install --extra-index-url \
