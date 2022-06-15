@@ -155,7 +155,7 @@ google-cloud-dlp==1.0.0
 google-cloud-language==1.3.0
 google-cloud-pubsub==2.8.0
 google-cloud-recommendations-ai==0.2.0
-google-cloud-spanner==1.19.1
+google-cloud-spanner==3.9.0
 google-cloud-storage==1.44.0
 google-cloud-videointelligence==1.16.0
 google-cloud-vision==1.0.0
