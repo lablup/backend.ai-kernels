@@ -1,0 +1,49 @@
+FROM ultralytics/yolov5:latest-arm64
+MAINTAINER Backend.AI Manager
+
+# RUN useradd --user-group --create-home --no-log-init --shell /bin/bash work
+USER root
+
+ENV PYTHONUNBUFFERED=1 \
+    LANG=C.UTF-8 \
+    BASE_DIR=/usr/src/app \
+    UPLOADS_PATH=/upload \
+    MODEL_OUTPUTS=/output
+
+RUN apt-get update -y && \
+    apt-get install -y ncurses-term sudo vim net-tools && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/ && \
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+
+RUN ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color
+# RUN echo "work ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers 
+
+RUN python3 -m pip install -U pip setuptools && \
+    python3 -m pip install Pillow && \
+    python3 -m pip install h5py && \
+    python3 -m pip install ipython && \
+    python3 -m pip install jupyter && \
+    python3 -m pip install jupyterlab && \
+    python3 -m pip install fastapi && \
+    python3 -m pip install python-multipart && \
+    python3 -m pip install uvicorn
+
+WORKDIR /usr/src/app
+COPY . /usr/src/app
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.accelerators="cuda" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+# RUN python3 deploy_server.py 
