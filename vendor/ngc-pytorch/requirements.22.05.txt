@@ -112,6 +112,7 @@ google_auth_httplib2==0.0.3
 googleapis-common-protos==1.51.0
 graphviz==0.14
 greenlet==1.1.2
+grpcio==1.44.0
 gym-notices==0.0.6
 gym==0.17.3
 h5py==2.10.0
