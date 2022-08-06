@@ -125,7 +125,9 @@ hypothesis==4.50.8
 idna==3.2
 imageio==2.8.0
 imbalanced-learn==0.5.0
+importlib-resources==5.7.1
 ipyparallel==6.2.4
+ipykernel==6.13.0
 ipython==8.3.0
 ipywidgets==7.5.1
 iso8601==1.0.2
