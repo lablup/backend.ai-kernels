@@ -151,7 +151,7 @@ jupyter-dash==0.4.0
 jupyter-highlight-selected-word==0.2.0
 jupyter-js-widgets-nbextension==0.0.2.dev0
 jupyter-latex-envs==1.4.6
-jupyter-lsp==1.2.0
+jupyter-lsp==1.4.0
 jupyter-nbextensions-configurator==0.4.1
 jupyter-packaging==0.11.1
 jupyter-server-mathjax==0.2.4
