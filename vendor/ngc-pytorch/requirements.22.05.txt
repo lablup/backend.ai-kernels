@@ -33,7 +33,7 @@ branca==0.4.0
 brotli==1.0.9
 catboost==0.22
 category-encoders==2.0.0
-certipy==0.1.2
+certipy==2022.5.18.1
 cffi==1.14.5
 chardet==3.0.4
 charset_normalizer==2.0.12
