@@ -156,7 +156,7 @@ jupyter-nbextensions-configurator==0.4.1
 jupyter-packaging==0.11.1
 jupyter-server-mathjax==0.2.4
 jupyter-server-proxy==1.2.0
-jupyter-server==1.15.5
+jupyter-server==1.18.1
 jupyter-telemetry==0.1.0
 jupyter==1.0.0
 jupyter_bokeh==2.0.4
