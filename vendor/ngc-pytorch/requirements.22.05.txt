@@ -172,7 +172,7 @@ jupyterhub_kubespawner==0.15.0
 jupyterhubutils==0.25.0
 jupyterlab-hdf==0.3.0
 jupyterlab-lsp==3.10.1
-jupyterlab-server==2.1.0
+jupyterlab-server==2.10
 jupyterlab-widgets==1.1.0
 jupyterlab==3.4.4
 jupyterlab_hdf==0.3.0
