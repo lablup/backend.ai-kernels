@@ -212,6 +212,7 @@ RUN /opt/conda/bin/python3 -m ipykernel install \
         --prefix=/opt/conda/ \
         --display-name "PyTorch 1.13 (NGC 22.05/Python 3.8 Conda) on Backend.AI" && \
     cat /opt/conda/share/jupyter/kernels/python3/kernel.json
+ENV JUPYTER_PATH="/opt/conda/share/jupyter"
 
 # Backend.AI specifics
 COPY ./service-defs /etc/backend.ai/service-defs
