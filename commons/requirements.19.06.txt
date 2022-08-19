@@ -123,7 +123,7 @@ Mako==1.0.7
 Markdown==3.2.1
 MarkupSafe==1.1.1
 mccabe==0.6.1
-mistune==0.8.4
+mistune==2.0.3
 mlxtend==0.17.2
 more-itertools==7.2.0
 msgpack==0.6.1

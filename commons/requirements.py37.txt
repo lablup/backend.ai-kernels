@@ -223,7 +223,7 @@ mccabe==0.6.1
 mesh-tensorflow==0.1.16
 meshio==4.2.2
 mimeparse==0.1.3
-mistune==0.8.4
+mistune==2.0.3
 ml-metadata==0.28.0
 mlflow-extend==0.1.6
 mlflow==1.11.0

@@ -282,7 +282,7 @@ mdit-py-plugins==0.3.0
 mesh-tensorflow==0.1.19
 meshio==4.2.2
 mimeparse==0.1.3
-mistune==0.8.4
+mistune==2.0.3
 ml-metadata==1.8.0
 ml-pipelines-sdk==1.8.0
 mlflow-extend==0.1.6
