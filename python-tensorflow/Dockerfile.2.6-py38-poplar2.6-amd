@@ -1,0 +1,80 @@
+FROM graphcore/tensorflow:2-amd-2.6.0-ubuntu-20.04
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends git && \
+	rm -rf /var/lib/apt/lists/*
+
+# TODO: Add horovod for Graphcore
+
+RUN python3 -m pip install --no-cache-dir \
+            tornado notebook
+
+RUN python3 -m pip install --no-cache-dir \
+            scipy numpy jupyter jupyterlab \
+    	    jupyter-tensorboard==0.2.0
+
+RUN python3 -m pip install --no-cache-dir \
+            nni==1.9 \
+            mlflow==1.12.1 \
+            scikit-nni==0.2.1
+
+# Install ipython kernelspec
+RUN python3 -m ipykernel install --display-name "TensorFlow 2.6 on Python 3.8 & Poplar 2.6.0" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+RUN apt update && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt install -y \
+    ncurses-term curl \
+    libxml2 libevent-dev \
+    openssh-client openssh-server && \
+	rm -rf /var/lib/apt/lists/* && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
+    mkdir -p /var/run/sshd
+
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.4.1/code-server-3.4.1-linux-amd64.tar.gz \
+  | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-3.4.1-linux-amd64 /usr/local/lib/code-server-3.4.1 && \
+    ln -s /usr/local/lib/code-server-3.4.1/bin/code-server /usr/local/bin/code-server
+
+# Allow OpenSSH to talk to containers without asking for confirmation
+RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
+    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
+    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
+
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
+
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+
+# Install OpenSSH for MPI to communicate between containers
+RUN mkdir -p /var/run/sshd
+
+# Allow OpenSSH to talk to containers without asking for confirmation
+RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
+    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
+    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
+
+# Copy Backend.Ai multi-node support
+COPY ./service-defs /etc/backend.ai/service-defs
+COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+
+WORKDIR /home/work
+# vim: ft=dockerfile
