@@ -191,6 +191,9 @@ progressbar==2.5
 prometheus-flask-exporter==0.20.3
 promise==2.3
 protobuf==3.20.1
+prometheus-client==0.14.1
+prompt_toolkit==3.0.30
+ptyprocess==0.7.0
 PuLP==2.5.1
 psutil==5.9.1
 py-cpuinfo==5.0.0
