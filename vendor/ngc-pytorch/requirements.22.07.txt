@@ -201,6 +201,7 @@ pyerfa==2.0.0.1
 pyflakes==2.2.0
 pygal==2.4.0
 pygame==2.0.1
+pygments==2.12.0
 pyglet==1.5.0
 PyJWT==2.4.0
 pyLDAvis==2.1.2
@@ -214,7 +215,9 @@ pyproj==2.5.0
 PyQt5==5.15.0
 PyQt5-sip==12.8.1
 PyQtWebEngine==5.15.2
+pyrsistent==0.18.1
 pyshp==2.2.0
+pysocks==1.7.1
 pysimdjson==3.2.0
 pystan==3.3.0
 python-jose==3.3.0
