@@ -190,10 +190,13 @@ prettytable==3.3.0
 progressbar==2.5
 prometheus-flask-exporter==0.20.3
 promise==2.3
+protobuf==3.20.1
 PuLP==2.5.1
+psutils==5.9.1
 py-cpuinfo==5.0.0
 pyaml==19.12.0
 pyasn1==0.4.8
+pyasn1-modules==0.2.8
 pycairo==1.20.1
 pycodestyle==2.6.0
 pydocstyle==6.1.1
