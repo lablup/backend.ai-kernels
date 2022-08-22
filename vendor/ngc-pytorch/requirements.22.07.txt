@@ -20,7 +20,7 @@ avro-python3==1.9.1
 bayesian-optimization==1.1.0
 benepar==0.2.0
 beniget==0.4.0
-black==21.11b1
+black==22.6.0
 bokeh==2.3.2
 boltons==21.0.0
 boto==2.49.0
