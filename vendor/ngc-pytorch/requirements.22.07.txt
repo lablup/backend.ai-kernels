@@ -136,9 +136,11 @@ jupyterhub==2.2.1
 jupyterhub-jwtauthenticator==0.1
 jupyterhub-kubespawner==0.15.0
 jupyterhubutils==0.25.0
+jupyterlab==3.4.4
 jupyterlab-hdf==0.3.0
 jupyterlab-lsp==3.10.1
 jupyterlab-widgets==1.1.0
+jupyterlab_server==2.10.0
 jupyterlabutils==0.9.2
 jupyterthemes==0.20.0
 kiwisolver==1.4.3
