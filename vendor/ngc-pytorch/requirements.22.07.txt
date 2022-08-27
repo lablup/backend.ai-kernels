@@ -114,7 +114,9 @@ ipywidgets==7.5.1
 iso8601==1.0.2
 isort==4.3.21
 jaxlib==0.1.75
+jinja2==3.1.2
 jmespath==0.9.4
+joblib==1.0.1
 JPype1==0.7.2
 json-tricks==3.15.5
 jsonpatch==1.32
@@ -122,6 +124,7 @@ jsonpickle==1.5.0
 jsonpointer==2.3
 jsonschema==4.6.1
 jupyter==1.0.0
+jupyter_core==4.11.1
 jupyter-bokeh==2.0.4
 jupyter-console==6.1.0
 jupyter-dash==0.4.0
