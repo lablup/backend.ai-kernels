@@ -111,13 +111,15 @@ hyperopt==0.1.2
 imageio==2.8.0
 imbalanced-learn==0.5.0
 importlib-resources==5.9.0
+ipykernel==6.15.0
 ipython==8.4.0
 ipywidgets==7.5.1
 iso8601==1.0.2
 isort==4.3.21
 itsdangerous==2.1.2
 jaxlib==0.1.75
-jinja2==2.11.3
+#jinja2==2.11.3
+jinja2==3.1.2
 jmespath==0.9.4
 joblib==1.0.1
 JPype1==0.7.2
@@ -141,7 +143,7 @@ jupyter-telemetry==0.1.0
 jupyterhub==2.2.1
 jupyterhub-jwtauthenticator==0.1
 jupyterhub-kubespawner==0.15.0
-jupyterhubutils==0.25.0
+#jupyterhubutils==0.25.0
 jupyterlab==3.4.4
 jupyterlab-hdf==0.3.0
 jupyterlab-lsp==3.10.1
