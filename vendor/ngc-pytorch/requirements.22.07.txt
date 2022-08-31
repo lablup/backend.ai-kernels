@@ -96,7 +96,7 @@ google-auth==2.9.0
 google-auth-httplib2==0.0.3
 google-images-download==2.8.0
 google-pasta==0.1.8
-googleapis-common-protos==1.51.0
+googleapis-common-protos==1.56.2
 graphviz==0.14
 greenlet==1.1.2
 gunicorn==20.1.0
