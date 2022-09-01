@@ -93,7 +93,7 @@ GitPython==3.1.26
 google-api-core==2.8.2
 google-api-python-client==2.58.0
 google-auth==2.9.0
-google-auth-httplib2==0.0.3
+google-auth-httplib2==0.1.0
 google-images-download==2.8.0
 google-pasta==0.1.8
 googleapis-common-protos==1.56.2
