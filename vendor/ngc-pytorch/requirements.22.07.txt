@@ -40,7 +40,8 @@ colored==1.4.3
 colour==0.1.5
 contextlib2==0.5.5
 convertdate==2.3.2
-coverage==6.4.1
+#coverage==6.4.1
+coverage==4.5.4
 crashtest==0.3.0
 cycler==0.10.0
 cvxpy==1.1.15
