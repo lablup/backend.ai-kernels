@@ -158,7 +158,7 @@ ngraph-tensorflow-bridge==0.18.0
 nltk==3.2.5
 numba==0.48.0
 numexpr==2.7.0
-oauthlib==3.1.0
+oauthlib==3.2.1
 oauth2client==3.0.0
 onnx==1.6.0
 onnx-plaidml==0.6.3

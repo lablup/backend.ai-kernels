@@ -138,7 +138,7 @@ networkx==2.4
 nltk==3.2.5
 numba==0.48.0
 numexpr==2.7.0
-oauthlib==3.1.0
+oauthlib==3.2.1
 onnx==1.6.0
 opt-einsum==3.2.0
 osqp==0.5.0
