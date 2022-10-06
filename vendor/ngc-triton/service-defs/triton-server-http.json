@@ -1,0 +1,7 @@
+{
+    "command": [
+        "/opt/tritonserver/bin/tritonserver",
+        "--model-repository",
+        "/workspace/triton-server/docs/examples/model_repository"
+    ]
+}
