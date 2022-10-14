@@ -28,6 +28,7 @@ boto3==1.9.209
 botocore==1.12.253
 branca==0.4.0
 Brotli==1.0.9
+cachetools==5.2.0
 catboost==0.22
 category-encoders==2.0.0
 charset_normalizer==2.1.1
