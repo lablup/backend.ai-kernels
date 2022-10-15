@@ -561,7 +561,7 @@ vtk==9.0.1
 wcwidth==0.2.5
 webencodings==0.5.1
 websocket-client==1.2.3
-websockets==8.1
+websockets==9.1
 widgetsnbextension==3.5.2
 witwidget-gpu==1.6.0
 witwidget==1.8.1
