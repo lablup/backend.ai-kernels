@@ -1,15 +1,15 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND noninteractive \
     PYTHONUNBUFFERED=1 \
-    PATH=/opt/conda/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH \
+    PATH=/opt/conda/bin:$PATH \
     LANG=C.UTF-8
 
 WORKDIR /tmp
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         software-properties-common wget curl && \
-    curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    add-apt-repository -y ppa:bashtop-monitor/bashtop && \
+    curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+#    add-apt-repository -y ppa:bashtop-monitor/bashtop 
     apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
@@ -20,10 +20,11 @@ RUN apt-get update -y && \
         libgeos-dev libgeos++-dev \
         mime-support \
         gcc g++ \
+	bashtop \
 	libopenblas-dev pkg-config libhdf5-dev \
 	cmake ncurses-term && \
-    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
-    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-aarch64.sh -O /tmp/miniconda.sh && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color 
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh -O /tmp/miniconda.sh && \
     /bin/bash /tmp/miniconda.sh -b -p /opt/conda && \
     rm /tmp/miniconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
@@ -32,32 +33,29 @@ RUN apt-get update -y && \
     curl -L "https://github.com/krallin/tini/releases/download/v0.19.0/tini_0.19.0.deb" > tini.deb && \
     dpkg -i tini.deb && \
     rm tini.deb && \
-    git clone https://github.com/aristocratos/bashtop.git && \
-    cd bashtop && \
-    make install && \
     /opt/conda/bin/conda config --add channels conda-forge && \
     /opt/conda/bin/conda config --add channels bioconda && \
     /opt/conda/bin/conda config --add channels intel && \
     /opt/conda/bin/conda config --add envs_dirs /home/work/.conda && \
     /opt/conda/bin/conda update --prefix /opt/conda conda && \
-    /opt/conda/bin/conda install -c intel intelpython3_core blas=*=*mkl
     apt-get clean && \
     rm -rf /var/lib/apt/lists/ 
 
-RUN conda install cython
-RUN conda install matplotlib bokeh
-RUN conda install versioneer
-RUN conda install pyproj cartopy 
-RUN conda install pandas
-RUN conda install seaborn 
-RUN conda install pillow
-RUN conda install h5py
-RUN conda install networkx cvxpy
-RUN conda install scikit-learn scikit-image
-RUN conda install pygments
-RUN conda install ipython
-RUN conda install jupyter
-RUN conda install jupyterlab 
+RUN /opt/conda/bin/conda install --name base \
+       cython \
+       matplotlib bokeh \
+       versioneer \
+       pyproj cartopy  \
+       pandas \
+       seaborn  \
+       pillow \
+       h5py \
+       networkx cvxpy \
+       scikit-learn scikit-image \
+       pygments \
+       ipython \
+       jupyter \
+       jupyterlab 
 
 # Install ipython kernelspec
 RUN /opt/conda/bin/python -m ipykernel install \
@@ -69,6 +67,7 @@ RUN /opt/conda/bin/python -m ipykernel install \
 WORKDIR /tmp
 RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.2.0/git-lfs-linux-amd64-v3.2.0.tar.gz && \
     tar -zxf git-lfs-linux-amd64-v3.2.0.tar.gz && \
+    cd git-lfs-3.2.0 && \
     bash install.sh && \
     rm -rf /tmp/*
 
