@@ -2,7 +2,9 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND noninteractive \
     PYTHONUNBUFFERED=1 \
     PATH=/opt/conda/bin:$PATH \
-    LANG=C.UTF-8
+    LANG=C.UTF-8 \
+    CONDA_ENVS_PATH=/home/work/.conda \
+    CONDA_PREFIX=/home/work/.conda
 
 WORKDIR /tmp
 RUN apt-get update -y && \
