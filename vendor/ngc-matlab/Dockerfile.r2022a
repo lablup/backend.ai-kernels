@@ -31,7 +31,7 @@ LABEL ai.backend.kernelspec="1" \
 
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 COPY ./service-defs /etc/backend.ai/service-defs
-COPY bootstrap.sh /opt/container/bootstrap.sh
+COPY bootstrap.r2022a.sh /opt/container/bootstrap.sh
 
 WORKDIR /home/work
 # vim: ft=dockerfile

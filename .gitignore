@@ -78,5 +78,8 @@ yarn.lock
 .*.swp
 venv*
 
+# Mac
+.DS_Store
+
 # Local modification of build script
 build-local.sh
