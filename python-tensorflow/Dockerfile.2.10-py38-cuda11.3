@@ -25,7 +25,7 @@ RUN python3 -m pip install --no-cache-dir \
 RUN python3 -m pip uninstall -y google-api-core
 RUN python3 -m pip install --no-cache-dir \
       --use-feature=2020-resolver \
-	    google_cloud_spanner==3.22.2 \
+	    google_cloud_spanner==1.19.3 \
 	    googleapis-common-protos==1.56.4 \
 	    google_cloud_videointelligence==1.15.0 \
 	    google_cloud_vision==0.42.0 \
@@ -45,11 +45,11 @@ RUN python3 -m pip install --no-cache-dir \
 	    -i https://pypi-nightly.tensorflow.org/simple tensorflow-data-validation==1.10.0
 RUN python3 -m pip install --no-cache-dir \
 	    tensorflow-graphics-gpu==1.0.0 \
-            tensorflow-io==0.17.0 \
-	    tensorflow_ranking==0.3.2 \
+            tensorflow-io==0.27.0 \
+	    tensorflow_ranking==0.5.1 \
 	    tensorflow-plot==0.3.2 \
-	    tensorflow_text==2.4.1 \
-	    tensorflow-gan==2.0.0 
+	    tensorflow_text==2.10.0 \
+	    tensorflow-gan==2.1.0 
 RUN   python3 -m pip install --no-cache-dir \
             tensorflow-gpu==2.10.0 \
 	    tensorboard-plugin-wit \
@@ -60,13 +60,13 @@ RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
     HOROVOD_GPU_ALLREDUCE=NCCL HOROVOD_GPU_BROADCAST=NCCL HOROVOD_NCCL_LINK=SHARED \
     HOROVOD_WITH_TENSORFLOW=1 HOROVOD_WITHOUT_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1\
     HOROVOD_GPU=CUDA \
-    python3 -m pip install --no-cache-dir horovod==0.23.0 && \
+    python3 -m pip install --no-cache-dir horovod==0.26.1 && \
     ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
-            mpi4py==3.0.3 \
-            nni==1.9 \
-            mlflow==1.12.1 \
+            mpi4py==3.1.4 \
+            nni==2.9 \
+            mlflow==1.30.0 \
             scikit-nni==0.2.1
 
 # Install ipython kernelspec
