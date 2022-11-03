@@ -25,14 +25,14 @@ RUN python3 -m pip install --no-cache-dir \
 RUN python3 -m pip uninstall -y google-api-core
 RUN python3 -m pip install --no-cache-dir \
       --use-feature=2020-resolver \
-	    google_cloud_spanner==1.19.0 \
+	    google_cloud_spanner==3.22.2 \
 	    googleapis-common-protos==1.56.4 \
 	    google_cloud_videointelligence==1.15.0 \
 	    google_cloud_vision==0.42.0 \
 	    google_cloud_pubsub==2.13.10 \
 	    google_cloud_dlp==3.9.2 \
-	    google_cloud_datastore==1.15.2 \
-	    google_cloud_bigtable==1.6.0 \
+	    google_cloud_datastore==1.15.5 \
+	    google_cloud_bigtable==1.7.2 \
 	    google-api-core[grpc,grpcgcp]==1.33.2 \
 	    google_api_core==1.33.2
 
