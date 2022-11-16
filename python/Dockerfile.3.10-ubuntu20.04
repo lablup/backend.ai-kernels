@@ -75,4 +75,5 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8070,jupyterlab:http:8090"
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 
+WORKDIR /home/work
 # vim: ft=dockerfile

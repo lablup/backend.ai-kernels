@@ -11,7 +11,6 @@ RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         software-properties-common wget curl && \
     curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
-#    add-apt-repository -y ppa:bashtop-monitor/bashtop 
     apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
