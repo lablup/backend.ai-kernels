@@ -16,7 +16,7 @@ Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.2
 Korpora==0.1.1
 LunarCalendar==0.0.9
-Mako==1.1.0
+Mako==1.2.2
 Markdown==3.3
 MarkupSafe==1.1.1
 Pillow==9.0.1
