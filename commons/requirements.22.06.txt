@@ -494,7 +494,7 @@ tensorflow-datasets-ko
 tensorflow-datasets
 tensorflow-estimator
 tensorflow-gan
-tensorflow-gpu==2.9.0
+tensorflow-gpu==2.9.3
 tensorflow-graphics-gpu
 tensorflow-hub
 tensorflow-io-gcs-filesystem
