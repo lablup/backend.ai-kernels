@@ -229,7 +229,7 @@ jaxlib==0.3.0
 jedi==0.17.2
 jeepney==0.4.3
 jmespath==0.10.0
-joblib==0.14.1
+joblib==1.2.0
 json-tricks==3.14.0
 json5==0.9.6
 jsonpickle==1.5.2
