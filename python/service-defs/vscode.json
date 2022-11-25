@@ -1,7 +1,7 @@
 {
     "prestart": [],
     "command": [
-      "/opt/kernel/code-server",
+      "/usr/local/bin/code-server",
       "--port", "{ports[0]}",
       "--extensions-dir", "/etc/backend.ai/vscode-exts"
     ],
