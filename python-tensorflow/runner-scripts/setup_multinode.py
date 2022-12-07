@@ -14,7 +14,7 @@ def get_ssh_port(mapping, cluster_host):
 
 
 if __name__ == "__main__":
-    if "BACKENDAI_CLUSTER_HOST" in os.environ: # Start mutli-instance setup.
+    if "BACKENDAI_CLUSTER_HOST" in os.environ:  # Start mutli-instance setup.
         try:
             ssh_port_mapping = json.loads(Path("/home/config/ssh/port-mapping.json").read_bytes())
         except FileNotFoundError:
@@ -22,14 +22,14 @@ if __name__ == "__main__":
 
         env = {
             "cluster": {
-                "chief": ["main1:" + get_ssh_port(ssh_port_mapping, "main1")],
+                "chief": ["main1:" + str(get_ssh_port(ssh_port_mapping, "main1"))],
                 "worker": [],
             },
         }
         for cluster_host in os.environ["BACKENDAI_CLUSTER_HOSTS"].split(","):
             if cluster_host != "main1":
                 env["cluster"]["worker"].append(
-                    cluster_host + ":" + get_ssh_port(ssh_port_mapping, cluster_host)
+                    cluster_host + ":" + str(get_ssh_port(ssh_port_mapping, cluster_host))
                 )
 
         # TF's worker index starts from 0.
@@ -48,3 +48,6 @@ if __name__ == "__main__":
         print(json.dumps(env))
     else:
         print("")
+
+
+# vim: et sts=4 sw=4 tw=105
