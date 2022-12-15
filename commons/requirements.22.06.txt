@@ -1,4 +1,3 @@
-#absl-py==1.1.0
 aiohttp==3.8.1
 aiosignal==1.2.0
 aiozmq==0.9.0
