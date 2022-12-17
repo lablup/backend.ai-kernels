@@ -1,8 +1,5 @@
 FROM ubuntu:22.04
 
-ENV NUMPY_VERSION 1.21.3
-ENV SCIPY_VERSION 1.6.2
-
 # Python 3.8 is supported by Ubuntu 
 ARG python=3.8
 ENV PYTHON_VERSION=${python}
