@@ -183,7 +183,14 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
     jupyter lab build
-
+    
+RUN pip uninstall -y tensorboardX && \
+    pip install -U tensorboard==1.15 && \
+    pip uninstall -y mesh-tensorflow tensorflow tensorflow-addons \
+        tensorflow-datasets tensorflow-estimator tensorflow-gan \
+        tensorflow-hub tensorflow-metadata tensorflow-model-analysis \
+        tensorflow-probability tensorflow-serving-api tensorflow-text
+        
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
