@@ -7,9 +7,9 @@ ENV PYTHON_VERSION=${python}
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include:/usr/local/lib:$LD_LIBRARY_PATH" \
+    LD_LIBRARY_PATH="/usr/include/x86_64-linux-gnu:/opt/intel/compilers_and_libraries_2023.0.279/linux/mkl/lib/intel64:/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/include:/usr/local/lib:$LD_LIBRARY_PATH" \
     PATH="/usr/local/sbin:/usr/bin/cmake/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
-    LIBRARY_PATH="/opt/intel/compilers_and_libraries_2020.3.279/linux/mkl/lib/intel64" \
+    LIBRARY_PATH="/opt/intel/compilers_and_libraries_2023.0.279/linux/mkl/lib/intel64" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     LANG=C.UTF-8
 
@@ -65,7 +65,7 @@ RUN apt update -y && \
 	proj-bin libproj-dev libgeos-dev libgeos++-dev graphviz \
         python${PYTHON_VERSION} \
         python${PYTHON_VERSION}-dev \
-	intel-mkl-2020.3-111 intel-ipp-2020.2-108 intel-tbb-2020.3-108 intel-daal-2020.2-108 intel-mpi-2019.8-108 \
+	intel-mkl-2023.0-111 intel-ipp-2023.0-108 intel-tbb-2023.0-108 intel-daal-2023.0-108 intel-mpi-2023.0-108 \
 	libxml2-dev \
 	libxslt1-dev \
 	libasound2-dev \
