@@ -426,9 +426,7 @@ terminaltables==3.1.0
 termstyle==0.1.11
 test-generator==0.1.1
 testpath==0.4.4
-#tf-agents==0.8.0
 tf-slim==1.1.0
-#tf2onnx==0.3.1
 tfco-nightly @ git+https://github.com/google-research/tensorflow_constrained_optimization@ce083f2cf3d06e70d91c7a01ec47b66a5765d789
 tfds-nightly==4.2.0.dev202103170106
 tfx-bsl==0.28.1
