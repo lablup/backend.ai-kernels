@@ -1,0 +1,119 @@
+FROM rocker/r-ver:4.2.2
+
+ENV R_VERSION 4.2.2
+ENV GIT_LFS_VERSION 3.3.0
+
+RUN apt-get update && \
+    apt-get install -y \
+        ca-certificates \
+        wget curl git-core \
+        python3 python3-dev python3-pip \
+        libssl-dev \
+        libmpdec-dev \
+        proj-bin libproj-dev \
+        libgeos-dev libgeos++-dev \
+        mime-support \
+	locales \
+	fonts-texgyre \
+	less \
+	vim-tiny \
+	liblapack3 \
+	ncurses-term \
+        gcc g++ gfortran && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
+    curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get update -y && \
+    apt-get install -y nodejs 
+
+# install git-lfs
+WORKDIR /tmp
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz && \
+    cd git-lfs-*  && \
+    bash install.sh && \
+    rm -rf /tmp/*
+
+# Install commonly-used wheels
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
+    python3 -m pip install --no-cache-dir ipython && \
+    python3 -m pip install --no-cache-dir jupyter && \
+    python3 -m pip install --no-cache-dir ipywidgets && \
+    python3 -m pip install --no-cache-dir ipyparallel && \
+    python3 -m pip install --no-cache-dir jupyterlab && \
+    python3 -m pip install --no-cache-dir jupyterthemes && \    
+    python3 -m pip install --no-cache-dir jupyter-js-widgets-nbextension && \
+    python3 -m pip install --no-cache-dir jupyter_contrib_nbextensions && \
+    python3 -m pip install --no-cache-dir jupyter_nbextensions_configurator && \
+    rm -rf /root/.cache && \
+    rm -f /tmp/*.whl
+
+# python alternative support
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
+ENV USER work
+ENV PASSWORD work
+ENV USERID 1000
+ENV GROUPID 1000
+ENV DISABLE_AUTH true
+
+ENV S6_VERSION=v2.1.0.2
+ENV RSTUDIO_VERSION=2022.12.0+353
+#ENV DEFAULT_USER=rstudio
+#ENV PANDOC_VERSION=default
+#ENV QUARTO_VERSION=default
+
+## Install R / Rstudio / Tidyverse
+RUN /rocker_scripts/install_rstudio.sh
+RUN /rocker_scripts/install_pandoc.sh
+# Devtools is installed here.
+RUN /rocker_scripts/install_tidyverse.sh
+
+RUN apt-get update && \
+    apt-get install -y \
+        libzmq3-dev && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/*
+
+#RUN Rscript -e "devtools::install_github('IRkernel/IRkernel')"
+RUN Rscript -e "install.packages(c('rzmq','repr','IRkernel','IRdisplay'))" && \
+    Rscript -e "install.packages(c('slidify','ggplot2'))" && \
+    Rscript -e "install.packages(c('KoNLP'))" && \
+    Rscript -e "install.packages(c('stm','stmCorrViz'))" && \
+    Rscript -e "install.packages(c('jsonlite','jsonview','XML','xml2','xmlview'))" && \
+    Rscript -e "install.packages(c('igraph'))"
+
+RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.1.0 on Backend.AI' , user = FALSE)" && \
+    rm -rf /root/.local/share/jupyter && \
+    jupyter kernelspec list && \
+    cat /usr/local/share/jupyter/kernels/ir/kernel.json 
+
+RUN jupyter nbextensions_configurator enable && \
+    jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install && \
+    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
+    jupyter labextension install --no-build @jupyterlab/toc && \
+    jupyter lab build
+
+COPY ./service-defs /etc/backend.ai/service-defs
+COPY bootstrap_rocker2.sh /opt/container/bootstrap.sh
+COPY userconf_backendai.sh /rocker_scripts/userconf.sh
+COPY userconf_backendai.sh /etc/cont-init.d/userconf
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
+      ai.backend.base-distro="ubuntu20.04" \
+      ai.backend.runtime-type="r" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,rstudio:preopen:8787"
+ENV USER work
+ENV PASSWORD work
+ENV DISABLE_AUTH true
+
+WORKDIR /home/work
