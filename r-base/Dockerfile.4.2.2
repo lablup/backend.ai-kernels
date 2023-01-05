@@ -15,9 +15,14 @@ RUN apt-get update && \
         mime-support \
         locales \
         fonts-texgyre \
+	fonts-nanum \
+	fonts-nanum-coding \
+	fonts-nanum-extra \
+	htop \
         less \
         vim-tiny \
         liblapack3 \
+        libzmq3-dev \
         ncurses-term \
         cmake gcc g++ gfortran && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
@@ -66,12 +71,6 @@ RUN /rocker_scripts/install_rstudio.sh
 RUN /rocker_scripts/install_pandoc.sh
 # Devtools is installed here.
 RUN /rocker_scripts/install_tidyverse.sh
-
-RUN apt-get update && \
-    apt-get install -y \
-        libzmq3-dev && \
-    apt-get autoclean && \
-    rm -rf /var/lib/apt/lists/*
 
 #RUN Rscript -e "devtools::install_github('IRkernel/IRkernel')"
 RUN Rscript -e "install.packages(c('rzmq','repr','IRkernel','IRdisplay'))" && \
