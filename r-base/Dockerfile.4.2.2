@@ -60,9 +60,6 @@ ENV DISABLE_AUTH true
 
 ENV S6_VERSION=v2.1.0.2
 ENV RSTUDIO_VERSION=2022.12.0+353
-#ENV DEFAULT_USER=rstudio
-#ENV PANDOC_VERSION=default
-#ENV QUARTO_VERSION=default
 
 ## Install R / Rstudio / Tidyverse
 RUN /rocker_scripts/install_rstudio.sh
@@ -84,7 +81,7 @@ RUN Rscript -e "install.packages(c('rzmq','repr','IRkernel','IRdisplay'))" && \
     Rscript -e "install.packages(c('jsonlite','jsonview','XML','xml2','xmlview'))" && \
     Rscript -e "install.packages(c('igraph'))"
 
-RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.1.0 on Backend.AI' , user = FALSE)" && \
+RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.2.2 on Backend.AI' , user = FALSE)" && \
     rm -rf /root/.local/share/jupyter && \
     jupyter kernelspec list && \
     cat /usr/local/share/jupyter/kernels/ir/kernel.json
