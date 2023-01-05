@@ -3,6 +3,7 @@ FROM rocker/r-ver:4.2.2
 ENV R_VERSION 4.2.2
 ENV GIT_LFS_VERSION 3.3.0
 
+WORKDIR /tmp
 RUN apt-get update && \
     apt-get install -y \
         ca-certificates \
@@ -33,8 +34,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
 
 # install git-lfs
-WORKDIR /tmp
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz && \
+    curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz && \
     tar -zxf git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz && \
     cd git-lfs-*  && \
     bash install.sh && \
