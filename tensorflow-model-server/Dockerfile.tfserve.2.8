@@ -2,12 +2,11 @@ FROM tensorflow/serving:2.8.3
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
-      ai.backend.features="batch query uid-match user-input" \
-      ai.backend.base-distro="ubuntu18.04" \
+      ai.backend.features="batch uid-match" \
+      ai.backend.base-distro="ubuntu20.04" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=0 \
-      ai.backend.resource.min.cuda.shares=0 \
-      ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.runtime-type="app" \
       ai.backend.service-ports="tf-model-server-grpc:preopen:8500,tf-model-server-restapi:preopen:8501"
+ENV USER work
+WORKDIR /home/work
