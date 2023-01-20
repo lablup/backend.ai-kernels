@@ -59,7 +59,8 @@ RUN apt-get update && \
 	pv \
 	pdsh \
 	protobuf-compiler \
-	v4l-utils \	
+	v4l-utils \
+	cmake \ 
 	x264 
 
 # Install CUDA + cuDNN 
@@ -67,15 +68,45 @@ RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.3.2 /usr/local/cuda/lib64/libc
     rm -rf /var/lib/apt/lists/* && \
     ldconfig
 
-# Install cmake
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-Linux-x86_64.sh \
-         -q -O /tmp/cmake-install.sh && \
-    chmod u+x /tmp/cmake-install.sh && \
-    mkdir /usr/bin/cmake && \
-    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
-    rm /tmp/cmake-install.sh
-
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
+# Install Open MPI
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.gz && \
+    tar zxf openmpi-4.1.4.tar.gz && \
+    cd openmpi-4.1.4 && \
+    ./configure --enable-orterun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    rm -rf /tmp/openmpi* && \
+# Create a wrapper for OpenMPI to allow running as root by default
+    mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun && \
+# Configure OpenMPI to run good defaults:
+    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+
+
+# Install Horovod, temporarily using CUDA stubs
+RUN \
+#ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
+    HOROVOD_NCCL_LINK=SHARED \
+    HOROVOD_WITH_MPI=1 \
+    HOROVOD_GPU_ALLREDUCE=NCCL \
+    NCCL_LIBRARY=/usr/include \
+    HOROVOD_NCCL_INCLUDE=/usr/include \
+    HOROVOD_NCCL_LIB=/lib/x86_64-linux-gnu \
+    HOROVOD_GPU_BROADCAST=NCCL \
+    HOROVOD_GPU_BROADCAST=NCCL \
+    HOROVOD_GPU_ALLREDUCE=NCCL \
+    HOROVOD_GPU=CUDA \
+    HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
+    pip install --no-cache-dir horovod==0.26.1 && \
+    ldconfig
+
 
 # install NLP packages *mecab-ko & khai*
 WORKDIR /tmp
@@ -170,51 +201,19 @@ RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.9.1/code-se
     mv /usr/local/lib/code-server-4.9.1-linux-amd64 /usr/local/lib/code-server-4.9.1 && \
     ln -s /usr/local/lib/code-server-4.9.1/bin/code-server /usr/local/bin/code-server
 
+
 WORKDIR /tmp
-COPY ./requirements.22.09.1.txt /tmp/requirements.txt
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt
-COPY ./requirements.22.09.2.txt /tmp/requirements.txt
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt
-COPY ./requirements.22.09.3.txt /tmp/requirements.txt
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt
-COPY ./requirements.22.09.4.txt /tmp/requirements.txt
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt
-COPY ./requirements.22.09.5.txt /tmp/requirements.txt
-RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt && \
+COPY ./requirements.22.12.1.txt /tmp/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+COPY ./requirements.22.12.2.txt /tmp/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+COPY ./requirements.22.12.3.txt /tmp/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+COPY ./requirements.22.12.4.txt /tmp/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+COPY ./requirements.22.12.5.txt /tmp/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirem*
-
-# Install Open MPI
-RUN mkdir /tmp/openmpi && \
-    cd /tmp/openmpi && \
-    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.gz && \
-    tar zxf openmpi-4.1.4.tar.gz && \
-    cd openmpi-4.1.4 && \
-    ./configure --enable-orterun-prefix-by-default && \
-    make -j $(nproc) all && \
-    make install && \
-    ldconfig && \
-    rm -rf /tmp/openmpi* && \
-# Create a wrapper for OpenMPI to allow running as root by default
-    mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
-    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
-    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
-    chmod a+x /usr/local/bin/mpirun && \
-# Configure OpenMPI to run good defaults:
-    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
-
-# Install Horovod, temporarily using CUDA stubs
-RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda-11.8/include:/usr/include/x86_64-linux-gnu:/usr/include:$LD_LIBRARY_PATH" \
-    HOROVOD_NCCL_LINK=SHARED \
-    HOROVOD_WITH_MPI=1 \
-    HOROVOD_GPU_ALLREDUCE=NCCL \
-    NCCL_LIBRARY=/usr/include \
-    HOROVOD_NCCL_INCLUDE=/usr/include \
-    HOROVOD_NCCL_LIB=/lib/x86_64-linux-gnu \
-    HOROVOD_GPU_BROADCAST=NCCL \
-    HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.24.2 && \
-    ldconfig
 
 RUN python3 -m pip install --no-cache-dir \
     	mpi4py==3.1.3 \
@@ -222,7 +221,16 @@ RUN python3 -m pip install --no-cache-dir \
 	mlflow==1.29.0 \
 	scikit-nni==0.2.1
 
-RUN jupyter nbextensions_configurator enable && \
+RUN python3 -m pip install pytorch-lightning && \
+    python3 -m pip install --no-cache-dir \
+        torch-scatter \
+	torch-sparse \
+	torch-cluster \
+	torch-spline-conv \
+	torch-geometric \
+        -f https://pytorch-geometric.com/whl/torch-1.13.1%2Bcu117.html
+RUN pip install jupyter_contrib_nbextensions markupsafe==2.0.1 && \
+    jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
@@ -240,11 +248,8 @@ RUN apt autoclean && \
     rm -rf /root/.cache && \
     rm -rf /tmp/*
 
-RUN /opt/conda/bin/python3 -m ipykernel install \
-        --prefix=/opt/conda/ \
-        --display-name "PyTorch 1.13 (NGC 22.09/Python 3.8 Conda) on Backend.AI" && \
-    cat /opt/conda/share/jupyter/kernels/python3/kernel.json
-ENV JUPYTER_PATH="/opt/conda/share/jupyter"
+Run python3 -m ipykernel install --display-name "PyTorch 1.14 (NGC 22.12/Python 3.8) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 # Backend.AI specifics
 COPY ./service-defs /etc/backend.ai/service-defs
@@ -259,9 +264,8 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.mem="1g" \
       ai.backend.resource.min.cuda.device=1 \
       ai.backend.resource.min.cuda.shares=0 \
-      ai.backend.base-distro="ubuntu22.04" \
       ai.backend.runtime-type="python" \
-      ai.backend.runtime-path="/opt/conda/bin/python3" \
+      ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
 
 WORKDIR /home/work
