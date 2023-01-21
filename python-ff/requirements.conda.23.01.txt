@@ -355,7 +355,7 @@ tenacity==8.1.0
 tensorboard==2.9.1
 tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.1
-tensorflow==2.9.2
+tensorflow==2.9.3
 tensorflow-datasets==4.8.1
 tensorflow-estimator==2.9.0
 tensorflow-gcs-config==2.9.1
