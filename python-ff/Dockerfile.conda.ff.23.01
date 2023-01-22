@@ -406,7 +406,7 @@ RUN MPICC=/usr/lib64/openmpi/bin/mpicc python3 -m pip install mpi4py && \
     python3 -m pip install "jax[cuda11_cudnn805]" -f https://storage.googleapis.com/jax-releases/jax_releases.html 
 
 WORKDIR /tmp
-RUN python3 -m pip install --no-cache-dir "jax[cuda11_cudnn82]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+RUN python3 -m pip install --no-cache-dir jax[cuda11_cudnn82]==0.3.25 -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 COPY ./requirements.conda.23.01.txt /tmp/requirements.txt 
 RUN python3 -m pip install --no-cache-dir -r requirements.txt 
 RUN python3 -m pip --no-cache-dir install git+https://github.com/rpy2/rpy2.git@${RPY2_VERSION} && \
