@@ -422,12 +422,11 @@ RUN python3 -m pip --no-cache-dir install git+https://github.com/rpy2/rpy2.git@$
     rm -f /tmp/*.whl /tmp/requirements.txt
 
 RUN python3 -m pip install --extra-index-url \
-        https://developer.download.nvidia.com/compute/redist \
-	--upgrade nvidia-dali-cuda110 \
-       && \
+        https://developer.download.nvidia.com/compute/redist/ \
+	    nvidia-dali-cuda110==1.22.0 && \
     python3 -m pip install --extra-index-url \
-        https://developer.download.nvidia.com/compute/redist \
-	--upgrade nvidia-dali-tf-plugin-cuda110 
+        https://developer.download.nvidia.com/compute/redist/ \
+	    nvidia-dali-tf-plugin-cuda110==1.22.0
 
 RUN CUDA_ROOT=/usr/local/cuda python3 -m pip install --no-cache-dir \
         mpi4jax \
