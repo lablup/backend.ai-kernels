@@ -125,7 +125,7 @@ google-pasta==0.2.0
 google-resumable-media==2.4.0
 googleapis-common-protos==1.58.0
 googledrivedownloader==0.4
-graphviz==0.9
+graphviz==0.8.4
 greenlet==2.0.1
 grpcio==1.51.1
 grpcio-status==1.48.2
@@ -375,10 +375,10 @@ toml==0.10.2
 tomli==2.0.1
 toolz==0.12.0
 torch @ https://download.pytorch.org/whl/cu117/torch-1.13.1%2Bcu117-cp38-cp38-linux_x86_64.whl
-torchaudio @ https://download.pytorch.org/whl/cu116/torchaudio-0.13.1%2Bcu116-cp38-cp38-linux_x86_64.whl
+torchaudio @ https://download.pytorch.org/whl/cu117/torchaudio-0.13.1%2Bcu117-cp38-cp38-linux_x86_64.whl
 torchsummary==1.5.1
 torchtext==0.14.1
-torchvision @ https://download.pytorch.org/whl/cu116/torchvision-0.14.1%2Bcu116-cp38-cp38-linux_x86_64.whl
+torchvision @ https://download.pytorch.org/whl/cu117/torchvision-0.14.1%2Bcu117-cp38-cp38-linux_x86_64.whl
 tornado==6.0.4
 tqdm==4.64.1
 traitlets==5.7.1
