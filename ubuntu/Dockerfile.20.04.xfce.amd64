@@ -8,8 +8,6 @@ ENV DISPLAY=:1 \
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-COPY scripts/clean_snap.sh /tmp/
-
 RUN apt update && \
     apt install --no-install-recommends -y apt-utils ;\
     apt install --no-install-recommends -y \
