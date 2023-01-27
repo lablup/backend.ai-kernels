@@ -1,5 +1,5 @@
 {
-  "display_name": "Julia 1.8 on Backend.AI",
+  "display_name": "FluxML 0.13 on Backend.AI",
   "argv": [
     "/usr/local/julia/bin/julia",
     "-i",
