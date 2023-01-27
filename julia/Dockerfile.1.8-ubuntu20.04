@@ -47,6 +47,8 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 # Install jupyter & Julia
 ARG JULIA_VERSION
 ENV JULIA_VERSION ${JULIA_VERSION:-1.8.5}
+ARG JULIA_MAJOR_VERSION
+ENV JULIA_MAJOR_VERSION ${JULIA_MAJOR_VERSION:-1.8}
 ENV JULIA_PATH "/usr/local/julia"
 ENV PATH $JULIA_PATH:$JULIA_PATH/bin:$PATH
     
@@ -59,7 +61,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding Julia binary release"; exit 1 ;; \
     esac; \
     \
-    curl -fL -o julia.tar.gz     "https://julialang-s3.julialang.org/bin/linux/${dirArch}/${JULIA_VERSION%[.-]*}/julia-${JULIA_VERSION}-linux-${tarArch}.tar.gz"; \
+    curl -fL -o julia.tar.gz "https://julialang-s3.julialang.org/bin/linux/${dirArch}/${JULIA_VERSION%[.-]*}/julia-${JULIA_VERSION}-linux-${tarArch}.tar.gz"; \
     \
     mkdir "$JULIA_PATH"; \
     tar -xzf julia.tar.gz -C "$JULIA_PATH" --strip-components 1; \
@@ -88,11 +90,11 @@ RUN julia -e 'using IJulia' && \
 SHELL ["/bin/sh", "-c"]
 # Install ipython kernelspec
 COPY replace_placeholder.sh /etc/backend.ai/replace_placeholder.sh
-COPY kernel.json /usr/local/share/jupyter/kernels/julia-1.8/kernel.json
-RUN /etc/backend.ai/replace_placeholder.sh && \
+COPY kernel.json /usr/local/share/jupyter/kernels/julia-${JULIA_MAJOR_VERSION}/kernel.json
+RUN /etc/backend.ai/replace_placeholder.sh ${JULIA_MAJOR_VERSION} && \
     rm /etc/backend.ai/replace_placeholder.sh
-COPY logo-32x32.png /usr/local/share/jupyter/kernels/julia-1.8/logo-32x32.png
-COPY logo-64x64.png /usr/local/share/jupyter/kernels/julia-1.8/logo-64x64.png
+COPY logo-32x32.png /usr/local/share/jupyter/kernels/julia-${JULIA_MAJOR_VERSION}/logo-32x32.png
+COPY logo-64x64.png /usr/local/share/jupyter/kernels/julia-${JULIA_MAJOR_VERSION}/logo-64x64.png
 
 # Backend.AI specifics
 LABEL ai.backend.kernelspec="1" \
