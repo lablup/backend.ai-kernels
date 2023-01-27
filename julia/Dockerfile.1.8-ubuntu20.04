@@ -87,7 +87,10 @@ RUN julia -e 'using IJulia' && \
     chmod -R 755 /opt/julia/compiled
 SHELL ["/bin/sh", "-c"]
 # Install ipython kernelspec
-COPY kernel.1.8.json /usr/local/share/jupyter/kernels/julia-1.8/kernel.json
+COPY replace_placeholder.sh /etc/backend.ai/replace_placeholder.sh
+COPY kernel.json /usr/local/share/jupyter/kernels/julia-1.8/kernel.json
+RUN /etc/backend.ai/replace_placeholder.sh && \
+    rm /etc/backend.ai/replace_placeholder.sh
 COPY logo-32x32.png /usr/local/share/jupyter/kernels/julia-1.8/logo-32x32.png
 COPY logo-64x64.png /usr/local/share/jupyter/kernels/julia-1.8/logo-64x64.png
 
