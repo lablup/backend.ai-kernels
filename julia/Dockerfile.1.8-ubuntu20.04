@@ -54,6 +54,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
         amd64) tarArch='x86_64'; dirArch='x64';; \
         armhf) tarArch='arm'; dirArch='arm';; \
+        arm64) tarArch='aarch64'; dirArch='aarch64';; \
         i386) tarArch='i686'; dirArch='x86';; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding Julia binary release"; exit 1 ;; \
     esac; \
@@ -95,7 +96,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.resource.min.cpu="1" \
-      ai.backend.resource.min.mem="512m" \
+      ai.backend.resource.min.mem="1g" \
       ai.backend.base-distro="ubuntu20.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
