@@ -62,6 +62,9 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 2
 RUN python3.10 -m ipykernel install --display-name "Python 3.10 on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
+# Copy Backend.AI multi-node support
+COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
+
 # Backend.AI specifics
 COPY ./service-defs /etc/backend.ai/service-defs
 LABEL ai.backend.kernelspec="1" \

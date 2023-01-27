@@ -1,0 +1,13 @@
+{
+  "display_name": "FluxML 0.13 on Backend.AI",
+  "argv": [
+    "/usr/local/julia/bin/julia",
+    "-i",
+    "--startup-file=yes",
+    "--color=yes",
+    "/opt/julia/packages/IJulia/PLACEHOLDER/src/kernel.jl",
+    "{connection_file}"
+  ],
+  "language": "julia",
+  "env": {}
+}
