@@ -15,14 +15,14 @@ RUN apt update && \
     wget sudo curl gpg git bzip2 vim-tiny procps python x11-xserver-utils \
     libnss3 libnspr4 libasound2 libgbm1 ca-certificates ttf-ubuntu-font-family xdg-utils \
     tigervnc-standalone-server tigervnc-common firefox firefox-locale-ko fonts-nanum \
-    libappindicator3-1 libindicator3-7 && \
+    libappindicator3-1 libindicator3-7 ncurses-term && \
     apt upgrade -y ibus-hangul && \
     rm -vf /opt/lib*.deb; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 
-ENV TERM xterm
+#ENV TERM xterm
 # Install NOVNC.
 RUN git clone --branch v1.2.0 --single-branch https://github.com/novnc/noVNC.git /opt/noVNC; \
     git clone --branch v0.9.0 --single-branch https://github.com/novnc/websockify.git /opt/noVNC/utils/websockify; \
@@ -36,22 +36,45 @@ ENV QT_X11_NO_MITSHM=1 \
 
 # give every user read write access to the "/root" folder where the binary is cached
 RUN ls -la /root
-RUN chmod 777 /root && mkdir /src
+RUN chmod 777 /root && mkdir /src && mkdir /tmp/user_config && mkdir /usr/local/xfcedeskconfig
+COPY assets/config/ /tmp/user_config/
+RUN cd /tmp/user_config && tar czvf /usr/local/xfcedeskconfig/deskconfig.tar.gz * && rm -rf /tmp/user_config
+COPY scripts/entrypoint.sh /usr/local/bin/
 
-RUN groupadd -g 61000 dockeruser; \
-    useradd -g 61000 -l -m -s /bin/bash -u 61000 dockeruser
+# this have to be moved to bootstrap code
+#COPY assets/config/ /home/dockeruser/.config
 
-COPY assets/config/ /home/dockeruser/.config
+# RUN chown -R dockeruser:dockeruser /home/dockeruser;\
+#     chmod -R 777 /home/dockeruser ;\
+#     adduser dockeruser sudo;\
+#     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-RUN chown -R dockeruser:dockeruser /home/dockeruser;\
-    chmod -R 777 /home/dockeruser ;\
-    adduser dockeruser sudo;\
-    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+#USER dockeruser
 
-USER dockeruser
+#COPY scripts/entrypoint.sh /src
 
-COPY scripts/entrypoint.sh /src
+#Expose port 5901 to view display using VNC Viewer (6901 --> noVNC)
+#EXPOSE 5901 6901
+#ENTRYPOINT ["/src/entrypoint.sh"]
 
-#Expose port 5901 to view display using VNC Viewer
-EXPOSE 5901 6901
-ENTRYPOINT ["/src/entrypoint.sh"]
+WORKDIR /home/work
+
+ENV USER work
+ENV PASSWORD work
+ENV USERID 1000
+ENV GROUPID 1000
+
+COPY assets/service-defs /etc/backend.ai/service-defs
+COPY assets/policy.yml /etc/backend.ai/jail/policy.yml
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="256m" \
+      ai.backend.base-distro="ubuntu20.04" \
+      ai.backend.runtime-type="app" \
+      ai.backend.runtime-path="/usr/false" \
+      ai.backend.service-ports="novnc:http:5900"
+
+RUN   ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color

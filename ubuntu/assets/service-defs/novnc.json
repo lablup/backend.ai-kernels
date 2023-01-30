@@ -1,0 +1,16 @@
+{
+    "prestart": [],
+    "command": [
+        "/bin/bash",
+        "/usr/local/bin/entrypoint.sh",
+        "{ports[0]}"
+    ],
+    "allowed_arguments": [
+    ],
+    "allowed_envs": [
+      "PASSWORD",
+      "RESOLUTION"
+    ],
+    "default_arguments": {
+    }
+}
