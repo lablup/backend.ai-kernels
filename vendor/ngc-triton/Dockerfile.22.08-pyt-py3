@@ -1,0 +1,41 @@
+FROM nvcr.io/nvidia/tritonserver:22.08-pyt-python-py3
+# NVIDIA Triton
+
+ENV PYTHONUNBUFFERED=1 \
+    _CUDA_COMPAT_PATH="/usr/local/cuda/compat" \
+    PATH="/opt/tritonserver/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin" \
+    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64" \
+    LANG=C.UTF-8
+
+RUN apt update && \
+    apt install -y --no-install-recommends \
+      ncurses-term \
+      unzip zlib1g-dev htop curl git && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color
+
+# Copy example models
+RUN git clone -b r22.08 https://github.com/triton-inference-server/server.git /workspace/triton-server && \
+    cd /workspace/triton-server/docs/examples && \
+    ./fetch_models.sh && \
+    chmod -R +r /workspace/triton-server
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+COPY ./service-defs /etc/backend.ai/service-defs
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.accelerators="cuda" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python" \
+      ai.backend.service-ports="triton-server-http:preopen:8000"
+      # ai.backend.service-ports="triton-server-http:preopen:8000,triton-server-grpc:preopen:8001,triton-server-metric:preopen:8002"
+      # ai.backend.service-ports="triton-server:preopen:[8000,8001,8002]"
+
+WORKDIR /home/work
+# vim: ft=dockerfile
