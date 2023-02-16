@@ -1,2 +1,2 @@
 #!/bin/bash
-/opt/tritonserver/bin/tritonserver --model-repository /models
+/opt/tritonserver/bin/tritonserver --model-repository /models &
