@@ -26,6 +26,7 @@ COPY ./runner-scripts/bootstrap.sh /opt/container/
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
+      ai.backend.role="INFERENCE" \
       ai.backend.base-distro="ubuntu18.04" \
       ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
