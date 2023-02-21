@@ -54,21 +54,21 @@ RUN apt-get update && \
 	libtbb-dev \
 	mercurial \
 	ncurses-term \
-        openjdk-8-jdk \
+    openjdk-8-jdk \
 	pbzip2 \
 	pv \
 	pdsh \
 	protobuf-compiler \
 	v4l-utils \
 	cmake \ 
-	x264 
+	x264 && \
 
 # Install CUDA + cuDNN 
-RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.3.2 /usr/local/cuda/lib64/libcudnn.so && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.3.2 /usr/local/cuda/lib64/libcudnn.so && \
     rm -rf /var/lib/apt/lists/* && \
-    ldconfig
+    ldconfig && \
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
@@ -91,9 +91,7 @@ RUN mkdir /tmp/openmpi && \
 
 
 # Install Horovod, temporarily using CUDA stubs
-RUN \
-#ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-    HOROVOD_NCCL_LINK=SHARED \
+RUN HOROVOD_NCCL_LINK=SHARED \
     HOROVOD_WITH_MPI=1 \
     HOROVOD_GPU_ALLREDUCE=NCCL \
     NCCL_LIBRARY=/usr/include \
