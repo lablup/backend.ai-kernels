@@ -21,16 +21,19 @@ RUN git clone https://github.com/triton-inference-server/server.git /workspace/t
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 COPY ./service-defs /etc/backend.ai/service-defs
+COPY ./runner-scripts/bootstrap.sh /opt/container/
+
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
-      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.role="INFERENCE" \
+      ai.backend.base-distro="ubuntu18.04" \
       ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
       ai.backend.resource.min.cuda.device=0 \
       ai.backend.resource.min.cuda.shares=0 \
-      ai.backend.base-distro="ubuntu16.04" \
+      ai.backend.model-path="/models" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="triton-server-http:preopen:8000"
