@@ -106,7 +106,7 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf && \
     ldconfig
 
-# Install CUDA-10.2 + cuDNN 8.0.2
+# Install CUDA-10.2 + cuDNN 7.8.0
 RUN ln -s /usr/local/cuda-10.2 /usr/local/cuda && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.7.8.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig
