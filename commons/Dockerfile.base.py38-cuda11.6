@@ -245,9 +245,9 @@ RUN git clone https://github.com/aristocratos/bashtop.git && \
 
 # Install VSCode
 WORKDIR /tmp
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.12.0/code-server-3.12.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
-    mv /usr/local/lib/code-server-3.12.0-linux-amd64 /usr/local/lib/code-server-3.12.0 && \
-    ln -s /usr/local/lib/code-server-3.12.0/bin/code-server /usr/local/bin/code-server
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.10.0/code-server-4.10.0-linux-amd64.tar.gz | tar -C /usr/local/lib -xz && \
+    mv /usr/local/lib/code-server-4.10.0-linux-amd64 /usr/local/lib/code-server-4.10.0 && \
+    ln -s /usr/local/lib/code-server-4.10.0/bin/code-server /usr/local/bin/code-server
 
 RUN rm /usr/bin/python3 && \
     ln -s /usr/bin/python3.8 /usr/bin/python3 && \
@@ -422,7 +422,7 @@ RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.
 
 # Clean up
 RUN apt autoclean && \
-    ln -s /usr/local/cuda-11.5/targets/x86_64-linux/lib/libcusolver.so.11 /usr/local/cuda-11.5/targets/x86_64-linux/lib/libcusolver.so.10 && \
+    ln -s /usr/local/cuda-11.5/targets/x86_64-linux/lib/libcusolver.so.11 /usr/local/cuda-11.6/targets/x86_64-linux/lib/libcusolver.so.10 && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
