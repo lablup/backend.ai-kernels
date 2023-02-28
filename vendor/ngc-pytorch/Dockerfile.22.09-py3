@@ -1,5 +1,28 @@
 FROM nvcr.io/nvidia/pytorch:22.09-py3
 # NVIDIA NGC PyTorch with Python 3.8 (CONDA)
+USER root
+# Install Open MPI
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.gz && \
+    tar zxf openmpi-4.1.4.tar.gz && \
+    cd openmpi-4.1.4 && \
+    ./configure --enable-orterun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    rm -rf /tmp/openmpi* && \
+# Create a wrapper for OpenMPI to allow running as root by default
+    mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun && \
+# Configure OpenMPI to run good defaults:
+    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+
+# Install Horovod, temporarily using CUDA stubs
+RUN /opt/conda/bin/python3 -m pip install --no-cache-dir \
+        horovod[pytorch]==0.26.1 
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
@@ -155,19 +178,19 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
 	zip \
         tcl \
         udev \
-	zlib1g-dev 
+	zlib1g-dev && \
 # Install CUDA + cuDNN 
-RUN ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.3.2 /usr/local/cuda/lib64/libcudnn.so && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.6.0 /usr/local/cuda/lib64/libcudnn.so && \
     rm -rf /var/lib/apt/lists/* && \
     ldconfig
 
 # Install cmake
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-Linux-x86_64.sh \
-         -q -O /tmp/cmake-install.sh && \
-    chmod u+x /tmp/cmake-install.sh && \
-    mkdir /usr/bin/cmake && \
-    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
-    rm /tmp/cmake-install.sh
+#RUN wget https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-Linux-x86_64.sh \
+#         -q -O /tmp/cmake-install.sh && \
+#    chmod u+x /tmp/cmake-install.sh && \
+#    mkdir /usr/bin/cmake && \
+#    /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake && \
+#    rm /tmp/cmake-install.sh
 
 RUN update-alternatives --install /opt/conda/bin/python python /opt/conda/bin/python3 2
 
@@ -267,56 +290,20 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
     python3 -m pip install --no-cache-dir opencv-python && \
     rm -fr opencv* 
 
-WORKDIR /tmp
-COPY requirements.22.09.txt /tmp/requirements.txt
-RUN for f in $(ls requirements*.txt); do pip3 install --disable-pip-version-check --no-cache-dir -r $f; done && \
-     rm -f /tmp/*.whl /tmp/requirem*
+COPY ./requirements.22.09.1.txt /tmp/requirements.txt
+RUN for f in $(ls requirements*.txt); do /opt/conda/bin/python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done ; rm /tmp/requirements.txt
+COPY ./requirements.22.09.2.txt /tmp/requirements.txt
+RUN for f in $(ls requirements*.txt); do /opt/conda/bin/python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done ; rm /tmp/requirements.txt
+COPY ./requirements.22.09.3.txt /tmp/requirements.txt
+RUN for f in $(ls requirements*.txt); do /opt/conda/bin/python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done ; rm /tmp/requirements.txt
+COPY ./requirements.22.09.4.txt /tmp/requirements.txt
+RUN for f in $(ls requirements*.txt); do /opt/conda/bin/python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done ; rm /tmp/requirements.txt
+RUN python3 -m pip install markupsafe==2.0.1 jupyter-nbextensions_configurator
+
+COPY ./requirements.22.09.5.txt /tmp/requirements.txt
+RUN for f in $(ls requirements*.txt); do /opt/conda/bin/python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done ; rm /tmp/requirements.txt
 
 
-#COPY ./requirements.22.09.1.txt /tmp/requirements.txt
-#RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt
-#COPY ./requirements.22.09.2.txt /tmp/requirements.txt
-#RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt
-#COPY ./requirements.22.09.3.txt /tmp/requirements.txt
-#RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt
-#COPY ./requirements.22.09.4.txt /tmp/requirements.txt
-#RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt
-#COPY ./requirements.22.09.5.txt /tmp/requirements.txt
-#RUN /opt/conda/bin/python3 -m pip install --no-cache-dir -r requirements.txt && \
-#    rm -f /tmp/*.whl /tmp/requirem*
-
-# Install Open MPI
-RUN mkdir /tmp/openmpi && \
-    cd /tmp/openmpi && \
-    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.gz && \
-    tar zxf openmpi-4.1.4.tar.gz && \
-    cd openmpi-4.1.4 && \
-    ./configure --enable-orterun-prefix-by-default && \
-    make -j $(nproc) all && \
-    make install && \
-    ldconfig && \
-    rm -rf /tmp/openmpi* && \
-# Create a wrapper for OpenMPI to allow running as root by default
-    mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
-    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
-    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
-    chmod a+x /usr/local/bin/mpirun && \
-# Configure OpenMPI to run good defaults:
-    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
-
-# Install Horovod, temporarily using CUDA stubs
-RUN ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs && \
-    LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/local/cuda-11.8/include:/usr/include/x86_64-linux-gnu:/usr/include:$LD_LIBRARY_PATH" \
-    HOROVOD_NCCL_LINK=SHARED \
-    HOROVOD_WITH_MPI=1 \
-    HOROVOD_GPU_ALLREDUCE=NCCL \
-    NCCL_LIBRARY=/usr/include \
-    HOROVOD_NCCL_INCLUDE=/usr/include \
-    HOROVOD_NCCL_LIB=/lib/x86_64-linux-gnu \
-    HOROVOD_GPU_BROADCAST=NCCL \
-    HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir horovod==0.24.2 && \
-    ldconfig
 
 RUN python3 -m pip install pytorch-lightning && \
     python3 -m pip install --no-cache-dir \
@@ -334,16 +321,24 @@ RUN python3 -m pip install --no-cache-dir \
 	mlflow==1.29.0 \
 	scikit-nni==0.2.1
 
-RUN jupyter nbextensions_configurator enable && \
-    jupyter contrib nbextension install && \
-    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+RUN python3 -m pip install markupsafe==2.0.1  jupyter_lsp==1.2.0
+
+RUN jupyter lab build --dev-build=False --minimize=False && \
+    jupyter nbextensions_configurator enable 
+#RUN jupyter contrib nbextension install 
+RUN jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
+#    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
+#    jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
+    jupyter labextension install @jupyterlab/toc && \
     jupyter lab build
+
+#RUN python3 -m pip install jupyter_contrib_nbextensions jupyter-lsp && \
+
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
