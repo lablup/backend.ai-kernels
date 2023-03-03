@@ -29,10 +29,10 @@ RUN mkdir /tmp/openmpi && \
     echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
     chmod a+x /usr/local/bin/mpirun && \
 # Configure OpenMPI to run good defaults:
-    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+    echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf && \
 
 # Install Horovod, temporarily using CUDA stubs
-RUN HOROVOD_NCCL_LINK=SHARED \
+    HOROVOD_NCCL_LINK=SHARED \
     HOROVOD_WITH_MPI=1 \
     HOROVOD_GPU_ALLREDUCE=NCCL \
     NCCL_LIBRARY=/usr/include \
@@ -45,6 +45,7 @@ RUN HOROVOD_NCCL_LINK=SHARED \
     HOROVOD_WITHOUT_TENSORFLOW=1 HOROVOD_WITH_PYTORCH=1 HOROVOD_WITHOUT_MXNET=1 \
     pip install --no-cache-dir horovod==0.26.1 && \
     ldconfig
+    
 RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
     apt-get update && \
 	automake \
@@ -307,7 +308,7 @@ RUN for f in $(ls requirements*.txt); do /opt/conda/bin/python3 -m pip install -
     rm -f /tmp/*.whl /tmp/requirem*
 
 RUN python3 -m pip install --no-cache-dir \
-    	mpi4py==3.1.3 \
+    mpi4py==3.1.3 \
 	nni==2.9 \
 	mlflow==1.29.0 \
 	scikit-nni==0.2.1
@@ -315,12 +316,12 @@ RUN python3 -m pip install --no-cache-dir \
 RUN python3 -m pip install pytorch-lightning && \
     python3 -m pip install --no-cache-dir \
         torch-scatter \
-	torch-sparse \
-	torch-cluster \
-	torch-spline-conv \
-	torch-geometric \
-        -f https://pytorch-geometric.com/whl/torch-1.13.1%2Bcu117.html
-RUN pip install widgetsnbextension jupyter_contrib_nbextensions jupyter_lsp markupsafe==2.0.1 
+	    torch-sparse \
+	    torch-cluster \
+	    torch-spline-conv \
+	    torch-geometric \
+        -f https://pytorch-geometric.com/whl/torch-1.13.1%2Bcu117.html && \
+    python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyter_lsp markupsafe==2.0.1 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
@@ -332,16 +333,16 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable toc2/main && \
     jupyter lab build
 
+Run python3 -m ipykernel install --display-name "PyTorch 1.14 (NGC 22.12/Python 3.8) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
-
-Run python3 -m ipykernel install --display-name "PyTorch 1.14 (NGC 22.12/Python 3.8) on Backend.AI" && \
-    cat /usr/local/share/jupyter/kernels/python3/kernel.json
-
+    
 # Backend.AI specifics
 COPY ./service-defs /etc/backend.ai/service-defs
 COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
