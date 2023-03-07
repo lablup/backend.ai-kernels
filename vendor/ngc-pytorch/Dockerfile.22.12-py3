@@ -30,7 +30,6 @@ RUN mkdir /tmp/openmpi && \
     chmod a+x /usr/local/bin/mpirun && \
 # Configure OpenMPI to run good defaults:
     echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf && \
-
 # Install Horovod, temporarily using CUDA stubs
     HOROVOD_NCCL_LINK=SHARED \
     HOROVOD_WITH_MPI=1 \
@@ -188,15 +187,11 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
     tcl \
     udev \
 	zlib1g-dev && \
-
 # Install CUDA + cuDNN 
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.6.0 /usr/local/cuda/lib64/libcudnn.so && \
     rm -rf /var/lib/apt/lists/* && \
     ldconfig && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 2
-
-
-
 
 # install NLP packages *mecab-ko & khai*
 WORKDIR /tmp
@@ -308,10 +303,10 @@ RUN for f in $(ls requirements*.txt); do /opt/conda/bin/python3 -m pip install -
     rm -f /tmp/*.whl /tmp/requirem*
 
 RUN python3 -m pip install --no-cache-dir \
-    mpi4py==3.1.3 \
-	nni==2.9 \
-	mlflow==1.29.0 \
-	scikit-nni==0.2.1
+        mpi4py==3.1.3 \
+	    nni==2.9 \
+	    mlflow==1.29.0 \
+	    scikit-nni==0.2.1
 
 RUN python3 -m pip install pytorch-lightning && \
     python3 -m pip install --no-cache-dir \
