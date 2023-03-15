@@ -1,0 +1,6 @@
+{
+    "command": [
+        "{runtime_path}", "-m", "streamlit", "run",
+        "/models/stable-diffusion-client.py", "--server.port", "9000"
+    ]
+}
