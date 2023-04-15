@@ -64,7 +64,8 @@ ENV GROUPID 1000
 ENV DISABLE_AUTH true
 
 ENV S6_VERSION=v2.1.0.2
-ENV RSTUDIO_VERSION=v2023.03.0+386
+#ENV RSTUDIO_VERSION=v2023.05.0+386
+ENV RSTUDIO_VERSION=2023.03.0+386
 
 ## Install R / Rstudio / Tidyverse
 RUN /rocker_scripts/install_rstudio.sh
@@ -84,11 +85,12 @@ RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.2.3 on Backend.AI'
     rm -rf /root/.local/share/jupyter && \
     jupyter kernelspec list && \
     cat /usr/local/share/jupyter/kernels/ir/kernel.json
-
+RUN python3 -m pip install jupyter_contrib_nbextensions 
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
-    jupyter contrib nbextension install && \
+    jupyter contrib nbextension install --user && \
+    jupyter nbextension enable hinterland/hinterland && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
