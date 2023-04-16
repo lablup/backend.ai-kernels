@@ -16,10 +16,10 @@ RUN apt-get update && \
         mime-support \
         locales \
         fonts-texgyre \
-	fonts-nanum \
-	fonts-nanum-coding \
-	fonts-nanum-extra \
-	htop \
+	    fonts-nanum \
+	    fonts-nanum-coding \
+	    fonts-nanum-extra \
+	    htop \
         less \
         vim-tiny \
         liblapack3 \
@@ -88,6 +88,7 @@ RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.2.2 on Backend.AI'
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter nbextension enable hinterland/hinterland && \
     jupyter contrib nbextension install && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
