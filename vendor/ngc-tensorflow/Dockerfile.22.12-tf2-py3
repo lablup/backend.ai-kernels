@@ -70,9 +70,9 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
 	nodejs \
 	pdsh \
 	protobuf-compiler \
-        libsmpeg-dev \
-        openjdk-8-jdk \
-        python3-gdal \
+    libsmpeg-dev \
+    openjdk-8-jdk \
+    python3-gdal \
 	v4l-utils \	
 	x264 
 
