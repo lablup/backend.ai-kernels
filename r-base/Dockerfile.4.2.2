@@ -90,6 +90,9 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter nbextension enable hinterland/hinterland && \
     jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install --user && \
+    jupyter nbextension enable hinterland/hinterland && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
