@@ -93,6 +93,9 @@ RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.2.3 on Backend.AI'
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
+    jupyter nbextension enable toc2/main && \
+    jupyter nbextension enable code_prettify/autopep8 && \
+    jupyter nbextension enable nbTranslate/main && \
     jupyter lab build
 
 COPY ./service-defs /etc/backend.ai/service-defs
