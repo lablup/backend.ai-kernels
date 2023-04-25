@@ -69,6 +69,7 @@ ENV RSTUDIO_VERSION=2023.03.0+386
 ## Install R / Rstudio / Tidyverse
 RUN /rocker_scripts/install_rstudio.sh
 RUN /rocker_scripts/install_pandoc.sh
+
 # Devtools is installed here.
 RUN /rocker_scripts/install_tidyverse.sh
 
