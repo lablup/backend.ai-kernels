@@ -32,7 +32,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.preferred.shmem="64" \
       ai.backend.runtime-type="app" \
       ai.backend.runtime-path="/bin/false" \
-      ai.backend.service-ports="sftp:preopen:22"
+      ai.backend.service-ports="sftpd:preopen:22"
 
 COPY policy.yml /etc/backend.ai/jail/policy.yml
 
