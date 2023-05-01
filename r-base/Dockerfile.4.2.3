@@ -100,9 +100,9 @@ RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.2.3 on Backend.AI'
     jupyter lab build
 
 COPY ./service-defs /etc/backend.ai/service-defs
-COPY bootstrap_rocker2.sh /opt/container/bootstrap.sh
-COPY userconf_backendai.sh /rocker_scripts/userconf.sh
-COPY userconf_backendai.sh /etc/cont-init.d/userconf
+COPY ./bootstrap_rocker2.sh /opt/container/bootstrap.sh
+COPY ./userconf_backendai.sh /rocker_scripts/userconf.sh
+COPY ./userconf_backendai.sh /etc/cont-init.d/userconf
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
