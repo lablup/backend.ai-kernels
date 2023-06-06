@@ -111,7 +111,7 @@ jaxlib>=0.4.7
 jinja2==3.1.2
 jmespath==0.9.4
 joblib==1.0.1
-JPype1==0.7.2
+JPype1>=0.7.2
 json-tricks==3.15.5
 jsonpatch==1.32
 jsonpickle==1.5.0
@@ -198,7 +198,7 @@ pyls-black==0.4.4
 PyMeeus==0.5.10
 pymongo==3.10.1
 pynput==1.7.6
-pyproj==2.5.0
+pyproj>=2.5.0
 PyQt5==5.15.0
 PyQt5-sip==12.8.1
 PyQtWebEngine==5.15.2
