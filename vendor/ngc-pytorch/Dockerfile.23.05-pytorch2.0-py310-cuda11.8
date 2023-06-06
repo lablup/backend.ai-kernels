@@ -83,7 +83,7 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
 	libgeos++-dev \
 	libgeos-dev \
 	libgflags-dev \
-	libgfortran4 \
+	libgfortran \
 	libgirepository1.0-dev \
 	libglib2.0-0 \
 	libgoogle-glog-dev \
@@ -114,7 +114,7 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
 	libportmidi-dev \
 	libproj-dev \
 	libprotobuf-dev \
-	libsdl-dev \
+	libsdl2-dev \
 	libsdl-image1.2-dev \
 	libsdl-mixer1.2-dev \
 	libsdl-ttf2.0-dev \
@@ -155,7 +155,8 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
 	proj-bin \
 	protobuf-compiler \
 	pv \
-	python-apt \
+	python-is-python3 \
+#	python-apt \
 	python-xkit \
 	python3-gdal \
 	screen-resolution-extra \
