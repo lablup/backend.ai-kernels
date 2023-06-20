@@ -38,6 +38,20 @@ RUN apt-get update -y && \
 # python alternative support
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
+WORKDIR /tmp
+RUN git clone https://github.com/aristocratos/bashtop.git && \
+    cd bashtop && \
+    make install
+
+# install git-lfs
+WORKDIR /tmp
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-amd64-v3.3.0.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v3.3.0.tar.gz && \
+    cd git-lfs-3.3.0 && \
+    bash install.sh && \
+    rm -rf /tmp/*
+
+WORKDIR /tmp
 RUN python3 -m pip install --upgrade pip setuptools && \
     python3 -m pip --no-cache-dir install \
         numpy \
@@ -63,8 +77,8 @@ RUN python3 -m pip install --upgrade pip setuptools && \
     python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyter_lsp markupsafe==2.0.1 
 
 # Jupyter notebook extension
-RUN mkdir -p /home/work/.jupyter/nbextension
-WORKDIR /home/work/.jupyter/nbextension
+RUN mkdir -p /usr/local/share/jupyter/nbextension
+WORKDIR /usr/local/share/jupyter/nbextension
 
 RUN python3 -m pip install --no-cache-dir imbalanced-learn && \
     python3 -m pip install --no-cache-dir scikit-optimize && \
