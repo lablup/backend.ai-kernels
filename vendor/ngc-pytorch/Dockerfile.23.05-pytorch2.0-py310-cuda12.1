@@ -66,7 +66,7 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
 	libatlas-base-dev \
 	libavcodec-dev \
 	libavformat-dev \
-	libavresample-dev \
+#	libavresample-dev \
 	libboost-dev \
 	libboost-filesystem-dev \
 	libboost-system-dev \
@@ -83,7 +83,7 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
 	libgeos++-dev \
 	libgeos-dev \
 	libgflags-dev \
-	libgfortran \
+	gfortran \
 	libgirepository1.0-dev \
 	libglib2.0-0 \
 	libgoogle-glog-dev \
@@ -122,6 +122,7 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
 	libsmpeg-dev \
 	libssl-dev \
 	libswscale-dev \
+	libswresample-dev \
 	libtbb-dev \
 	libtheora-dev \
 	libtiff-dev \
@@ -209,10 +210,10 @@ RUN mkdir -p /usr/local/share/vscode/extensions && \
       | tar -C /usr/local/lib -xz && \ 
     mv /usr/local/lib/code-server-4.13.0-linux-amd64 /usr/local/lib/code-server-4.13.0 && \
     ln -s /usr/local/lib/code-server-4.13.0/bin/code-server /usr/local/bin/code-server && \
-    code-server --extensions-dir /usr/local/share/vscode/extensions --install-extension \
-        ms-python.python && \
-    code-server --extensions-dir /usr/local/share/vscode/extensions --install-extension \
-        ms-ceintl.vscode-language-pack-ko \
+    code-server --extensions-dir /usr/local/share/vscode/extensions \
+        --install-extension ms-python.python && \
+    code-server --extensions-dir /usr/local/share/vscode/extensions \
+        --install-extension ms-ceintl.vscode-language-pack-ko \
         --install-extension bierner.emojisense  \
         --install-extension formulahendry.auto-complete-tag  \
         --install-extension moshfeu.compare-folders  \
@@ -235,7 +236,7 @@ RUN mkdir -p /usr/local/share/vscode/extensions && \
         --install-extension Face.huggingface-vscode  \
         --install-extension tomoki1207.pdf redhat.vscode-yaml 
 
-COPY ./requirements.23.03.txt /tmp/requirements.txt
+COPY ./requirements.23.05.txt /tmp/requirements.txt
 #RUN for f in $(ls requirements*.txt); do python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done && \
 RUN  python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirem*
