@@ -47,7 +47,8 @@ RUN mkdir /tmp/openmpi && \
     
 RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
     apt-get update && \
-	automake \
+	apt-get install \
+    automake \
 	bison \
 	build-essential \
 	bzip2 \
