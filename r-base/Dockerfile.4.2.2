@@ -16,10 +16,10 @@ RUN apt-get update && \
         mime-support \
         locales \
         fonts-texgyre \
-	fonts-nanum \
-	fonts-nanum-coding \
-	fonts-nanum-extra \
-	htop \
+	    fonts-nanum \
+	    fonts-nanum-coding \
+	    fonts-nanum-extra \
+	    htop \
         less \
         vim-tiny \
         liblapack3 \
@@ -59,8 +59,8 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 ENV USER work
 ENV PASSWORD work
-ENV USERID 1000
-ENV GROUPID 1000
+ENV USERID 1100
+ENV GROUPID 1100
 ENV DISABLE_AUTH true
 
 ENV S6_VERSION=v2.1.0.2
@@ -88,7 +88,11 @@ RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.2.2 on Backend.AI'
 RUN jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter nbextension enable hinterland/hinterland && \
     jupyter contrib nbextension install && \
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+    jupyter contrib nbextension install --user && \
+    jupyter nbextension enable hinterland/hinterland && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \

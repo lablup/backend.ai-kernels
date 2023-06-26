@@ -59,21 +59,20 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 ENV USER work
 ENV PASSWORD work
-ENV USERID 1000
-ENV GROUPID 1000
+ENV USERID 1100
+ENV GROUPID 1100
 ENV DISABLE_AUTH true
 
 ENV S6_VERSION=v2.1.0.2
-#ENV RSTUDIO_VERSION=v2023.05.0+386
 ENV RSTUDIO_VERSION=2023.03.0+386
 
 ## Install R / Rstudio / Tidyverse
 RUN /rocker_scripts/install_rstudio.sh
 RUN /rocker_scripts/install_pandoc.sh
+
 # Devtools is installed here.
 RUN /rocker_scripts/install_tidyverse.sh
 
-#RUN Rscript -e "devtools::install_github('IRkernel/IRkernel')"
 RUN Rscript -e "install.packages(c('rzmq','repr','IRkernel','IRdisplay'))" && \
     Rscript -e "install.packages(c('slidify','ggplot2'))" && \
     Rscript -e "install.packages(c('KoNLP'))" && \
@@ -84,9 +83,9 @@ RUN Rscript -e "install.packages(c('rzmq','repr','IRkernel','IRdisplay'))" && \
 RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.2.3 on Backend.AI' , user = FALSE)" && \
     rm -rf /root/.local/share/jupyter && \
     jupyter kernelspec list && \
-    cat /usr/local/share/jupyter/kernels/ir/kernel.json
-RUN python3 -m pip install jupyter_contrib_nbextensions 
-RUN jupyter nbextensions_configurator enable && \
+    cat /usr/local/share/jupyter/kernels/ir/kernel.json && \
+    python3 -m pip install jupyter_contrib_nbextensions && \
+    jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter contrib nbextension install --user && \
@@ -95,12 +94,15 @@ RUN jupyter nbextensions_configurator enable && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
+    jupyter nbextension enable toc2/main && \
+    jupyter nbextension enable code_prettify/autopep8 && \
+    jupyter nbextension enable nbTranslate/main && \
     jupyter lab build
 
 COPY ./service-defs /etc/backend.ai/service-defs
-COPY bootstrap_rocker2.sh /opt/container/bootstrap.sh
-COPY userconf_backendai.sh /rocker_scripts/userconf.sh
-COPY userconf_backendai.sh /etc/cont-init.d/userconf
+COPY ./bootstrap_rocker2.sh /opt/container/bootstrap.sh
+COPY ./userconf_backendai.sh /rocker_scripts/userconf.sh
+COPY ./userconf_backendai.sh /etc/cont-init.d/userconf
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \

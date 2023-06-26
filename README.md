@@ -124,6 +124,7 @@ Here we list the latest versions of our supported kernel images.
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.09-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 21.11-py3     | O     | O\*   | O          |     |                   |
 | NGC-Pytorch             | `lablup/ngc-pytorch`    | 22.02-py3     | O     | O\*   | O          |     |                   |
+| NGC-Pytorch             | `lablup/ngc-pytorch`    | 23.03-py3     | O     | O\*   | O          |     |                   |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.07-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.08-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |
 | NGC-MXNet               | `lablup/ngc-mxnet`      | 19.09-py3     | O     | O\*   | O          |     | Bundled w/Keras 2 |

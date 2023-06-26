@@ -1,0 +1,4 @@
+FROM cr.backend.ai/stable/python:3.8-ubuntu20.04
+LABEL ai.backend.resource.min.atom.device=0
+
+# vim: ft=dockerfile

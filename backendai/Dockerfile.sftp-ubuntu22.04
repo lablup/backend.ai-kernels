@@ -1,0 +1,39 @@
+FROM ubuntu:22.04
+
+# Install packages
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        openssh-server rsync && \
+    apt clean && rm -rf /var/lib/apt/lists/ && rm -rf /root/.cache && rm -rf /tmp/*
+
+# Configure SSH server
+RUN mkdir /var/run/sshd && \
+    sed -i 's/#AllowAgentForwarding yes/AllowAgentForwarding no/' /etc/ssh/sshd_config && \
+    sed -i 's/#AllowTcpForwarding yes/AllowTcpForwarding no/' /etc/ssh/sshd_config && \
+    sed -i 's/#GatewayPorts no/GatewayPorts no/' /etc/ssh/sshd_config && \
+    sed -i 's/X11Forwarding yes/X11Forwarding no/' /etc/ssh/sshd_config && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && \
+    sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/' /etc/ssh/sshd_config && \
+    echo 'PermitRootLogin no' >> /etc/ssh/sshd_config && \
+    chmod 700 /usr/bin/ssh
+
+# Copy the entrypoint script
+COPY ./bootstrap_sftp.sh /opt/container/
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="uid-match private" \
+      ai.backend.role="SYSTEM" \
+      ai.backend.base-distro="ubuntu22.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="128m" \
+      ai.backend.resource.max.mem="256m" \
+      ai.backend.resource.preferred.shmem="64" \
+      ai.backend.runtime-type="app" \
+      ai.backend.runtime-path="/bin/false" \
+      ai.backend.service-ports="sftpd:preopen:22"
+
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+WORKDIR /home/work

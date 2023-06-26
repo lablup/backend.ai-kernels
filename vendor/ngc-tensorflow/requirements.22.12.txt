@@ -4,8 +4,6 @@ albumentations==1.1.0
 alembic==1.7.5
 ansi2html==1.6.0
 anyio
-#apache-airflow[celery,devel,postgres,redis,s3,ssh]==1.10.6
-#apache-beam==2.34.0
 appdirs==1.4.3
 argo-workflows==3.6.1
 astor==0.8.1
@@ -169,9 +167,6 @@ jupyter-latex-envs==1.4.6
 jupyter-lsp==1.2.0
 jupyter-nbextensions-configurator==0.4.1
 jupyter-packaging==0.9.2
-jupyter-server-mathjax
-jupyter-server-proxy==1.6.0
-jupyter-server
 jupyter-telemetry==0.1.0
 jupyter==1.0.0
 jupyter_bokeh==2.0.4
@@ -180,8 +175,6 @@ jupyterhub-jwtauthenticator==0.1
 jupyterhub-kubespawner==0.16.1
 jupyterhubutils==0.25.0
 jupyterlab-code-formatter==1.4.10
-#jupyterlab-git
-#jupyterlab-github==2.0.0
 jupyterlab-hdf==0.5.1
 jupyterlab-launcher==0.13.1
 jupyterlab-lsp==3.6.0
