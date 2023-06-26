@@ -1,6 +1,6 @@
 FROM nvcr.io/nvidia/pytorch:22.09-py3
 # NVIDIA NGC PyTorch with Python 3.8 (CONDA)
-USER root
+
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
