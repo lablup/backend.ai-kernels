@@ -11,6 +11,7 @@
     "{runtime_path}",
     "-m", "tensorboard.main",
     "--port", "{ports[0]}",
+    "--debugger_port", "6064"
     "--bind_all"
   ],
   "allowed_arguments": [
