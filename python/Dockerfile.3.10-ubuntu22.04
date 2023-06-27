@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/lib/python3.8/dist-packages/torch/lib:/usr/include/x86_64-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/lib/python3.10/dist-packages/torch/lib:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvm/versions/node/v16.19.1/bin:/usr/local/lib/python3.10/dist-packages/torch_tensorrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     LANG=C.UTF-8
 
