@@ -4,18 +4,15 @@
 	"/usr/local/bin/code-server",
 	"--bind-addr", "0.0.0.0",
 	"--port", "{ports[0]}",
-	"--extensions-dir", "/home/work/.local/share/code-server/extensions",
-	"--extra-extensions-dir", "/home/work/.vscode-exts",
-	"--extra-extensions-dir", "/usr/local/share/vscode-extensions"
-	"--extra-extensions-dir", "/etc/backend.ai/vscode-exts"
+	"--extensions-dir", "/home/work/.local/share/code-server/extensions"
     ],
     "allowed_arguments": [
-	"--auth"
+      "--auth"
     ],
     "allowed_envs": [
-	"PASSWORD"
+      "PASSWORD"
     ],
     "default_arguments": {
-	"--auth": "none"
+      "--auth": "none"
     }
 }
