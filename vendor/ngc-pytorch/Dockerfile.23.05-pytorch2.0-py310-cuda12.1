@@ -1,11 +1,11 @@
 FROM nvcr.io/nvidia/pytorch:23.06-py3
-# NVIDIA NGC PyTorch with Python 3.8 
+# NVIDIA NGC PyTorch with Python 3.10 
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/lib/python3.10/dist-packages/torch/lib:/usr/local/lib/python3.8/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.1/include:/usr/local/cuda-11.8/include:/usr/include/x86_64-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/lib/python3.10/dist-packages/torch/lib:/usr/local/lib/python3.10/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.1/include:/usr/local/cuda-11.8/include:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvm/versions/node/v16.19.1/bin:/usr/local/lib/python3.10/dist-packages/torch_tensorrt/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
