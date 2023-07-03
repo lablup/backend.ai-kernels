@@ -1,12 +1,12 @@
-FROM nvcr.io/nvidia/pytorch:23.05-py3
+FROM nvcr.io/nvidia/pytorch:23.06-py3
 # NVIDIA NGC PyTorch with Python 3.8 
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/lib/python3.8/dist-packages/torch/lib:/usr/local/lib/python3.8/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.1/include:/usr/local/cuda-11.8/include:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvm/versions/node/v16.19.1/bin:/usr/local/lib/python3.8/dist-packages/torch_tensorrt/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    LD_LIBRARY_PATH="/usr/local/lib/python3.10/dist-packages/torch/lib:/usr/local/lib/python3.8/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.1/include:/usr/local/cuda-11.8/include:/usr/include/x86_64-linux-gnu" \
+    PATH="/usr/local/nvm/versions/node/v16.19.1/bin:/usr/local/lib/python3.10/dist-packages/torch_tensorrt/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
@@ -66,7 +66,6 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
 	libatlas-base-dev \
 	libavcodec-dev \
 	libavformat-dev \
-#	libavresample-dev \
 	libboost-dev \
 	libboost-filesystem-dev \
 	libboost-system-dev \
@@ -157,7 +156,6 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
 	protobuf-compiler \
 	pv \
 	python-is-python3 \
-#	python-apt \
 	python-xkit \
 	python3-gdal \
 	screen-resolution-extra \
@@ -205,38 +203,12 @@ RUN git clone https://github.com/aristocratos/bashtop.git && \
     cd bashtop && \
     make install
 
-RUN mkdir -p /usr/local/share/vscode/extensions && \
-    curl -fL https://github.com/cdr/code-server/releases/download/v4.13.0/code-server-4.13.0-linux-amd64.tar.gz \
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.14.1/code-server-4.14.1-linux-amd64.tar.gz \
       | tar -C /usr/local/lib -xz && \ 
-    mv /usr/local/lib/code-server-4.13.0-linux-amd64 /usr/local/lib/code-server-4.13.0 && \
-    ln -s /usr/local/lib/code-server-4.13.0/bin/code-server /usr/local/bin/code-server && \
-    code-server --extensions-dir /usr/local/share/vscode/extensions \
-        --install-extension ms-python.python && \
-    code-server --extensions-dir /usr/local/share/vscode/extensions \
-        --install-extension ms-ceintl.vscode-language-pack-ko \
-        --install-extension bierner.emojisense  \
-        --install-extension formulahendry.auto-complete-tag  \
-        --install-extension moshfeu.compare-folders  \
-        --install-extension usernamehw.errorlens  \
-        --install-extension GrapeCity.gc-excelviewer  \
-        --install-extension bierner.markdown-preview-github-styles  \
-        --install-extension eamodio.gitlens  \
-        --install-extension ms-toolsai.jupyter  \
-        --install-extension MS-CEINTL.vscode-language-pack-ko  \
-        --install-extension bierner.lit-html  \
-        --install-extension yzhang.markdown-all-in-one  \
-        --install-extension bierner.markdown-checkbox  \
-        --install-extension bierner.markdown-emoji  \
-        --install-extension bierner.markdown-footnotes  \
-        --install-extension hancel.markdown-image  \
-        --install-extension bierner.markdown-yaml-preamble  \
-        --install-extension christian-kohler.path-intellisense  \
-        --install-extension ms-python.vscode-pylance  \
-        --install-extension sai.datawrangler  \
-        --install-extension Face.huggingface-vscode  \
-        --install-extension tomoki1207.pdf redhat.vscode-yaml 
+    mv /usr/local/lib/code-server-4.14.1-linux-amd64 /usr/local/lib/code-server-4.14.1 && \
+    ln -s /usr/local/lib/code-server-4.14.1/bin/code-server /usr/local/bin/code-server 
 
-COPY ./requirements.23.05.txt /tmp/requirements.txt
+COPY ./requirements.23.06.txt /tmp/requirements.txt
 #RUN for f in $(ls requirements*.txt); do python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done && \
 RUN  python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirem*
@@ -275,7 +247,7 @@ RUN python3 -m pip install --no-cache-dir \
 	jupyterlab-code-formatter==1.3.8 \
 	jupyterlab-hdf \
 	jupyterlab-launcher 
-#	jupyterlab-lsp==2.1.4
+
 RUN python3 -m pip install --no-cache-dir \
 	jupyter-dash \
 	jupyter-js-widgets-nbextension \
@@ -299,7 +271,6 @@ RUN jupyter lab build --dev-build=False --minimize=False && \
     jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-#    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc && \
     jupyter nbextension enable execute_time/ExecuteTime && \
@@ -307,7 +278,7 @@ RUN jupyter lab build --dev-build=False --minimize=False && \
     jupyter labextension install @jupyterlab/toc && \
     jupyter lab build    
 
-Run python3 -m ipykernel install --display-name "PyTorch 2.0 (NGC 23.05/Python 3.10) on Backend.AI" && \
+Run python3 -m ipykernel install --display-name "PyTorch 2.0 (NGC 23.06/Python 3.10) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 RUN apt autoclean && \
