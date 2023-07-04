@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/pytorch:23.06-py3
+FROM nvcr.io/nvidia/pytorch:23.05-py3
 # NVIDIA NGC PyTorch with Python 3.10 
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -208,7 +208,7 @@ RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.14.1/code-s
     mv /usr/local/lib/code-server-4.14.1-linux-amd64 /usr/local/lib/code-server-4.14.1 && \
     ln -s /usr/local/lib/code-server-4.14.1/bin/code-server /usr/local/bin/code-server 
 
-COPY ./requirements.23.06.txt /tmp/requirements.txt
+COPY ./requirements.23.05.txt /tmp/requirements.txt
 #RUN for f in $(ls requirements*.txt); do python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done && \
 RUN  python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt && \
     rm -f /tmp/*.whl /tmp/requirem*
@@ -278,7 +278,7 @@ RUN jupyter lab build --dev-build=False --minimize=False && \
     jupyter labextension install @jupyterlab/toc && \
     jupyter lab build    
 
-Run python3 -m ipykernel install --display-name "PyTorch 2.0 (NGC 23.06/Python 3.10) on Backend.AI" && \
+Run python3 -m ipykernel install --display-name "PyTorch 2.0 (NGC 23.05/Python 3.10) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 RUN apt autoclean && \
