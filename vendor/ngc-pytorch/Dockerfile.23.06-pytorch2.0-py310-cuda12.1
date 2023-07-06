@@ -210,8 +210,7 @@ RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.14.1/code-s
 
 COPY ./requirements.23.06.txt /tmp/requirements.txt
 
-#RUN for f in $(ls requirements*.txt); do python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done && \
-RUN  python3 -m pip uninstall urllib3 && \
+RUN  python3 -m pip uninstall -y urllib3 && \
      python3 -m pip install urllib3==2.0.3 && \
      python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt && \
      rm -f /tmp/*.whl /tmp/requirem*
@@ -285,10 +284,10 @@ RUN python3 -m ipykernel install --display-name "PyTorch 2.1 (NGC 23.06/Python 3
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 WORKDIR /tmp
-RUN git clone -q --branch=0.39.1 \
-      https://github.com/timdettmers/bitsandbytes.git && \
+RUN git clone -q --branch=fix/libcuda-to-torch \
+      https://github.com/rapsealk/bitsandbytes && \
     cd /tmp/bitsandbytes && \
-    CUDA_VERSION=120 make cuda12x && \
+    CUDA_VERSION=121 make cuda12x_nomatmul && \
     python setup.py install
     
 RUN apt autoclean && \
