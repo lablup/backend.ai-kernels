@@ -209,9 +209,12 @@ RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.14.1/code-s
     ln -s /usr/local/lib/code-server-4.14.1/bin/code-server /usr/local/bin/code-server 
 
 COPY ./requirements.23.06.txt /tmp/requirements.txt
+
 #RUN for f in $(ls requirements*.txt); do python3 -m pip install --disable-pip-version-check --no-cache-dir -r $f; done && \
-RUN  python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt && \
-    rm -f /tmp/*.whl /tmp/requirem*
+RUN  python3 -m pip uninstall urllib3 && \
+     python3 -m pip install urllib3==2.0.3 && \
+     python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt && \
+     rm -f /tmp/*.whl /tmp/requirem*
 
 RUN python3 -m pip install --no-cache-dir \
       mpi4py==3.1.3 \
@@ -278,9 +281,16 @@ RUN jupyter lab build --dev-build=False --minimize=False && \
     jupyter labextension install @jupyterlab/toc && \
     jupyter lab build    
 
-Run python3 -m ipykernel install --display-name "PyTorch 2.1 (NGC 23.06/Python 3.10) on Backend.AI" && \
+RUN python3 -m ipykernel install --display-name "PyTorch 2.1 (NGC 23.06/Python 3.10) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
+WORKDIR /tmp
+RUN git clone -q --branch=0.39.1 \
+      https://github.com/timdettmers/bitsandbytes.git && \
+    cd /tmp/bitsandbytes && \
+    CUDA_VERSION=120 make cuda12x && \
+    python setup.py install
+    
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
