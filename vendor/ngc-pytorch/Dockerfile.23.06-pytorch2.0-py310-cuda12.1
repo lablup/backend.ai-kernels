@@ -188,20 +188,17 @@ RUN git clone -q --branch=v0.3.21 https://github.com/xianyi/OpenBLAS.git && \
     cd /tmp && \
     git clone --recursive https://github.com/bodono/scs-python.git  && \
     cd /tmp/scs-python && \
-    python setup.py install --scs --gpu
-
+    python setup.py install --scs --gpu && \
 # install git-lfs
-WORKDIR /tmp
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-amd64-v3.3.0.tar.gz && \
+    cd /tmp && \
+    curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-amd64-v3.3.0.tar.gz && \
     tar -zxf git-lfs-linux-amd64-v3.3.0.tar.gz && \
     cd git-lfs-3.3.0 && \
     bash install.sh && \
-    rm -rf /tmp/*
-
-WORKDIR /tmp
-RUN git clone https://github.com/aristocratos/bashtop.git && \
+    git clone https://github.com/aristocratos/bashtop.git && \
     cd bashtop && \
-    make install
+    make install && \
+    rm -rf /tmp/* 
 
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.14.1/code-server-4.14.1-linux-amd64.tar.gz \
       | tar -C /usr/local/lib -xz && \ 
@@ -213,7 +210,7 @@ COPY ./requirements.23.06.txt /tmp/requirements.txt
 RUN  python3 -m pip uninstall -y urllib3 && \
      python3 -m pip install urllib3==2.0.3 && \
      python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt && \
-     rm -f /tmp/*.whl /tmp/requirem*
+
 
 RUN python3 -m pip install --no-cache-dir \
       mpi4py==3.1.3 \
@@ -224,10 +221,10 @@ RUN python3 -m pip install --no-cache-dir \
 RUN python3 -m pip install pytorch-lightning && \
     python3 -m pip install --no-cache-dir \
         torch-scatter \
-	torch-sparse \
-	torch-cluster \
-	torch-spline-conv \
-	torch-geometric \
+	    torch-sparse \
+	    torch-cluster \
+	    torch-spline-conv \
+	    torch-geometric \
         -f https://pytorch-geometric.com/whl/torch-2.0.0%2Bcu118.html && \
     python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyter_lsp markupsafe==2.0.1 
 
@@ -293,6 +290,7 @@ RUN git clone -q --branch=fix/libcuda-to-torch \
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
+    rm -f /tmp/*.whl /tmp/requirem* && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
