@@ -178,8 +178,7 @@ RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.8.9.2 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 2 
-#    /usr/bin/python3 -m pip install --upgrade pip setuptools
-
+    
 WORKDIR /tmp
 RUN git clone -q --branch=v0.3.21 https://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
@@ -240,7 +239,7 @@ RUN python3 -m pip install --no-cache-dir \
 	jupyter-contrib-core==0.4.2 \
 	jupyter-highlight-selected-word==0.2.0 \
 	jupyter-server==1.24.0 \
-        jupyter_lsp==2.2.0 
+    jupyter_lsp==2.2.0 
 RUN python3 -m pip install --no-cache-dir \
 	jupyterlab==2.3.2 \
 	jupyterlab-code-formatter==1.3.8 \
