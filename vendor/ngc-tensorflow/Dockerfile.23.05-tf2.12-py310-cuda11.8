@@ -70,9 +70,9 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
 	nodejs \
 	pdsh \
 	protobuf-compiler \
-        libsmpeg-dev \
-        openjdk-8-jdk \
-        python3-gdal \
+    libsmpeg-dev \
+    openjdk-8-jdk \
+    python3-gdal \
 	v4l-utils \	
 	x264 
 
@@ -147,33 +147,8 @@ RUN mkdir -p /usr/local/share/vscode/extensions && \
     curl -fL https://github.com/cdr/code-server/releases/download/v4.13.0/code-server-4.13.0-linux-amd64.tar.gz \
       | tar -C /usr/local/lib -xz && \ 
     mv /usr/local/lib/code-server-4.13.0-linux-amd64 /usr/local/lib/code-server-4.13.0 && \
-    ln -s /usr/local/lib/code-server-4.13.0/bin/code-server /usr/local/bin/code-server && \
-    code-server --extensions-dir /usr/local/share/vscode/extensions --install-extension \
-        ms-python.python && \
-    code-server --extensions-dir /usr/local/share/vscode/extensions --install-extension \
-        ms-ceintl.vscode-language-pack-ko \
-        --install-extension bierner.emojisense  \
-        --install-extension formulahendry.auto-complete-tag  \
-        --install-extension moshfeu.compare-folders  \
-        --install-extension usernamehw.errorlens  \
-        --install-extension GrapeCity.gc-excelviewer  \
-        --install-extension bierner.markdown-preview-github-styles  \
-        --install-extension eamodio.gitlens  \
-        --install-extension ms-toolsai.jupyter  \
-        --install-extension MS-CEINTL.vscode-language-pack-ko  \
-        --install-extension bierner.lit-html  \
-        --install-extension yzhang.markdown-all-in-one  \
-        --install-extension bierner.markdown-checkbox  \
-        --install-extension bierner.markdown-emoji  \
-        --install-extension bierner.markdown-footnotes  \
-        --install-extension hancel.markdown-image  \
-        --install-extension bierner.markdown-yaml-preamble  \
-        --install-extension christian-kohler.path-intellisense  \
-        --install-extension ms-python.vscode-pylance  \
-        --install-extension sai.datawrangler  \
-        --install-extension Face.huggingface-vscode  \
-        --install-extension tomoki1207.pdf redhat.vscode-yaml 
-
+    ln -s /usr/local/lib/code-server-4.13.0/bin/code-server /usr/local/bin/code-server 
+    
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
@@ -195,7 +170,7 @@ RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
 RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
 
 RUN python3 -m pip install --no-cache-dir \
-    	mpi4py==3.1.4 \
+    mpi4py==3.1.4 \
 	nni==2.10.1 \
 	mlflow==2.3.2 \
 	opencv-python \
@@ -204,10 +179,10 @@ RUN python3 -m pip install --no-cache-dir \
 # Install Jupyterlab extensions
 RUN python3 -m pip install --no-cache-dir \
         jupyter_nbextensions_configurator==0.6.3 \
-	jupyter_contrib_nbextensions==0.7.0 \
-	jupyter-contrib-core==0.4.2 \
-	jupyter-highlight-selected-word==0.2.0 \
-	jupyter-server==1.24.0 \
+	    jupyter_contrib_nbextensions==0.7.0 \
+	    jupyter-contrib-core==0.4.2 \
+	    jupyter-highlight-selected-word==0.2.0 \
+	    jupyter-server==1.24.0 \
         jupyter_lsp==2.2.0 
 RUN python3 -m pip install --no-cache-dir \
 	jupyterlab==2.3.2 \
