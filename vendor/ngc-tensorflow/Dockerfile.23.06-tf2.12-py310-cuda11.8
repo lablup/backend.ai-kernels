@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/cuda/compat/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/nvidia/lib64:/usr/include/x86_64-linux-gnu" \
-    PATH="/usr/local/nvm/versions/node/v16.15.1/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
+    PATH="/usr/local/nvm/versions/node/v16.20.0/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin:/usr/local/src/lightgbm/LightGBM:/usr/local/bin/mecab" \
     mecab_dicdir=/usr/local/lib/mecab/dic/mecab-ko-dic \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
@@ -86,8 +86,8 @@ RUN mkdir -p /opt/oracle && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
-    python3 -m pip install -U "pip < 22" "setuptools<=65.5.1" wheel
+#RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
+#    python3 -m pip install -U "pip < 22" "setuptools<=65.5.1" wheel
 
 # install NLP packages *mecab-ko & khai*
 WORKDIR /tmp
@@ -114,7 +114,7 @@ RUN curl -LO https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9
     python3 -m pip install /tmp/mecab-python-0.996
 
 WORKDIR /tmp
-RUN git clone -q --branch=v0.3.20 https://github.com/xianyi/OpenBLAS.git && \
+RUN git clone -q --branch=v0.3.23 https://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
     make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
     make install
@@ -137,24 +137,24 @@ RUN git clone https://github.com/aristocratos/bashtop.git && \
 
 # install git-lfs
 WORKDIR /tmp
-RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.2.0/git-lfs-linux-amd64-v3.2.0.tar.gz && \
-    tar -zxf git-lfs-linux-amd64-v3.2.0.tar.gz && \
-    cd git-lfs-3.2.0 && \
+RUN curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.4.0/git-lfs-linux-amd64-v3.4.0.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v3.4.0.tar.gz && \
+    cd git-lfs-3.4.0 && \
     bash install.sh && \
     rm -rf /tmp/*
 
 RUN mkdir -p /usr/local/share/vscode/extensions && \
-    curl -fL https://github.com/cdr/code-server/releases/download/v4.13.0/code-server-4.13.0-linux-amd64.tar.gz \
+    curl -fL https://github.com/cdr/code-server/releases/download/v4.16.1/code-server-4.16.1-linux-amd64.tar.gz \
       | tar -C /usr/local/lib -xz && \ 
-    mv /usr/local/lib/code-server-4.13.0-linux-amd64 /usr/local/lib/code-server-4.13.0 && \
-    ln -s /usr/local/lib/code-server-4.13.0/bin/code-server /usr/local/bin/code-server 
+    mv /usr/local/lib/code-server-4.16.1-linux-amd64 /usr/local/lib/code-server-4.16.0 && \
+    ln -s /usr/local/lib/code-server-4.16.1/bin/code-server /usr/local/bin/code-server 
     
 # Install Open MPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
-    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.gz && \
-    tar zxf openmpi-4.1.4.tar.gz && \
-    cd openmpi-4.1.4 && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz && \
+    tar zxf openmpi-4.1.5.tar.gz && \
+    cd openmpi-4.1.5 && \
     ./configure --enable-orterun-prefix-by-default && \
     make -j $(nproc) all && \
     make install && \
