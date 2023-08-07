@@ -249,7 +249,7 @@ pylint==2.8.3
 pyls-black==0.4.4
 pymongo==3.10.1
 pynput==1.7.3
-pyproj==2.5.0
+pyproj==3.6.0
 pyqt5==5.15.0
 pyshp
 pystan==3.3.0 
