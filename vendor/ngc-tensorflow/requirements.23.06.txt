@@ -211,7 +211,7 @@ pamela==1.0.0
 pandasgui==0.2.7
 path==16.2.0
 pathspec==0.7.0
-patsy==0.5.1
+patsy>=0.5.1
 pbr==5.5.0
 plaidml==0.7.0
 plotly==4.5.3
