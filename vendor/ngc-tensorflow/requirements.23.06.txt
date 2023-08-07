@@ -243,7 +243,7 @@ pydotplus==2.0.2
 pyerfa==1.7.3
 pyflakes==2.1.1
 pygal==2.4.0
-pygame==2.0.1
+pygame==2.5.0
 pyglet==1.5.0
 pylint==2.8.3
 pyls-black==0.4.4
