@@ -230,7 +230,7 @@ pyQt5==5.15.0
 pyQtWebEngine==5.15.2
 pySocks==1.7.1
 pyVirtualDisplay==1.3.2
-pyWavelets==1.1.1
+pyWavelets>=1.1.1
 pyaml==19.12.0
 pyarrow==12.0.1
 pycairo==1.20.1 
