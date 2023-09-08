@@ -89,14 +89,14 @@ google-api-core==1.23.0
 google-api-core[grpc]==1.23.0
 google-api-python-client==1.12.8
 google-apitools==0.5.31
-google-auth==2.21.0
+#google-auth>=2.21.0
 google-auth-httplib2==0.0.3
 google-cloud-bigquery==1.28.0
 google-cloud-bigtable==1.2.1
-google-cloud-core==1.5.0
-google-cloud-datastore==1.15.3
+google-cloud-core>=1.5.0
+google-cloud-datastore>=1.15.3
 google-cloud-dlp==1.0.0
-google-cloud-language==1.3.0
+google-cloud-language>=1.3.0
 google-cloud-pubsub==1.7.0
 google-cloud-spanner==1.19.1
 google-cloud-videointelligence==1.16.1
@@ -154,7 +154,7 @@ jupyter_bokeh==2.0.4
 jupyterhub==2.2.2
 jupyterhub-jwtauthenticator==0.1
 jupyterhub-kubespawner==0.16.1
-jupyterhubutils==0.25.0
+#jupyterhubutils==0.25.0
 jupyterlab-code-formatter==1.4.10
 jupyterlab-hdf==0.5.1
 jupyterlab-launcher==0.13.1
