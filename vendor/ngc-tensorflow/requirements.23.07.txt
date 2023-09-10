@@ -21,7 +21,7 @@ boto3==1.17.112
 botocore==1.20.112
 branca==0.4.0
 brotli==1.0.9
-cachetools==5.3.1
+#cachetools==5.3.1
 catboost
 category-encoders==2.0.0
 chardet==3.0.4
