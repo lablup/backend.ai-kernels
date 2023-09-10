@@ -112,7 +112,7 @@ RUN git clone -q --branch=v0.3.23 https://github.com/xianyi/OpenBLAS.git && \
 
 WORKDIR /tmp
 COPY ./requirements.23.08.txt /tmp/requirements.txt
-RUN python3 -m pip uninstall -y markupsafe && \
+RUN python3 -m pip uninstall -y markupsafe google-auth-oauthlib && \
 	python3 -m pip install markupsafe==2.0.1 &&\
 	python3 -m pip install jsonschema[format,format-nongpl]==4.17.3 
 RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
@@ -152,7 +152,7 @@ RUN python3 -m pip install --no-cache-dir \
 	jupyter-contrib-core==0.4.2 \
 	jupyter-highlight-selected-word==0.2.0 \
 	jupyter-server==1.24.0 \
-        jupyter_lsp==2.2.0 
+        jupyter_lsp>=2.2.0 
 RUN python3 -m pip install --no-cache-dir \
 	jupyterlab==2.3.2 \
 	jupyterlab-code-formatter==1.3.8 \
