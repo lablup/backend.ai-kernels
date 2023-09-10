@@ -86,8 +86,8 @@ RUN mkdir -p /opt/oracle && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig
 
-#RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
-#    python3 -m pip install -U "pip < 22" "setuptools<=65.5.1" wheel
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
+    python3 -m pip install -U "pip < 22" "setuptools<=65.5.1" wheel
 
 # install NLP packages *mecab-ko & khai*
 WORKDIR /tmp
