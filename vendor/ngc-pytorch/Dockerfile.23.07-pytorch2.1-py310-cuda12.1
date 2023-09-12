@@ -275,8 +275,7 @@ RUN python3 -m ipykernel install --display-name "PyTorch 2.1 (NGC 23.07/Python 3
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
 
 WORKDIR /tmp
-RUN git clone -q --branch=fix/libcuda-to-torch \
-      https://github.com/rapsealk/bitsandbytes && \
+RUN git clone -q https://github.com/TimDettmers/bitsandbytes.git && \
     cd /tmp/bitsandbytes && \
     CUDA_VERSION=121 make cuda12x_nomatmul && \
     python setup.py install
