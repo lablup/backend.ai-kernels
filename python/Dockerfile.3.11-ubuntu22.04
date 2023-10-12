@@ -84,7 +84,8 @@ RUN cd /tmp && \
     curl -sLO "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${tarArch}-v${GIT_LFS_VERSION}.tar.gz" && \
     tar -zxf "git-lfs-linux-${tarArch}-v${GIT_LFS_VERSION}.tar.gz" && \
     cd /tmp/git-lfs-${GIT_LFS_VERSION} && \
-    bash install.sh
+    bash install.sh \
+    rm -rf /tmp/git-lfs-${GIT_LFS_VERSION}
 
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
@@ -116,7 +117,8 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     curl -fL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}.tar.gz" \
       | tar -C /usr/local/lib -xz && \ 
     mv "/usr/local/lib/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}" /usr/local/lib/code-server-${CODE_SERVER_VERSION} && \
-    ln -s /usr/local/lib/code-server-${CODE_SERVER_VERSION}/bin/code-server /usr/local/bin/code-server
+    ln -s /usr/local/lib/code-server-${CODE_SERVER_VERSION}/bin/code-server /usr/local/bin/code-server \ 
+    rm -rf code-server-${CODE_SERVER_VERSION}-linux-${tarArch}.tar.gz
 
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "Python ${PYTHON_MAJOR_VERSION} on Backend.AI" && \
