@@ -2,16 +2,18 @@
 FROM ubuntu:22.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
+ARG CODE_SERVER_VERSION=4.17.1 \
+    GIT_LFS_VERSION=3.4.0 \ 
+    PYTHON_MAJOR_VERSION=3.11 \
+    NODEJS_VERSION=18.18.1
+
 ENV DEBIAN_FRONTEND=noninteractive \
     XDG_DATA_HOME=/home/work/.local/share \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
-    PATH="/usr/local/nvm/versions/node/v16.19.1/bin:/usr/local/lib/python3.11/dist-packages/torch_tensorrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     LANG=C.UTF-8 \
-    CODE_SERVER_VERSION=4.17.1 \
-    GIT_LFS_VERSION=3.4.0 \ 
-    PYTHON_MAJOR_VERSION=3.11
+    PATH="/usr/local/nvm/versions/node/v18.18.1/bin:/usr/local/lib/python3.11/dist-packages/torch_tensorrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 WORKDIR /tmp
 RUN dpkgArch="$(dpkg --print-architecture)"; \
@@ -22,7 +24,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         i386) tarArch='i686'; dirArch='x86';; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
-    LD_LIBRARY_PATH="/usr/local/lib/python3.11/dist-packages/torch/lib:/usr/include/${dirArch}-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/lib/python${PYTHON_MAJOR_VERSION}/dist-packages/torch/lib:/usr/include/${dirArch}-linux-gnu" \
     apt-get update -y && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
@@ -50,16 +52,17 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
 	openssh-client \
 	openssh-server \
 	pkg-config \
-	python3.11 \
-	python3.11-dev \
-	python3.11-distutils \
+	python${PYTHON_MAJOR_VERSION} \
+	python${PYTHON_MAJOR_VERSION}-dev \
+	python${PYTHON_MAJOR_VERSION}-distutils \
 	python3-tk \
 	unzip \
 	vim \
 	wget \
+    htop \
 	libcupti-dev && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.11 2 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 2 && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_MAJOR_VERSION} 2 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_MAJOR_VERSION} 2 && \
     git clone https://github.com/aristocratos/bashtop.git /tmp/bashtop && \
     cd /tmp/bashtop && \
     make install && \
@@ -108,13 +111,13 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
     \
-    curl -fL "https://github.com/cdr/code-server/releases/download/v4.17.1/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}.tar.gz" \
+    curl -fL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}.tar.gz" \
       | tar -C /usr/local/lib -xz && \ 
     mv "/usr/local/lib/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}" /usr/local/lib/code-server-${CODE_SERVER_VERSION} && \
     ln -s /usr/local/lib/code-server-${CODE_SERVER_VERSION}/bin/code-server /usr/local/bin/code-server
 
 # Install ipython kernelspec
-RUN python3 -m ipykernel install --display-name "Python 3.11 on Backend.AI" && \
+RUN python3 -m ipykernel install --display-name "Python ${PYTHON_MAJOR_VERSION} on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json 
 
 # Backend.AI specifics
