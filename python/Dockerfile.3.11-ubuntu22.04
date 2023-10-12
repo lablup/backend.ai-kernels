@@ -74,9 +74,9 @@ RUN cd /tmp && \
     esac; \
     \
     curl -sLO "https://github.com/git-lfs/git-lfs/releases/download/v3.4.0/git-lfs-linux-${tarArch}-v3.4.0.tar.gz" && \
-    tar -zxf git-lfs-linux-amd64-v3.4.0.tar.gz && \
+    tar -zxf "git-lfs-linux-${tarArch}-v3.4.0.tar.gz" && \
     cd /tmp/git-lfs-3.4.0 && \
-    bash install.sh && \
+    bash install.sh
 
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
