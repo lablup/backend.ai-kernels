@@ -107,7 +107,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     \
     curl -fL "https://github.com/cdr/code-server/releases/download/v4.17.1/code-server-4.17.1-linux-${tarArch}.tar.gz" \
       | tar -C /usr/local/lib -xz && \ 
-    mv /usr/local/lib/code-server-4.17.1-linux-amd64 /usr/local/lib/code-server-4.17.1 && \
+    mv "/usr/local/lib/code-server-4.17.1-linux-${tarArch}" /usr/local/lib/code-server-4.17.1 && \
     ln -s /usr/local/lib/code-server-4.17.1/bin/code-server /usr/local/bin/code-server
 
 # Install ipython kernelspec
