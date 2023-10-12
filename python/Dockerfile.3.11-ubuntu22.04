@@ -8,7 +8,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
     PATH="/usr/local/nvm/versions/node/v16.19.1/bin:/usr/local/lib/python3.11/dist-packages/torch_tensorrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
-    LANG=C.UTF-8
+    LANG=C.UTF-8 \
+    CODE_SERVER_VERSION=4.17.1 \
+    GIT_LFS_VERSION=3.4.0 \ 
+    PYTHON_MAJOR_VERSION=3.11
 
 WORKDIR /tmp
 RUN dpkgArch="$(dpkg --print-architecture)"; \
@@ -73,9 +76,9 @@ RUN cd /tmp && \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
     \
-    curl -sLO "https://github.com/git-lfs/git-lfs/releases/download/v3.4.0/git-lfs-linux-${tarArch}-v3.4.0.tar.gz" && \
-    tar -zxf "git-lfs-linux-${tarArch}-v3.4.0.tar.gz" && \
-    cd /tmp/git-lfs-3.4.0 && \
+    curl -sLO "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${tarArch}-v${GIT_LFS_VERSION}.tar.gz" && \
+    tar -zxf "git-lfs-linux-${tarArch}-v${GIT_LFS_VERSION}.tar.gz" && \
+    cd /tmp/git-lfs-${GIT_LFS_VERSION} && \
     bash install.sh
 
 WORKDIR /tmp
@@ -105,10 +108,10 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
     \
-    curl -fL "https://github.com/cdr/code-server/releases/download/v4.17.1/code-server-4.17.1-linux-${tarArch}.tar.gz" \
+    curl -fL "https://github.com/cdr/code-server/releases/download/v4.17.1/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}.tar.gz" \
       | tar -C /usr/local/lib -xz && \ 
-    mv "/usr/local/lib/code-server-4.17.1-linux-${tarArch}" /usr/local/lib/code-server-4.17.1 && \
-    ln -s /usr/local/lib/code-server-4.17.1/bin/code-server /usr/local/bin/code-server
+    mv "/usr/local/lib/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}" /usr/local/lib/code-server-${CODE_SERVER_VERSION} && \
+    ln -s /usr/local/lib/code-server-${CODE_SERVER_VERSION}/bin/code-server /usr/local/bin/code-server
 
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "Python 3.11 on Backend.AI" && \
