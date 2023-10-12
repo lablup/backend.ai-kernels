@@ -23,12 +23,9 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         i386) tarArch='i686'; dirArch='x86';; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
-    LD_LIBRARY_PATH="/usr/local/lib/python${PYTHON_MAJOR_VERSION}/dist-packages/torch/lib:/usr/include/${dirArch}-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/include/${dirArch}-linux-gnu" \
     apt-get update -y && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
     curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get update && \
     apt-get install -y  && \
     apt-get -y install --no-install-recommends \
     apt-utils \
@@ -51,21 +48,13 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
 	openssh-client \
 	openssh-server \
 	pkg-config \
-	python${PYTHON_MAJOR_VERSION} \
-	python${PYTHON_MAJOR_VERSION}-dev \
-	python${PYTHON_MAJOR_VERSION}-distutils \
-	python3-tk \
 	unzip \
 	vim \
 	wget \
     htop \
     sudo \
+    bashtop \
 	libcupti-dev && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_MAJOR_VERSION} 2 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_MAJOR_VERSION} 2 && \
-    git clone https://github.com/aristocratos/bashtop.git /tmp/bashtop && \
-    cd /tmp/bashtop && \
-    make install && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
@@ -86,6 +75,29 @@ RUN cd /tmp && \
     cd /tmp/git-lfs-${GIT_LFS_VERSION} && \
     bash install.sh \
     rm -rf /tmp/git-lfs-${GIT_LFS_VERSION}
+
+# Install Python
+RUN dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        amd64) tarArch='amd64'; dirArch='x86_64';; \
+        armhf) tarArch='arm'; dirArch='arm';; \
+        arm64) tarArch='arm64'; dirArch='aarch64';; \
+        i386) tarArch='i686'; dirArch='x86';; \
+        *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
+    esac; \
+    LD_LIBRARY_PATH="/usr/local/lib/python${PYTHON_MAJOR_VERSION}/dist-packages/torch/lib:/usr/include/${dirArch}-linux-gnu" \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update -y && \
+    apt-get install -y && \
+    apt-get -y install --no-install-recommends \
+	python${PYTHON_MAJOR_VERSION} \
+	python${PYTHON_MAJOR_VERSION}-dev \
+	python${PYTHON_MAJOR_VERSION}-distutils \
+	python3-tk && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_MAJOR_VERSION} 2 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_MAJOR_VERSION} 2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/
 
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
