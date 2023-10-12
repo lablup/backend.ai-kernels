@@ -7,12 +7,20 @@ ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/lib/python3.11/dist-packages/torch/lib:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/nvm/versions/node/v16.19.1/bin:/usr/local/lib/python3.11/dist-packages/torch_tensorrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     LANG=C.UTF-8
 
 WORKDIR /tmp
-RUN apt-get update -y && \
+RUN dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        amd64) tarArch='amd64'; dirArch='x86_64';; \
+        armhf) tarArch='arm'; dirArch='arm';; \
+        arm64) tarArch='arm64'; dirArch='aarch64';; \
+        i386) tarArch='i686'; dirArch='x86';; \
+        *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
+    esac; \
+    LD_LIBRARY_PATH="/usr/local/lib/python3.11/dist-packages/torch/lib:/usr/include/${dirArch}-linux-gnu" \
+    apt-get update -y && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
     curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
@@ -52,13 +60,23 @@ RUN apt-get update -y && \
     git clone https://github.com/aristocratos/bashtop.git /tmp/bashtop && \
     cd /tmp/bashtop && \
     make install && \
-# install git-lfs
-    cd /tmp && \
-    curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-amd64-v3.3.0.tar.gz && \
-    tar -zxf git-lfs-linux-amd64-v3.3.0.tar.gz && \
-    cd /tmp/git-lfs-3.3.0 && \
-    bash install.sh && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color 
+
+# install git-lfs
+RUN cd /tmp && \
+    dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        amd64) tarArch='amd64'; dirArch='x64';; \
+        armhf) tarArch='arm'; dirArch='arm';; \
+        arm64) tarArch='arm64'; dirArch='aarch64';; \
+        i386) tarArch='i686'; dirArch='x86';; \
+        *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
+    esac; \
+    \
+    curl -sLO "https://github.com/git-lfs/git-lfs/releases/download/v3.4.0/git-lfs-linux-${tarArch}-v3.4.0.tar.gz" && \
+    tar -zxf git-lfs-linux-amd64-v3.4.0.tar.gz && \
+    cd /tmp/git-lfs-3.4.0 && \
+    bash install.sh && \
 
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
@@ -78,10 +96,19 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir jupyter && \
     python3 -m pip install --no-cache-dir jupyterlab 
 
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.14.0/code-server-4.14.0-linux-amd64.tar.gz \
+RUN dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        amd64) tarArch='amd64'; dirArch='x64';; \
+        armhf) tarArch='arm'; dirArch='arm';; \
+        arm64) tarArch='arm64'; dirArch='aarch64';; \
+        i386) tarArch='i686'; dirArch='x86';; \
+        *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
+    esac; \
+    \
+    curl -fL "https://github.com/cdr/code-server/releases/download/v4.17.1/code-server-4.17.1-linux-${tarArch}.tar.gz" \
       | tar -C /usr/local/lib -xz && \ 
-    mv /usr/local/lib/code-server-4.14.0-linux-amd64 /usr/local/lib/code-server-4.14.0 && \
-    ln -s /usr/local/lib/code-server-4.14.0/bin/code-server /usr/local/bin/code-server
+    mv /usr/local/lib/code-server-4.17.1-linux-amd64 /usr/local/lib/code-server-4.17.1 && \
+    ln -s /usr/local/lib/code-server-4.17.1/bin/code-server /usr/local/bin/code-server
 
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "Python 3.11 on Backend.AI" && \
