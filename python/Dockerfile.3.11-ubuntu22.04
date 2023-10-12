@@ -1,6 +1,5 @@
 # python3.11 based on Ubuntu22.04
 FROM ubuntu:22.04
-MAINTAINER Mario Cho "m.cho@lablup.com"
 
 ARG CODE_SERVER_VERSION=4.17.1 \
     GIT_LFS_VERSION=3.4.0 \ 
@@ -13,7 +12,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
     LANG=C.UTF-8 \
-    PATH="/usr/local/nvm/versions/node/v18.18.1/bin:/usr/local/lib/python3.11/dist-packages/torch_tensorrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 WORKDIR /tmp
 RUN dpkgArch="$(dpkg --print-architecture)"; \
@@ -60,13 +59,16 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
 	vim \
 	wget \
     htop \
+    sudo \
 	libcupti-dev && \
     update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_MAJOR_VERSION} 2 && \
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_MAJOR_VERSION} 2 && \
     git clone https://github.com/aristocratos/bashtop.git /tmp/bashtop && \
     cd /tmp/bashtop && \
     make install && \
-    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color 
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/
 
 # install git-lfs
 RUN cd /tmp && \
