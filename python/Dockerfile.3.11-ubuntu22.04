@@ -25,6 +25,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     esac; \
     LD_LIBRARY_PATH="/usr/include/${dirArch}-linux-gnu" \
     apt-get update -y && \
+    apt-get install -y software-properties-common && \
     curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y  && \
     apt-get -y install --no-install-recommends \
