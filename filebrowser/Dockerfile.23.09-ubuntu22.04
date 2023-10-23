@@ -1,5 +1,4 @@
 FROM ubuntu:22.04
-ARG TARGETPLATFORM
 ENV PYTHONUNBUFFERED=1 \
     PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     LANG=C.UTF-8
@@ -12,7 +11,16 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/ && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     mkdir -p /etc/filebrowser && \
-    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCHITECTURE=amd64; elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then ARCHITECTURE=arm; elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then ARCHITECTURE=aarch64; else ARCHITECTURE=amd64; fi && \
+    dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        amd64) ARCHITECTURE='amd64';; \
+        armhf) ARCHITECTURE='arm';; \
+        arm64) ARCHITECTURE='aarch64';; \
+        i386)  ARCHITECTURE='x86';; \
+        darwin) ARCHITECTURE='darwin';; \
+        *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
+    esac; \
+    \
     cp "/tmp/filebrowser_${ARCHITECTURE}.bin" /usr/bin/filebrowser
 
 COPY filebrowser.db /etc/filebrowser/filebrowser.db
