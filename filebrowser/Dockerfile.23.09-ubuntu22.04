@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN apt-get update && \
     apt-get install -y \
-        ncurses-term curl && \
+        ncurses-term curl rsync && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/ && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
@@ -25,7 +25,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     esac; \
     \
     curl -fL "https://github.com/filebrowser/filebrowser/releases/download/v${FILEBROWSER_VERSION}/linux-${ARCHITECTURE}-filebrowser.tar.gz" \
-      | tar -C /etc/filebrowser -xz && \ 
+      | tar -C /etc/filebrowser -xz && \
     cp /etc/filebrowser/filebrowser /usr/bin/filebrowser
 
 COPY filebrowser.db /etc/filebrowser/filebrowser.db
