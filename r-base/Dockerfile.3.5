@@ -37,6 +37,7 @@ RUN Rscript -e "install.packages('IRkernel')" && \
     mv /root/.local/share/jupyter/kernels/ir /usr/local/share/jupyter/kernels && \
     rm -rf /root/.local/share/jupyter
 
+COPY policy.yml /etc/backend.ai/jail/policy.yml
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
@@ -46,4 +47,4 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-type="r" \
       ai.backend.runtime-path="/usr/bin/python3" \
       ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090"
-COPY policy.yml /etc/backend.ai/jail/policy.yml
+
