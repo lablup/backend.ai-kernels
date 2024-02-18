@@ -45,6 +45,7 @@ Here we list the latest versions of our supported kernel images.
 | All-in-one Environment  | `lablup/python-ff`         | 21.03   | O     | O\*   | O          |     |                   |
 | All-in-one Environment  | `lablup/python-ff`         | 21.08   | O     | O\*   | O          |     |                   |
 | All-in-one Environment  | `lablup/python-ff`         | 21.09   | O     | O\*   | O          |     |                   |
+| All-in-one Environment  | `lablup/python-ff`         | 22.02   | O     | O\*   | O          |     |                   |
 
 ### Warrented Images (NGC, Nvidia GPU Cloud)
 | Deep-Learning Framework | Image Name              | Version       | Batch | Query | Input Hook | TTY | Runtime Impl.     |
