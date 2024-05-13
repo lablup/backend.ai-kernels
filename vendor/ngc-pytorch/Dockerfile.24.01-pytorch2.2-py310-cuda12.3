@@ -183,10 +183,10 @@ RUN git clone -q --branch=v0.3.25 https://github.com/xianyi/OpenBLAS.git && \
     make install && \
     rm -rf /tmp/* 
 
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.19.1/code-server-4.19.1-linux-amd64.tar.gz \
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v4.89.0/code-server-4.89.0-linux-amd64.tar.gz \
       | tar -C /usr/local/lib -xz && \ 
-    mv /usr/local/lib/code-server-4.19.1-linux-amd64 /usr/local/lib/code-server-4.19.1 && \
-    ln -s /usr/local/lib/code-server-4.19.1/bin/code-server /usr/local/bin/code-server 
+    mv /usr/local/lib/code-server-4.89.0-linux-amd64 /usr/local/lib/code-server-4.89.0 && \
+    ln -s /usr/local/lib/code-server-4.89.0/bin/code-server /usr/local/bin/code-server 
 
 
 COPY ./requirements.24.01.txt /tmp/requirements.txt
@@ -202,12 +202,12 @@ RUN python3 -m pip install --no-cache-dir \
 
 RUN python3 -m pip install pytorch-lightning && \
     python3 -m pip install --no-cache-dir \
-        torch-scatter \
+            torch-scatter \
 	    torch-sparse \
 	    torch-cluster \
 	    torch-spline-conv \
 	    torch-geometric \
-        -f https://pytorch-geometric.com/whl/torch-2.0.1%2Bcu118.html 
+        -f https://pytorch-geometric.com/whl/torch-2.2.0%2Bcu121.html
 
 # Install Jupyterlab extensions
 RUN python3 -m pip uninstall -y markupsafe && \
@@ -255,9 +255,6 @@ RUN python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyt
     jupyter labextension install @jupyterlab/toc && \
     jupyter lab build    
 
-RUN python3 -m ipykernel install --display-name "PyTorch 2.2 (NGC 23.11/Python 3.10) on Backend.AI" && \
-    cat /usr/local/share/jupyter/kernels/python3/kernel.json
-
 WORKDIR /tmp
 RUN git clone -q https://github.com/TimDettmers/bitsandbytes.git && \
     cd /tmp/bitsandbytes && \
@@ -272,6 +269,10 @@ RUN apt autoclean && \
     rm -rf /root/.cache && \
     rm -rf /tmp/*
     
+# Install ipython kernelspec
+RUN /usr/bin/python3 -m ipykernel install --display-name "Python 3.10 (NGC 24.01 / PyTorch 2.2) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
 # Backend.AI specifics
 COPY ./service-defs /etc/backend.ai/service-defs
 COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
