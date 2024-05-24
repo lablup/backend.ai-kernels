@@ -206,8 +206,8 @@ RUN python3 -m pip install pytorch-lightning && \
 	    torch-sparse \
 	    torch-cluster \
 	    torch-spline-conv \
-	    torch-geometric \
-        -f https://pytorch-geometric.com/whl/torch-2.2.0%2Bcu121.html
+	    torch-geometric 
+
 
 # Install Jupyterlab extensions
 RUN python3 -m pip uninstall -y markupsafe && \
