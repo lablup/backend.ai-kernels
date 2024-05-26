@@ -202,14 +202,6 @@ RUN python3 -m pip install --no-cache-dir \
       scikit-nni>=0.2.1
 
 RUN python3 -m pip install pytorch-lightning 
-RUN python3 -m pip install --no-cache-dir \
-	    pyg_lib \
-	    torch_scatter \
-	    torch_sparse \
-	    torch_cluster \
-	    torch_spline_conv
-	    torch-geometric \
-        -f https://data.pyg.org/whl/torch-2.3.0+cu121.html
 
 # Install Jupyterlab extensions
 RUN python3 -m pip uninstall -y markupsafe && \
@@ -263,7 +255,16 @@ RUN git clone -q https://github.com/TimDettmers/bitsandbytes.git && \
     cd /tmp/bitsandbytes && \
     cmake -B build -DBUILD_CUDA=ON -S . && \
     python setup.py install
-    
+
+RUN python3 -m pip install --no-cache-dir \
+	    torch_scatter \
+	    torch_sparse \
+	    torch_cluster \
+	    torch_spline_conv \
+	    torch_geometric 
+#	    pyg_lib \
+#        -f https://data.pyg.org/whl/torch-2.3.0+cu121.html
+
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
