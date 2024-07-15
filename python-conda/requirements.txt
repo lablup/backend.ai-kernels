@@ -306,7 +306,7 @@ versioneer==0.18
 vtk==9.0.1
 wcwidth==0.1.8
 webencodings==0.5.1
-Werkzeug==1.0.0
+Werkzeug==2.2.3
 widgetsnbextension==3.5.1
 wrapt==1.11.2
 yapf==0.29.0
