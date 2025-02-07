@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.6:/usr/local/cuda-12.6/include:/usr/include/x86_64-linux-gnu" \
+    LD_LIBRARY_PATH="/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.6:/usr/local/cuda-12.6/include:/usr/include/x86_64-linux-gnu:/opt/hpcx/ucc/lib" \
     PATH="/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin" \
     BNB_CUDA_VERSION=126 \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
@@ -16,8 +16,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 #RUN apt remove libappstream3
 #
 RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
 	automake \
 	bison \
 	build-essential \
@@ -124,7 +124,7 @@ RUN apt-get update && \
 	mercurial \
 	media-types \
 	mailcap \
-	mpich \
+#	mpich \
 	ncurses-term \
 	net-tools \
 	openjdk-11-jdk \
@@ -156,9 +156,8 @@ RUN apt-get update && \
 	yasm \
 	zip \
 	tcl \
-	udev \
-	&& \
-    mkdir -p /opt/oracle && \
+	udev
+RUN mkdir -p /opt/oracle && \
     cd /opt/oracle && \
     wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
     unzip instantclient-basiclite-linuxx64.zip && \
@@ -198,9 +197,17 @@ RUN curl -fL https://github.com/cdr/code-server/releases/download/v$CODESERVER/c
     mv /usr/local/lib/code-server-$CODESERVER-linux-amd64 /usr/local/lib/code-server-$CODESERVER && \
     ln -s /usr/local/lib/code-server-$CODESERVER/bin/code-server /usr/local/bin/code-server 
 
+# remove hwloc-like packages (ImportError: /opt/hpcx/ucc/lib/libucc.so.1: undefined symbol issue)
+RUN apt-get purge -y hwloc-nox libhwloc-plugins
+# install kss (temporary, when kss package's pyyaml version is updated, move to requirements.txt)
+WORKDIR /tmp
 RUN python3 -m pip install --upgrade pip setuptools wheel Cython
-RUN python3 -m pip install --no-cache-dir PyYAML==6.0.2
-RUN python3 -m pip install --no-deps kss
+RUN cd /tmp && git clone https://github.com/hyunwoongko/kss.git && \
+    cd kss && \
+    sed -i 's/pyyaml==6.0/pyyaml>=6.0.2/' setup.py && \
+    pip install . && \
+    rm -rf /tmp/*
+
 COPY ./requirements.24.12.txt /tmp/requirements.txt
 RUN python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt 
 RUN python3 -m pip install datasets==3.0.1 multiprocess==0.70.16
