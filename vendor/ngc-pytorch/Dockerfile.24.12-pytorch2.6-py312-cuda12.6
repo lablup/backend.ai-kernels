@@ -157,7 +157,6 @@ RUN apt-get install -y --no-install-recommends \
 	zip \
 	tcl \
 	udev
-RUN ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color
 RUN mkdir -p /opt/oracle && \
     cd /opt/oracle && \
     wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
@@ -303,6 +302,7 @@ RUN python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyt
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     rm -f /tmp/*.whl /tmp/requirem* && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
