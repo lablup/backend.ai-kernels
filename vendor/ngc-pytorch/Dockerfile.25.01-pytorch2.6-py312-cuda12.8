@@ -6,9 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
     PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH="/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.8:/usr/local/cuda-12.8/include:/usr/include/x86_64-linux-gnu:/opt/hpcx/ucc/lib" \
+    LD_LIBRARY_PATH="/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.8:/usr/local/cuda-12.8/include:/usr/include/x86_64-linux-gnu:/opt/hpcx/ucc/lib:/usr/local/cuda/lib64:$LD_LIBRARY_PATH" \
     PATH="/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin" \
-    BNB_CUDA_VERSION=128 \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
     LANG=C.UTF-8
@@ -228,9 +227,10 @@ RUN python3 -m pip install pytorch-lightning && \
 
 
 WORKDIR /tmp
-RUN git clone -q https://github.com/TimDettmers/bitsandbytes.git && \
+RUN git clone --recursive  -q https://github.com/bitsandbytes-foundation/bitsandbytes.git && \
     cd /tmp/bitsandbytes && \
-    cmake -B build -DBUILD_CUDA=ON -S . && \
+    cmake -DCOMPUTE_BACKEND=cuda -S . && \
+	CUDA_HOME=/usr/local/cuda-12.8 CUDA_VERSION=128 make && \
     python setup.py install
     
 # Install ipython kernelspec
