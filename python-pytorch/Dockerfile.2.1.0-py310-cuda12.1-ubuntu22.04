@@ -1,0 +1,85 @@
+FROM cr.backend.ai/internal/common-base:py310-cuda12.1-ubuntu22.04 
+#FROM lablup/common-base:py39-cuda11.1
+
+# Install PyTorch
+ENV PYTORCH_VERSION=2.1.0
+ENV CUDA_HOME=/usr/local/cuda
+
+RUN python3 -m pip uninstall -y torch && \
+    python3 -m pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cu121 \ 
+    torch==${PYTORCH_VERSION}+cu121 \
+    torchvision \
+    torchaudio \
+    torchserve \
+    torchtext  \
+    jsonargparse \
+    torchmetrics \
+    pyDeprecate \
+    fsspec[http]>=2021.05.0 \
+    PyYAML>=6.0.2 \
+    pretrainedmodels \
+    cnn-finetune \
+    keras4torch \
+    tensorboardX \
+    pytorch-lightning
+
+RUN python3 -m pip install torch-tensorrt -f https://github.com/NVIDIA/Torch-TensorRT/releases
+
+
+RUN python3 -m pip install --extra-index-url https://pypi.nvidia.com --upgrade nvidia-dali-cuda120
+
+# Install Horovod, temporarily using CUDA stubs
+RUN CUDA_HOME=/usr/local/cuda-12.1 \
+    HOROVOD_WITHOUT_GLOO=1 \
+    HOROVOD_CUDA_HOME=/usr/local/cuda-12.1 \
+    HOROVOD_NCCL_LINK=SHARED \
+    HOROVOD_GPU_OPERATIONS=NCCL \
+    HOROVOD_WITH_MPI=1 \
+    HOROVOD_WITH_PYTORCH=1 \
+    HOROVOD_WITHOUT_TENSORFLOW=1 \
+    HOROVOD_WITHOUT_MXNET=1 \
+    pip install --no-cache-dir git+https://github.com/thomas-bouvier/horovod.git@compile-cpp17
+
+# torch2trt PyTorch to TensorRT converter which utilizes the TensorRT Python API
+WORKDIR /tmp
+RUN git clone --branch=v0.5.0 https://github.com/NVIDIA-AI-IOT/torch2trt /tmp/torch2trt && \
+    cd /tmp/torch2trt && \
+    python3 setup.py install --plugins && \
+    rm -fr /tmp/torch2trt
+
+RUN apt-get remove -y python3-blinker && \
+    python3 -m pip install --no-cache-dir \
+    mpi4py>=3.1.4 \
+    mlflow>=2.6.0 \
+    nni>=2.10.1 \
+    tensorboard-plugin-wit \
+    scikit-nni>=0.2.1
+
+RUN apt autoclean && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+
+COPY ./service-defs /etc/backend.ai/service-defs
+COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
+
+# Install ipython kernelspec
+RUN python3 -m pip install ipykernel && \
+    python3 -m ipykernel install --display-name "PyTorch 2.1.0 on Python 3.10 (CUDA 12.1)" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+
+# Backend.AI specifics
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu22.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python3" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8081,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+
+WORKDIR /home/work
+# vim: ft=dockerfile
