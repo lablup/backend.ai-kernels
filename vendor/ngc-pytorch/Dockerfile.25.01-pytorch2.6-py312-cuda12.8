@@ -5,6 +5,7 @@ ENV CODESERVER=4.96.4
 ENV DEBIAN_FRONTEND=noninteractive \
     MPLBACKEND=Svg \
     PIP_IGNORE_INSTALLED=0 \
+    PIP_BREAK_SYSTEM_PACKAGES=1 \
     PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.8:/usr/local/cuda-12.8/include:/usr/include/x86_64-linux-gnu:/opt/hpcx/ucc/lib:/usr/local/cuda/lib64:$LD_LIBRARY_PATH" \
     PATH="/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin" \
@@ -168,7 +169,7 @@ RUN mkdir -p /opt/oracle && \
     cd /tmp && \
     curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh && \ 
     bash /tmp/nodesource_setup.sh && \
-    apt update ; apt install nodejs && \
+    apt-get update ; apt-get install -y nodejs && \
 # Install CUDA + cuDNN
     mkdir -p /usr/local/nvidia/lib && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.9.6.0 /usr/local/cuda/lib64/libcudnn.so && \
@@ -286,7 +287,7 @@ RUN python3 -m pip uninstall -y markupsafe && \
     python3 -m pip install markupsafe==2.0.1 &&\
     python3 -m pip install jsonschema[format,format-nongpl]==4.17.3 
 
-RUN python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyter_lsp markupsafe==2.0.1 && \
+RUN python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyter_lsp markupsafe==2.0.1 jupyterlab_widgets && \
     jupyter lab build --dev-build=False --minimize=False && \
     jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
@@ -294,11 +295,11 @@ RUN python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyt
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter serverextension enable --py jupyter_lsp && \
-    jupyter labextension install --no-build @jupyterlab/toc && \
+    jupyter labextension install --no-build @jupyterlab/toc-extension && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-    jupyter labextension install @jupyterlab/toc && \
-    jupyter lab build    
+    jupyter labextension install @jupyterlab/toc-extension && \
+    jupyter lab build
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
