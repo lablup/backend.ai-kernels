@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     LD_LIBRARY_PATH="/usr/local/lib/python3.10/dist-packages/torch/lib:/usr/local/lib/python3.10/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-12.6:/usr/local/cuda-12.6/include:/usr/include/x86_64-linux-gnu" \
     PATH="/usr/local/lib/python3.10/dist-packages/torch_tensorrt/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin" \
-    BNB_CUDA_VERSION=123 \
+    BNB_CUDA_VERSION=126 \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
     LANG=C.UTF-8
@@ -171,13 +171,13 @@ RUN apt-get update && \
     cd /tmp && \
     curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh && \ 
     bash /tmp/nodesource_setup.sh && \
-    apt update ; apt install nodejs && \
+    apt-get update ; apt-get install -y nodejs && \
 # Install CUDA + cuDNN
     mkdir -p /usr/local/nvidia/lib && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.9.4.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 2 
-   
+
 WORKDIR /tmp
 RUN git clone -q --branch=v0.3.27 https://github.com/xianyi/OpenBLAS.git && \
     cd OpenBLAS && \
@@ -276,7 +276,7 @@ RUN python3 -m pip uninstall -y markupsafe && \
     python3 -m pip install markupsafe==2.0.1 &&\
     python3 -m pip install jsonschema[format,format-nongpl]==4.17.3 
 
-RUN python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyter_lsp markupsafe==2.0.1 && \
+RUN python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyter_lsp markupsafe==2.0.1 jupyterlab_widgets && \
     jupyter lab build --dev-build=False --minimize=False && \
     jupyter nbextensions_configurator enable && \
     jupyter contrib nbextension install && \
@@ -284,10 +284,10 @@ RUN python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyt
     jupyter serverextension enable --py jupyterlab --sys-prefix && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter serverextension enable --py jupyter_lsp && \
-    jupyter labextension install --no-build @jupyterlab/toc && \
+    jupyter labextension install --no-build @jupyterlab/toc-extension && \
     jupyter nbextension enable execute_time/ExecuteTime && \
     jupyter nbextension enable toc2/main && \
-    jupyter labextension install @jupyterlab/toc && \
+    jupyter labextension install @jupyterlab/toc-extension && \
     jupyter lab build    
 
 RUN apt autoclean && \
