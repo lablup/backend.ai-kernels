@@ -257,8 +257,8 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
-# Install Jupyterlab extensions
 
+# Install Jupyterlab extensions
 RUN python3 -m pip install --no-cache-dir \
         jupyter_nbextensions_configurator>=0.6.3 \
 	jupyter-contrib-core>=0.4.2 \
@@ -292,7 +292,6 @@ RUN python3 -m pip uninstall -y markupsafe && \
 
 RUN python3 -m pip install jupyter_lsp markupsafe==3.0.2 jupyterlab_widgets && \
     jupyter lab build --dev-build=False --minimize=False && \
-    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @jupyterlab/toc-extension && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
