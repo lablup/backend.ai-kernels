@@ -2,7 +2,7 @@ Brotli==1.0.9
 EasyProcess==0.3
 Fiona==1.10.1
 Flask-Compress==1.12
-Flask==2.1.2
+Flask==3.1.1
 GitPython==3.1.26
 JPype1>=0.7.2
 LunarCalendar==0.0.9
@@ -115,7 +115,7 @@ imbalanced-learn==0.5.0
 ipywidgets==7.5.1
 iso8601==1.0.2
 isort>=6.0.1
-itsdangerous==2.1.2
+itsdangerous==2.2.0
 jaxlib>=0.4.7
 jmespath==0.9.4
 json-tricks==3.15.5

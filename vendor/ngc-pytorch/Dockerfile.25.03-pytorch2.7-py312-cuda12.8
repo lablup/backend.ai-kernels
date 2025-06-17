@@ -211,11 +211,7 @@ COPY ./requirements.25.03.txt /tmp/requirements.txt
 RUN python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt 
 # install huggingface datasets
 WORKDIR /tmp
-RUN cd /tmp && git clone https://github.com/huggingface/datasets.git && \
-    cd datasets && \
-	sed -i 's/dill>=0.3.0,<0.3.9/dill>=0.3.0/' setup.py && \
-    pip install -e . && \
-    rm -rf /tmp/*
+RUN python3 -m pip install --no-cache-dir datasets
 
 RUN python3 -m pip install --no-cache-dir \
       mpi4py>=3.1.4 \
@@ -291,7 +287,6 @@ RUN python3 -m pip uninstall -y markupsafe && \
     python3 -m pip install jsonschema[format,format-nongpl]==4.23.0
 
 RUN python3 -m pip install jupyter_lsp markupsafe==3.0.2 jupyterlab_widgets && \
-    jupyter lab build --dev-build=False --minimize=False && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @jupyterlab/toc-extension && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
