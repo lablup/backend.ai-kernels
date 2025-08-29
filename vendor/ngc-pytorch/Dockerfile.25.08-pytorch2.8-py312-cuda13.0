@@ -272,7 +272,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.device=0 \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
@@ -324,6 +324,8 @@ RUN apt-get autoclean && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
-    
+
+# change permission
+RUN chown root:root /usr/lib
 
 WORKDIR /home/work
