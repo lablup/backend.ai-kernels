@@ -1,0 +1,331 @@
+FROM nvcr.io/nvidia/pytorch:25.08-py3
+# NVIDIA NGC PyTorch 2.8 with Python 3.12
+
+ENV CODESERVER=4.96.4
+ENV DEBIAN_FRONTEND=noninteractive \
+    MPLBACKEND=Svg \
+    PIP_IGNORE_INSTALLED=0 \
+    PIP_BREAK_SYSTEM_PACKAGES=1 \
+    PYTHONUNBUFFERED=1 \
+    LD_LIBRARY_PATH="/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda-13.0:/usr/local/cuda-13.0/include:/usr/include/x86_64-linux-gnu:/opt/hpcx/ucc/lib:/usr/local/cuda/lib64:$LD_LIBRARY_PATH" \
+    PATH="/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin" \
+    CPLUS_INCLUDE_PATH=/usr/include/gdal \
+    C_INCLUDE_PATH=/usr/include/gdal \
+    LANG=C.UTF-8
+
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu/|http://kr.archive.ubuntu.com/ubuntu/|g' /etc/apt/sources.list && \
+    rm -rf /var/lib/apt/lists/* && apt-get clean && apt-get update
+
+RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com 
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
+	automake \
+	bison \
+	build-essential \
+	bzip2 \
+	ca-certificates \
+	cabextract \
+	chrpath \
+	devscripts \
+	dh-make \
+	dirmngr \
+	dkms \
+#	dpatch \
+	ethtool \
+	fakeroot \
+	ffmpeg \
+	flex \
+	fonts-nanum \
+	fonts-nanum-coding \
+	fonts-nanum-extra \
+	g++ \
+	gcc \
+	gdal-bin \
+	gfortran \
+	gir1.2-gtk-3.0 \
+	git \
+	graphviz \
+	htop \
+	iputils-ping \
+	libasound2-dev \
+	libatlas-base-dev \
+	libavcodec-dev \
+	libavformat-dev \
+	libboost-dev \
+	libboost-filesystem-dev \
+	libboost-system-dev \
+	libcairo2-dev \
+	libcurl4-openssl-dev \
+	libdc1394-dev \
+	libeigen3-dev \
+	libfaac-dev \
+	libfftw3-dev \
+	libfreetype-dev \
+	libfuse2 \
+	libgdal-dev \
+	libgeos++-dev \
+	libgeos-dev \
+	libgflags-dev \
+	libgirepository1.0-dev \
+	libglib2.0-0 \
+	libgoogle-glog-dev \
+	libgphoto2-dev \
+	libgstreamer-plugins-base1.0-dev \
+	libgstreamer1.0-dev \
+	libgtk-3-dev \
+	libhdf5-dev \
+	libjemalloc-dev \
+	libjpeg-dev \
+	liblapack-dev \
+	libmnl0 \
+	libmp3lame-dev \
+#	libmpdec-dev \
+	libncurses-dev \
+	libnl-3-200 \
+	libnl-3-dev \
+	libnl-route-3-200 \
+	libnl-route-3-dev \
+	libnlopt-dev \
+	libnuma-dev \
+	libopenblas-dev \
+	libopencore-amrnb-dev \
+	libopencore-amrwb-dev \
+	libpci3 \
+	libpng-dev \
+	libportmidi-dev \
+	libproj-dev \
+	libprotobuf-dev \
+	libsdl2-dev \
+	libsdl-image1.2-dev \
+	libsdl-mixer1.2-dev \
+	libsdl-ttf2.0-dev \
+	libsm6 \
+	libsmpeg-dev \
+	libssl-dev \
+	libswscale-dev \
+	libswresample-dev \
+	libtbb-dev \
+	libtheora-dev \
+	libtiff-dev \
+	libv4l-dev \
+	libvorbis-dev \
+	libx264-dev \
+	libxext6 \
+	libxine2-dev \
+	libxml2-dev \
+	libxrender-dev \
+	libxrender1 \
+	libxslt1-dev \
+	libxvidcore-dev \
+	libyaml-dev \
+	libzmq3-dev \
+	lintian \
+	lsof \
+	make \
+	mercurial \
+	media-types \
+	mailcap \
+#	mpich \
+	ncurses-term \
+	net-tools \
+	openjdk-11-jdk \
+	openssh-client \
+	openssh-server \
+	pbzip2 \
+	pciutils \
+	pdsh \
+	pkg-config \
+	proj-bin \
+	protobuf-compiler \
+	pv \
+	python-is-python3 \
+	python3-xkit \
+	python3-gdal \
+	screen-resolution-extra \
+	sudo \
+	subversion \
+	swig \
+	tk \
+	unzip \
+	v4l-utils \
+	vim \
+	x264 \
+	xvfb \
+	xz-utils \
+	sudo \
+#	yarn \
+	yasm \
+	zip \
+	tcl \
+	udev
+RUN mkdir -p /opt/oracle && \
+    cd /opt/oracle && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip && \
+    unzip instantclient-basiclite-linuxx64.zip && \
+    rm -f instantclient-basiclite-linuxx64.zip && \
+    cd /opt/oracle/instantclient* && \
+    rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
+    echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+    ldconfig && \
+    cd /tmp && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get update && apt-get install -y nodejs && \
+	corepack enable && \
+    corepack prepare yarn@stable --activate && \
+    # Install CUDA + cuDNN
+    mkdir -p /usr/local/nvidia/lib && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.9.12.0 /usr/local/cuda/lib64/libcudnn.so && \
+    ldconfig && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 2 
+   
+WORKDIR /tmp
+RUN git clone -q --branch=v0.3.27 https://github.com/xianyi/OpenBLAS.git && \
+    cd OpenBLAS && \
+    make DYNAMIC_ARCH=1 NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
+    make install && \
+# install git-lfs
+    cd /tmp && \
+    curl -sLO https://github.com/git-lfs/git-lfs/releases/download/v3.5.1/git-lfs-linux-amd64-v3.5.1.tar.gz && \
+    tar -zxf git-lfs-linux-amd64-v3.5.1.tar.gz && \
+    cd git-lfs-3.5.1 && \
+    bash install.sh && \
+    git clone https://github.com/aristocratos/bashtop.git && \
+    cd bashtop && \
+    make install && \
+    rm -rf /tmp/* 
+
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v$CODESERVER/code-server-$CODESERVER-linux-amd64.tar.gz \
+      | tar -C /usr/local/lib -xz && \ 
+    mv /usr/local/lib/code-server-$CODESERVER-linux-amd64 /usr/local/lib/code-server-$CODESERVER && \
+    ln -s /usr/local/lib/code-server-$CODESERVER/bin/code-server /usr/local/bin/code-server 
+
+# remove hwloc-like packages (ImportError: /opt/hpcx/ucc/lib/libucc.so.1: undefined symbol issue)
+RUN apt-get purge -y hwloc-nox libhwloc-plugins
+# install kss (temporary, when kss package's pyyaml version is updated, move to requirements.txt)
+WORKDIR /tmp
+RUN python3 -m pip install --upgrade pip setuptools wheel Cython
+RUN cd /tmp && git clone https://github.com/hyunwoongko/kss.git && \
+    cd kss && \
+    pip install . && \
+    rm -rf /tmp/*
+
+COPY ./requirements.25.08.txt /tmp/requirements.txt
+RUN python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt 
+# install huggingface datasets
+WORKDIR /tmp
+RUN python3 -m pip install --no-cache-dir datasets
+
+RUN python3 -m pip install --no-cache-dir \
+      mpi4py>=3.1.4 \
+      nni>=2.10.1 \
+      mlflow>=2.6.0 \
+      scikit-nni>=0.2.1
+
+RUN python3 -m pip install pytorch-lightning && \
+    python3 -m pip install --no-cache-dir \
+        torch-scatter \
+	    torch-sparse \
+	    torch-cluster \
+	    torch-spline-conv \
+	    torch-geometric
+
+WORKDIR /tmp
+RUN git clone --recursive  -q https://github.com/bitsandbytes-foundation/bitsandbytes.git && \
+    cd /tmp/bitsandbytes && \
+    sed -i 's/VERSION_GREATER_EQUAL "13\.0"/VERSION_GREATER "13.1"/' CMakeLists.txt && \
+    # CUDA 13 API에 맞게 소스 패치
+    sed -i '/cudaMemPrefetchAsync(ptr, bytes, device, 0)/i\ \ \ \ cudaMemLocation loc; loc.type = cudaMemLocationTypeDevice; loc.id = device;' csrc/pythonInterface.cpp && \
+    sed -i 's/cudaMemPrefetchAsync(ptr, bytes, device, 0)/cudaMemPrefetchAsync(ptr, bytes, loc, 0)/' csrc/pythonInterface.cpp && \
+    # 3. (가장 중요!) CMake의 기본 아키텍처 리스트를 우리가 원하는 최신 리스트로 강제 덮어쓰기
+    #    'if(CMAKE_VERSION VERSION_LESS "3.23.0")' 블록이 끝난 직후에 삽입하여 모든 CMake 버전에서 동작하게 함
+    sed -i '/if(CMAKE_VERSION VERSION_LESS "3.23.0")/,/endif()/c\# Modern CUDA architectures only (for CUDA 13+)\nset(CMAKE_CUDA_ARCHITECTURES_ALL 80 86 89 90)\nset(CMAKE_CUDA_ARCHITECTURES "80;86;89;90")' CMakeLists.txt && \
+    sed -i 's/ 101//' CMakeLists.txt && \
+    sed -i '123d' CMakeLists.txt && \
+	# CUB compatibility layer 추가
+    sed -i '/#include <cub\/cub.cuh>/a \
+// ---- CUB/Thrust compatibility layer ----\n\
+#include <thrust/functional.h>\n\
+template <typename T>\n\
+using cubMaxCompat = thrust::maximum<T>;\n\
+\n\
+template <typename T>\n\
+using cubSumCompat = thrust::plus<T>;\n\
+// ----------------------------------------\n' csrc/kernels.cu && \
+    # Reduce 호출 치환 (float 기준)
+    sed -i 's/cub::Max()/cubMaxCompat<float>()/g' csrc/kernels.cu && \
+    sed -i 's/cub::Sum()/cubSumCompat<float>()/g' csrc/kernels.cu && \
+	cmake -DCOMPUTE_BACKEND=cuda -S . && \
+    CUDA_HOME=/usr/local/cuda-13.0 CUDA_VERSION=130 make && \
+    python setup.py install
+    
+# Install ipython kernelspec
+RUN python3 -m ipykernel install --display-name "PyTorch 2.8 (NGC 25.08/Python 3.12) on Backend.AI" && \
+    cat /usr/local/share/jupyter/kernels/python3/kernel.json
+# Backend.AI specifics
+COPY ./service-defs /etc/backend.ai/service-defs
+COPY ./runner-scripts/bootstrap.sh runner-scripts/setup_multinode.py /opt/container/
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input" \
+      ai.backend.base-distro="ubuntu24.04" \
+      ai.backend.accelerators="cuda" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="1g" \
+      ai.backend.resource.min.cuda.device=0 \
+      ai.backend.resource.min.cuda.shares=0 \
+      ai.backend.runtime-type="python" \
+      ai.backend.runtime-path="/usr/bin/python" \
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
+
+# Install Jupyterlab extensions
+RUN python3 -m pip install --no-cache-dir \
+        jupyter_nbextensions_configurator>=0.6.3 \
+	jupyter-contrib-core>=0.4.2 \
+	jupyter-highlight-selected-word>=0.2.0 \
+	jupyter-server>=2.14.2 \
+        jupyter_lsp>=2.2.0 
+RUN python3 -m pip install --no-cache-dir \
+	jupyterlab>=4.3.2 \
+	jupyterlab-code-formatter>=3.0.2 \
+	jupyterlab-hdf \
+	jupyterlab-launcher \
+        notebook
+
+RUN python3 -m pip install --no-cache-dir \
+	jupyter-dash \
+	jupyter-js-widgets-nbextension \
+	jupyter-latex-envs \
+	jupyter-packaging
+RUN python3 -m pip install --no-cache-dir \
+	jupyter-server-mathjax \
+	jupyter-server-proxy>=4.0.0 \
+	jupyter-telemetry==0.1.0 \
+	jupyter==1.0.0 \
+	jupyter-client==8.6.3 \
+	jupyter_bokeh==2.0.4 
+
+RUN python3 -m pip uninstall -y markupsafe && \
+    python3 -m pip uninstall -y jupyter_core==5.3.0 && \
+    python3 -m pip install markupsafe==3.0.2 && \
+    python3 -m pip install jsonschema[format,format-nongpl]==4.23.0
+
+RUN python3 -m pip install jupyter_lsp markupsafe==3.0.2 jupyterlab_widgets && \
+    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install --no-build @jupyterlab/toc-extension && \
+    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
+    jupyter labextension install @jupyterlab/toc-extension && \
+    jupyter lab build --dev-build=False --minimize=False 
+
+RUN apt-get autoclean && \
+    sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
+    rm -f /tmp/*.whl /tmp/requirem* && \
+    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+
+# change permission
+RUN chown root:root /usr/lib
+
+WORKDIR /home/work
