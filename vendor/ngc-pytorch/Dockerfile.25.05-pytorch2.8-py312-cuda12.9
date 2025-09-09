@@ -152,7 +152,7 @@ RUN apt-get install -y --no-install-recommends \
 	xvfb \
 	xz-utils \
 	sudo \
-	yarn \
+#	yarn \
 	yasm \
 	zip \
 	tcl \
@@ -167,10 +167,11 @@ RUN mkdir -p /opt/oracle && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig && \
     cd /tmp && \
-    curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh && \ 
-    bash /tmp/nodesource_setup.sh && \
-    apt-get update ; apt-get install -y nodejs && \
-# Install CUDA + cuDNN
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get update && apt-get install -y nodejs && \
+	corepack enable && \
+    corepack prepare yarn@stable --activate && \
+    # Install CUDA + cuDNN
     mkdir -p /usr/local/nvidia/lib && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.9.10.1 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig && \
@@ -248,7 +249,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.device=0 \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
@@ -275,7 +276,7 @@ RUN python3 -m pip install --no-cache-dir \
 	jupyter-packaging
 RUN python3 -m pip install --no-cache-dir \
 	jupyter-server-mathjax \
-	jupyter-server-proxy==1.6.0 \
+	jupyter-server-proxy>=4.0.0 \
 	jupyter-telemetry==0.1.0 \
 	jupyter==1.0.0 \
 	jupyter-client==8.6.3 \
@@ -301,5 +302,7 @@ RUN apt autoclean && \
     rm -rf /root/.cache && \
     rm -rf /tmp/*
     
+# change permission
+RUN chown root:root /usr/lib
 
 WORKDIR /home/work

@@ -152,7 +152,7 @@ RUN apt-get install -y --no-install-recommends \
 	xvfb \
 	xz-utils \
 	sudo \
-	yarn \
+#	yarn \
 	yasm \
 	zip \
 	tcl \
@@ -167,10 +167,11 @@ RUN mkdir -p /opt/oracle && \
     echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig && \
     cd /tmp && \
-    curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh && \ 
-    bash /tmp/nodesource_setup.sh && \
-    apt-get update ; apt-get install -y nodejs && \
-# Install CUDA + cuDNN
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get update && apt-get install -y nodejs && \
+	corepack enable && \
+    corepack prepare yarn@stable --activate && \
+    # Install CUDA + cuDNN
     mkdir -p /usr/local/nvidia/lib && \
     ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.9.6.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig && \
@@ -204,13 +205,14 @@ WORKDIR /tmp
 RUN python3 -m pip install --upgrade pip setuptools wheel Cython
 RUN cd /tmp && git clone https://github.com/hyunwoongko/kss.git && \
     cd kss && \
-    sed -i 's/pyyaml==6.0/pyyaml>=6.0.2/' setup.py && \
     pip install . && \
     rm -rf /tmp/*
 
 COPY ./requirements.25.01.txt /tmp/requirements.txt
 RUN python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.txt 
-RUN python3 -m pip install datasets==3.0.1 multiprocess==0.70.16
+# install huggingface datasets
+WORKDIR /tmp
+RUN python3 -m pip install --no-cache-dir datasets
 
 RUN python3 -m pip install --no-cache-dir \
       mpi4py>=3.1.4 \
@@ -225,7 +227,6 @@ RUN python3 -m pip install pytorch-lightning && \
 	torch-cluster \
 	torch-spline-conv \
 	torch-geometric 
-
 
 WORKDIR /tmp
 RUN git clone --recursive  -q https://github.com/bitsandbytes-foundation/bitsandbytes.git && \
@@ -248,16 +249,15 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.accelerators="cuda" \
       ai.backend.resource.min.cpu="1" \
       ai.backend.resource.min.mem="1g" \
-      ai.backend.resource.min.cuda.device=1 \
+      ai.backend.resource.min.cuda.device=0 \
       ai.backend.resource.min.cuda.shares=0 \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
-# Install Jupyterlab extensions
 
+# Install Jupyterlab extensions
 RUN python3 -m pip install --no-cache-dir \
         jupyter_nbextensions_configurator>=0.6.3 \
-	jupyter_contrib_nbextensions>=0.7.0 \
 	jupyter-contrib-core>=0.4.2 \
 	jupyter-highlight-selected-word>=0.2.0 \
 	jupyter-server>=2.14.2 \
@@ -276,30 +276,23 @@ RUN python3 -m pip install --no-cache-dir \
 	jupyter-packaging
 RUN python3 -m pip install --no-cache-dir \
 	jupyter-server-mathjax \
-	jupyter-server-proxy==1.6.0 \
+	jupyter-server-proxy>=4.0.0 \
 	jupyter-telemetry==0.1.0 \
 	jupyter==1.0.0 \
-	jupyter-client==8.4.0 \
-	jupyter_bokeh==2.0.4 
+	jupyter-client==8.6.3 \
+	jupyter_bokeh==2.0.4
 
 RUN python3 -m pip uninstall -y markupsafe && \
     python3 -m pip uninstall -y jupyter_core==5.3.0 && \
-    python3 -m pip install markupsafe==2.0.1 &&\
-    python3 -m pip install jsonschema[format,format-nongpl]==4.17.3 
+    python3 -m pip install markupsafe==3.0.2 && \
+    python3 -m pip install jsonschema[format,format-nongpl]==4.23.0
 
-RUN python3 -m pip install widgetsnbextension jupyter_contrib_nbextensions jupyter_lsp markupsafe==2.0.1 jupyterlab_widgets && \
-    jupyter lab build --dev-build=False --minimize=False && \
-    jupyter nbextensions_configurator enable && \
-    jupyter contrib nbextension install && \
-    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
-    jupyter serverextension enable --py jupyterlab --sys-prefix && \
+RUN python3 -m pip install jupyter_lsp markupsafe==3.0.2 jupyterlab_widgets && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-    jupyter serverextension enable --py jupyter_lsp && \
     jupyter labextension install --no-build @jupyterlab/toc-extension && \
-    jupyter nbextension enable execute_time/ExecuteTime && \
-    jupyter nbextension enable toc2/main && \
+    jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter labextension install @jupyterlab/toc-extension && \
-    jupyter lab build
+    jupyter lab build --dev-build=False --minimize=False
 
 RUN apt autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
@@ -308,6 +301,8 @@ RUN apt autoclean && \
     rm -rf /var/lib/apt/lists/* && \	
     rm -rf /root/.cache && \
     rm -rf /tmp/*
-    
+
+# change permission
+RUN chown root:root /usr/lib  
 
 WORKDIR /home/work
