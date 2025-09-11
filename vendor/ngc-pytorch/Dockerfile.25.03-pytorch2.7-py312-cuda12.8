@@ -173,7 +173,7 @@ RUN mkdir -p /opt/oracle && \
     corepack prepare yarn@stable --activate && \
     # Install CUDA + cuDNN
     mkdir -p /usr/local/nvidia/lib && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.9.6.0 /usr/local/cuda/lib64/libcudnn.so && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.9.8.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 2 
    
