@@ -392,7 +392,7 @@ smmap==3.0.4
 snowballstemmer==2.0.0
 sortedcontainers==2.1.0
 soynlp==0.0.493
-sqlparse==0.4.0
+sqlparse==0.4.2
 statsmodels==0.11.1
 stopit==1.1.2
 sympy==1.6.2
