@@ -1,0 +1,49 @@
+FROM ubuntu:24.04
+
+ARG FILEBROWSER_VERSION=2.42.5
+
+ENV PYTHONUNBUFFERED=1 \
+    PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LANG=C.UTF-8
+
+RUN apt-get update && \
+    apt-get install -y \
+        ncurses-term curl rsync && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/ && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
+    mkdir -p /etc/filebrowser
+
+RUN dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        amd64) ARCHITECTURE='amd64';; \
+        armhf) ARCHITECTURE='arm';; \
+        arm64) ARCHITECTURE='arm64';; \
+        i386)  ARCHITECTURE='x86';; \
+        darwin) ARCHITECTURE='darwin';; \
+        *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
+    esac; \
+    \
+    curl -fL "https://github.com/filebrowser/filebrowser/releases/download/v${FILEBROWSER_VERSION}/linux-${ARCHITECTURE}-filebrowser.tar.gz" \
+      | tar -C /etc/filebrowser -xz && \
+    cp /etc/filebrowser/filebrowser /usr/bin/filebrowser
+
+COPY filebrowser.db /etc/filebrowser/filebrowser.db
+COPY config.json /etc/filebrowser/config.json
+COPY ./filebrowser_static /etc/filebrowser/resources
+
+# Backend.AI specifics
+COPY ./service-defs /etc/backend.ai/service-defs
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="batch query uid-match user-input private" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="128m" \
+      ai.backend.role="SYSTEM" \
+      ai.backend.base-distro="ubuntu24.04" \
+      ai.backend.runtime-type="app" \
+      ai.backend.runtime-path="/usr/bin/filebrowser" \
+      ai.backend.service-ports="filebrowser:http:8080"
+
+# vim: ft=dockerfile
