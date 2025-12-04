@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_IGNORE_INSTALLED=0 \
     PIP_BREAK_SYSTEM_PACKAGES=1 \
     PYTHONUNBUFFERED=1 \
-    LANG=C.UTF-8 
+    LANG=C.UTF-8
 
 RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
@@ -22,7 +22,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal
 
-RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com 
+RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends \
 	automake \
@@ -184,7 +184,7 @@ RUN cd /tmp && \
     apt-get update && apt-get install -y nodejs && \
     npm install -g corepack && \
     corepack enable && \
-    corepack prepare yarn@stable --activate 
+    corepack prepare yarn@stable --activate
 
 # Install CUDA + cuDNN
 RUN dpkgArch="$(dpkg --print-architecture)"; \
@@ -196,12 +196,12 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
 	mkdir -p /usr/local/nvidia/lib && \
     ln -s /usr/lib/${dirArch}-linux-gnu/libcudnn.so.9.15.0 /usr/local/cuda/lib64/libcudnn.so && \
     ldconfig && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 2 
-   
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
 WORKDIR /tmp
 RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
-        amd64) openblasTarget='x86-64'; crossCompile='0'; ;; \
+        amd64) openblasTarget='CORE2'; crossCompile='0'; ;; \
         arm64) openblasTarget='ARMV8'; crossCompile='1'; ;; \
         *) echo >&2 "Unsupported: $dpkgArch"; exit 1 ;; \
     esac; \
@@ -230,7 +230,7 @@ RUN cd /tmp && \
 	git clone https://github.com/aristocratos/bashtop.git && \
     cd bashtop && \
     make install && \
-    rm -rf /tmp/* 
+    rm -rf /tmp/*
 
 RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
@@ -239,9 +239,9 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
      curl -fL https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}.tar.gz \
-      | tar -C /usr/local/lib -xz && \ 
+      | tar -C /usr/local/lib -xz && \
     mv /usr/local/lib/code-server-${CODE_SERVER_VERSION}-linux-${tarArch} /usr/local/lib/code-server-${CODE_SERVER_VERSION} && \
-    ln -s /usr/local/lib/code-server-${CODE_SERVER_VERSION}/bin/code-server /usr/local/bin/code-server 
+    ln -s /usr/local/lib/code-server-${CODE_SERVER_VERSION}/bin/code-server /usr/local/bin/code-server
 
 # remove hwloc-like packages (ImportError: /opt/hpcx/ucc/lib/libucc.so.1: undefined symbol issue)
 RUN apt-get purge -y hwloc-nox libhwloc-plugins
@@ -254,7 +254,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         arm64) tarArch='arm64';; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
-    python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.25.11.${tarArch}.txt 
+    python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.25.11.${tarArch}.txt
 
 # install huggingface datasets
 WORKDIR /tmp
@@ -278,7 +278,7 @@ RUN git clone --recursive  -q https://github.com/bitsandbytes-foundation/bitsand
     cmake -DCOMPUTE_BACKEND=cuda -DCMAKE_CUDA_COMPILER="/usr/local/cuda-13/bin/nvcc" -DCOMPUTE_CAPABILITY="75;80;86;87;89;90;100;103;110;120;121" -S . && \
 	make && \
     python setup.py install
-    
+
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "PyTorch 2.10 (NGC 25.11/Python 3.12) on Backend.AI" && \
     cat /usr/local/share/jupyter/kernels/python3/kernel.json
@@ -323,7 +323,7 @@ RUN python3 -m pip install --no-cache-dir \
 	jupyter>=1.1.1 \
 	jupyter-client==8.6.3 \
 	jupyter_bokeh==2.0.4 \
-	markupsafe>=3.0.2 \ 
+	markupsafe>=3.0.2 \
 	jsonschema[format,format-nongpl]>=4.23.0
 
 RUN python3 -m pip install jupyter_lsp markupsafe==3.0.2 jupyterlab_widgets && \
@@ -332,16 +332,16 @@ RUN python3 -m pip install jupyter_lsp markupsafe==3.0.2 jupyterlab_widgets && \
     jupyter labextension install --no-build @jupyterlab/toc-extension && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter labextension install @jupyterlab/toc-extension && \
-    jupyter lab build --dev-build=False --minimize=False 
+    jupyter lab build --dev-build=False --minimize=False
 
 RUN apt-get autoclean && \
     sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
     ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
     rm -f /tmp/*.whl /tmp/requirem* && \
-    rm -rf /var/lib/apt/lists/* && \	
+    rm -rf /var/lib/apt/lists/* && \
     rm -rf /root/.cache && \
     rm -rf /tmp/*
-    
+
 # change permission
 RUN chown root:root /usr/lib
 
