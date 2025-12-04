@@ -263,14 +263,14 @@ RUN python3 -m pip install --no-cache-dir datasets
 RUN python3 -m pip install --no-cache-dir \
       mpi4py==4.1.1 mlflow==3.5.0
 
-RUN python3 -m pip install pytorch-lightning && \
-    python3 -m pip install --no-cache-dir \
+RUN python3 -m pip install --no-build-isolation --no-cache-dir \
+        pytorch-lightning \
         torch-scatter \
-	    torch-sparse \
-	    torch-cluster \
-	    torch-spline-conv \
-	    torch-geometric \
-		torchao==0.14.1
+        torch-sparse \
+        torch-cluster \
+        torch-spline-conv \
+        torch-geometric \
+        torchao
 
 WORKDIR /tmp
 RUN git clone --recursive  -q https://github.com/bitsandbytes-foundation/bitsandbytes.git && \
