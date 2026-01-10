@@ -12,6 +12,7 @@
           "c.ServerApp.ip = \"0.0.0.0\"\n",
           "c.ServerApp.port = {ports[0]}\n",
           "c.ServerApp.token = \"\"\n",
+          "c.ServerApp.root_dir = \"/home/work\"\n",
           "c.ContentsManager.files_handler_class = None\n",
           "c.FileContentsManager.delete_to_trash = False\n",
           "c.NotebookApp.tornado_settings = {{'headers': {{'Content-Security-Policy': \"frame-ancestors * 'self' \"}}}}\n",
