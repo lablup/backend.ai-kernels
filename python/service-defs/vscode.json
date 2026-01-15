@@ -1,10 +1,10 @@
 {
     "prestart": [],
     "command": [
-	"/usr/local/bin/code-server",
-	"--bind-addr", "0.0.0.0",
-	"--port", "{ports[0]}",
-	"--extensions-dir", "/home/work/.local/share/code-server/extensions"
+      "/usr/local/bin/code-server",
+      "--bind-addr", "0.0.0.0",
+      "--port", "{ports[0]}",
+      "--extensions-dir", "/home/work/.local/share/code-server/extensions"
     ],
     "allowed_arguments": [
       "--auth"
