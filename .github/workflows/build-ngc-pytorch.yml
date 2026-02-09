@@ -70,6 +70,7 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/arm64 \
+            --progress=plain \ 
             -t cr.backend.ai/testing/ngc-pytorch:${{ steps.version.outputs.version }}-arm64 \
             -f ${{ steps.version.outputs.filename }} \
             --load \
@@ -112,6 +113,7 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/amd64 \
+            --progress=plain \ 
             -t cr.backend.ai/testing/ngc-pytorch:${{ steps.version.outputs.version }}-amd64 \
             -f ${{ steps.version.outputs.filename }} \
             --load \
