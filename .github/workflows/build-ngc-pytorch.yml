@@ -1,0 +1,126 @@
+name: Build NGC PyTorch Docker Images
+
+on:
+  push:
+    branches:
+      - '**'  # Trigger on all branches
+    paths:
+      - 'vendor/ngc-pytorch/Dockerfile.*'
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      dockerfiles: ${{ steps.changes.outputs.dockerfiles }}
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed Dockerfiles
+        id: changes
+        run: |
+          # Get changed files in vendor/ngc-pytorch
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^vendor/ngc-pytorch/Dockerfile\.' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "dockerfiles=[]" >> $GITHUB_OUTPUT
+            echo "No Dockerfile changes detected"
+            exit 0
+          fi
+
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+
+          # Convert to JSON array
+          DOCKERFILES_JSON=$(echo "$CHANGED_FILES" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "dockerfiles=$DOCKERFILES_JSON" >> $GITHUB_OUTPUT
+
+          echo "Changed Dockerfiles:"
+          echo "$CHANGED_FILES"
+
+  build-arm64:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: arm64-dgx-spark
+    strategy:
+      matrix:
+        dockerfile: ${{ fromJson(needs.detect-changes.outputs.dockerfiles) }}
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from Dockerfile name
+        id: version
+        run: |
+          DOCKERFILE="${{ matrix.dockerfile }}"
+          # Extract just the filename (e.g., Dockerfile.26.01-pytorch2.10-py312-cuda13.1)
+          FILENAME=$(basename "$DOCKERFILE")
+          # Extract version part (everything after "Dockerfile.")
+          VERSION=${FILENAME#Dockerfile.}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Build ARM64 Docker image
+        working-directory: vendor/ngc-pytorch
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            -t cr.backend.ai/testing/ngc-pytorch:${{ steps.version.outputs.version }}-arm64 \
+            -f ${{ steps.version.outputs.filename }} \
+            --load \
+            .
+
+      - name: Push ARM64 image (optional)
+        if: success()
+        working-directory: vendor/ngc-pytorch
+        run: |
+          # Uncomment when ready to push to registry
+          # docker push cr.backend.ai/testing/ngc-pytorch:${{ steps.version.outputs.version }}-arm64
+          echo "Image built: cr.backend.ai/testing/ngc-pytorch:${{ steps.version.outputs.version }}-arm64"
+
+  build-amd64:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: self-hosted-imagebuild-x86-rtx5060
+    strategy:
+      matrix:
+        dockerfile: ${{ fromJson(needs.detect-changes.outputs.dockerfiles) }}
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from Dockerfile name
+        id: version
+        run: |
+          DOCKERFILE="${{ matrix.dockerfile }}"
+          # Extract just the filename (e.g., Dockerfile.26.01-pytorch2.10-py312-cuda13.1)
+          FILENAME=$(basename "$DOCKERFILE")
+          # Extract version part (everything after "Dockerfile.")
+          VERSION=${FILENAME#Dockerfile.}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Build AMD64 Docker image
+        working-directory: vendor/ngc-pytorch
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -t cr.backend.ai/testing/ngc-pytorch:${{ steps.version.outputs.version }}-amd64 \
+            -f ${{ steps.version.outputs.filename }} \
+            --load \
+            .
+
+      - name: Push AMD64 image (optional)
+        if: success()
+        working-directory: vendor/ngc-pytorch
+        run: |
+          # Uncomment when ready to push to registry
+          # docker push cr.backend.ai/testing/ngc-pytorch:${{ steps.version.outputs.version }}-amd64
+          echo "Image built: cr.backend.ai/testing/ngc-pytorch:${{ steps.version.outputs.version }}-amd64"
