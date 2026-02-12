@@ -73,7 +73,7 @@ dacite==1.6.0
 dash-core-components==2.0.0
 dash-html-components==2.0.0
 dash-table==5.0.0
-dask==2.9.0
+dask==2021.10.0
 databricks-cli==0.12.0
 dataclasses==0.6
 dbus-python==1.2.16
