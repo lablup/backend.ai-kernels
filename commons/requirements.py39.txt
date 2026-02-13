@@ -177,7 +177,7 @@ jupyter-js-widgets-nbextension==0.0.2.dev0
 jupyter-latex-envs==1.4.6
 jupyter-lsp==0.8.0
 jupyter-nbextensions-configurator==0.4.1
-jupyter-server-proxy==1.5.0
+jupyter-server-proxy==3.2.1
 jupyter-tensorboard==0.2.0
 jupyter==1.0.0
 jupyterlab-git==0.20.0
