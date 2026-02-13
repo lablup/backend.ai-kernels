@@ -260,7 +260,7 @@ llvmlite==0.31.0
 lunarcalendar==0.0.9
 lunardate==0.2.0
 lxml==4.8.0
-mako==1.1.0
+mako==1.2.2
 maproxy==0.0.12
 markdown-it-py==1.1.0
 markdown==3.3
