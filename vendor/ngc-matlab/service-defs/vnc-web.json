@@ -4,5 +4,5 @@
       "--vnc", "localhost:5901",
       "--listen", "{ports[0]}"
     ],
-    "url_template": "{protocol}://{host}:{port}/vnc.html?host={host}&port={port}&password=backendai&autoconnect=true"
+    "url_template": "{protocol}://{host}:{port}/vnc.html?host=localhost&port=6080&password=backendai&autoconnect=true"
 }
