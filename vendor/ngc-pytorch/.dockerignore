@@ -1,0 +1,6 @@
+# Exclude unnecessary files from Docker build context
+*.md
+LICENSE
+.git
+.gitignore
+.dockerignore

@@ -22,9 +22,9 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal
 
-RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends \
+RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
 	automake \
 	bison \
 	build-essential \
@@ -159,7 +159,9 @@ RUN apt-get install -y --no-install-recommends \
 	yasm \
 	zip \
 	tcl \
-	udev
+	udev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
@@ -184,7 +186,9 @@ RUN cd /tmp && \
     apt-get update && apt-get install -y nodejs && \
     npm install -g corepack && \
     corepack enable && \
-    corepack prepare yarn@stable --activate
+    corepack prepare yarn@stable --activate && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install CUDA + cuDNN
 RUN dpkgArch="$(dpkg --print-architecture)"; \
@@ -208,12 +212,12 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     git clone -q --branch=v0.3.30 https://github.com/OpenMathLib/OpenBLAS.git && \
     cd OpenBLAS && \
     make TARGET=${openblasTarget} CROSS=${crossCompile} ${EXTRA_FLAGS} NO_AFFINITY=1 NUM_THREADS=48 FC=gfortran && \
-    make install
+    make install && \
+    rm -rf /tmp/OpenBLAS
 
-# install git-lfs
+# install git-lfs + bashtop
 WORKDIR /tmp
-RUN cd /tmp && \
-    dpkgArch="$(dpkg --print-architecture)"; \
+RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
         amd64) tarArch='amd64'; dirArch='x64';; \
         arm64) tarArch='arm64'; dirArch='aarch64';; \
@@ -223,11 +227,9 @@ RUN cd /tmp && \
     curl -sLO "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${tarArch}-v${GIT_LFS_VERSION}.tar.gz" && \
     tar -zxf "git-lfs-linux-${tarArch}-v${GIT_LFS_VERSION}.tar.gz" && \
     cd /tmp/git-lfs-${GIT_LFS_VERSION} && \
-    bash install.sh
-
-# install bashtop
-RUN cd /tmp && \
-	git clone https://github.com/aristocratos/bashtop.git && \
+    bash install.sh && \
+    cd /tmp && \
+    git clone https://github.com/aristocratos/bashtop.git && \
     cd bashtop && \
     make install && \
     rm -rf /tmp/*
@@ -246,7 +248,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
 # remove hwloc-like packages (ImportError: /opt/hpcx/ucc/lib/libucc.so.1: undefined symbol issue)
 #RUN apt-get purge -y hwloc-nox libhwloc-plugins
 
-# Python packages installation
+# Python packages installation (consolidated: requirements + datasets + mpi4py + mlflow)
 COPY ./requirements.25.12.*.txt /tmp/
 RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
@@ -254,15 +256,14 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         arm64) tarArch='arm64';; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
-    python3 -m pip install --disable-pip-version-check --no-cache-dir -r requirements.25.12.${tarArch}.txt
+    python3 -m pip install --disable-pip-version-check --no-cache-dir \
+        -r requirements.25.12.${tarArch}.txt \
+        datasets \
+        mpi4py==4.1.1 mlflow==3.5.0 && \
+    find /usr/local/lib/python3.12/dist-packages -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true && \
+    rm -rf /tmp/*
 
-# install huggingface datasets
-WORKDIR /tmp
-RUN python3 -m pip install --no-cache-dir datasets
-
-RUN python3 -m pip install --no-cache-dir \
-      mpi4py==4.1.1 mlflow==3.5.0
-
+# PyTorch extensions (requires --no-build-isolation)
 RUN python3 -m pip install --no-build-isolation --no-cache-dir \
         pytorch-lightning \
         torch-scatter \
@@ -270,14 +271,17 @@ RUN python3 -m pip install --no-build-isolation --no-cache-dir \
         torch-cluster \
         torch-spline-conv \
         torch-geometric \
-        torchao
+        torchao && \
+    find /usr/local/lib/python3.12/dist-packages -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true && \
+    rm -rf /tmp/*
 
 WORKDIR /tmp
 RUN git clone --recursive  -q https://github.com/bitsandbytes-foundation/bitsandbytes.git && \
     cd /tmp/bitsandbytes && \
     cmake -DCOMPUTE_BACKEND=cuda -DCMAKE_CUDA_COMPILER="/usr/local/cuda-13/bin/nvcc" -DCOMPUTE_CAPABILITY="75;80;86;87;89;90;100;103;110;120;121" -S . && \
 	make && \
-    python setup.py install
+    python setup.py install && \
+    rm -rf /tmp/*
 
 # Install ipython kernelspec
 RUN python3 -m ipykernel install --display-name "PyTorch 2.10 (NGC 25.12/Python 3.12) on Backend.AI" && \
@@ -299,7 +303,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.runtime-path="/usr/bin/python" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8091,jupyterlab:http:8090,vscode:http:8180,tensorboard:http:6006,mlflow-ui:preopen:5000,nniboard:preopen:8080"
 
-# Install Jupyterlab extensions
+# Install Jupyterlab extensions + build (merged with cleanup)
 RUN python3 -m pip install --no-cache-dir \
     jupyter_nbextensions_configurator>=0.6.5 \
 	jupyter_core \
@@ -324,23 +328,21 @@ RUN python3 -m pip install --no-cache-dir \
 	jupyter-client==8.6.3 \
 	jupyter_bokeh==2.0.4 \
 	markupsafe>=3.0.2 \
-	jsonschema[format,format-nongpl]>=4.23.0
-
-RUN python3 -m pip install jupyter_lsp markupsafe==3.0.2 jupyterlab_widgets && \
+	jsonschema[format,format-nongpl]>=4.23.0 && \
+    python3 -m pip install --no-cache-dir jupyter_lsp markupsafe==3.0.2 jupyterlab_widgets && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
 	jupyter labextension install --no-build @jupyter-widgets/controls && \
     jupyter labextension install --no-build @jupyterlab/toc-extension && \
     jupyter labextension install --no-build @krassowski/jupyterlab-lsp && \
     jupyter labextension install @jupyterlab/toc-extension && \
-    jupyter lab build --dev-build=False --minimize=False
-
-RUN apt-get autoclean && \
-    sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
-    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color && \
-    rm -f /tmp/*.whl /tmp/requirem* && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /root/.cache && \
+    jupyter lab build --dev-build=False --minimize=False && \
+    find /usr/local/lib/python3.12/dist-packages -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true && \
+    rm -rf /usr/local/share/jupyter/lab/staging && \
+    rm -rf /root/.cache /root/.npm && \
     rm -rf /tmp/*
+
+RUN sed -i 's/source \/usr\/local\/nvm\/nvm.sh//' /etc/bash.bashrc && \
+    ln -sf /usr/share/terminfo/x/xterm-color /usr/share/terminfo/x/xterm-256color
 
 # change permission
 RUN chown root:root /usr/lib
