@@ -1,0 +1,45 @@
+FROM ubuntu:24.04
+
+# Install packages
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        openssh-server rsync && \
+    apt-get clean && rm -rf /var/lib/apt/lists/ && rm -rf /root/.cache && rm -rf /tmp/*
+
+# Configure SSH server
+# NOTE: Ubuntu 24.04 uses Include /etc/ssh/sshd_config.d/*.conf by default,
+# which may override settings in sshd_config. Remove any drop-in configs to
+# ensure our settings take effect.
+RUN mkdir -p /var/run/sshd && \
+    rm -f /etc/ssh/sshd_config.d/*.conf && \
+    sed -i 's/#AllowAgentForwarding yes/AllowAgentForwarding no/' /etc/ssh/sshd_config && \
+    sed -i 's/#AllowTcpForwarding yes/AllowTcpForwarding no/' /etc/ssh/sshd_config && \
+    sed -i 's/#GatewayPorts no/GatewayPorts no/' /etc/ssh/sshd_config && \
+    sed -i 's/X11Forwarding yes/X11Forwarding no/' /etc/ssh/sshd_config && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && \
+    sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/' /etc/ssh/sshd_config && \
+    echo 'PermitRootLogin no' >> /etc/ssh/sshd_config && \
+    echo 'Port 22022' >> /etc/ssh/sshd_config && \
+    echo 'LoginGraceTime 0' >> /etc/ssh/sshd_config && \
+    chmod 700 /usr/bin/ssh
+
+# Copy the entrypoint script
+COPY ./bootstrap_sftp.sh /opt/container/bootstrap.sh
+
+LABEL ai.backend.kernelspec="1" \
+      ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
+      ai.backend.features="uid-match private" \
+      ai.backend.role="SYSTEM" \
+      ai.backend.base-distro="ubuntu24.04" \
+      ai.backend.resource.min.cpu="1" \
+      ai.backend.resource.min.mem="128m" \
+      ai.backend.resource.max.mem="256m" \
+      ai.backend.resource.preferred.shmem="64" \
+      ai.backend.runtime-type="app" \
+      ai.backend.runtime-path="/bin/false" \
+      ai.backend.service-ports="sftpd:preopen:22022"
+
+COPY policy.yml /etc/backend.ai/jail/policy.yml
+
+WORKDIR /home/work
