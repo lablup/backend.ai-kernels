@@ -308,7 +308,6 @@ RUN python3 -m pip install --no-cache-dir \
     jupyter-highlight-selected-word>=0.2.0 \
     jupyter-server>=2.17.0 \
     jupyter_lsp>=2.3.0 \
-    jupyter-dash \
     jupyter-js-widgets-nbextension \
     jupyter-latex-envs \
     jupyter-packaging \
@@ -316,17 +315,17 @@ RUN python3 -m pip install --no-cache-dir \
     jupyterlab-code-formatter>=3.0.2 \
     jupyterlab_h5web \
     jupyterlab-launcher \
-    jupyterlab-widgets==3.0.16 \
+    jupyterlab-widgets>=3.0.16 \
     notebook \
     jupyter-server-mathjax \
     jupyter-server-proxy>=4.4.0 \
-    jupyter-telemetry==0.1.0 \
+    jupyter-telemetry>=0.1.0 \
     jupyter>=1.1.1 \
-    jupyter-client==8.6.3 \
-    jupyter_bokeh==2.0.4 \
+    jupyter-client>=8.8.0 \
+    jupyter_bokeh>=4.0.5 \
     markupsafe>=3.0.2 \
-    jsonschema[format,format-nongpl]>=4.23.0 && \
-    python3 -m pip install --no-cache-dir jupyter_lsp markupsafe==3.0.2 jupyterlab_widgets && \
+    jsonschema[format,format-nongpl]>=4.23.0 \
+    jupyterlab_widgets && \
     jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
     jupyter labextension install --no-build @jupyter-widgets/controls && \
     jupyter labextension install --no-build @jupyterlab/toc-extension && \
