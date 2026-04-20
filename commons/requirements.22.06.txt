@@ -192,7 +192,7 @@ jedi==0.17.2
 jeepney==0.4.3
 jinja2==2.11.3
 jmespath==0.10.0
-joblib==0.14.1
+joblib==1.2.0
 jpype1==0.7.2
 json-tricks==3.14.0
 json5==0.9.6
