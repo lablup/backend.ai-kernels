@@ -463,7 +463,7 @@ ujson==1.35
 update-checker==0.16
 update-checker==0.16
 uritemplate==3.0.1
-urllib3==1.25.10
+urllib3==1.26.5
 uvloop==0.14.0
 vecstack==0.4.0
 versioneer==0.18
