@@ -52,20 +52,31 @@ RUN python3 -m pip install --no-cache-dir \
 	    tensorflow-plot==0.3.2 \
 	    tensorflow_text==2.12.1 \
 	    tensorflow-gan==2.1.0 
-RUN   python3 -m pip install --no-cache-dir \
-        tensorflow[and-cuda]==2.15.1 \
-	    keras==2.15.0 \
-	    Keras-Applications==1.0.8 \
-	    Keras-Preprocessing==1.1.2 \
-	    tensorboard-plugin-wit \
-	    tensorboard numpy scipy
 RUN python3 -m pip install --no-cache-dir \
-	    transformers \
-	    accelerate \
-	    xformers \
-	    gradio
+        tensorflow[and-cuda]==2.15.1 \
+	keras==2.15.0 \
+	Keras-Applications==1.0.8 \
+	Keras-Preprocessing==1.1.2 \
+	tensorboard-plugin-wit \
+	tensorboard numpy scipy
+RUN python3 -m pip install --no-cache-dir \
+	transformers \
+	accelerate \
+	xformers \
+	gradio
+
+RUN set -eux; \
+    FILENAME="libtensorflow-gpu-linux-x86_64-2.15.0.tar.gz";  \
+    wget -q -O /tmp/${FILENAME}  "https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-2.15.0.tar.gz"; \
+    mkdir -p /opt/libtensorflow; \
+    tar -C /opt/libtensorflow -xzf "/tmp/${FILENAME}"; \
+    rm -f "/tmp/${FILENAME}"; \
+    echo "/opt/libtensorflow/lib" > /etc/ld.so.conf.d/libtensorflow.conf; \
+    ldconfig /usr/local/lib
 
 # Install Horovod, temporarily using CUDA stubs
+ENV CMAKE_PREFIX_PATH=/opt/libtensorflow
+ENV Tensorflow_ROOT=/opt/libtensorflow
 RUN CUDA_HOME=/usr/local/cuda-12.4 \
     HOROVOD_WITHOUT_GLOO=1 \
     HOROVOD_CUDA_HOME=/usr/local/cuda-12.4 \
@@ -75,7 +86,8 @@ RUN CUDA_HOME=/usr/local/cuda-12.4 \
     HOROVOD_WITHOUT_PYTORCH=1 \
     HOROVOD_WITH_TENSORFLOW=1 \
     HOROVOD_WITHOUT_MXNET=1 \
-    pip install --no-cache-dir git+https://github.com/thomas-bouvier/horovod.git@compile-cpp17
+    CMAKE_PREFIX_PATH=/opt/libtensorflow \
+    python3 -m pip install --no-cache-dir --no-build-isolation -v git+https://github.com/horovod/horovod.git
 
 
 RUN python3 -m pip install --no-cache-dir \
