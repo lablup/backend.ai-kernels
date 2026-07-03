@@ -421,10 +421,12 @@ RUN apt-get autoclean && \
 # change permission
 RUN chown root:root /usr/lib
 
-# JAX pinned to 0.4.34 — the newest jax that still accepts ml-dtypes~=0.2.0
-# (which TensorFlow 2.15 requires). jax>=0.4.35 forces ml-dtypes>=0.4.0 and would
-# break TF 2.15's pinned ml-dtypes 0.2.0.
-RUN python3 -m pip install --no-cache-dir jax==0.4.34 jaxlib==0.4.34
+# JAX (CUDA 12 build) pinned to 0.4.34 — the newest jax that still accepts
+# ml-dtypes~=0.2.0 (which TensorFlow 2.15 requires); jax>=0.4.35 forces
+# ml-dtypes>=0.4.0 and would break TF 2.15's pinned ml-dtypes 0.2.0. The
+# jax-cuda12 plugin reuses the cu12 nvidia wheels already installed by torch, so
+# it adds no extra CUDA stack.
+RUN python3 -m pip install --no-cache-dir "jax[cuda12]==0.4.34"
 
 # Pin protobuf to a TensorFlow 2.15-compatible version. TF 2.15 uses the legacy
 # MessageFactory.GetPrototype API and tensorboard 2.15.1 requires protobuf<4.24,
