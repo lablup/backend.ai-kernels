@@ -72,9 +72,12 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 ENV USER work
 ENV PASSWORD work
-ENV USERID 1100
-ENV GROUPID 1100
 ENV DISABLE_AUTH true
+# Do NOT set USERID/GROUPID=1100: the rocker/rstudio base's own cont-init
+# (02_userconf) reads them and recreates the rstudio user at that UID, which
+# then mismatches the UID 1000 Backend.AI runs the session as (breaking rsession
+# spawn -> app-proxy ServerDisconnectedError). Leaving them unset keeps the base
+# rstudio user at UID 1000, matching Backend.AI.
 
 # S6_VERSION and RSTUDIO_VERSION are already exported by the rocker/rstudio base
 # image (identical on amd64 and arm64), so they are intentionally not redefined
@@ -104,8 +107,10 @@ RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.6.1 on Backend.AI'
 COPY ./service-defs /etc/backend.ai/service-defs
 COPY ./bootstrap_rocker2.sh /opt/container/bootstrap.sh
 RUN chmod +x /opt/container/bootstrap.sh
-COPY ./userconf_backendai.sh /rocker_scripts/userconf.sh
-COPY ./userconf_backendai.sh /etc/cont-init.d/userconf
+# The rocker/rstudio base already provides its own cont-init user/auth handling
+# (01_set_env + 02_userconf); do NOT install userconf_backendai.sh (built for the
+# older rocker/r-ver flow) — running both left RStudio without a valid session
+# user and re-enabled auth, breaking the RStudio app.
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
