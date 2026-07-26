@@ -73,11 +73,10 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 ENV USER work
 ENV PASSWORD work
 ENV DISABLE_AUTH true
-# Do NOT set USERID/GROUPID=1100: the rocker/rstudio base's own cont-init
-# (02_userconf) reads them and recreates the rstudio user at that UID, which
-# then mismatches the UID 1000 Backend.AI runs the session as (breaking rsession
-# spawn -> app-proxy ServerDisconnectedError). Leaving them unset keeps the base
-# rstudio user at UID 1000, matching Backend.AI.
+# Do NOT set USERID/GROUPID: 02_userconf defaults them to 1000, which matches
+# the uid Backend.AI creates `work` with, so it skips its userdel/useradd branch
+# and leaves the entrypoint-created account alone.  Setting them to anything
+# else makes cont-init delete and recreate the account underneath RStudio.
 
 # S6_VERSION and RSTUDIO_VERSION are already exported by the rocker/rstudio base
 # image (identical on amd64 and arm64), so they are intentionally not redefined
@@ -104,13 +103,36 @@ RUN Rscript -e "IRkernel::installspec(displayname = 'R-base 4.6.1 on Backend.AI'
 # / `jupyter labextension install` / `jupyter lab build` steps are removed (those
 # subcommands no longer exist and would fail the build).
 
+# Vacate uid/gid 1000 for Backend.AI.
+#
+# The rocker/rstudio base ships an `rstudio` account at uid/gid 1000, which is
+# exactly the uid Backend.AI runs sessions as.  When Backend.AI's entrypoint
+# finds an existing account at $LOCAL_USER_ID it takes its "merge the image home
+# directory" branch and runs `usermod -l work rstudio`, i.e. it *renames* the
+# base account (the stray `cp: cannot stat '/home/rstudio/*'` lines in the
+# session log come from that same branch).  The rocker cont-init scripts then
+# configure RStudio for a user named `rstudio` that no longer exists, so rserver
+# cannot spawn an rsession and app-proxy reports ServerDisconnectedError.
+#
+# Moving the base account out of the way makes the entrypoint take its clean
+# `useradd work -u 1000` branch instead: nothing is renamed and nothing is
+# copied.
+RUN usermod -u 1100 rstudio && \
+    groupmod -g 1100 rstudio && \
+    chown -R 1100:1100 /home/rstudio
+
 COPY ./service-defs /etc/backend.ai/service-defs
-COPY ./bootstrap_rocker2.sh /opt/container/bootstrap.sh
+COPY ./bootstrap_rstudio.sh /opt/container/bootstrap.sh
 RUN chmod +x /opt/container/bootstrap.sh
 # The rocker/rstudio base already provides its own cont-init user/auth handling
 # (01_set_env + 02_userconf); do NOT install userconf_backendai.sh (built for the
 # older rocker/r-ver flow) — running both left RStudio without a valid session
-# user and re-enabled auth, breaking the RStudio app.
+# user and re-enabled auth, breaking the RStudio app.  The base scripts do the
+# right thing once DEFAULT_USER=work and uid 1000 is free (see above).
+#
+# runtime-path is what the jupyter/jupyterlab service definitions interpolate as
+# `{runtime_path} -m notebook`, so it must be a real interpreter even though the
+# runtime-type is "app".
 LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
@@ -118,8 +140,14 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.resource.min.mem="256m" \
       ai.backend.base-distro="ubuntu24.04" \
       ai.backend.runtime-type="app" \
-      ai.backend.runtime-path="/bin/false" \
+      ai.backend.runtime-path="/usr/bin/python3" \
       ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,rstudio:preopen:8787"
+
+# DEFAULT_USER is the knob the base 02_userconf uses to pick the RStudio login
+# account (`USER=${DEFAULT_USER}` — it ignores an inherited $USER).  Pointing it
+# at `work` makes cont-init write `USER=work` into /etc/environment, which is
+# what /etc/services.d/rstudio/run feeds to rserver for the auth-none login.
+ENV DEFAULT_USER work
 ENV USER work
 ENV PASSWORD work
 ENV DISABLE_AUTH true
