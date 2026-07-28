@@ -17,6 +17,6 @@
     }
   ],
   "command": [
-    "{runtime_path}", "-m", "jupyterlab", "--no-browser", "--config", "{jupyter_cfg}"
+    "/usr/bin/python3", "-m", "jupyterlab", "--no-browser", "--config", "{jupyter_cfg}"
   ]
 }
