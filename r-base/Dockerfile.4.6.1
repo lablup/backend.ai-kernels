@@ -102,7 +102,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.base-distro="ubuntu24.04" \
       ai.backend.runtime-type="app" \
       ai.backend.runtime-path="/usr/bin/python3" \
-      ai.backend.service-ports="jupyter:http:8080,jupyterlab:http:8090,rstudio:preopen:8787"
+      ai.backend.service-ports="ipython:pty:3000,jupyter:http:8080,jupyterlab:http:8090,rstudio:preopen:8787"
 ENV USER work
 ENV PASSWORD work
 ENV DISABLE_AUTH true
