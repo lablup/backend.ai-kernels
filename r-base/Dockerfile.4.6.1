@@ -71,13 +71,15 @@ ENV RSTUDIO_VERSION=stable
 ## Install R / Rstudio / Tidyverse
 RUN /rocker_scripts/install_rstudio.sh
 
-# Backend.AI serves apps inside an iframe. RStudio defaults to SameSite=lax
-# cookies and forbids iframe embedding, so the browser withholds the auth
-# cookie cross-site and loops between / and /auth-sign-in
-# (ERR_TOO_MANY_REDIRECTS). Applied to both configs because userconf.sh swaps
-# disable_auth_rserver.conf over rserver.conf when DISABLE_AUTH=true.
+# Backend.AI serves apps inside an iframe; current RStudio forbids iframe
+# embedding by default (www-frame-origin=none), so allow it. Applied to both
+# configs because userconf.sh swaps disable_auth_rserver.conf over rserver.conf
+# when DISABLE_AUTH=true. Deliberately NOT setting www-same-site=none: without
+# HTTPS (Secure) Chrome rejects SameSite=None cookies outright.
+# (The historical ERR_TOO_MANY_REDIRECTS through the app proxy was a proxy bug
+# collapsing duplicate Set-Cookie headers, fixed in lablup/backend.ai#13194.)
 RUN for f in /etc/rstudio/rserver.conf /etc/rstudio/disable_auth_rserver.conf; do \
-        printf 'www-same-site=none\nwww-frame-origin=any\n' >> "$f"; \
+        printf 'www-frame-origin=any\n' >> "$f"; \
     done
 
 RUN /rocker_scripts/install_pandoc.sh
