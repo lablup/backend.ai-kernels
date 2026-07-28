@@ -70,6 +70,16 @@ ENV RSTUDIO_VERSION=stable
 
 ## Install R / Rstudio / Tidyverse
 RUN /rocker_scripts/install_rstudio.sh
+
+# Backend.AI serves apps inside an iframe. RStudio defaults to SameSite=lax
+# cookies and forbids iframe embedding, so the browser withholds the auth
+# cookie cross-site and loops between / and /auth-sign-in
+# (ERR_TOO_MANY_REDIRECTS). Applied to both configs because userconf.sh swaps
+# disable_auth_rserver.conf over rserver.conf when DISABLE_AUTH=true.
+RUN for f in /etc/rstudio/rserver.conf /etc/rstudio/disable_auth_rserver.conf; do \
+        printf 'www-same-site=none\nwww-frame-origin=any\n' >> "$f"; \
+    done
+
 RUN /rocker_scripts/install_pandoc.sh
 
 # Devtools is installed here.
