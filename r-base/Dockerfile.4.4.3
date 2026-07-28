@@ -66,7 +66,13 @@ ENV USERID 1100
 ENV GROUPID 1100
 ENV DISABLE_AUTH true
 
-ENV RSTUDIO_VERSION=stable
+# Pin RStudio Server rather than tracking "stable": install_rstudio.sh sends
+# stable/latest/preview/daily to rstudio.org/download/latest/..., which only
+# publishes amd64 debs, so the build 404s on arm64.  A concrete version takes
+# the download2/rstudio-ide-build code path instead, which does have arm64
+# builds -- and pins both architectures to the same RStudio release.  This is
+# the version the official multi-arch rocker/rstudio images ship.
+ENV RSTUDIO_VERSION=2026.07.1+147
 
 ## Install R / Rstudio / Tidyverse
 RUN /rocker_scripts/install_rstudio.sh
