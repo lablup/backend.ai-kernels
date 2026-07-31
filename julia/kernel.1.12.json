@@ -1,0 +1,15 @@
+{
+  "display_name": "Julia 1.12 on Backend.AI",
+  "argv": [
+    "/usr/local/julia/bin/julia",
+    "-i",
+    "--startup-file=yes",
+    "--color=yes",
+    "-e",
+    "import IJulia; IJulia.run_kernel()",
+    "{connection_file}"
+  ],
+  "language": "julia",
+  "env": {},
+  "interrupt_mode": "signal"
+}
