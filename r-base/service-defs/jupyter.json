@@ -18,6 +18,6 @@
     }
   ],
   "command": [
-    "{runtime_path}", "-m", "notebook", "--no-browser", "--config", "{jupyter_cfg}"
+    "/usr/bin/python3", "-m", "notebook", "--no-browser", "--config", "{jupyter_cfg}"
   ]
 }
