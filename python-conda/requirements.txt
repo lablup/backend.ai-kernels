@@ -135,7 +135,7 @@ jupyterlab_code_formatter
 jupyterlab-vimrc
 jupyterlab-pygments==0.1.2
 jupyterlab-server==2.5.0
-jupyterlab==3.0.9
+jupyterlab==3.0.17
 jupyterlab_hdf==0.3.0
 jupyterlabutils==0.9.0
 jupyterthemes==0.20.0
