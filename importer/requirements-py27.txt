@@ -1,0 +1,7 @@
+setuptools==44.0.0   # latest version for Python 2.7
+pip==20.0.2
+pillow~=6.2.2        # latest version for Python 2.7
+h5py~=2.10.0
+ipython~=5.8         # latest version for Python 2.7
+jupyter~=1.0
+jupyterlab~=0.33.12  # latest version for Python 2.7
