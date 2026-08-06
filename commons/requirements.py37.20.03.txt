@@ -183,7 +183,7 @@ tqdm==4.43.0
 traitlets==4.3.3
 typing==3.7.4.1
 typing-extensions==3.7.4.1
-urllib3==1.25.8
+urllib3==1.26.5
 uvloop==0.14.0
 vecstack==0.4.0
 versioneer==0.18
