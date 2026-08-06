@@ -20,7 +20,7 @@ autograd==1.5
 Babel==2.11.0
 backcall==0.2.0
 beautifulsoup4==4.6.3
-bleach==5.0.1
+bleach==3.3.0
 blis==0.7.9
 bokeh==2.3.3
 branca==0.6.0
