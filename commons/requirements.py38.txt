@@ -300,7 +300,7 @@ prompt-toolkit==2.0.10
 protobuf==3.12.2
 psutil==5.7.0
 ptyprocess==0.6.0
-py==1.8.0
+py==1.11.0
 py-cpuinfo==5.0.0
 pyaml==19.12.0
 pyarrow==0.17.0
