@@ -248,7 +248,15 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
 # remove hwloc-like packages (ImportError: /opt/hpcx/ucc/lib/libucc.so.1: undefined symbol issue)
 #RUN apt-get purge -y hwloc-nox libhwloc-plugins
 
-# Python packages installation (consolidated: requirements + datasets + mpi4py + mlflow)
+# Python packages installation.
+#
+# Two pip invocations on purpose, not one.  pip 25.3 -- the version this NGC
+# base ships -- turns runaway backtracking into a hard `resolution-too-deep`
+# error, and resolving requirements.25.12.*.txt together with datasets/mlflow
+# crosses that limit: pip spends ~24 minutes walking astropy, jupyterhub,
+# jaxlib and fastmcp candidates and then fails the build.  Either half resolves
+# without trouble on its own (verified with `pip install --dry-run` inside this
+# same image), so they are kept apart.
 COPY ./requirements.25.12.*.txt /tmp/
 RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
@@ -257,7 +265,8 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
     python3 -m pip install --disable-pip-version-check --no-cache-dir \
-        -r requirements.25.12.${tarArch}.txt \
+        -r requirements.25.12.${tarArch}.txt && \
+    python3 -m pip install --disable-pip-version-check --no-cache-dir \
         datasets \
         mpi4py==4.1.1 mlflow==3.5.0 && \
     rm -rf /tmp/*
