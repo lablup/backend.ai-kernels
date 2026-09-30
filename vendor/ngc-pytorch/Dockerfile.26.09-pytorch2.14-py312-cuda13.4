@@ -276,8 +276,8 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     python3 -m pip install --disable-pip-version-check --no-cache-dir \
         -r requirements.26.09.${tarArch}.txt && \
     python3 -m pip install --disable-pip-version-check --no-cache-dir \
-        datasets \
-        mpi4py==4.1.1 mlflow==3.10.1 && \
+        datasets==5.0.1 \
+        mpi4py==4.1.1 mlflow==3.16.1 && \
     rm -rf /tmp/*
 
 # PyTorch extensions (requires --no-build-isolation)
