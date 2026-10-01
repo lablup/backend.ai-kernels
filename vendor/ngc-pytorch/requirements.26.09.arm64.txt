@@ -122,7 +122,7 @@ json-tricks==3.15.5
 jsonpatch==1.32
 jsonpickle==4.1.1
 jsonpointer==3.1.1
-jupyterhub==5.4.5
+jupyterhub==5.5.0
 konlpy==0.6.0
 korean-lunar-calendar==0.2.1
 kss==6.0.6
