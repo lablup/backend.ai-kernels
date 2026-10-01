@@ -157,6 +157,7 @@ notebook-shim==0.2.4
 numexpr==2.14.1
 oauth2client==3.0.0
 oauthenticator==17.4.0
+oauthlib==4.0.0
 opencv-python-headless==4.10.0.84
 opt-einsum==3.4.0
 osqp==0.6.7
@@ -257,7 +258,6 @@ tifffile==2026.3.3
 tokenizers==0.22.2
 tomlkit==0.10.2
 transformers==5.14.1
-tweepy==4.17.0
 typeguard==4.5.2
 ujson==6.0.0
 update-checker==0.16
