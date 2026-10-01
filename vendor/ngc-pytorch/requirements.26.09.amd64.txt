@@ -234,7 +234,7 @@ scs==3.2.7
 seaborn==0.13.2
 selenium==3.141.0
 semver==2.13.0
-sentence-transformers==5.3.0
+sentence-transformers==5.6.0
 sentencepiece==0.2.2
 setuptools>=83.0.0
 setuptools-git==1.2
