@@ -100,6 +100,27 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/
 
+# The requested Python is Ubuntu resolute's own interpreter here, so it ships a PEP 668
+# EXTERNALLY-MANAGED marker and pip refuses to install into the system
+# site-packages. Backend.AI kernels expect packages there (see runtime-path
+# below), and a single-purpose kernel container has no OS Python to protect,
+# so drop the marker instead of scattering --break-system-packages over every
+# pip call. The deadsnakes-provided interpreters carry no marker, so the other
+# Dockerfiles here do not need this step.
+#
+# Dropping the marker then exposes what the marker was guarding: dpkg-installed
+# python3-* modules live in /usr/lib/python3/dist-packages with no RECORD file,
+# so pip cannot uninstall them and dies with uninstall-no-record-file the moment
+# a wheel needs to upgrade one (typing-extensions, via jupyter-client, on
+# resolute). Removing only their *metadata* leaves the modules importable but
+# invisible to pip, which then installs its own copies into
+# /usr/local/lib/python${PYTHON_MAJOR_VERSION}/dist-packages -- earlier on
+# sys.path, so they win. Both distro-Python images need this; noble merely got
+# lucky that none of its 18 such packages required an upgrade.
+RUN rm -f /usr/lib/python${PYTHON_MAJOR_VERSION}/EXTERNALLY-MANAGED && \
+    rm -rf /usr/lib/python3/dist-packages/*.dist-info \
+           /usr/lib/python3/dist-packages/*.egg-info
+
 WORKDIR /tmp
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     python3 -m pip install --no-cache-dir --upgrade setuptools && \
