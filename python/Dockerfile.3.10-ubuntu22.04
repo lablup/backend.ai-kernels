@@ -2,10 +2,10 @@
 FROM ubuntu:22.04
 MAINTAINER Mario Cho "m.cho@lablup.com"
 
-ARG CODE_SERVER_VERSION=4.17.1 \
-    GIT_LFS_VERSION=3.4.0 \ 
+ARG CODE_SERVER_VERSION=4.141.0 \
+    GIT_LFS_VERSION=3.8.0 \ 
     PYTHON_MAJOR_VERSION=3.10 \
-    NODEJS_VERSION=18.18.1
+    NODEJS_VERSION=24.22.0
 
 ENV DEBIAN_FRONTEND=noninteractive \
     XDG_DATA_HOME=/home/work/.local/share \
@@ -26,9 +26,9 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
     esac; \
     LD_LIBRARY_PATH="/usr/local/lib/python${PYTHON_MAJOR_VERSION}/dist-packages/torch/lib:/usr/include/${dirArch}-linux-gnu" \
     apt-get update -y && \
-    apt-get install -y software-properties-common && \
+    apt-get install -y software-properties-common curl ca-certificates gnupg && \
     add-apt-repository ppa:deadsnakes/ppa && \
-    curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
+    curl -sL https://deb.nodesource.com/setup_24.x | bash - && \
     apt-get update && \
     apt-get install -y  && \
     apt-get -y install --no-install-recommends \
@@ -111,7 +111,7 @@ RUN dpkgArch="$(dpkg --print-architecture)"; \
         *) echo >&2 "error: current architecture ($dpkgArch) does not have a corresponding binary release"; exit 1 ;; \
     esac; \
     \
-    curl -fL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}.tar.gz" \
+    curl -fL "https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}.tar.gz" \
       | tar -C /usr/local/lib -xz && \ 
     mv "/usr/local/lib/code-server-${CODE_SERVER_VERSION}-linux-${tarArch}" /usr/local/lib/code-server-${CODE_SERVER_VERSION} && \
     ln -s /usr/local/lib/code-server-${CODE_SERVER_VERSION}/bin/code-server /usr/local/bin/code-server
@@ -127,8 +127,7 @@ LABEL ai.backend.kernelspec="1" \
       ai.backend.envs.corecount="OPENBLAS_NUM_THREADS,OMP_NUM_THREADS,NPROC" \
       ai.backend.features="batch query uid-match user-input" \
       ai.backend.resource.min.cpu="1" \
-      ai.backend.resource.min.mem="256m" \
-      ai.backend.resource.min.atom.device=0 \
+      ai.backend.resource.min.mem="1g" \
       ai.backend.base-distro="ubuntu22.04" \
       ai.backend.runtime-type="python" \
       ai.backend.runtime-path="/usr/bin/python3" \
