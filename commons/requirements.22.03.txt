@@ -19,7 +19,7 @@ LunarCalendar==0.0.9
 Mako==1.1.0
 Markdown==3.3
 MarkupSafe==1.1.1
-Pillow==9.0.1
+Pillow==9.3.0
 PyGObject==3.42.0
 PyMeeus==0.5.11
 PyQt5-sip==12.8.1
