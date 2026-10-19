@@ -129,7 +129,7 @@ lime==0.1.1.37
 llvmlite==0.31.0
 lunardate==0.2.0
 lxml==4.5.0
-Mako==1.0.7
+Mako==1.2.2
 Markdown==3.2.1
 MarkupSafe==1.1.1
 mccabe==0.6.1
