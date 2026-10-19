@@ -8,6 +8,7 @@
           "c.NotebookApp.ip = \"0.0.0.0\"\n",
           "c.NotebookApp.port = {ports[0]}\n",
           "c.NotebookApp.token = \"\"\n",
+          "c.IdentityProvider.cookie_options = {{'expires_days': None}}\n",
           "c.FileContentsManager.delete_to_trash = False\n",
           "c.NotebookApp.tornado_settings = {{'headers': {{'Content-Security-Policy': \"frame-ancestors * 'self' \"}}}}\n",
           "c.JupyterHub.tornado_settings = {{'headers': {{'Content-Security-Policy': \"frame-ancestors * 'self' \"}}}}\n"
