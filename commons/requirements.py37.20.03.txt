@@ -125,7 +125,7 @@ prompt-toolkit==3.0.3
 protobuf==3.11.3
 psutil==5.7.0
 ptyprocess==0.6.0
-py==1.8.0
+py==1.11.0
 pygal==2.4.0
 pycairo==1.19.1
 pycparser==2.19
